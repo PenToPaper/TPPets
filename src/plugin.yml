@@ -1,0 +1,45 @@
+name: TPPets
+version: 0.8.0
+description: Teleport pets to certain areas of th emap
+load: POSTWORLD
+author: GatheringExp
+main: com.maxwellwheeler.plugins.tppets.TPPets
+
+commands:
+  tp-dogs:
+    description: Teleport all owned dogs to your location.
+    aliases: [tp-wolves]
+    permission: tppets.tpwolves
+    usage: "Error! Usage: /tp-dogs"
+  tp-cats:
+    description: Teleport all owned cats to your location.
+    aliases: [tp-ocelots]
+    permission: tppets.tpcats
+    usage: "Error! Usage: /tp-cats"
+  tp-parrots:
+    description: Teleport all owned birds to your location.
+    aliases: [tp-birds]
+    permission: tppets.tpparrots
+    usage: "Error! Usage: /tp-parrots"
+
+permissions:
+  tppets.*:
+    description: Allows teleportation of every pet, and allows teleportation in restricted areas.
+    default: op
+    children:
+      tppets.tpanywhere: true
+      tppets.tpdogs: true
+      tppets.tpcats: true
+      tppets.tpparrots: true
+  tppets.tpanywhere:
+    default: true
+    description: Releases any restrictions on teleporting animals.
+  tppets.tpdogs:
+    default: true
+    description: Allows teleporting dogs.
+  tppets.tpcats:
+    default: true
+    description: Allows teleporting cats.
+  tppets.tpparrot:
+    default: true
+    description: Allows teleporting parrots.
