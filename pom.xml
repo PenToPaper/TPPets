@@ -27,8 +27,8 @@
   </build>
   <repositories>
 	<repository>
-	  <id>bukkit-repo</id>
-	  <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+	  	<id>bukkit-repo</id>
+	  	<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 	</repository>
   </repositories>
   <dependencies>
@@ -41,6 +41,14 @@
       <groupId>org.xerial</groupId>
       <artifactId>sqlite-jdbc</artifactId>
       <version>3.21.0</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.sk89q</groupId>
+    	<artifactId>worldedit</artifactId>
+    	<version>6.1.7.3</version>
+    	<scope>system</scope>
+    	<type>jar</type>
+    	<systemPath>${basedir}/lib/worldedit-bukkit-6.1.7.3.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

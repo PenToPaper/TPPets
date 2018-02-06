@@ -1,0 +1,12 @@
+#forbidden_zones:
+#  zone_name:
+#    enter_message: "This message displays when a player attempts to enter this zone with pets."
+#    world_name: "This is the world's name"
+#    coordinates: 
+#       - x1
+#       - y1
+#       - z1
+#       - x2
+#       - y2
+#       - z2
+forbidden_zones: "TEST"

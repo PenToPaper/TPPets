@@ -1,7 +1,6 @@
-package com.maxwellwheeler.plugins.tppets;
+package com.maxwellwheeler.plugins.tppets.commands;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -19,6 +18,7 @@ import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.SQLite;
@@ -34,18 +34,23 @@ public class CommandTPPets implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
             Player playerTemp = (Player) sender;
-            switch (command.getName()) {
-                case "tp-cats":
-                    getPetsToTeleport(PetType.Pets.CAT, playerTemp);
-                    return true;
-                case "tp-dogs":
-                    getPetsToTeleport(PetType.Pets.DOG, playerTemp);
-                    return true;
-                case "tp-parrots":
-                    getPetsToTeleport(PetType.Pets.PARROT, playerTemp);
-                    return true;
-                default:
-                    return false;
+            if (!((TPPets)Bukkit.getServer().getPluginManager().getPlugin("TPPets")).isInProtectedRegion(playerTemp)) {
+                switch (command.getName()) {
+                    case "tp-cats":
+                        getPetsToTeleport(PetType.Pets.CAT, playerTemp);
+                        return true;
+                    case "tp-dogs":
+                        getPetsToTeleport(PetType.Pets.DOG, playerTemp);
+                        return true;
+                    case "tp-parrots":
+                        getPetsToTeleport(PetType.Pets.PARROT, playerTemp);
+                        return true;
+                    default:
+                        return false;
+                }
+            } else {
+                playerTemp.sendMessage("You are in a protected region!");
+                return true;
             }
         } else {
             return false;
@@ -101,6 +106,7 @@ public class CommandTPPets implements CommandExecutor {
         }
     }
     
+    @SuppressWarnings("unused")
     private Chunk getChunkFromCoords(World world, int x, int y, int z) {
         return new Location(world, x, y, z).getChunk();
     }

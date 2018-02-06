@@ -4,8 +4,19 @@ description: Teleport pets to certain areas of th emap
 load: POSTWORLD
 author: GatheringExp
 main: com.maxwellwheeler.plugins.tppets.TPPets
+depend: [WorldEdit]
 
 commands:
+  no-pets:
+    description: Uses a worldedit selection to define an area where no pets are allowed. Only cuboid selections are allowed right now.
+    aliases: [disallow-pets]
+    permission: tppets.nopets
+    usage: "Error! Usage: /no-pets [region name] [region message]"
+  pets-lf:
+    description: Uses a worldedit selection to define an area where pets are teleported to if they are caught in a no-pets area. Only cuboid selections are allowed right now.
+    aliases: [lf]
+    permission: tppets.lf
+    usage: "Error! Usage: /pets-lf"
   tp-dogs:
     description: Teleport all owned dogs to your location.
     aliases: [tp-wolves]
@@ -31,6 +42,13 @@ permissions:
       tppets.tpdogs: true
       tppets.tpcats: true
       tppets.tpparrots: true
+      tppets.nopets: true
+  tppets.nopets:
+    default: op
+    description: Allows user to set cuboid regions where pets are not allowed.
+  tppets.lf:
+    default: op
+    description: Allows user to set cuboid regions where pets are teleported if they are caught in a no-pets area.
   tppets.tpanywhere:
     default: true
     description: Releases any restrictions on teleporting animals.
