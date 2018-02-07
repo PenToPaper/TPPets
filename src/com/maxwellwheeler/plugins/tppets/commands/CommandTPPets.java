@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -32,6 +33,7 @@ public class CommandTPPets implements CommandExecutor {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        System.out.println(System.currentTimeMillis());
         if (sender instanceof Player) {
             Player playerTemp = (Player) sender;
             if (!((TPPets)Bukkit.getServer().getPluginManager().getPlugin("TPPets")).isInProtectedRegion(playerTemp)) {
@@ -60,9 +62,12 @@ public class CommandTPPets implements CommandExecutor {
     private void getPetsToTeleport(PetType.Pets pt, Player pl) {
         List<World> worldsList = Bukkit.getServer().getWorlds();
         for (World world : worldsList) {
-            ArrayList<PetStorage> unloadedPetsInWorld = dbc.selectGeneric(pt, world.toString(), pl.getUniqueId().toString());
+            ArrayList<PetStorage> unloadedPetsInWorld = dbc.selectGeneric(pt, world.getName(), pl.getUniqueId().toString());
+            System.out.println(System.currentTimeMillis());
             for (PetStorage pet : unloadedPetsInWorld) {
                 Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
+                System.out.println(tempLoadedChunk.getX());
+                System.out.println(tempLoadedChunk.getZ());
                 tempLoadedChunk.load();
                 for (Entity entity : tempLoadedChunk.getEntities()) {
                     if (entity instanceof Sittable) {
@@ -73,7 +78,7 @@ public class CommandTPPets implements CommandExecutor {
                 }
                 tempLoadedChunk.unload();
             }
-            for (Entity entity : world.getEntities()) {
+            for (Entity entity : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                 if (entity instanceof Sittable) {
                     if (isTeleportablePet(pt, entity, pl)) {
                         teleportPet(pl, entity);
@@ -81,6 +86,7 @@ public class CommandTPPets implements CommandExecutor {
                 }
             }
         }
+        System.out.println(System.currentTimeMillis());
     }
     
     private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {

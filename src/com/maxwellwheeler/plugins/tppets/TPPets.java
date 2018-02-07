@@ -14,10 +14,12 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.maxwellwheeler.plugins.tppets.commands.CommandCreateDogs;
 import com.maxwellwheeler.plugins.tppets.commands.CommandLF;
 import com.maxwellwheeler.plugins.tppets.commands.CommandNoPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPPets;
@@ -82,6 +84,7 @@ public class TPPets extends JavaPlugin implements Listener {
         this.getCommand("tp-parrots").setExecutor(new CommandTPPets(dbc));
         this.getCommand("no-pets").setExecutor(new CommandNoPets());
         this.getCommand("pets-lf").setExecutor(new CommandLF());
+        this.getCommand("generate-tamed-dogs").setExecutor(new CommandCreateDogs());
         
         startCheckingRegions();
     }
@@ -111,6 +114,16 @@ public class TPPets extends JavaPlugin implements Listener {
     
     public void addProtectedRegion (ProtectedRegion pr) {
         protectedRegions.add(pr);
+    }
+    
+    @EventHandler (priority=EventPriority.MONITOR)
+    public void onEntityDeathEvent(EntityDeathEvent e) {
+        if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
+            Tameable tameableTemp = (Tameable) e.getEntity();
+            if (tameableTemp.isTamed()) {
+                dbc.deleteEntry(e.getEntity().getUniqueId(), tameableTemp.getOwner().getUniqueId());
+            }
+        }
     }
     
     public boolean isInProtectedRegion(Player pl) {

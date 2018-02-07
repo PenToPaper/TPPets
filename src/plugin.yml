@@ -32,6 +32,8 @@ commands:
     aliases: [tp-birds]
     permission: tppets.tpparrots
     usage: "Error! Usage: /tp-parrots"
+  generate-tamed-dogs:
+    description: Testing only
 
 permissions:
   tppets.*:

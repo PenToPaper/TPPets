@@ -107,14 +107,14 @@ public class SQLite {
                     }
                     
                     try {
-                        System.out.println(String.format("INSERT INTO unloadedpets(petId, petType, petX, petY, petZ, petWorld, ownerId) VALUES (%s, %d, %d, %d, %d, %s, %s)", shortenUUID(entity.getUniqueId().toString()), entityTypeIndex, entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ(), entity.getWorld().toString(), shortenUUID(tameableTemp.getOwner().getUniqueId().toString())));
+                        System.out.println(String.format("INSERT INTO unloadedpets(petId, petType, petX, petY, petZ, petWorld, ownerId) VALUES (%s, %d, %d, %d, %d, %s, %s)", shortenUUID(entity.getUniqueId().toString()), entityTypeIndex, entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ(), entity.getWorld().getName(), shortenUUID(tameableTemp.getOwner().getUniqueId().toString())));
                         PreparedStatement insertPStatement = dbc.prepareStatement(insertPrepStatement);
                         insertPStatement.setString(1, shortenUUID(entity.getUniqueId().toString()));
                         insertPStatement.setInt(2, entityTypeIndex);
                         insertPStatement.setInt(3, entity.getLocation().getBlockX());
                         insertPStatement.setInt(4, entity.getLocation().getBlockY());
                         insertPStatement.setInt(5, entity.getLocation().getBlockZ());
-                        insertPStatement.setString(6, entity.getWorld().toString());
+                        insertPStatement.setString(6, entity.getWorld().getName());
                         insertPStatement.setString(7, shortenUUID(tameableTemp.getOwner().getUniqueId().toString()));
                         insertPStatement.executeUpdate();
                     } catch (SQLException e) {
@@ -169,7 +169,7 @@ public class SQLite {
                     pstmt.setInt(1, ent.getLocation().getBlockX());
                     pstmt.setInt(2, ent.getLocation().getBlockY());
                     pstmt.setInt(3, ent.getLocation().getBlockZ());
-                    pstmt.setString(4, ent.getWorld().toString());
+                    pstmt.setString(4, ent.getWorld().getName());
                     pstmt.setString(5, petIdString);
                     pstmt.setString(6, playerIdString);
                     pstmt.executeUpdate();
