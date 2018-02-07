@@ -50,5 +50,11 @@
     	<type>jar</type>
     	<systemPath>${basedir}/lib/worldedit-bukkit-6.1.7.3.jar</systemPath>
     </dependency>
+    <dependency>
+        <groupId>org.spigotmc</groupId>
+        <artifactId>spigot-api</artifactId>
+        <version>1.12-R0.1-SNAPSHOT</version>
+        <scope>provided</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -9,4 +9,5 @@
 #       - x2
 #       - y2
 #       - z2
+check_interval: "45s"
 forbidden_zones: "TEST"

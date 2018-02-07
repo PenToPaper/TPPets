@@ -1,15 +1,12 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
@@ -19,12 +16,6 @@ public class CommandNoPets extends RegionCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player && we != null) {
             Player pl = (Player) sender;
-            Location[] maxMinLoc = getWePoints(pl);
-            if (maxMinLoc != null && args.length >= 2) {
-                for (String arg)
-                
-                ProtectedRegion pr = new ProtectedRegion(args[0])
-            }
             Selection playerSelection = we.getSelection(pl);
             if (playerSelection != null && playerSelection instanceof CuboidSelection && args.length == 2) {
                 Location minPoint = playerSelection.getMinimumPoint();
