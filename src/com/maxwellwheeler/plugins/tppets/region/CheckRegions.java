@@ -13,10 +13,12 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 public class CheckRegions extends BukkitRunnable {
     private ArrayList<ProtectedRegion> protectedRegions = new ArrayList<ProtectedRegion>();
     private LostAndFoundRegion lostAndFound;
+    private TPPets pluginInstance;
     
     public CheckRegions(TPPets plugin, LostAndFoundRegion lostAndFound) {
-        protectedRegions = plugin.getProtectedRegions();
+        this.protectedRegions = plugin.getProtectedRegions();
         this.lostAndFound = lostAndFound;
+        this.pluginInstance = plugin;
     }
     
     @Override
@@ -31,6 +33,7 @@ public class CheckRegions extends BukkitRunnable {
                         Tameable tameableTemp = (Tameable) ent;
                         if (tameableTemp.isTamed()) {
                             pr.teleportPet(lostAndFound.getApproxCenter(), ent);
+                            pluginInstance.getSQLite().updateOrInsert(ent);
                         }
                     }
                 }

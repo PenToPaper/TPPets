@@ -72,7 +72,8 @@ public abstract class Region {
             Sittable tempSittable = (Sittable) entity;
             tempSittable.setSitting(true);
         }
-        // TODO Update database entry
+        TPPets plugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
+        plugin.getSQLite().updateOrInsert(entity);
     }
     
     protected List<Chunk> initializeChunkList() {

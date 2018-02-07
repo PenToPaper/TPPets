@@ -120,7 +120,7 @@ public class CommandTPPets implements CommandExecutor {
             Sittable tempSittable = (Sittable) entity;
             tempSittable.setSitting(false);
         }
-        dbc.deleteEntry(entity.getUniqueId(), pl.getUniqueId());
+        // dbc.deleteEntry(entity.getUniqueId(), pl.getUniqueId());
         entity.teleport(pl);
     }
 }

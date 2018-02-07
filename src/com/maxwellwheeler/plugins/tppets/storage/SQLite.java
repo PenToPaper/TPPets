@@ -36,7 +36,9 @@ public class SQLite {
     private String insertPrepStatement = "INSERT INTO unloadedpets(petId, petType, petX, petY, petZ, petWorld, ownerId) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private String selectStatement = "SELECT * FROM unloadedpets WHERE ownerId = \"%s\"";
     private String selectStatementGeneric = "SELECT * FROM unloadedpets WHERE ownerId = \"%s\" AND petWorld = \"%s\" AND petType = %d";
+    private String selectDoesExist = "SELECT * FROM unloadedpets WHERE petId = \"%s\" AND ownerId = \"%s\"";
     private String deletePrepStatement = "DELETE FROM unloadedpets WHERE petId = ? AND ownerId=?";
+    private String updatePrepStatement = "UPDATE unloadedpets SET petX = ?, petY = ?, petZ = ?, petWorld = ? WHERE petId = ? AND ownerId = ?";
     private Connection dbc;
     
     public SQLite (TPPets plugin, String dbPath, String dbName) {
@@ -139,10 +141,75 @@ public class SQLite {
                 pstmt.setString(1, petIdString);
                 pstmt.setString(2, playerIdString);
                 pstmt.executeUpdate();
+                dbc.close();
             } catch (SQLException e) {
                 logSevere("SQL Exception", "deleting pet from database", e);
             }
         }
+    }
+    
+    public void updateOrInsert (Entity entity) {
+        if (isAlreadyInTable(entity)) {
+            updateEntry(entity);
+        } else {
+            insertPet(entity);
+        }
+    }
+    
+    public void updateEntry(Entity ent) {
+        Connection dbc = getDBC();
+        if (dbc != null) {
+            if (ent instanceof Tameable) {
+                Tameable tameableTemp = (Tameable) ent;
+                String petIdString = shortenUUID(ent.getUniqueId().toString());
+                String playerIdString = shortenUUID(tameableTemp.getOwner().getUniqueId().toString());
+                try {
+                    PreparedStatement pstmt = dbc.prepareStatement(updatePrepStatement);
+                    // private String updatePrepStatement = "UPDATE unloadedpets SET petX = ?, petY = ?, petZ = ?, petWorld = ? WHERE petId = ? AND ownerId = ?";
+                    pstmt.setInt(1, ent.getLocation().getBlockX());
+                    pstmt.setInt(2, ent.getLocation().getBlockY());
+                    pstmt.setInt(3, ent.getLocation().getBlockZ());
+                    pstmt.setString(4, ent.getWorld().toString());
+                    pstmt.setString(5, petIdString);
+                    pstmt.setString(6, playerIdString);
+                    pstmt.executeUpdate();
+                    dbc.close();
+                } catch (SQLException e) {
+                    logSevere("SQL Exception", "updating pet entry in database", e);
+                }
+            }
+            try {
+                dbc.close();
+            } catch (SQLException e) {
+                logSevere("SQL Exception", "closing database connection", e);
+            }
+        }
+    }
+    
+    public boolean isAlreadyInTable(Entity ent) {
+        Connection dbc = getDBC();
+        if (dbc != null) {
+            if (ent instanceof Tameable) {
+                Tameable tameableTemp = (Tameable) ent;
+                String petIdString = shortenUUID(ent.getUniqueId().toString());
+                String playerIdString = shortenUUID(tameableTemp.getOwner().getUniqueId().toString());
+                try {
+                    Statement stmt = dbc.createStatement();
+                    ResultSet rs = stmt.executeQuery(String.format(selectDoesExist, petIdString, playerIdString));
+                    boolean ret = rs.next();
+                    dbc.close();
+                    return ret;
+                } catch (SQLException e) {
+                    logSevere("SQL Exception", "selecting pets from database", e);
+                }
+            }
+            try {
+                dbc.close();
+            } catch (SQLException e) {
+                logSevere("SQL Exception", "closing database connection", e);
+            }
+        }
+        return false;
     }
     
     public ArrayList<PetStorage> selectFromUUID(UUID userId) {

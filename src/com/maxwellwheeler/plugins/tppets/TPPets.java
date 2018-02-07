@@ -9,6 +9,7 @@ import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sittable;
+import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -88,8 +89,11 @@ public class TPPets extends JavaPlugin implements Listener {
     @EventHandler (priority=EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent e) {
         for (Entity ent : e.getChunk().getEntities()) {
-           if (ent instanceof Ocelot || ent instanceof Wolf || ent instanceof Parrot) { 
-               dbc.insertPet(ent);
+           if (ent instanceof Sittable && ent instanceof Tameable) {
+               Tameable tameableTemp = (Tameable) ent;
+               if (tameableTemp.isTamed()) {
+                   dbc.updateOrInsert(ent);
+               }
            }
         }
     }
@@ -142,6 +146,10 @@ public class TPPets extends JavaPlugin implements Listener {
             lostAndFound = lfr;
         }
         
+    }
+    
+    public SQLite getSQLite() {
+        return dbc;
     }
     
     public ArrayList<ProtectedRegion> getProtectedRegions() {
