@@ -63,26 +63,13 @@ public class CommandTPPets implements CommandExecutor {
         List<World> worldsList = Bukkit.getServer().getWorlds();
         for (World world : worldsList) {
             ArrayList<PetStorage> unloadedPetsInWorld = dbc.selectGeneric(pt, world.getName(), pl.getUniqueId().toString());
-            System.out.println(System.currentTimeMillis());
             for (PetStorage pet : unloadedPetsInWorld) {
                 Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
-                System.out.println(tempLoadedChunk.getX());
-                System.out.println(tempLoadedChunk.getZ());
                 tempLoadedChunk.load();
-                for (Entity entity : tempLoadedChunk.getEntities()) {
-                    if (entity instanceof Sittable) {
-                        if (isTeleportablePet(pt, entity, pl)) {
-                            teleportPet(pl, entity);
-                        }
-                    }
-                }
-                tempLoadedChunk.unload();
             }
             for (Entity entity : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
-                if (entity instanceof Sittable) {
-                    if (isTeleportablePet(pt, entity, pl)) {
-                        teleportPet(pl, entity);
-                    }
+                if (isTeleportablePet(pt, entity, pl)) {
+                    teleportPet(pl, entity);
                 }
             }
         }
@@ -126,7 +113,6 @@ public class CommandTPPets implements CommandExecutor {
             Sittable tempSittable = (Sittable) entity;
             tempSittable.setSitting(false);
         }
-        // dbc.deleteEntry(entity.getUniqueId(), pl.getUniqueId());
         entity.teleport(pl);
     }
 }

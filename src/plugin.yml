@@ -34,6 +34,8 @@ commands:
     usage: "Error! Usage: /tp-parrots"
   generate-tamed-dogs:
     description: Testing only
+  tp-forward:
+    description: Testing only
 
 permissions:
   tppets.*:

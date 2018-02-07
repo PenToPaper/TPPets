@@ -23,6 +23,7 @@ import com.maxwellwheeler.plugins.tppets.commands.CommandCreateDogs;
 import com.maxwellwheeler.plugins.tppets.commands.CommandLF;
 import com.maxwellwheeler.plugins.tppets.commands.CommandNoPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandTpForward;
 import com.maxwellwheeler.plugins.tppets.helpers.TimeCalculator;
 import com.maxwellwheeler.plugins.tppets.region.CheckRegions;
 import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
@@ -85,7 +86,8 @@ public class TPPets extends JavaPlugin implements Listener {
         this.getCommand("no-pets").setExecutor(new CommandNoPets());
         this.getCommand("pets-lf").setExecutor(new CommandLF());
         this.getCommand("generate-tamed-dogs").setExecutor(new CommandCreateDogs());
-        
+        this.getCommand("tp-forward").setExecutor(new CommandTpForward());
+
         startCheckingRegions();
     }
     
