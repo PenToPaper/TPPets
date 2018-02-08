@@ -47,6 +47,11 @@ permissions:
       tppets.tpcats: true
       tppets.tpparrots: true
       tppets.nopets: true
+      tppets.lf: true
+      tppets.bypassprotection: true
+  tppets.bypassprotection:
+    default: op
+    description: Allows user to damage pets that they don't own.
   tppets.nopets:
     default: op
     description: Allows user to set cuboid regions where pets are not allowed.

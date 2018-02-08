@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 

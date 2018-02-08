@@ -5,23 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Sittable;
-import org.bukkit.entity.Tameable;
-import org.bukkit.entity.Wolf;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityTeleportEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.maxwellwheeler.plugins.tppets.commands.CommandCreateDogs;
@@ -30,6 +15,8 @@ import com.maxwellwheeler.plugins.tppets.commands.CommandNoPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTpForward;
 import com.maxwellwheeler.plugins.tppets.helpers.TimeCalculator;
+import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
+import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
 import com.maxwellwheeler.plugins.tppets.region.CheckRegions;
 import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
@@ -46,6 +33,18 @@ public class TPPets extends JavaPlugin implements Listener {
     private boolean preventPlayerDamage;
     private boolean preventEnvironmentalDamage;
     private boolean preventMobDamage;
+    
+    public boolean getPreventPlayerDamage() {
+        return preventPlayerDamage;
+    }
+    
+    public boolean getPreventEnvironmentalDamage() {
+        return preventEnvironmentalDamage;
+    }
+    
+    public boolean getPreventMobDamage() {
+        return preventMobDamage;
+    }
     
     public static TPPets getInstance() {
         return instance;
@@ -101,7 +100,8 @@ public class TPPets extends JavaPlugin implements Listener {
         checkInterval = TimeCalculator.getTimeFromString(getConfig().getString("check_interval"));
         
         // Register events + commands
-        getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
+        getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
         this.getCommand("tp-dogs").setExecutor(new CommandTPPets(dbc));
         this.getCommand("tp-cats").setExecutor(new CommandTPPets(dbc));
         this.getCommand("tp-parrots").setExecutor(new CommandTPPets(dbc));
@@ -115,113 +115,8 @@ public class TPPets extends JavaPlugin implements Listener {
         initializeLostAndFound();
     }
     
-    @EventHandler (priority=EventPriority.MONITOR)
-    public void onChunkUnload(ChunkUnloadEvent e) {
-        for (Entity ent : e.getChunk().getEntities()) {
-           if (ent instanceof Sittable && ent instanceof Tameable) {
-               Tameable tameableTemp = (Tameable) ent;
-               if (tameableTemp.isTamed()) {
-                   dbc.updateOrInsert(ent);
-               }
-           }
-        }
-    }
-    
-    @EventHandler (priority=EventPriority.LOW)
-    public void onEntityTeleportEvent(EntityTeleportEvent e) {
-        if (isInProtectedRegion(e.getTo())) {
-            if (e.getEntity() instanceof Sittable) {
-                Sittable ent = (Sittable) e.getEntity();
-                ent.setSitting(true);
-            }
-            e.setCancelled(true);
-        }
-    }
-    
     public void addProtectedRegion (ProtectedRegion pr) {
         protectedRegions.add(pr);
-    }
-    
-    @EventHandler (priority=EventPriority.MONITOR)
-    public void onEntityDeathEvent(EntityDeathEvent e) {
-        if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
-            Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed()) {
-                dbc.deleteEntry(e.getEntity().getUniqueId(), tameableTemp.getOwner().getUniqueId());
-            }
-        }
-    }
-    
-    @EventHandler (priority=EventPriority.LOW)
-    public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
-        if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
-            Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed()) {
-                if (preventPlayerDamage) {
-                    if (e.getDamager() instanceof Player && !e.getDamager().equals(tameableTemp.getOwner())) {
-                        System.out.println("PREVENTED PLAYER DAMAGE");
-                        e.setCancelled(true);
-                        return;
-                    } else if (e.getDamager() instanceof Projectile) {
-                        Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner())) {
-                            System.out.println("PREVENTED PROJECTILE PLAYER DAMAGE");
-                            e.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
-                if (preventMobDamage) {
-                    if (e.getDamager() instanceof LivingEntity) {
-                        System.out.println("PREVENTED MOB DAMAGE");
-                        e.setCancelled(true);
-                        return;
-                    } else if (e.getDamager() instanceof Projectile) {
-                        Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof LivingEntity && !projTemp.getShooter().equals(tameableTemp.getOwner())) {
-                            System.out.println("PREVENTED MOB DAMAGE");
-                            e.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    @EventHandler (priority=EventPriority.LOW)
-    public void onEntityDamageEvent(EntityDamageEvent e) {
-        if ((preventEnvironmentalDamage) && e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
-            Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed()) {
-                switch (e.getCause()) {
-                    case BLOCK_EXPLOSION:
-                    case CONTACT:
-                    case CRAMMING:
-                    case DRAGON_BREATH:
-                    case DROWNING:
-                    case FALL:
-                    case FALLING_BLOCK:
-                    case FIRE:
-                    case FIRE_TICK:
-                    case FLY_INTO_WALL:
-                    case HOT_FLOOR:
-                    case LAVA:
-                    case LIGHTNING:
-                    case MELTING:
-                    case POISON:
-                    case STARVATION:
-                    case SUFFOCATION:
-                    case THORNS:
-                    case WITHER:
-                        System.out.println("PREVENTED ENVIRONMENTAL DAMAGE");
-                        e.setCancelled(true);
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
     }
     
     public boolean isInProtectedRegion(Player pl) {
