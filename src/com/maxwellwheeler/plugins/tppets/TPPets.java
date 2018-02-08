@@ -1,19 +1,24 @@
 package com.maxwellwheeler.plugins.tppets;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Ocelot;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -38,8 +43,25 @@ public class TPPets extends JavaPlugin implements Listener {
     private int checkInterval;
     private LostAndFoundRegion lostAndFound;
     
+    private boolean preventPlayerDamage;
+    private boolean preventEnvironmentalDamage;
+    private boolean preventMobDamage;
+    
     public static TPPets getInstance() {
         return instance;
+    }
+    
+    private void initializeDamageConfigs() {
+        List<String> configList = getConfig().getStringList("protect_pets_from");
+        if (configList.contains("Player")) {
+            preventPlayerDamage = true;
+        }
+        if (configList.contains("EnvironmentalDamage")) {
+            preventEnvironmentalDamage = true;
+        }
+        if (configList.contains("MobDamage")) {
+            preventMobDamage = true;
+        }
     }
     
     private void initializeProtectedRegions() {
@@ -60,7 +82,7 @@ public class TPPets extends JavaPlugin implements Listener {
             lostAndFound = new LostAndFoundRegion(this);
         }
     }
-    
+
     @Override
     public void onEnable() {
         // Public static property instance now refers to the server's instance of the plugin
@@ -89,6 +111,8 @@ public class TPPets extends JavaPlugin implements Listener {
         this.getCommand("tp-forward").setExecutor(new CommandTpForward());
 
         startCheckingRegions();
+        initializeDamageConfigs();
+        initializeLostAndFound();
     }
     
     @EventHandler (priority=EventPriority.MONITOR)
@@ -124,6 +148,78 @@ public class TPPets extends JavaPlugin implements Listener {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
                 dbc.deleteEntry(e.getEntity().getUniqueId(), tameableTemp.getOwner().getUniqueId());
+            }
+        }
+    }
+    
+    @EventHandler (priority=EventPriority.LOW)
+    public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
+        if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
+            Tameable tameableTemp = (Tameable) e.getEntity();
+            if (tameableTemp.isTamed()) {
+                if (preventPlayerDamage) {
+                    if (e.getDamager() instanceof Player && !e.getDamager().equals(tameableTemp.getOwner())) {
+                        System.out.println("PREVENTED PLAYER DAMAGE");
+                        e.setCancelled(true);
+                        return;
+                    } else if (e.getDamager() instanceof Projectile) {
+                        Projectile projTemp = (Projectile) e.getDamager();
+                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner())) {
+                            System.out.println("PREVENTED PROJECTILE PLAYER DAMAGE");
+                            e.setCancelled(true);
+                            return;
+                        }
+                    }
+                }
+                if (preventMobDamage) {
+                    if (e.getDamager() instanceof LivingEntity) {
+                        System.out.println("PREVENTED MOB DAMAGE");
+                        e.setCancelled(true);
+                        return;
+                    } else if (e.getDamager() instanceof Projectile) {
+                        Projectile projTemp = (Projectile) e.getDamager();
+                        if (projTemp.getShooter() instanceof LivingEntity && !projTemp.getShooter().equals(tameableTemp.getOwner())) {
+                            System.out.println("PREVENTED MOB DAMAGE");
+                            e.setCancelled(true);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @EventHandler (priority=EventPriority.LOW)
+    public void onEntityDamageEvent(EntityDamageEvent e) {
+        if ((preventEnvironmentalDamage) && e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
+            Tameable tameableTemp = (Tameable) e.getEntity();
+            if (tameableTemp.isTamed()) {
+                switch (e.getCause()) {
+                    case BLOCK_EXPLOSION:
+                    case CONTACT:
+                    case CRAMMING:
+                    case DRAGON_BREATH:
+                    case DROWNING:
+                    case FALL:
+                    case FALLING_BLOCK:
+                    case FIRE:
+                    case FIRE_TICK:
+                    case FLY_INTO_WALL:
+                    case HOT_FLOOR:
+                    case LAVA:
+                    case LIGHTNING:
+                    case MELTING:
+                    case POISON:
+                    case STARVATION:
+                    case SUFFOCATION:
+                    case THORNS:
+                    case WITHER:
+                        System.out.println("PREVENTED ENVIRONMENTAL DAMAGE");
+                        e.setCancelled(true);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }

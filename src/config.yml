@@ -1,3 +1,7 @@
+# Accepts the following values in the list: Player, EnvironmentalDamage, MobDamage
+# If all are there, dogs are immune to all damage
+protect_pets_from: [Player, EnvironmentalDamage, MobDamage]
+check_interval: "45s"
 #forbidden_zones:
 #  zone_name:
 #    enter_message: "This message displays when a player attempts to enter this zone with pets."
@@ -9,5 +13,4 @@
 #       - x2
 #       - y2
 #       - z2
-check_interval: "45s"
 forbidden_zones: "TEST"
