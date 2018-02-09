@@ -1,37 +1,16 @@
 name: TPPets
-version: 0.8.1
-description: Teleport pets to certain areas of th emap
+version: 0.9.0
+description: Teleport pets to certain areas of the map
 load: POSTWORLD
 author: GatheringExp
 main: com.maxwellwheeler.plugins.tppets.TPPets
 depend: [WorldEdit]
 
 commands:
-  no-pets:
-    description: Uses a worldedit selection to define an area where no pets are allowed. Only cuboid selections are allowed right now.
-    aliases: [disallow-pets]
-    permission: tppets.nopets
-    usage: "Error! Usage: /no-pets [region name] [region message]"
-  pets-lf:
-    description: Uses a worldedit selection to define an area where pets are teleported to if they are caught in a no-pets area. Only cuboid selections are allowed right now.
-    aliases: [lf]
-    permission: tppets.lf
-    usage: "Error! Usage: /pets-lf"
-  tp-dogs:
-    description: Teleport all owned dogs to your location.
-    aliases: [tp-wolves]
-    permission: tppets.tpwolves
-    usage: "Error! Usage: /tp-dogs"
-  tp-cats:
-    description: Teleport all owned cats to your location.
-    aliases: [tp-ocelots]
-    permission: tppets.tpcats
-    usage: "Error! Usage: /tp-cats"
-  tp-parrots:
-    description: Teleport all owned birds to your location.
-    aliases: [tp-birds]
-    permission: tppets.tpparrots
-    usage: "Error! Usage: /tp-parrots"
+  tpp:
+    description: Base command for TPPets
+    aliases: [teleportpets]
+    usage: "Usage: /tpp [parrots/dogs/cats/restricted/lost]"
   generate-tamed-dogs:
     description: Testing only
   tp-forward:
@@ -42,31 +21,31 @@ permissions:
     description: Allows teleportation of every pet, and allows teleportation in restricted areas.
     default: op
     children:
-      tppets.tpanywhere: true
-      tppets.tpdogs: true
-      tppets.tpcats: true
-      tppets.tpparrots: true
-      tppets.nopets: true
-      tppets.lf: true
       tppets.bypassprotection: true
+      tppets.tpanywhere: true
+      tppets.restricted: true
+      tppets.lost: true
+      tppets.dogs: true
+      tppets.cats: true
+      tppets.birds: true
   tppets.bypassprotection:
     default: op
     description: Allows user to damage pets that they don't own.
-  tppets.nopets:
+  tppets.tpanywhere:
+    default: op
+    description: Allows user to teleport pets in restricted regions.
+  tppets.restricted:
     default: op
     description: Allows user to set cuboid regions where pets are not allowed.
-  tppets.lf:
+  tppets.lost:
     default: op
     description: Allows user to set cuboid regions where pets are teleported if they are caught in a no-pets area.
-  tppets.tpanywhere:
-    default: true
-    description: Releases any restrictions on teleporting animals.
-  tppets.tpdogs:
+  tppets.dogs:
     default: true
     description: Allows teleporting dogs.
-  tppets.tpcats:
+  tppets.cats:
     default: true
     description: Allows teleporting cats.
-  tppets.tpparrot:
+  tppets.birds:
     default: true
     description: Allows teleporting parrots.

@@ -7,8 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ocelot;
@@ -19,49 +17,37 @@ import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.SQLite;
 
-public class CommandTPPets implements CommandExecutor {
+public class CommandTPPets {
+    private TPPets thisPlugin;
     private SQLite dbc;
     
-    public CommandTPPets(SQLite dbc) {
-        this.dbc = dbc;
+    public CommandTPPets() {
+        this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
+        this.dbc = this.thisPlugin.getSQLite();
     }
     
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        System.out.println(System.currentTimeMillis());
+    public void processCommand(CommandSender sender, PetType.Pets pt) {
         if (sender instanceof Player) {
-            Player playerTemp = (Player) sender;
-            if (!((TPPets)Bukkit.getServer().getPluginManager().getPlugin("TPPets")).isInProtectedRegion(playerTemp)) {
-                switch (command.getName()) {
-                    case "tp-cats":
-                        getPetsToTeleport(PetType.Pets.CAT, playerTemp);
-                        return true;
-                    case "tp-dogs":
-                        getPetsToTeleport(PetType.Pets.DOG, playerTemp);
-                        return true;
-                    case "tp-parrots":
-                        getPetsToTeleport(PetType.Pets.PARROT, playerTemp);
-                        return true;
-                    default:
-                        return false;
-                }
+            Player tempPlayer = (Player) sender;
+            ProtectedRegion tempProtected = thisPlugin.inProtectedRegion(tempPlayer);
+            if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
+                getPetsToTeleport(pt, tempPlayer);
             } else {
-                playerTemp.sendMessage("You are in a protected region!");
-                return true;
+                tempPlayer.sendMessage(tempProtected.getEnterMessage());
             }
-        } else {
-            return false;
         }
     }
-    
+
     private void getPetsToTeleport(PetType.Pets pt, Player pl) {
+        // TODO: Config setting disabling cross-world teleporting
         List<World> worldsList = Bukkit.getServer().getWorlds();
         for (World world : worldsList) {
-            ArrayList<PetStorage> unloadedPetsInWorld = dbc.selectGeneric(pt, world.getName(), pl.getUniqueId().toString());
+            ArrayList<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pt, world.getName(), pl.getUniqueId().toString());
             for (PetStorage pet : unloadedPetsInWorld) {
                 Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
                 tempLoadedChunk.load();
@@ -72,7 +58,6 @@ public class CommandTPPets implements CommandExecutor {
                 }
             }
         }
-        System.out.println(System.currentTimeMillis());
     }
     
     private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {
@@ -90,17 +75,9 @@ public class CommandTPPets implements CommandExecutor {
                     default:
                         return false;
                 }
-            } else {
-                return false;
             }
-        } else {
-            return false;
         }
-    }
-    
-    @SuppressWarnings("unused")
-    private Chunk getChunkFromCoords(World world, int x, int y, int z) {
-        return new Location(world, x, y, z).getChunk();
+        return false;
     }
     
     private Chunk getChunkFromCoords(World world, int x, int z) {

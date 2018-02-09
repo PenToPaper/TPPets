@@ -22,19 +22,10 @@ public abstract class Region {
     private Location maxLoc;
     public List<Chunk> chunkList;
     
-    public static World getWorldFromWorldName(String worldName) {
-        for (World wld : Bukkit.getServer().getWorlds()) {
-            if (wld.getName().equals(worldName)) {
-                return wld;
-            }
-        }
-        return null;
-    }
-    
     public Region(String zoneName, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo, int zTwo) {
         this.zoneName = zoneName;
         this.worldName = worldName;
-        this.world = getWorldFromWorldName(worldName);
+        this.world = Bukkit.getServer().getWorld(worldName);
         this.minLoc = new Location(this.world, xOne, yOne, zOne);
         this.maxLoc = new Location(this.world, xTwo, yTwo, zTwo);
         this.chunkList = initializeChunkList();
@@ -43,7 +34,7 @@ public abstract class Region {
     public Region(String zoneName, String worldName, Location locOne, Location locTwo) {
         this.zoneName = zoneName;
         this.worldName = worldName;
-        this.world = getWorldFromWorldName(worldName);
+        this.world = Bukkit.getServer().getWorld(worldName);
         this.minLoc = locOne;
         this.maxLoc = locTwo;
         this.chunkList = initializeChunkList();
@@ -53,7 +44,7 @@ public abstract class Region {
         FileConfiguration config = thisPlugin.getConfig();
         this.zoneName = configKey.replaceAll("\\w+\\.", configKey);
         this.worldName = config.getString(configKey + ".world_name");
-        this.world = getWorldFromWorldName(this.worldName);
+        this.world = Bukkit.getServer().getWorld(worldName);
         List<Integer> coordinateList = config.getIntegerList(configKey + ".coordinates");
         if (coordinateList.size() == 6) {
             this.minLoc = new Location(this.world, coordinateList.get(0), coordinateList.get(1), coordinateList.get(2));
@@ -73,23 +64,20 @@ public abstract class Region {
             tempSittable.setSitting(true);
         }
         TPPets plugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
-        plugin.getSQLite().updateOrInsert(entity);
+        plugin.getSQLite().updateOrInsertPet(entity);
     }
     
     protected List<Chunk> initializeChunkList() {
-        System.out.println("***************CHUNK LIST IS BEING INITIALIZED*******************");
         List<Chunk> ret = new ArrayList<Chunk>();
-        int minX = nearestChunkCoord(minLoc.getBlockX());
-        int minZ = nearestChunkCoord(minLoc.getBlockZ());
-        int maxX = nearestChunkCoord(maxLoc.getBlockX());
-        int maxZ = nearestChunkCoord(maxLoc.getBlockZ());
+        int minX = nearestChunkCoord(this.minLoc.getBlockX());
+        int minZ = nearestChunkCoord(this.minLoc.getBlockZ());
+        int maxX = nearestChunkCoord(this.maxLoc.getBlockX());
+        int maxZ = nearestChunkCoord(this.maxLoc.getBlockZ());
         for (int i = minX; i <= maxX; i++) {
             for (int j = minZ; j <= maxZ; j++) {
-                ret.add(world.getChunkAt(i, j));
-                System.out.println("FOUND A CHUNK!!!");
+                ret.add(this.world.getChunkAt(i, j));
             }
         }
-        System.out.println(ret == null);
         return ret;
     }
     

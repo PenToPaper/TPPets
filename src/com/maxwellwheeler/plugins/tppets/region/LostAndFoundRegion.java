@@ -12,17 +12,17 @@ public class LostAndFoundRegion extends Region {
         return String.format("zoneName = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", getZoneName(), getZoneName(), getMinLoc().getBlockX(), getMinLoc().getBlockY(), getMinLoc().getBlockZ(), getMaxLoc().getBlockX(), getMaxLoc().getBlockY(), getMaxLoc().getBlockZ());
     }
     
-    public LostAndFoundRegion(String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo,
+    public LostAndFoundRegion(String zoneName, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo,
             int zTwo) {
-        super("primary", worldName, xOne, yOne, zOne, xTwo, yTwo, zTwo);
+        super(zoneName, worldName, xOne, yOne, zOne, xTwo, yTwo, zTwo);
     }
     
-    public LostAndFoundRegion(String worldName, Location locOne, Location locTwo) {
-        super("primary", worldName, locOne, locTwo);
+    public LostAndFoundRegion(String zoneName, String worldName, Location locOne, Location locTwo) {
+        super(zoneName, worldName, locOne, locTwo);
     }
     
-    public LostAndFoundRegion(TPPets thisPlugin) {
-        super("lost_and_found.primary", thisPlugin);
+    public LostAndFoundRegion(String zoneName, TPPets thisPlugin) {
+        super(zoneName, thisPlugin);
     }
     
     @Override

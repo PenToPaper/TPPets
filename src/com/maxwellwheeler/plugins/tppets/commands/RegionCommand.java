@@ -26,4 +26,8 @@ public class RegionCommand {
         }
         return ret;
     }
+    
+    protected String getLocationString(Location lc) {
+        return Integer.toString(lc.getBlockX()) + ", " + Integer.toString(lc.getBlockY()) + ", " + Integer.toString(lc.getBlockZ());
+    }
 }

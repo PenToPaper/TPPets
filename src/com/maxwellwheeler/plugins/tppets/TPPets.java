@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
@@ -10,9 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.maxwellwheeler.plugins.tppets.commands.CommandCreateDogs;
-import com.maxwellwheeler.plugins.tppets.commands.CommandLF;
-import com.maxwellwheeler.plugins.tppets.commands.CommandNoPets;
-import com.maxwellwheeler.plugins.tppets.commands.CommandTPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTpForward;
 import com.maxwellwheeler.plugins.tppets.helpers.TimeCalculator;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
@@ -23,31 +22,31 @@ import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.SQLite;
 
 public class TPPets extends JavaPlugin implements Listener {
-    private ArrayList<ProtectedRegion> protectedRegions = new ArrayList<ProtectedRegion>();
-    private static TPPets instance;
+    // Configuration-based data types
+    private ArrayList<ProtectedRegion> restrictedRegions = new ArrayList<ProtectedRegion>();
+    private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<String, LostAndFoundRegion>();
+    private Hashtable<String, List<String>> commandAliases = new Hashtable<String, List<String>>();
+
+    // Database
     private SQLite dbc;
-    private CheckRegions cr;
+    
+    // Periodic checking if pets are in restricted regions
     private int checkInterval;
-    private LostAndFoundRegion lostAndFound;
+    private CheckRegions cr;
     
     private boolean preventPlayerDamage;
     private boolean preventEnvironmentalDamage;
     private boolean preventMobDamage;
     
-    public boolean getPreventPlayerDamage() {
-        return preventPlayerDamage;
-    }
+    /*
+     * VARIABLE INITIALIZERS
+     * 
+     */
     
-    public boolean getPreventEnvironmentalDamage() {
-        return preventEnvironmentalDamage;
-    }
-    
-    public boolean getPreventMobDamage() {
-        return preventMobDamage;
-    }
-    
-    public static TPPets getInstance() {
-        return instance;
+    private void initializeDBC() {
+        dbc = new SQLite(this, getDataFolder().getPath(), "tppets");
+        dbc.createDatabase();
+        dbc.createTables();
     }
     
     private void initializeDamageConfigs() {
@@ -63,80 +62,82 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
-    private void initializeProtectedRegions() {
-        Set<String> regionKeyList = getConfig().getConfigurationSection("forbidden_zones").getKeys(false);
-        System.out.println(regionKeyList.toString());
-        for (String key : regionKeyList) {
-            protectedRegions.add(new ProtectedRegion(key, this));
+    private void initializeCommandAliases() {
+        Set<String> configKeyList = getConfig().getConfigurationSection("command_aliases").getKeys(false);
+        for (String key : configKeyList) {
+            List<String> tempAliasList = getConfig().getStringList("command_aliases." + key);
+            tempAliasList.add(key);
+            commandAliases.put(key, tempAliasList);
         }
-        for (ProtectedRegion pr : protectedRegions) {
-            System.out.println(pr.toString());
-        }
-        System.out.println(protectedRegions.size());
     }
     
-    private void initializeLostAndFound() {
-        //TODO Temporary. When we move to databases for everything, we should get a more robust solution, like the one above ^^
-        if (getConfig().isSet("lost_and_found.primary")) {
-            lostAndFound = new LostAndFoundRegion(this);
-        }
+    private void initializeRestrictedRegions() {
+        restrictedRegions = dbc.getProtectedRegions();
     }
+    
+    private void initializeLostRegions() {
+        lostRegions = dbc.getLostRegions();
+    }
+    
+    private void initializeCheckInterval() {
+        checkInterval = TimeCalculator.getTimeFromString(getConfig().getString("check_interval"));
+    }
+
 
     @Override
     public void onEnable() {
-        // Public static property instance now refers to the server's instance of the plugin
-        instance = this;
-        
-        // Config stuff
+        // Config setup and pulling
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
-        initializeProtectedRegions();
+        initializeCommandAliases();
+        initializeCheckInterval();
         
         // Database setup
-        dbc = new SQLite(this, getDataFolder().getPath(), "test");
-        dbc.createDatabase();
-        dbc.createTable();
+        initializeDBC();
         
-        checkInterval = TimeCalculator.getTimeFromString(getConfig().getString("check_interval"));
+        // Database pulling
+        initializeLostRegions();
+        initializeRestrictedRegions();
+        
         
         // Register events + commands
         getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
-        this.getCommand("tp-dogs").setExecutor(new CommandTPPets(dbc));
-        this.getCommand("tp-cats").setExecutor(new CommandTPPets(dbc));
-        this.getCommand("tp-parrots").setExecutor(new CommandTPPets(dbc));
-        this.getCommand("no-pets").setExecutor(new CommandNoPets());
-        this.getCommand("pets-lf").setExecutor(new CommandLF());
+        initializeCommandAliases();
+        this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases));
         this.getCommand("generate-tamed-dogs").setExecutor(new CommandCreateDogs());
         this.getCommand("tp-forward").setExecutor(new CommandTpForward());
 
-        startCheckingRegions();
+
         initializeDamageConfigs();
-        initializeLostAndFound();
+        initializeLostRegions();
+        startCheckingRegions();
     }
+    
+    /*
+     * PROTECTED REGIONS
+     * 
+     */
     
     public void addProtectedRegion (ProtectedRegion pr) {
-        protectedRegions.add(pr);
+        restrictedRegions.add(pr);
     }
     
-    public boolean isInProtectedRegion(Player pl) {
-        for (ProtectedRegion pr : protectedRegions) {
-            if (pr.isInZone(pl)) {
-                return true;
+    public ProtectedRegion inProtectedRegion(Location lc) {
+        for (ProtectedRegion pr : restrictedRegions) {
+            if (pr.isInZone(lc)) {
+                return pr;
             }
         }
-        return false;
+        return null;
     }
     
-    public void startCheckingRegions() {
-        if (lostAndFound != null) {
-            cr = new CheckRegions(this, lostAndFound);
-            cr.runTaskTimer(this, 0, checkInterval);
-        }
+    public ProtectedRegion inProtectedRegion(Player pl) {
+        return inProtectedRegion(pl.getLocation());
     }
     
     public boolean isInProtectedRegion(Location lc) {
-        for (ProtectedRegion pr : protectedRegions) {
+        for (ProtectedRegion pr : restrictedRegions) {
             if (pr.isInZone(lc)) {
                 return true;
             }
@@ -144,29 +145,91 @@ public class TPPets extends JavaPlugin implements Listener {
         return false;
     }
     
-    public void addLostAndFoundRegion (LostAndFoundRegion lfr) {
-        if (lostAndFound == null) {
-            lostAndFound = lfr;
-            startCheckingRegions();
-        } else {
-            lostAndFound = lfr;
-        }
-        
+    public boolean isInProtectedRegion(Player pl) {
+        return isInProtectedRegion(pl.getLocation());
     }
+    
+    public ProtectedRegion getProtectedRegion(String name) {
+        for (ProtectedRegion pr : restrictedRegions) {
+            if (pr.getZoneName().equals(name)) {
+                return pr;
+            }
+        }
+        return null;
+    }
+
+    public void removeProtectedRegion(String name) {
+        for (int i = 0; i < restrictedRegions.size(); i++) {
+            if (restrictedRegions.get(i).getZoneName().equals(name)) {
+                restrictedRegions.remove(i);
+                break;
+            }
+        }
+    }
+    
+    /*
+     * LOST REGIONS
+     * 
+     */
+    
+    public void addLostRegion(LostAndFoundRegion lfr) {
+        lostRegions.put(lfr.getZoneName(), lfr);
+    }
+    
+    public void removeLostRegion(LostAndFoundRegion lfr) {
+        lostRegions.remove(lfr.getZoneName());
+    }
+    
+    /*
+     * CHECK REGIONS TIMER
+     * 
+     */
+    
+    public void startCheckingRegions() {
+        if (checkInterval != 0) {
+            cr = new CheckRegions(this);
+            cr.runTaskTimer(this, 0, checkInterval);
+        }
+    }
+    
+    public void stopCheckingRegions() {
+        try {
+            cr.cancel();
+        } catch (IllegalStateException e) {
+            getLogger().info("Something went wrong while trying to stop checking regions");
+        }
+    }
+    
+    /*
+     * GETTERS/SETTERS
+     * 
+     */
     
     public SQLite getSQLite() {
         return dbc;
     }
     
     public ArrayList<ProtectedRegion> getProtectedRegions() {
-        return protectedRegions;
+        return restrictedRegions;
     }
     
-    public void stopScheduledEvent() {
-        try {
-            cr.cancel();
-        } catch (IllegalStateException e) {
-            System.out.println("SOMETHING WENT VERY WRONG");
-        }
+    public Hashtable<String, LostAndFoundRegion> getLostRegions() {
+        return lostRegions;
+    }
+    
+    public boolean getPreventPlayerDamage() {
+        return preventPlayerDamage;
+    }
+    
+    public boolean getPreventEnvironmentalDamage() {
+        return preventEnvironmentalDamage;
+    }
+    
+    public boolean getPreventMobDamage() {
+        return preventMobDamage;
+    }
+    
+    public LostAndFoundRegion getLostRegion(String name) {
+        return lostRegions.get(name);
     }
 }

@@ -55,8 +55,4 @@ public class TimeCalculator {
         }
         return "";
     }
-    
-    public static void main(String[] args) {
-        System.out.println(getTimeFromString("1s30d"));
-    }
 }

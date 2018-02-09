@@ -1,16 +1,9 @@
-# Accepts the following values in the list: Player, EnvironmentalDamage, MobDamage
-# If all are there, dogs are immune to all damage
 protect_pets_from: [Player, EnvironmentalDamage, MobDamage]
-check_interval: "45s"
-#forbidden_zones:
-#  zone_name:
-#    enter_message: "This message displays when a player attempts to enter this zone with pets."
-#    world_name: "This is the world's name"
-#    coordinates: 
-#       - x1
-#       - y1
-#       - z1
-#       - x2
-#       - y2
-#       - z2
-forbidden_zones: "TEST"
+check_interval: "10m"
+command_aliases:
+  restricted: [restrict, rest, r]
+  lost: [lostandfound, laf, lf, lost, l]
+  dogs: [wolves, dog, wolf]
+  cats: [cat, ocelot, ocelots]
+  birds: [bird, parrots, parrot]
+  help: [pls]
