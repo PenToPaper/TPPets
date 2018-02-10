@@ -22,9 +22,6 @@ public class CommandTPP implements CommandExecutor {
     // Main command handler for the plugin, forwards commands to appropriate sub-commands
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        for (String test : args) {
-            System.out.println(test);
-        }
         if (args[0] != null) {
             String realCommand = "";
             for (String commands : commandAliases.keySet()) {

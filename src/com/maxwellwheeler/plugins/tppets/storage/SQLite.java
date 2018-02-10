@@ -69,6 +69,7 @@ public class SQLite {
     private String insertRestrictedPrep = "INSERT INTO restrictedregions(zoneName, enterMessage, minX, minY, minZ, maxX, maxY, maxZ, worldName, lfZoneName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private String deleteRestrictedPrep = "DELETE FROM restrictedregions WHERE zoneName = ?";
     private String selectRestrictedPrep = "SELECT * FROM restrictedregions";
+    private String updateRestrictedPrep = "UPDATE restrictedregions SET lfZoneName = ? WHERE zoneName = ?";
     private Connection dbc;
     
     public SQLite (TPPets plugin, String dbPath, String dbName) {
@@ -228,6 +229,21 @@ public class SQLite {
             deleteRegionPStatement.setString(1, regionName);
             deleteRegionPStatement.executeUpdate();
             dbc.close();
+        }
+    }
+    
+    public void updateRestrictedRegion(String restrictedZoneName, String lfZoneName) {
+        Connection dbc = getDBC();
+        if (dbc != null) {
+            try {
+                PreparedStatement pstmt = dbc.prepareStatement(updateRestrictedPrep);
+                pstmt.setString(1, lfZoneName);
+                pstmt.setString(2, restrictedZoneName);
+                pstmt.executeUpdate();
+                dbc.close();
+            } catch (SQLException e) {
+                logSevere("SQL Exception", "updating pet entry in database", e);
+            }
         }
     }
     

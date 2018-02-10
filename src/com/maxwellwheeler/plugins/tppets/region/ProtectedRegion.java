@@ -58,4 +58,8 @@ public class ProtectedRegion extends Region {
     public LostAndFoundRegion getLfReference() {
         return lfReference;
     }
+    
+    public void setLfReference(String lfString) {
+        this.lfReference = getLFReference(lfString);
+    }
 }

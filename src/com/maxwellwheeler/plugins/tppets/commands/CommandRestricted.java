@@ -14,17 +14,23 @@ public class CommandRestricted extends RegionCommand {
         if (args[0] != null) {
             switch (args[0]) {
                 case "add":
-                    if (args[1] != null && args[2] != null && args[3] != null) {
+                    if (args.length >= 4 && args[1] != null && args[2] != null && args[3] != null) {
                         addRegion(sender, Arrays.copyOfRange(args, 1, args.length));
                     }
                     break;
                 case "remove":
-                    if (args[1] != null) {
+                    if (args.length >= 2 && args[1] != null) {
                         removeRegion(sender, new String[] {args[1]});
                     }
                     break;
                 case "list":
                     listRegions(sender);
+                    break;
+                case "relink":
+                    System.out.println(Arrays.toString(args));
+                    if (args.length >= 3 && args[1] != null && args[2] != null) {
+                        relinkRegion(sender, Arrays.copyOfRange(args, 1, 3));
+                    }
                     break;
                 default:
                     sender.sendMessage(ChatColor.RED + "Syntax error: /tpp restricted [add/remove/list]");
@@ -69,5 +75,12 @@ public class CommandRestricted extends RegionCommand {
             sender.sendMessage(ChatColor.BLUE + "    " + "lost region: " + pr.getLfReference().getZoneName());
         }
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------------------------------");
+    }
+    
+    private void relinkRegion(CommandSender sender, String[] truncatedArgs) {
+        ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
+        tempPr.setLfReference(truncatedArgs[1]);
+        thisPlugin.getSQLite().updateRestrictedRegion(tempPr.getZoneName(), tempPr.getLfReference().getZoneName());
+        sender.sendMessage("Restricted Region " + truncatedArgs[0] + " Updated!");
     }
 }
