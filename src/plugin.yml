@@ -5,6 +5,7 @@ load: POSTWORLD
 author: GatheringExp
 main: com.maxwellwheeler.plugins.tppets.TPPets
 depend: [WorldEdit]
+softdepend: [Vault]
 
 commands:
   tpp:

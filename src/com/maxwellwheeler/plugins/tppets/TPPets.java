@@ -8,18 +8,20 @@ import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.maxwellwheeler.plugins.tppets.commands.CommandCreateDogs;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTpForward;
-import com.maxwellwheeler.plugins.tppets.helpers.TimeCalculator;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
-import com.maxwellwheeler.plugins.tppets.region.CheckRegions;
+import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
 import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.SQLite;
+
+import net.milkbowl.vault.permission.Permission;
 
 public class TPPets extends JavaPlugin implements Listener {
     // Configuration-based data types
@@ -30,13 +32,14 @@ public class TPPets extends JavaPlugin implements Listener {
     // Database
     private SQLite dbc;
     
-    // Periodic checking if pets are in restricted regions
-    private int checkInterval;
-    private CheckRegions cr;
-    
     private boolean preventPlayerDamage;
     private boolean preventEnvironmentalDamage;
     private boolean preventMobDamage;
+    
+    private Permission perms;
+    private boolean vaultEnabled;
+    // Vault stuff
+    
     
     /*
      * VARIABLE INITIALIZERS
@@ -79,8 +82,16 @@ public class TPPets extends JavaPlugin implements Listener {
         lostRegions = dbc.getLostRegions();
     }
     
-    private void initializeCheckInterval() {
-        checkInterval = TimeCalculator.getTimeFromString(getConfig().getString("check_interval"));
+    private void initializeVault() {
+        if (vaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault")) {
+            initializePermissions();
+        }
+    }
+    
+    private boolean initializePermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        perms = rsp.getProvider();
+        return perms != null;
     }
 
 
@@ -90,7 +101,6 @@ public class TPPets extends JavaPlugin implements Listener {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         initializeCommandAliases();
-        initializeCheckInterval();
         
         // Database setup
         initializeDBC();
@@ -103,6 +113,7 @@ public class TPPets extends JavaPlugin implements Listener {
         // Register events + commands
         getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
+        getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases));
         this.getCommand("generate-tamed-dogs").setExecutor(new CommandCreateDogs());
@@ -111,7 +122,7 @@ public class TPPets extends JavaPlugin implements Listener {
 
         initializeDamageConfigs();
         initializeLostRegions();
-        startCheckingRegions();
+        initializeVault();
     }
     
     /*
@@ -167,6 +178,28 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
+    public void updateLFReference(String lfRegionName) {
+        System.out.println("Updaintg LF References with name: " + lfRegionName);
+        for (ProtectedRegion pr : restrictedRegions) {
+            System.out.println("Comparing " + pr.getLfName() + " with " + lfRegionName);
+            if (pr.getLfName().equals(lfRegionName)) {
+                System.out.println("Found region that needs to be updated!");
+                pr.updateLFReference();
+            }
+        }
+    }
+    
+    public void removeLFReference(String lfRegionName) {
+        System.out.println("Removing LF References with name: " + lfRegionName);
+        for (ProtectedRegion pr : restrictedRegions) {
+            System.out.println("Comparing " + pr.getLfName() + " with " + lfRegionName);
+            if (pr.getLfName().equals(lfRegionName)) {
+                System.out.println("Found region that needs to be updated!");
+                pr.setLfReference(null);
+            }
+        }
+    }
+    
     /*
      * LOST REGIONS
      * 
@@ -178,26 +211,6 @@ public class TPPets extends JavaPlugin implements Listener {
     
     public void removeLostRegion(LostAndFoundRegion lfr) {
         lostRegions.remove(lfr.getZoneName());
-    }
-    
-    /*
-     * CHECK REGIONS TIMER
-     * 
-     */
-    
-    public void startCheckingRegions() {
-        if (checkInterval != 0) {
-            cr = new CheckRegions(this);
-            cr.runTaskTimer(this, 0, checkInterval);
-        }
-    }
-    
-    public void stopCheckingRegions() {
-        try {
-            cr.cancel();
-        } catch (IllegalStateException e) {
-            getLogger().info("Something went wrong while trying to stop checking regions");
-        }
     }
     
     /*
@@ -231,5 +244,13 @@ public class TPPets extends JavaPlugin implements Listener {
     
     public LostAndFoundRegion getLostRegion(String name) {
         return lostRegions.get(name);
+    }
+    
+    public Permission getPerms() {
+        return perms;
+    }
+    
+    public boolean getVaultEnabled() {
+        return vaultEnabled;
     }
 }

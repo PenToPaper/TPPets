@@ -8,21 +8,30 @@ import org.bukkit.entity.Player;
 import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
 
 public class CommandLost extends RegionCommand {
+    
     public void processCommand(CommandSender sender, String[] args) {
         if (args[0] != null) {
             switch (args[0]) {
                 case "add":
                     if (args[1] != null) {
                         addRegion(sender, new String[] {args[1]});
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Syntax error: /tpp lostandfound add [name]");
                     }
                     break;
                 case "remove":
                     if (args[1] != null) {
                         removeRegion(sender, new String[] {args[1]});
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Syntax error: /tpp lostandfound remove [name]");
                     }
                     break;
                 case "list":
-                    listRegions(sender);
+                    if (args.length >= 2 && args[1] != null) {
+                        listRegions(sender, new String[] {args[1]});
+                    } else {
+                        listRegions(sender, new String[] {});
+                    }
                     break;
                 default:
                     sender.sendMessage(ChatColor.RED + "Syntax error: /tpp lostandfound [add/remove/list]");
@@ -38,9 +47,13 @@ public class CommandLost extends RegionCommand {
             Location[] lcs = getWePoints(pl);
             if (lcs != null && truncatedArgs.length == 1) {
                 LostAndFoundRegion lfr = new LostAndFoundRegion(truncatedArgs[0], pl.getWorld().getName(), lcs[0], lcs[1]);
-                thisPlugin.getSQLite().insertLostRegion(lfr);
-                thisPlugin.addLostRegion(lfr);
-                sender.sendMessage("Lost and Found Region " + truncatedArgs[0] + " Set!");
+                if (thisPlugin.getSQLite().insertLostRegion(lfr)) {
+                    thisPlugin.addLostRegion(lfr);
+                    thisPlugin.updateLFReference(lfr.getZoneName());
+                    sender.sendMessage(ChatColor.BLUE + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Unable to add lost and found region  " + ChatColor.WHITE + truncatedArgs[0]);
+                }
             }
         }
     }
@@ -48,21 +61,38 @@ public class CommandLost extends RegionCommand {
     private void removeRegion(CommandSender sender, String[] truncatedArgs) {
         LostAndFoundRegion tempLfr = thisPlugin.getLostRegion(truncatedArgs[0]);
         if (tempLfr != null) {
-            thisPlugin.removeLostRegion(tempLfr);
-            thisPlugin.getSQLite().deleteLostRegion(tempLfr);
-            sender.sendMessage("Lost and Found Region " + truncatedArgs[0] + " Removed!");
+            if (thisPlugin.getSQLite().deleteLostRegion(tempLfr)) {
+                thisPlugin.removeLFReference(tempLfr.getZoneName());
+                thisPlugin.removeLostRegion(tempLfr);
+                sender.sendMessage(ChatColor.BLUE + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
+            } else {
+                sender.sendMessage(ChatColor.RED + "Unable to remove lost and found region  " + ChatColor.WHITE + truncatedArgs[0]);
+            }
         }
     }
     
-    private void listRegions(CommandSender sender) {
+    private void listRegions(CommandSender sender, String[] truncatedArgs) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Lost and Found Regions]" + ChatColor.DARK_GRAY + "---------");
-        for (String key : thisPlugin.getLostRegions().keySet()) {
-            LostAndFoundRegion lfr = thisPlugin.getLostRegion(key);
-            sender.sendMessage(ChatColor.BLUE + "name: " + lfr.getZoneName());
-            sender.sendMessage(ChatColor.BLUE + "    " + "world: " + lfr.getWorldName());
-            sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 1: " + getLocationString(lfr.getMinLoc()));
-            sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 2: " + getLocationString(lfr.getMaxLoc()));
+        if (truncatedArgs.length == 1 && truncatedArgs[0] != null) {
+            LostAndFoundRegion lfr = thisPlugin.getLostRegion(truncatedArgs[0]);
+            if (lfr != null) {
+                displayLfrInfo(sender, lfr);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Could not find lost and found region with name " + ChatColor.WHITE + truncatedArgs[0]);
+            }
+        } else {
+            for (String key : thisPlugin.getLostRegions().keySet()) {
+                LostAndFoundRegion lfr = thisPlugin.getLostRegion(key);
+                displayLfrInfo(sender, lfr);
+            }
         }
-        sender.sendMessage(ChatColor.DARK_GRAY + "------------------------------------------");
+        sender.sendMessage(ChatColor.DARK_GRAY + "-----------------------------------------");
+    }
+    
+    private void displayLfrInfo(CommandSender sender, LostAndFoundRegion lfr) {
+        sender.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + lfr.getZoneName());
+        sender.sendMessage(ChatColor.BLUE + "    " + "world: " + ChatColor.WHITE + lfr.getWorldName());
+        sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 1: " + ChatColor.WHITE + getLocationString(lfr.getMinLoc()));
+        sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 2: " + ChatColor.WHITE + getLocationString(lfr.getMaxLoc()));
     }
 }

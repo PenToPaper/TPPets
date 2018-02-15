@@ -124,7 +124,7 @@ public class SQLite {
         }
     }
     
-    public void insertRestrictedRegion(ProtectedRegion pr) {
+    public boolean insertRestrictedRegion(ProtectedRegion pr) {
         Connection dbc = getDBC();
         if (dbc != null) {
             try {
@@ -141,13 +141,15 @@ public class SQLite {
                 insertPStatement.setString(10, pr.getLfReference().getZoneName());
                 insertPStatement.executeUpdate();
                 dbc.close();
+                return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "inserting restricted region into database", e);
             }
         }
+        return false;
     }
     
-    public void insertLostRegion(LostAndFoundRegion lfr) {
+    public boolean insertLostRegion(LostAndFoundRegion lfr) {
         Connection dbc = getDBC();
         if (dbc != null) {
             try {
@@ -163,10 +165,12 @@ public class SQLite {
                 insertPStatement.setString(8, lfr.getWorldName());
                 insertPStatement.executeUpdate();
                 dbc.close();
+                return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "inserting lost and found region into database", e);
             }
         }
+        return false;
     }
     
     public ArrayList<ProtectedRegion> getProtectedRegions() {
@@ -177,7 +181,6 @@ public class SQLite {
                 PreparedStatement selectPStatement = dbc.prepareStatement(selectRestrictedPrep);
                 ResultSet rs = selectPStatement.executeQuery();
                 while (rs.next()) {
-                    // TODO replace null with reference
                     ret.add(new ProtectedRegion(rs.getString("zoneName"), rs.getString("enterMessage"), rs.getString("worldName"), rs.getInt("minX"), rs.getInt("minY"), rs.getInt("minZ"), rs.getInt("maxX"), rs.getInt("maxY"), rs.getInt("maxZ"), rs.getString("lfZoneName")));
                 }
                 dbc.close();
@@ -206,20 +209,24 @@ public class SQLite {
         return ret;
     }
     
-    public void deleteRestrictedRegion(ProtectedRegion pr) {
+    public boolean deleteRestrictedRegion(ProtectedRegion pr) {
         try {
             deleteRegion(true, pr.getZoneName());
+            return true;
         } catch (SQLException e) {
             logSevere("SQL Exception", "deleting protected region from database", e);
         }
+        return false;
     }
     
-    public void deleteLostRegion(LostAndFoundRegion lfr) {
+    public boolean deleteLostRegion(LostAndFoundRegion lfr) {
         try {
             deleteRegion(false, lfr.getZoneName());
+            return true;
         } catch (SQLException e) {
             logSevere("SQL Exception", "deleting lost region from database", e);
         }
+        return false;
     }
     
     private void deleteRegion(boolean isRestrictedRegion, String regionName) throws SQLException {
@@ -232,7 +239,7 @@ public class SQLite {
         }
     }
     
-    public void updateRestrictedRegion(String restrictedZoneName, String lfZoneName) {
+    public boolean updateRestrictedRegion(String restrictedZoneName, String lfZoneName) {
         Connection dbc = getDBC();
         if (dbc != null) {
             try {
@@ -241,10 +248,12 @@ public class SQLite {
                 pstmt.setString(2, restrictedZoneName);
                 pstmt.executeUpdate();
                 dbc.close();
+                return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "updating pet entry in database", e);
             }
         }
+        return false;
     }
     
     public void insertPet(Entity entity) {

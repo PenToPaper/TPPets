@@ -22,7 +22,7 @@ public class CommandTPP implements CommandExecutor {
     // Main command handler for the plugin, forwards commands to appropriate sub-commands
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args[0] != null) {
+        if (args.length >= 1 && args[0] != null) {
             String realCommand = "";
             for (String commands : commandAliases.keySet()) {
                 if (commandAliases.get(commands).contains(args[0])) {
@@ -35,37 +35,49 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.restricted")) {
                         CommandRestricted cr = new CommandRestricted();
                         cr.processCommand(sender, separateArgs(Arrays.copyOfRange(args, 1, args.length), 4));
-                        return true;
+                    } else {
+                        permissionMessage(sender);
                     }
+                    break;
                 case "lost":
                     if (sender.hasPermission("tppets.lost")) {
                         CommandLost cl = new CommandLost();
                         cl.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
-                        return true; 
+                    } else {
+                        permissionMessage(sender);
                     }
+                    break;
                 case "dogs":
                     if (sender.hasPermission("tppets.dogs")) {
                         CommandTPPets dogTPP = new CommandTPPets();
                         dogTPP.processCommand(sender, PetType.Pets.DOG);
-                        return true;
+                    } else {
+                        permissionMessage(sender);
                     }
+                    break;
                 case "cats":
                     if (sender.hasPermission("tppets.cats")) {
                         CommandTPPets catTPP = new CommandTPPets();
                         catTPP.processCommand(sender, PetType.Pets.CAT);
-                        return true;
+                    } else {
+                        permissionMessage(sender);
                     }
+                    break;
                 case "birds":
                     if (sender.hasPermission("tppets.birds")) {
                         CommandTPPets parrotTPP = new CommandTPPets();
                         parrotTPP.processCommand(sender, PetType.Pets.PARROT);
                         return true;
+                    } else {
+                        permissionMessage(sender);
                     }
+                    break;
                 case "help":
                 default:
                     sendHelp(sender);
-                    return true;
+                    break;
             }
+            return true;
         }
         return false;
     }
@@ -75,7 +87,7 @@ public class CommandTPP implements CommandExecutor {
         sender.sendMessage(ChatColor.BLUE + "/tpp dogs     ->    Teleports your dogs to your location");
         sender.sendMessage(ChatColor.BLUE + "/tpp cats     ->    Teleports your cats to your location");
         sender.sendMessage(ChatColor.BLUE + "/tpp birds    ->    Teleports your birds to your location");
-        sender.sendMessage(ChatColor.BLUE + "/tpp restrocted [add, remove, list]    ->    Creates a region where pets will not be allowed");
+        sender.sendMessage(ChatColor.BLUE + "/tpp restrocted [add, remove, list, relink]    ->    Creates a region where pets will not be allowed");
         sender.sendMessage(ChatColor.BLUE + "/tpp lost [add, remove, list]    ->    Creates a region where lost pets will be teleported to");
         sender.sendMessage(ChatColor.DARK_GRAY + "---------------------------");
     }
@@ -93,5 +105,9 @@ public class CommandTPP implements CommandExecutor {
         }
         retList.add(replacementTruncation);
         return retList.toArray(new String[truncate]);
+    }
+    
+    private void permissionMessage(CommandSender sender) {
+        sender.sendMessage(ChatColor.RED + "You do not have permission to use that command.");
     }
 }

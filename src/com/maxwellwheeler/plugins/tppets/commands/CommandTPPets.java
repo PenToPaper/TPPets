@@ -22,6 +22,8 @@ import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.SQLite;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class CommandTPPets {
     private TPPets thisPlugin;
     private SQLite dbc;
@@ -37,6 +39,7 @@ public class CommandTPPets {
             ProtectedRegion tempProtected = thisPlugin.inProtectedRegion(tempPlayer);
             if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
                 getPetsToTeleport(pt, tempPlayer);
+                announceComplete(sender, pt);
             } else {
                 tempPlayer.sendMessage(tempProtected.getEnterMessage());
             }
@@ -90,5 +93,21 @@ public class CommandTPPets {
             tempSittable.setSitting(false);
         }
         entity.teleport(pl);
+    }
+    
+    private void announceComplete(CommandSender sender, PetType.Pets pt) {
+        switch (pt) {
+            case CAT:
+                sender.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + "cats " + ChatColor.BLUE + "have been teleported to you.");
+                break;
+            case DOG:
+                sender.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + "dogs " + ChatColor.BLUE + "have been teleported to you.");
+                break;
+            case PARROT:
+                sender.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + "birds " + ChatColor.BLUE + "have been teleported to you.");
+                break;
+            default:
+                break;
+        }
     }
 }
