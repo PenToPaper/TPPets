@@ -50,17 +50,28 @@ public class CommandTPPets {
         // TODO: Config setting disabling cross-world teleporting
         int petsTeleported = 0;
         List<World> worldsList = Bukkit.getServer().getWorlds();
-        for (World world : worldsList) {
-            ArrayList<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pt, world.getName(), pl.getUniqueId().toString());
-            for (PetStorage pet : unloadedPetsInWorld) {
-                Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
-                tempLoadedChunk.load();
+        if (thisPlugin.getAllowTp()) {
+            for (World world : worldsList) {
+                petsTeleported += loadAndTp(world, pt, pl);
             }
-            for (Entity entity : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
-                if (isTeleportablePet(pt, entity, pl)) {
-                    teleportPet(pl, entity);
-                    petsTeleported++;
-                }
+        } else {
+            petsTeleported += loadAndTp(pl.getWorld(), pt, pl);
+        }
+
+        return petsTeleported;
+    }
+    
+    private int loadAndTp(World world, PetType.Pets pt, Player pl) {
+        int petsTeleported = 0;
+        ArrayList<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pt, world.getName(), pl.getUniqueId().toString());
+        for (PetStorage pet : unloadedPetsInWorld) {
+            Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
+            tempLoadedChunk.load();
+        }
+        for (Entity entity : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
+            if (isTeleportablePet(pt, entity, pl)) {
+                teleportPet(pl, entity);
+                petsTeleported++;
             }
         }
         return petsTeleported;

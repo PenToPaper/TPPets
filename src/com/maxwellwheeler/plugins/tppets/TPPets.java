@@ -36,10 +36,11 @@ public class TPPets extends JavaPlugin implements Listener {
     private boolean preventEnvironmentalDamage;
     private boolean preventMobDamage;
     
+    // Vault stuff
     private Permission perms;
     private boolean vaultEnabled;
-    // Vault stuff
     
+    private boolean allowTpBetweenWorlds;
     
     /*
      * VARIABLE INITIALIZERS
@@ -50,6 +51,10 @@ public class TPPets extends JavaPlugin implements Listener {
         dbc = new SQLite(this, getDataFolder().getPath(), "tppets");
         dbc.createDatabase();
         dbc.createTables();
+    }
+    
+    private void initializeAllowTP() {
+        allowTpBetweenWorlds = getConfig().getBoolean("tp_pets_between_worlds");
     }
     
     private void initializeDamageConfigs() {
@@ -107,6 +112,7 @@ public class TPPets extends JavaPlugin implements Listener {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         initializeCommandAliases();
+        initializeAllowTP();
         
         // Database setup
         getLogger().info("Setting up database.");
@@ -254,5 +260,9 @@ public class TPPets extends JavaPlugin implements Listener {
     
     public boolean getVaultEnabled() {
         return vaultEnabled;
+    }
+    
+    public boolean getAllowTp() {
+        return allowTpBetweenWorlds;
     }
 }

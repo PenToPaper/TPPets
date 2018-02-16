@@ -1,5 +1,5 @@
 protect_pets_from: [Player, EnvironmentalDamage, MobDamage]
-check_interval: "10m"
+tp_pets_between_worlds: true
 command_aliases:
   restricted: [restrict, rest, r]
   lost: [lostandfound, laf, lf, lost, l]
