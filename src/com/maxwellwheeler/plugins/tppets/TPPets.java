@@ -56,12 +56,15 @@ public class TPPets extends JavaPlugin implements Listener {
         List<String> configList = getConfig().getStringList("protect_pets_from");
         if (configList.contains("Player")) {
             preventPlayerDamage = true;
+            getLogger().info("Preventing player damage...");
         }
         if (configList.contains("EnvironmentalDamage")) {
             preventEnvironmentalDamage = true;
+            getLogger().info("Preventing environmental damage...");
         }
         if (configList.contains("MobDamage")) {
             preventMobDamage = true;
+            getLogger().info("Preventing mob damage...");
         }
     }
     
@@ -85,6 +88,9 @@ public class TPPets extends JavaPlugin implements Listener {
     private void initializeVault() {
         if (vaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault")) {
             initializePermissions();
+            getLogger().info("Vault detected. Permission tppets.tpanywhere will work with online and offline players.");
+        } else {
+            getLogger().info("Vault not detected on this server. Permission tppets.tpanywhere will only work with online players.");
         }
     }
     
@@ -103,14 +109,17 @@ public class TPPets extends JavaPlugin implements Listener {
         initializeCommandAliases();
         
         // Database setup
+        getLogger().info("Setting up database.");
         initializeDBC();
         
         // Database pulling
+        getLogger().info("Getting data from database.");
         initializeLostRegions();
         initializeRestrictedRegions();
         
         
         // Register events + commands
+        getLogger().info("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this), this);
@@ -118,7 +127,6 @@ public class TPPets extends JavaPlugin implements Listener {
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases));
         this.getCommand("generate-tamed-dogs").setExecutor(new CommandCreateDogs());
         this.getCommand("tp-forward").setExecutor(new CommandTpForward());
-
 
         initializeDamageConfigs();
         initializeLostRegions();
@@ -179,22 +187,16 @@ public class TPPets extends JavaPlugin implements Listener {
     }
     
     public void updateLFReference(String lfRegionName) {
-        System.out.println("Updaintg LF References with name: " + lfRegionName);
         for (ProtectedRegion pr : restrictedRegions) {
-            System.out.println("Comparing " + pr.getLfName() + " with " + lfRegionName);
             if (pr.getLfName().equals(lfRegionName)) {
-                System.out.println("Found region that needs to be updated!");
                 pr.updateLFReference();
             }
         }
     }
     
     public void removeLFReference(String lfRegionName) {
-        System.out.println("Removing LF References with name: " + lfRegionName);
         for (ProtectedRegion pr : restrictedRegions) {
-            System.out.println("Comparing " + pr.getLfName() + " with " + lfRegionName);
             if (pr.getLfName().equals(lfRegionName)) {
-                System.out.println("Found region that needs to be updated!");
                 pr.setLfReference(null);
             }
         }

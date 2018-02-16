@@ -141,6 +141,7 @@ public class SQLite {
                 insertPStatement.setString(10, pr.getLfReference().getZoneName());
                 insertPStatement.executeUpdate();
                 dbc.close();
+                plugin.getLogger().info("Restricted region " + pr.getZoneName() + " added to database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "inserting restricted region into database", e);
@@ -153,7 +154,6 @@ public class SQLite {
         Connection dbc = getDBC();
         if (dbc != null) {
             try {
-                System.out.println(String.format("INSERT INTO lostregions(zoneName, minX, minY, minZ, maxX, maxY, maxZ, worldName) VALUES (%s, %d, %d, %d, %d, %d, %d, %s)", lfr.getZoneName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName()));
                 PreparedStatement insertPStatement = dbc.prepareStatement(insertLostPrep);
                 insertPStatement.setString(1, lfr.getZoneName());
                 insertPStatement.setInt(2, lfr.getMinLoc().getBlockX());
@@ -165,6 +165,7 @@ public class SQLite {
                 insertPStatement.setString(8, lfr.getWorldName());
                 insertPStatement.executeUpdate();
                 dbc.close();
+                plugin.getLogger().info("Restricted region " + lfr.getZoneName() + " added to database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "inserting lost and found region into database", e);
@@ -212,6 +213,7 @@ public class SQLite {
     public boolean deleteRestrictedRegion(ProtectedRegion pr) {
         try {
             deleteRegion(true, pr.getZoneName());
+            plugin.getLogger().info("Deleted restricted region " + pr.getZoneName() + " from database.");
             return true;
         } catch (SQLException e) {
             logSevere("SQL Exception", "deleting protected region from database", e);
@@ -222,6 +224,7 @@ public class SQLite {
     public boolean deleteLostRegion(LostAndFoundRegion lfr) {
         try {
             deleteRegion(false, lfr.getZoneName());
+            plugin.getLogger().info("Deleted lost and found region region " + lfr.getZoneName() + " from database.");
             return true;
         } catch (SQLException e) {
             logSevere("SQL Exception", "deleting lost region from database", e);
@@ -248,6 +251,7 @@ public class SQLite {
                 pstmt.setString(2, restrictedZoneName);
                 pstmt.executeUpdate();
                 dbc.close();
+                plugin.getLogger().info("Updated lfZoneName for restricted region " + restrictedZoneName + " in database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "updating pet entry in database", e);
@@ -272,7 +276,6 @@ public class SQLite {
                     }
                     
                     try {
-                        System.out.println(String.format("INSERT INTO unloadedpets(petId, petType, petX, petY, petZ, petWorld, ownerId) VALUES (%s, %d, %d, %d, %d, %s, %s)", shortenUUID(entity.getUniqueId().toString()), entityTypeIndex, entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ(), entity.getWorld().getName(), shortenUUID(tameableTemp.getOwner().getUniqueId().toString())));
                         PreparedStatement insertPStatement = dbc.prepareStatement(insertPetPrep);
                         insertPStatement.setString(1, shortenUUID(entity.getUniqueId().toString()));
                         insertPStatement.setInt(2, entityTypeIndex);
@@ -282,6 +285,7 @@ public class SQLite {
                         insertPStatement.setString(6, entity.getWorld().getName());
                         insertPStatement.setString(7, shortenUUID(tameableTemp.getOwner().getUniqueId().toString()));
                         insertPStatement.executeUpdate();
+                        plugin.getLogger().info("Inserting pet with UUID " + entity.getUniqueId().toString() + " into database.");
                     } catch (SQLException e) {
                         logSevere("SQL Exception", "inserting pet into database", e);
                     }
@@ -301,12 +305,12 @@ public class SQLite {
             String petIdString = shortenUUID(petId.toString());
             String playerIdString = shortenUUID(playerId.toString());
             try {
-                System.out.println(String.format("DELETE FROM unloadedpets WHERE petId = %s AND ownerId=%s", petIdString, playerIdString));
                 PreparedStatement pstmt = dbc.prepareStatement(deletePetPrep);
                 pstmt.setString(1, petIdString);
                 pstmt.setString(2, playerIdString);
                 pstmt.executeUpdate();
                 dbc.close();
+                plugin.getLogger().info("Deleted pet with UUID " + petId.toString() +  " from entering restricted region.");
             } catch (SQLException e) {
                 logSevere("SQL Exception", "deleting pet from database", e);
             }
@@ -338,6 +342,7 @@ public class SQLite {
                     pstmt.setString(6, playerIdString);
                     pstmt.executeUpdate();
                     dbc.close();
+                    plugin.getLogger().info("Updating pet with UUID " + ent.getUniqueId().toString() + " in database.");
                 } catch (SQLException e) {
                     logSevere("SQL Exception", "updating pet entry in database", e);
                 }

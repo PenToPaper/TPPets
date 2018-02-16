@@ -34,6 +34,7 @@ public class TPPetsEntityListener implements Listener {
                     Sittable sittableTemp = (Sittable) e.getEntity();
                     sittableTemp.setSitting(true);
                     e.setCancelled(true);
+                    thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering restricted region.");
                 }
             }
         }
@@ -62,15 +63,15 @@ public class TPPetsEntityListener implements Listener {
                 if (thisPlugin.getPreventPlayerDamage()) {
                     // Direct damage
                     if (e.getDamager() instanceof Player && !(e.getDamager().equals(tameableTemp.getOwner())) && !((Player)e.getDamager()).hasPermission("tppets.bypassprotection")) {
-                        System.out.println("PREVENTED PLAYER DAMAGE");
                         e.setCancelled(true);
+                        thisPlugin.getLogger().info("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                         return;
                     // Indirect damage
                     } else if (e.getDamager() instanceof Projectile) {
                         Projectile projTemp = (Projectile) e.getDamager();
                         if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner()) && !((Player)e.getDamager()).hasPermission("tppets.bypassprotection")) {
-                            System.out.println("PREVENTED PROJECTILE PLAYER DAMAGE");
                             e.setCancelled(true);
+                            thisPlugin.getLogger().info("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                             return;
                         }
                     }
@@ -79,15 +80,15 @@ public class TPPetsEntityListener implements Listener {
                 if (thisPlugin.getPreventMobDamage()) {
                     // Direct damage
                     if (e.getDamager() instanceof LivingEntity) {
-                        System.out.println("PREVENTED MOB DAMAGE");
                         e.setCancelled(true);
+                        thisPlugin.getLogger().info("Prevented mob damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                         return;
                     // Indirect damage
                     } else if (e.getDamager() instanceof Projectile) {
                         Projectile projTemp = (Projectile) e.getDamager();
                         if (projTemp.getShooter() instanceof LivingEntity && !projTemp.getShooter().equals(tameableTemp.getOwner())) {
-                            System.out.println("PREVENTED MOB DAMAGE");
                             e.setCancelled(true);
+                            thisPlugin.getLogger().info("Prevented mob damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                             return;
                         }
                     }
@@ -123,7 +124,7 @@ public class TPPetsEntityListener implements Listener {
                     case THORNS:
                     case WITHER:
                         e.setCancelled(true);
-                        System.out.println("PREVENTED ENVIRONMENTAL DAMAGE");
+                        thisPlugin.getLogger().info("Prevented environmental damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                         break;
                     default:
                         break;

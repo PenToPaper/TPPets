@@ -38,7 +38,7 @@ public class CommandTPPets {
             Player tempPlayer = (Player) sender;
             ProtectedRegion tempProtected = thisPlugin.inProtectedRegion(tempPlayer);
             if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
-                getPetsToTeleport(pt, tempPlayer);
+                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsToTeleport(pt, tempPlayer)) + " " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
                 announceComplete(sender, pt);
             } else {
                 tempPlayer.sendMessage(tempProtected.getEnterMessage());
@@ -46,8 +46,9 @@ public class CommandTPPets {
         }
     }
 
-    private void getPetsToTeleport(PetType.Pets pt, Player pl) {
+    private int getPetsToTeleport(PetType.Pets pt, Player pl) {
         // TODO: Config setting disabling cross-world teleporting
+        int petsTeleported = 0;
         List<World> worldsList = Bukkit.getServer().getWorlds();
         for (World world : worldsList) {
             ArrayList<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pt, world.getName(), pl.getUniqueId().toString());
@@ -58,9 +59,11 @@ public class CommandTPPets {
             for (Entity entity : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                 if (isTeleportablePet(pt, entity, pl)) {
                     teleportPet(pl, entity);
+                    petsTeleported++;
                 }
             }
         }
+        return petsTeleported;
     }
     
     private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {
@@ -109,5 +112,9 @@ public class CommandTPPets {
             default:
                 break;
         }
+    }
+    
+    private String formatLocation(Location lc) {
+        return "x: " + Integer.toString(lc.getBlockX()) + ", " + "y: " + Integer.toString(lc.getBlockY()) + ", " + "z: " + Integer.toString(lc.getBlockZ());
     }
 }

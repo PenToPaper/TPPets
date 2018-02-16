@@ -21,6 +21,7 @@ public abstract class Region {
     private Location minLoc;
     private Location maxLoc;
     public List<Chunk> chunkList;
+    protected TPPets thisPlugin;
     
     public Region(String zoneName, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo, int zTwo) {
         this.zoneName = zoneName;
@@ -29,6 +30,7 @@ public abstract class Region {
         this.minLoc = new Location(this.world, xOne, yOne, zOne);
         this.maxLoc = new Location(this.world, xTwo, yTwo, zTwo);
         this.chunkList = initializeChunkList();
+        this.thisPlugin = (TPPets) Bukkit.getServer().getPluginManager().getPlugin("TPPets");
     }
     
     public Region(String zoneName, String worldName, Location locOne, Location locTwo) {
@@ -120,4 +122,8 @@ public abstract class Region {
     public abstract void writeToConfig(TPPets thisPlugin);
     
     public abstract String toString();
+    
+    protected TPPets getPlugin() {
+        return thisPlugin;
+    }
 }

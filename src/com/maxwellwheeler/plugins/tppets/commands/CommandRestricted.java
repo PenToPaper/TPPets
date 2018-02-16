@@ -11,10 +11,6 @@ import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
 
 public class CommandRestricted extends RegionCommand {
     public void processCommand(CommandSender sender, String[] args) {
-        System.out.println("CommandRestricted Called!");
-        for (String arg : args) {
-            System.out.println(arg);
-        }
         if (args.length >= 1 && args[0] != null) {
             switch (args[0]) {
                 case "add":
@@ -62,6 +58,7 @@ public class CommandRestricted extends RegionCommand {
                 if (thisPlugin.getSQLite().insertRestrictedRegion(pr)) {
                     thisPlugin.addProtectedRegion(pr);
                     sender.sendMessage(ChatColor.BLUE + "Restricted Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
+                    thisPlugin.getLogger().info("Player " + sender.getName() + " added restricted region " + truncatedArgs[0]);
                 } else {
                     sender.sendMessage(ChatColor.RED + "Unable to set restricted region " + ChatColor.WHITE + truncatedArgs[0]);
                 }
@@ -77,6 +74,7 @@ public class CommandRestricted extends RegionCommand {
             if (thisPlugin.getSQLite().deleteRestrictedRegion(tempPr)) {
                 thisPlugin.removeProtectedRegion(truncatedArgs[0]);
                 sender.sendMessage(ChatColor.BLUE + "Restricted Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
+                thisPlugin.getLogger().info("Player " + sender.getName() + " removed restricted region " + truncatedArgs[0]);
             } else {
                 sender.sendMessage(ChatColor.RED + "Unable to remove restricted region " + ChatColor.WHITE + truncatedArgs[0]);
             }
@@ -105,6 +103,7 @@ public class CommandRestricted extends RegionCommand {
         if (thisPlugin.getSQLite().updateRestrictedRegion(tempPr.getZoneName(), tempPr.getLfReference().getZoneName())) {
             tempPr.setLfReference(truncatedArgs[1]);
             sender.sendMessage(ChatColor.BLUE + "Restricted Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Updated!");
+            thisPlugin.getLogger().info("Player " + sender.getName() + " relinked restricted region " + truncatedArgs[0] + " to " + truncatedArgs[1]);
         } else {
             sender.sendMessage(ChatColor.RED + "Unable to relink restricted region  " + ChatColor.WHITE + truncatedArgs[0]);
         }

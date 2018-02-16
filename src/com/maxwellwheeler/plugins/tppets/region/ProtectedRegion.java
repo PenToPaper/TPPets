@@ -20,7 +20,6 @@ public class ProtectedRegion extends Region {
     
     public void updateLFReference() {
         this.lfReference = getLFReference(lfName);
-        System.out.println("Updating LF Reference. Is LFReference null?" + Boolean.toString(lfReference == null));
     }
     
     @Override
@@ -30,7 +29,6 @@ public class ProtectedRegion extends Region {
     
     public ProtectedRegion(String zoneName, String enterMessage, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo, int zTwo, String lfString) {
         super(zoneName, worldName, xOne, yOne, zOne, xTwo, yTwo, zTwo);
-        System.out.printf("zoneName = %s, enterMessage = %s, worldName = %s, xOne = %d, yOne = %d, zOne = %d, xTwo = %d, yTwo = %d, zTwo = %d, lfString = %s", zoneName, enterMessage, worldName, xOne, yOne, zOne, xTwo, yTwo, zTwo, lfString);
         this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
         this.lfReference = getLFReference(lfString);
         this.lfName = lfString;
@@ -49,11 +47,11 @@ public class ProtectedRegion extends Region {
     
     public void tpToLostRegion(Entity ent) {
         if (ent instanceof Sittable) {
-            System.out.println(((Sittable)ent).isSitting());
             ((Sittable) ent).setSitting(false);
         }
         if (lfReference != null) {
             ent.teleport(lfReference.getApproxCenter());
+            getPlugin().getLogger().info("Teleported pet with UUID " + ent.getUniqueId().toString() +  " away from " + this.getZoneName() + " to " + this.getLfReference().getZoneName());
         }
     }
     
@@ -80,7 +78,6 @@ public class ProtectedRegion extends Region {
     }
     
     public void setLfReference(String lfString) {
-        System.out.println("Setting Lf Reference. Is equal to null?" + Boolean.toString(lfString == null));
         this.lfName = lfString;
         this.lfReference = lfString == null ? null : getLFReference(lfString);
     }
