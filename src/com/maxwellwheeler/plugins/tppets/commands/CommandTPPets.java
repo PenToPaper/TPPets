@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -38,7 +39,7 @@ public class CommandTPPets {
             Player tempPlayer = (Player) sender;
             ProtectedRegion tempProtected = thisPlugin.inProtectedRegion(tempPlayer);
             if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
-                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsToTeleport(pt, tempPlayer)) + " " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
+                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsToTeleport(pt, tempPlayer).size()) + " " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
                 announceComplete(sender, pt);
             } else {
                 tempPlayer.sendMessage(tempProtected.getEnterMessage());
@@ -46,23 +47,21 @@ public class CommandTPPets {
         }
     }
 
-    private int getPetsToTeleport(PetType.Pets pt, Player pl) {
-        // TODO: Config setting disabling cross-world teleporting
-        int petsTeleported = 0;
+    private List<UUID> getPetsToTeleport(PetType.Pets pt, Player pl) {
         List<World> worldsList = Bukkit.getServer().getWorlds();
+        List<UUID> teleportedEnts = new ArrayList<UUID>();
         if (thisPlugin.getAllowTp()) {
             for (World world : worldsList) {
-                petsTeleported += loadAndTp(world, pt, pl);
+                teleportedEnts = loadAndTp(teleportedEnts, world, pt, pl);
             }
         } else {
-            petsTeleported += loadAndTp(pl.getWorld(), pt, pl);
+            teleportedEnts = loadAndTp(teleportedEnts, pl.getWorld(), pt, pl);
         }
 
-        return petsTeleported;
+        return teleportedEnts;
     }
     
-    private int loadAndTp(World world, PetType.Pets pt, Player pl) {
-        int petsTeleported = 0;
+    private List<UUID> loadAndTp(List<UUID> entList, World world, PetType.Pets pt, Player pl) {
         ArrayList<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pt, world.getName(), pl.getUniqueId().toString());
         for (PetStorage pet : unloadedPetsInWorld) {
             Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
@@ -70,11 +69,15 @@ public class CommandTPPets {
         }
         for (Entity entity : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
             if (isTeleportablePet(pt, entity, pl)) {
-                teleportPet(pl, entity);
-                petsTeleported++;
+                if (!entList.contains(entity.getUniqueId())) {
+                    teleportPet(pl, entity);
+                    entList.add(entity.getUniqueId());
+                } else {
+                    entity.remove();
+                }
             }
         }
-        return petsTeleported;
+        return entList;
     }
     
     private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {
