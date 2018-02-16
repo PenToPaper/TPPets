@@ -1,5 +1,6 @@
-protect_pets_from: [Player, EnvironmentalDamage, MobDamage]
+protect_pets_from: [PlayerDamage, EnvironmentalDamage, MobDamage]
 tp_pets_between_worlds: true
+allow_untaming_pets: true
 command_aliases:
   restricted: [restrict, rest, r]
   lost: [lostandfound, laf, lf, lost, l]

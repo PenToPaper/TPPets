@@ -41,6 +41,7 @@ public class TPPets extends JavaPlugin implements Listener {
     private boolean vaultEnabled;
     
     private boolean allowTpBetweenWorlds;
+    private boolean allowUntamingPets;
     
     /*
      * VARIABLE INITIALIZERS
@@ -57,9 +58,13 @@ public class TPPets extends JavaPlugin implements Listener {
         allowTpBetweenWorlds = getConfig().getBoolean("tp_pets_between_worlds");
     }
     
+    private void initializeAllowUntamingPets() {
+        allowUntamingPets = getConfig().getBoolean("allow_untaming_pets");
+    }
+    
     private void initializeDamageConfigs() {
         List<String> configList = getConfig().getStringList("protect_pets_from");
-        if (configList.contains("Player")) {
+        if (configList.contains("PlayerDamage")) {
             preventPlayerDamage = true;
             getLogger().info("Preventing player damage...");
         }
@@ -113,6 +118,7 @@ public class TPPets extends JavaPlugin implements Listener {
         saveDefaultConfig();
         initializeCommandAliases();
         initializeAllowTP();
+        initializeAllowUntamingPets();
         
         // Database setup
         getLogger().info("Setting up database.");
@@ -264,5 +270,9 @@ public class TPPets extends JavaPlugin implements Listener {
     
     public boolean getAllowTp() {
         return allowTpBetweenWorlds;
+    }
+    
+    public boolean getAllowUntamingPets() {
+        return allowUntamingPets;
     }
 }

@@ -310,7 +310,7 @@ public class SQLite {
                 pstmt.setString(2, playerIdString);
                 pstmt.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Deleted pet with UUID " + petId.toString() +  " from entering restricted region.");
+                plugin.getLogger().info("Deleted pet with UUID " + petId.toString() +  " from database.");
             } catch (SQLException e) {
                 logSevere("SQL Exception", "deleting pet from database", e);
             }

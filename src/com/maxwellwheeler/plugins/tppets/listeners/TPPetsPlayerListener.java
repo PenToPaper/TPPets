@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.AnimalTamer;
@@ -9,11 +10,15 @@ import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.permissions.Permissible;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
+
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.List;
 
@@ -56,5 +61,19 @@ public class TPPetsPlayerListener implements Listener {
     private boolean offlineHasPerms(AnimalTamer at, String permission, World world) {
         // Player extends OfflinePlayer
         return (at instanceof OfflinePlayer && pluginInstance.getPerms().playerHas(world.getName(), (OfflinePlayer) at, "tppets.tpanywhere"));
+    }
+    
+    // If player right-clicks a pet they've tamed with shears while crouching, untames that entity
+    @EventHandler (priority=EventPriority.LOW)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
+        if (pluginInstance.getAllowUntamingPets() && e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.SHEARS)) {
+            Sittable sittableTemp = (Sittable) e.getRightClicked();
+            sittableTemp.setSitting(false);
+            Tameable tameableTemp = (Tameable) e.getRightClicked();
+            tameableTemp.setTamed(false);
+            pluginInstance.getSQLite().deletePet(e.getRightClicked().getUniqueId(), e.getPlayer().getUniqueId());
+            pluginInstance.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
+            e.getPlayer().sendMessage(ChatColor.BLUE + "Un-taming pet.");
+        }
     }
 }
