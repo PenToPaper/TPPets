@@ -1,5 +1,5 @@
 name: TPPets
-version: 0.9.0
+version: 0.9.1
 description: Teleport pets to certain areas of the map
 load: POSTWORLD
 author: GatheringExp

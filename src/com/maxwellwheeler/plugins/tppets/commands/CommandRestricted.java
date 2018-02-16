@@ -58,6 +58,9 @@ public class CommandRestricted extends RegionCommand {
                 if (thisPlugin.getSQLite().insertRestrictedRegion(pr)) {
                     thisPlugin.addProtectedRegion(pr);
                     sender.sendMessage(ChatColor.BLUE + "Restricted Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
+                    if (pr.getLfReference() == null) {
+                        sender.sendMessage(ChatColor.BLUE + "Warning: Lost and found region " + ChatColor.WHITE + truncatedArgs[1] + ChatColor.BLUE + " does not exist.");
+                    }
                     thisPlugin.getLogger().info("Player " + sender.getName() + " added restricted region " + truncatedArgs[0]);
                 } else {
                     sender.sendMessage(ChatColor.RED + "Unable to set restricted region " + ChatColor.WHITE + truncatedArgs[0]);
@@ -78,6 +81,8 @@ public class CommandRestricted extends RegionCommand {
             } else {
                 sender.sendMessage(ChatColor.RED + "Unable to remove restricted region " + ChatColor.WHITE + truncatedArgs[0]);
             }
+        } else {
+            sender.sendMessage(ChatColor.RED + "Restricted Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.RED + " does not exist.");
         }
     }
     
@@ -104,6 +109,9 @@ public class CommandRestricted extends RegionCommand {
             tempPr.setLfReference(truncatedArgs[1]);
             sender.sendMessage(ChatColor.BLUE + "Restricted Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Updated!");
             thisPlugin.getLogger().info("Player " + sender.getName() + " relinked restricted region " + truncatedArgs[0] + " to " + truncatedArgs[1]);
+            if (tempPr.getLfReference() == null) {
+                sender.sendMessage(ChatColor.BLUE + "Warning: Lost and found region " + ChatColor.WHITE + truncatedArgs[1] + ChatColor.BLUE + " does not exist.");
+            }
         } else {
             sender.sendMessage(ChatColor.RED + "Unable to relink restricted region  " + ChatColor.WHITE + truncatedArgs[0]);
         }

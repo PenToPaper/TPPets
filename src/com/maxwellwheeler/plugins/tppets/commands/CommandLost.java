@@ -70,6 +70,8 @@ public class CommandLost extends RegionCommand {
             } else {
                 sender.sendMessage(ChatColor.RED + "Unable to remove lost and found region  " + ChatColor.WHITE + truncatedArgs[0]);
             }
+        } else {
+            sender.sendMessage(ChatColor.RED + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.RED + " does not exist.");
         }
     }
     

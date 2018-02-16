@@ -138,7 +138,7 @@ public class SQLite {
                 insertPStatement.setInt(7, pr.getMaxLoc().getBlockY());
                 insertPStatement.setInt(8, pr.getMaxLoc().getBlockZ());
                 insertPStatement.setString(9, pr.getWorldName());
-                insertPStatement.setString(10, pr.getLfReference().getZoneName());
+                insertPStatement.setString(10, pr.getLfName());
                 insertPStatement.executeUpdate();
                 dbc.close();
                 plugin.getLogger().info("Restricted region " + pr.getZoneName() + " added to database.");
