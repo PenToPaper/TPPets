@@ -61,6 +61,7 @@ public class SQLite {
     private String selectPetFromOwnerStmt = "SELECT * FROM unloadedpets WHERE ownerId = \"%s\"";
     private String selectPetGenericStmt = "SELECT * FROM unloadedpets WHERE ownerId = \"%s\" AND petWorld = \"%s\" AND petType = %d";
     private String selectPetFromUUIDsStmt = "SELECT * FROM unloadedpets WHERE petId = \"%s\" AND ownerId = \"%s\"";
+    private String selectPetFromWorldStmt = "SELECT * FROM unloadedpets WHERE petWorld = \"%s\"";
     private String deletePetPrep = "DELETE FROM unloadedpets WHERE petId = ? AND ownerId=?";
     private String updatePetPrep = "UPDATE unloadedpets SET petX = ?, petY = ?, petZ = ?, petWorld = ? WHERE petId = ? AND ownerId = ?";
     private String insertLostPrep = "INSERT INTO lostregions(zoneName, minX, minY, minZ, maxX, maxY, maxZ, worldName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -299,7 +300,7 @@ public class SQLite {
         }
     }
     
-    public void deletePet(UUID petId, UUID playerId) {
+    public boolean deletePet(UUID petId, UUID playerId) {
         Connection dbc = getDBC();
         if (dbc != null) {
             String petIdString = shortenUUID(petId.toString());
@@ -311,10 +312,12 @@ public class SQLite {
                 pstmt.executeUpdate();
                 dbc.close();
                 plugin.getLogger().info("Deleted pet with UUID " + petId.toString() +  " from database.");
+                return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "deleting pet from database", e);
             }
         }
+        return false;
     }
     
     public void updateOrInsertPet (Entity entity) {
@@ -406,6 +409,22 @@ public class SQLite {
                 Statement stmt = dbc.createStatement();
                 ArrayList<PetStorage> ret = new ArrayList<PetStorage>();
                 ret = getPetsList(stmt.executeQuery(String.format(selectPetGenericStmt, userIdString, worldName, PetType.getIndexFromPet(pt))));
+                dbc.close();
+                return ret;
+            } catch (SQLException e) {
+                logSevere("SQL Exception", "selecting pets from database", e);
+            }
+        }
+        return null;
+    }
+    
+    public ArrayList<PetStorage> getPetsByWorld(String worldName) {
+        Connection dbc = getDBC();
+        if (dbc != null) {
+            try {
+                Statement stmt = dbc.createStatement();
+                ArrayList<PetStorage> ret = new ArrayList<PetStorage>();
+                ret = getPetsList(stmt.executeQuery(String.format(selectPetFromWorldStmt, worldName)));
                 dbc.close();
                 return ret;
             } catch (SQLException e) {

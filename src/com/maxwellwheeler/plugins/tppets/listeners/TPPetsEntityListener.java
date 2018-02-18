@@ -11,9 +11,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
+import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class TPPetsEntityListener implements Listener {
     
@@ -46,7 +51,9 @@ public class TPPetsEntityListener implements Listener {
         if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
-                thisPlugin.getSQLite().deletePet(e.getEntity().getUniqueId(), tameableTemp.getOwner().getUniqueId());
+                if (thisPlugin.getSQLite().deletePet(e.getEntity().getUniqueId(), tameableTemp.getOwner().getUniqueId())) {
+                    thisPlugin.getPetIndex().removePetTamed(e.getEntity().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString(), PetType.getEnumByEntity(e.getEntity()));
+                }
             }
         }
     }
@@ -130,6 +137,21 @@ public class TPPetsEntityListener implements Listener {
                         break;
                 }
             }
+        }
+    }
+    
+    @EventHandler (priority=EventPriority.HIGH)
+    public void onEntityTameEvent(EntityTameEvent e) {
+        PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
+        PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner().getUniqueId().toString(), pt);
+        if (!rr.equals(PlayerPetIndex.RuleRestriction.ALLOWED)) {
+            e.setCancelled(true);
+            if (e.getOwner() instanceof Player) {
+                Player playerTemp = (Player) e.getOwner();
+                playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
+            }
+        } else {
+            thisPlugin.getPetIndex().newPetTamed(e.getOwner().getUniqueId().toString(), e.getEntity().getUniqueId().toString(), pt);
         }
     }
 }

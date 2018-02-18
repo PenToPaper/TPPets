@@ -19,6 +19,7 @@ import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
 import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
 import com.maxwellwheeler.plugins.tppets.storage.SQLite;
 
 import net.milkbowl.vault.permission.Permission;
@@ -43,10 +44,17 @@ public class TPPets extends JavaPlugin implements Listener {
     private boolean allowTpBetweenWorlds;
     private boolean allowUntamingPets;
     
+    private PlayerPetIndex petIndex;
+    
+    
     /*
      * VARIABLE INITIALIZERS
      * 
      */
+    
+    private void initializePetIndex() {
+        petIndex = new PlayerPetIndex(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"));
+    }
     
     private void initializeDBC() {
         dbc = new SQLite(this, getDataFolder().getPath(), "tppets");
@@ -128,7 +136,7 @@ public class TPPets extends JavaPlugin implements Listener {
         getLogger().info("Getting data from database.");
         initializeLostRegions();
         initializeRestrictedRegions();
-        
+        initializePetIndex();
         
         // Register events + commands
         getLogger().info("Registering commands and events.");
@@ -274,5 +282,9 @@ public class TPPets extends JavaPlugin implements Listener {
     
     public boolean getAllowUntamingPets() {
         return allowUntamingPets;
+    }
+    
+    public PlayerPetIndex getPetIndex() {
+        return petIndex;
     }
 }

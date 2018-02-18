@@ -17,6 +17,7 @@ import org.bukkit.permissions.Permissible;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 import net.md_5.bungee.api.ChatColor;
 
@@ -72,6 +73,9 @@ public class TPPetsPlayerListener implements Listener {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
             tameableTemp.setTamed(false);
             pluginInstance.getSQLite().deletePet(e.getRightClicked().getUniqueId(), e.getPlayer().getUniqueId());
+            String ownerUUIDString = e.getPlayer().getUniqueId().toString();
+            String entityUUIDString = e.getRightClicked().getUniqueId().toString();
+            pluginInstance.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
             pluginInstance.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
             e.getPlayer().sendMessage(ChatColor.BLUE + "Un-taming pet.");
         }
