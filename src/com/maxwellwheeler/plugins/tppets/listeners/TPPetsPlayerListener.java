@@ -78,6 +78,9 @@ public class TPPetsPlayerListener implements Listener {
             pluginInstance.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
             pluginInstance.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
             e.getPlayer().sendMessage(ChatColor.BLUE + "Un-taming pet.");
+        } else if (e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.BONE)) {
+            Tameable tameableTemp = (Tameable) e.getRightClicked();
+            e.getPlayer().sendMessage(ChatColor.BLUE + "This pet belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName());
         }
     }
 }
