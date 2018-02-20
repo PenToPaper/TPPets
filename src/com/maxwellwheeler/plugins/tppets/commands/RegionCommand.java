@@ -30,4 +30,16 @@ public class RegionCommand {
     protected String getLocationString(Location lc) {
         return Integer.toString(lc.getBlockX()) + ", " + Integer.toString(lc.getBlockY()) + ", " + Integer.toString(lc.getBlockZ());
     }
+    
+    protected boolean validateArgs(String[] args, int length) {
+        if (args.length >= length) {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] == null) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

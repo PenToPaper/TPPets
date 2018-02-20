@@ -12,7 +12,7 @@ commands:
     description: Base command for TPPets
     aliases: [teleportpets]
     usage: "Usage: /tpp [parrots/dogs/cats/restricted/lost]"
-  generate-tamed-dogs:
+  generate-tamed-cats:
     description: Testing only
   tp-forward:
     description: Testing only

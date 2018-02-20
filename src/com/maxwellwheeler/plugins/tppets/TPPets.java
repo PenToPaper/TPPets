@@ -11,7 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.maxwellwheeler.plugins.tppets.commands.CommandCreateDogs;
+import com.maxwellwheeler.plugins.tppets.commands.CommandCreateCats;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTpForward;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
@@ -145,7 +145,7 @@ public class TPPets extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases));
-        this.getCommand("generate-tamed-dogs").setExecutor(new CommandCreateDogs());
+        this.getCommand("generate-tamed-cats").setExecutor(new CommandCreateCats());
         this.getCommand("tp-forward").setExecutor(new CommandTpForward());
 
         initializeDamageConfigs();
@@ -226,6 +226,15 @@ public class TPPets extends JavaPlugin implements Listener {
      * LOST REGIONS
      * 
      */
+    
+    public boolean isInLostRegion(Location lc) {
+        for (String lfKey : lostRegions.keySet()) {
+            if (lostRegions.get(lfKey).isInZone(lc)) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     public void addLostRegion(LostAndFoundRegion lfr) {
         lostRegions.put(lfr.getZoneName(), lfr);

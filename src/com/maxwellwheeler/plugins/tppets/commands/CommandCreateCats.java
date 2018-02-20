@@ -8,14 +8,14 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 
-public class CommandCreateDogs implements CommandExecutor {
+public class CommandCreateCats implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
             for (int i = 0; i < Integer.parseInt(args[0]); i++) {
                 Player pl = (Player) sender;
-                Entity ent = pl.getWorld().spawnEntity(pl.getLocation(), EntityType.WOLF);
+                Entity ent = pl.getWorld().spawnEntity(pl.getLocation(), EntityType.OCELOT);
                 Tameable tmb = (Tameable) ent;
                 tmb.setOwner(pl);
             }

@@ -35,11 +35,14 @@ public class TPPetsEntityListener implements Listener {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed() && tameableTemp.getOwner() instanceof Player) {
                 Player playerTemp = (Player) tameableTemp.getOwner();
+                Sittable sittableTemp = (Sittable) e.getEntity();
                 if (thisPlugin.isInProtectedRegion(e.getTo()) && !playerTemp.hasPermission("tppets.tpanywhere")) {
-                    Sittable sittableTemp = (Sittable) e.getEntity();
                     sittableTemp.setSitting(true);
                     e.setCancelled(true);
                     thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering restricted region.");
+                } else if (thisPlugin.isInLostRegion(e.getFrom())) {
+                    sittableTemp.setSitting(true);
+                    e.setCancelled(true);
                 }
             }
         }
@@ -86,7 +89,7 @@ public class TPPetsEntityListener implements Listener {
                 // If we're supposed to prevent mob damage, prevent damage directly from mobs and indirectly through any mob-based projectiles
                 if (thisPlugin.getPreventMobDamage()) {
                     // Direct damage
-                    if (e.getDamager() instanceof LivingEntity) {
+                    if (e.getDamager() instanceof LivingEntity && !(e.getDamager() instanceof Player)) {
                         e.setCancelled(true);
                         thisPlugin.getLogger().info("Prevented mob damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                         return;

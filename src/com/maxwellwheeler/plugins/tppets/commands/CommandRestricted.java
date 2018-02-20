@@ -11,31 +11,31 @@ import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
 
 public class CommandRestricted extends RegionCommand {
     public void processCommand(CommandSender sender, String[] args) {
-        if (args.length >= 1 && args[0] != null) {
+        if (validateArgs(args, 1)) {
             switch (args[0]) {
                 case "add":
-                    if (args.length >= 4 && args[1] != null && args[2] != null && args[3] != null) {
+                    if (validateArgs(args, 4)) {
                         addRegion(sender, Arrays.copyOfRange(args, 1, args.length));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp restricted add [name] [lost region] [enter message]");
                     }
                     break;
                 case "remove":
-                    if (args.length >= 2 && args[1] != null) {
+                    if (validateArgs(args, 2)) {
                         removeRegion(sender, new String[] {args[1]});
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp restricted remove [name]");
                     }
                     break;
                 case "list":
-                    if (args.length >= 2 && args[1] != null) {
+                    if (validateArgs(args, 2)) {
                         listRegions(sender, new String[] {args[1]});
                     } else {
                         listRegions(sender, new String[] {});
                     }
                     break;
                 case "relink":
-                    if (args.length >= 3 && args[1] != null && args[2] != null) {
+                    if (validateArgs(args, 3)) {
                         relinkRegion(sender, Arrays.copyOfRange(args, 1, 3));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp restricted relink [name] [lost region]");
@@ -45,7 +45,7 @@ public class CommandRestricted extends RegionCommand {
                     sender.sendMessage(ChatColor.RED + "Syntax error: /tpp restricted [add/remove/list/relink]");
                 }
         } else {
-            sender.sendMessage(ChatColor.RED + "Syntax error: /tpp restricted [add/remove/list]");
+            sender.sendMessage(ChatColor.RED + "Syntax error: /tpp restricted [add/remove/list/relink]");
         }
     }
     

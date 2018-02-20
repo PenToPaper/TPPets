@@ -68,19 +68,25 @@ public class TPPetsPlayerListener implements Listener {
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
         if (pluginInstance.getAllowUntamingPets() && e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.SHEARS)) {
-            Sittable sittableTemp = (Sittable) e.getRightClicked();
-            sittableTemp.setSitting(false);
             Tameable tameableTemp = (Tameable) e.getRightClicked();
-            tameableTemp.setTamed(false);
-            pluginInstance.getSQLite().deletePet(e.getRightClicked().getUniqueId(), e.getPlayer().getUniqueId());
-            String ownerUUIDString = e.getPlayer().getUniqueId().toString();
-            String entityUUIDString = e.getRightClicked().getUniqueId().toString();
-            pluginInstance.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
-            pluginInstance.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
-            e.getPlayer().sendMessage(ChatColor.BLUE + "Un-taming pet.");
+            if (tameableTemp.getOwner().equals(e.getPlayer())) {
+                Sittable sittableTemp = (Sittable) e.getRightClicked();
+                sittableTemp.setSitting(false);
+                tameableTemp.setTamed(false);
+                pluginInstance.getSQLite().deletePet(e.getRightClicked().getUniqueId(), e.getPlayer().getUniqueId());
+                String ownerUUIDString = e.getPlayer().getUniqueId().toString();
+                String entityUUIDString = e.getRightClicked().getUniqueId().toString();
+                pluginInstance.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
+                pluginInstance.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
+                e.getPlayer().sendMessage(ChatColor.BLUE + "Un-taming pet.");
+            }
         } else if (e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.BONE)) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
-            e.getPlayer().sendMessage(ChatColor.BLUE + "This pet belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName());
+            if (tameableTemp.getOwner() != null) {
+                e.getPlayer().sendMessage(ChatColor.BLUE + "This pet belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
+            } else {
+                e.getPlayer().sendMessage(ChatColor.BLUE + "This pet does not belong to anybody.");
+            }
         }
     }
 }

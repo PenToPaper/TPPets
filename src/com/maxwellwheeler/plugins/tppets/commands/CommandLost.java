@@ -10,24 +10,24 @@ import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
 public class CommandLost extends RegionCommand {
     
     public void processCommand(CommandSender sender, String[] args) {
-        if (args[0] != null) {
+        if (validateArgs(args, 1)) {
             switch (args[0]) {
                 case "add":
-                    if (args[1] != null) {
+                    if (validateArgs(args, 2)) {
                         addRegion(sender, new String[] {args[1]});
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp lostandfound add [name]");
                     }
                     break;
                 case "remove":
-                    if (args[1] != null) {
+                    if (validateArgs(args, 2)) {
                         removeRegion(sender, new String[] {args[1]});
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp lostandfound remove [name]");
                     }
                     break;
                 case "list":
-                    if (args.length >= 2 && args[1] != null) {
+                    if (validateArgs(args, 2)) {
                         listRegions(sender, new String[] {args[1]});
                     } else {
                         listRegions(sender, new String[] {});

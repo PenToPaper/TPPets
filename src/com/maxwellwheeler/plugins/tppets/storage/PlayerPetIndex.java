@@ -132,6 +132,5 @@ public class PlayerPetIndex {
             }
         }
         return RuleRestriction.ALLOWED;
-        // return index.containsKey(trimmedUUID) && isWithinLimit(totalLimit, index.get(trimmedUUID).getTotalLength()) && isWithinLimit(getSpecificLimit(pt), index.get(trimmedUUID).getPetsLength(pt));
     }
 }
