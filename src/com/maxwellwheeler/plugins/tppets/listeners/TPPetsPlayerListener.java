@@ -21,11 +21,11 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 import net.md_5.bungee.api.ChatColor;
 
-import java.util.List;
+import java.util.Hashtable;
 
 public class TPPetsPlayerListener implements Listener {
     TPPets pluginInstance;
-    List<ProtectedRegion> protRegions;
+    Hashtable<String, ProtectedRegion> protRegions;
     
     public TPPetsPlayerListener(TPPets pluginInstance) {
         this.pluginInstance = pluginInstance;
@@ -34,7 +34,8 @@ public class TPPetsPlayerListener implements Listener {
     
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerMove(PlayerMoveEvent e) {
-        for (ProtectedRegion pr : protRegions) {
+        for (String key : protRegions.keySet()) {
+            ProtectedRegion pr = protRegions.get(key);
             if (pr.isInZone(e.getTo())) {
                 for (Entity ent : e.getPlayer().getNearbyEntities(10, 10, 10)) {
                     if (ent instanceof Tameable && ent instanceof Sittable && pr.isInZone(ent.getLocation())) {
@@ -69,7 +70,7 @@ public class TPPetsPlayerListener implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
         if (pluginInstance.getAllowUntamingPets() && e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.SHEARS)) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
-            if (tameableTemp.getOwner().equals(e.getPlayer())) {
+            if (tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall")) {
                 Sittable sittableTemp = (Sittable) e.getRightClicked();
                 sittableTemp.setSitting(false);
                 tameableTemp.setTamed(false);

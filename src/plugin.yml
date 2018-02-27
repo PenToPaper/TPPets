@@ -11,7 +11,7 @@ commands:
   tpp:
     description: Base command for TPPets
     aliases: [teleportpets]
-    usage: "Usage: /tpp [parrots/dogs/cats/restricted/lost]"
+    usage: "Usage: /tpp [parrots/dogs/cats/protected/lost]"
   generate-tamed-cats:
     description: Testing only
   tp-forward:
@@ -19,23 +19,26 @@ commands:
 
 permissions:
   tppets.*:
-    description: Allows teleportation of every pet, and allows teleportation in restricted areas.
+    description: Allows teleportation of every pet, and allows teleportation in protected areas.
     default: op
     children:
       tppets.bypassprotection: true
       tppets.tpanywhere: true
-      tppets.restricted: true
+      tppets.protected: true
       tppets.lost: true
       tppets.dogs: true
       tppets.cats: true
       tppets.birds: true
+  tppets.untameall:
+    default: op
+    description: Allows user to untame pets that they don't own.
   tppets.bypassprotection:
     default: op
     description: Allows user to damage pets that they don't own.
   tppets.tpanywhere:
     default: op
-    description: Allows user to teleport pets in restricted regions.
-  tppets.restricted:
+    description: Allows user to teleport pets in protected regions.
+  tppets.protected:
     default: op
     description: Allows user to set cuboid regions where pets are not allowed.
   tppets.lost:

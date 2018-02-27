@@ -31,9 +31,9 @@ public class CommandTPP implements CommandExecutor {
                 }
             }
             switch(realCommand) {
-                case "restricted":
-                    if (sender.hasPermission("tppets.restricted")) {
-                        CommandRestricted cr = new CommandRestricted();
+                case "protected":
+                    if (sender.hasPermission("tppets.protected")) {
+                        CommandProtected cr = new CommandProtected();
                         cr.processCommand(sender, separateArgs(Arrays.copyOfRange(args, 1, args.length), 4));
                     } else {
                         permissionMessage(sender);

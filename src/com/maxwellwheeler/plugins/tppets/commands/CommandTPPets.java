@@ -37,7 +37,7 @@ public class CommandTPPets {
     public void processCommand(CommandSender sender, PetType.Pets pt) {
         if (sender instanceof Player) {
             Player tempPlayer = (Player) sender;
-            ProtectedRegion tempProtected = thisPlugin.inProtectedRegion(tempPlayer);
+            ProtectedRegion tempProtected = thisPlugin.getProtectedRegionWithin(tempPlayer.getLocation());
             if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
                 thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsToTeleport(pt, tempPlayer).size()) + " " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
                 announceComplete(sender, pt);

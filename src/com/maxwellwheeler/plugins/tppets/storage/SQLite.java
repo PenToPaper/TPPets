@@ -45,7 +45,7 @@ public class SQLite {
             + "maxY INT NOT NULL,\n"
             + "maxZ INT NOT NULL,\n"
             + "worldName VARCHAR(25) NOT NULL);";
-    private String makeTableRestrictedRegions = "CREATE TABLE IF NOT EXISTS restrictedregions (\n"
+    private String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS protectedregions (\n"
             + "zoneName VARCHAR(64) PRIMARY KEY,\n"
             + "enterMessage VARCHAR(255),\n"
             + "minX INT NOT NULL,\n"
@@ -67,10 +67,10 @@ public class SQLite {
     private String insertLostPrep = "INSERT INTO lostregions(zoneName, minX, minY, minZ, maxX, maxY, maxZ, worldName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private String deleteLostPrep = "DELETE FROM lostregions WHERE zoneName = ?";
     private String selectLostPrep = "SELECT * FROM lostregions";
-    private String insertRestrictedPrep = "INSERT INTO restrictedregions(zoneName, enterMessage, minX, minY, minZ, maxX, maxY, maxZ, worldName, lfZoneName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private String deleteRestrictedPrep = "DELETE FROM restrictedregions WHERE zoneName = ?";
-    private String selectRestrictedPrep = "SELECT * FROM restrictedregions";
-    private String updateRestrictedPrep = "UPDATE restrictedregions SET lfZoneName = ? WHERE zoneName = ?";
+    private String insertProtectedPrep = "INSERT INTO protectedregions(zoneName, enterMessage, minX, minY, minZ, maxX, maxY, maxZ, worldName, lfZoneName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private String deleteProtectedPrep = "DELETE FROM protectedregions WHERE zoneName = ?";
+    private String selectProtectedPrep = "SELECT * FROM protectedregions";
+    private String updateProtectedPrep = "UPDATE protectedregions SET lfZoneName = ? WHERE zoneName = ?";
     private Connection dbc;
     
     public SQLite (TPPets plugin, String dbPath, String dbName) {
@@ -117,7 +117,7 @@ public class SQLite {
                 Statement makeTableStmt = dbc.createStatement();
                 makeTableStmt.execute(makeTableUnloadedPets);
                 makeTableStmt.execute(makeTableLostRegions);
-                makeTableStmt.execute(makeTableRestrictedRegions);
+                makeTableStmt.execute(makeTableProtectedRegions);
                 dbc.close();
             } catch (SQLException e) {
                 logSevere("SQL Exception", "creating table", e);
@@ -125,11 +125,11 @@ public class SQLite {
         }
     }
     
-    public boolean insertRestrictedRegion(ProtectedRegion pr) {
+    public boolean insertProtectedRegion(ProtectedRegion pr) {
         Connection dbc = getDBC();
         if (dbc != null) {
             try {
-                PreparedStatement insertPStatement = dbc.prepareStatement(insertRestrictedPrep);
+                PreparedStatement insertPStatement = dbc.prepareStatement(insertProtectedPrep);
                 insertPStatement.setString(1, pr.getZoneName());
                 insertPStatement.setString(2, pr.getEnterMessage());
                 insertPStatement.setInt(3, pr.getMinLoc().getBlockX());
@@ -142,10 +142,10 @@ public class SQLite {
                 insertPStatement.setString(10, pr.getLfName());
                 insertPStatement.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Restricted region " + pr.getZoneName() + " added to database.");
+                plugin.getLogger().info("Protected region " + pr.getZoneName() + " added to database.");
                 return true;
             } catch (SQLException e) {
-                logSevere("SQL Exception", "inserting restricted region into database", e);
+                logSevere("SQL Exception", "inserting protected region into database", e);
             }
         }
         return false;
@@ -166,7 +166,7 @@ public class SQLite {
                 insertPStatement.setString(8, lfr.getWorldName());
                 insertPStatement.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Restricted region " + lfr.getZoneName() + " added to database.");
+                plugin.getLogger().info("Protected region " + lfr.getZoneName() + " added to database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "inserting lost and found region into database", e);
@@ -175,19 +175,19 @@ public class SQLite {
         return false;
     }
     
-    public ArrayList<ProtectedRegion> getProtectedRegions() {
+    public Hashtable<String, ProtectedRegion> getProtectedRegions() {
         Connection dbc = getDBC();
-        ArrayList<ProtectedRegion> ret = new ArrayList<ProtectedRegion>();
+        Hashtable<String, ProtectedRegion> ret = new Hashtable<String, ProtectedRegion>();
         if (dbc != null) {
             try {
-                PreparedStatement selectPStatement = dbc.prepareStatement(selectRestrictedPrep);
+                PreparedStatement selectPStatement = dbc.prepareStatement(selectProtectedPrep);
                 ResultSet rs = selectPStatement.executeQuery();
                 while (rs.next()) {
-                    ret.add(new ProtectedRegion(rs.getString("zoneName"), rs.getString("enterMessage"), rs.getString("worldName"), rs.getInt("minX"), rs.getInt("minY"), rs.getInt("minZ"), rs.getInt("maxX"), rs.getInt("maxY"), rs.getInt("maxZ"), rs.getString("lfZoneName")));
+                    ret.put(rs.getString("zoneName"), new ProtectedRegion(rs.getString("zoneName"), rs.getString("enterMessage"), rs.getString("worldName"), rs.getInt("minX"), rs.getInt("minY"), rs.getInt("minZ"), rs.getInt("maxX"), rs.getInt("maxY"), rs.getInt("maxZ"), rs.getString("lfZoneName")));
                 }
                 dbc.close();
             } catch (SQLException e) {
-                logSevere("SQL Exception", "selecting restricted regions from database", e);
+                logSevere("SQL Exception", "selecting protected regions from database", e);
             }
         }
         return ret;
@@ -205,16 +205,16 @@ public class SQLite {
                 }
                 dbc.close();
             } catch (SQLException e) {
-                logSevere("SQL Exception", "selecting restricted regions from database", e);
+                logSevere("SQL Exception", "selecting protected regions from database", e);
             }
         }
         return ret;
     }
     
-    public boolean deleteRestrictedRegion(ProtectedRegion pr) {
+    public boolean deleteProtectedRegion(ProtectedRegion pr) {
         try {
             deleteRegion(true, pr.getZoneName());
-            plugin.getLogger().info("Deleted restricted region " + pr.getZoneName() + " from database.");
+            plugin.getLogger().info("Deleted protected region " + pr.getZoneName() + " from database.");
             return true;
         } catch (SQLException e) {
             logSevere("SQL Exception", "deleting protected region from database", e);
@@ -233,26 +233,26 @@ public class SQLite {
         return false;
     }
     
-    private void deleteRegion(boolean isRestrictedRegion, String regionName) throws SQLException {
+    private void deleteRegion(boolean isProtectedRegion, String regionName) throws SQLException {
         Connection dbc = getDBC();
         if (dbc != null) {
-            PreparedStatement deleteRegionPStatement = dbc.prepareStatement(isRestrictedRegion ? deleteRestrictedPrep : deleteLostPrep);
+            PreparedStatement deleteRegionPStatement = dbc.prepareStatement(isProtectedRegion ? deleteProtectedPrep : deleteLostPrep);
             deleteRegionPStatement.setString(1, regionName);
             deleteRegionPStatement.executeUpdate();
             dbc.close();
         }
     }
     
-    public boolean updateRestrictedRegion(String restrictedZoneName, String lfZoneName) {
+    public boolean updateProtectedRegion(String protectedZoneName, String lfZoneName) {
         Connection dbc = getDBC();
         if (dbc != null) {
             try {
-                PreparedStatement pstmt = dbc.prepareStatement(updateRestrictedPrep);
+                PreparedStatement pstmt = dbc.prepareStatement(updateProtectedPrep);
                 pstmt.setString(1, lfZoneName);
-                pstmt.setString(2, restrictedZoneName);
+                pstmt.setString(2, protectedZoneName);
                 pstmt.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Updated lfZoneName for restricted region " + restrictedZoneName + " in database.");
+                plugin.getLogger().info("Updated lfZoneName for protected region " + protectedZoneName + " in database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "updating pet entry in database", e);

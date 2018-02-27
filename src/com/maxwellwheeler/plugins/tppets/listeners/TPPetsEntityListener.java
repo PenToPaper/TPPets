@@ -39,7 +39,7 @@ public class TPPetsEntityListener implements Listener {
                 if (thisPlugin.isInProtectedRegion(e.getTo()) && !playerTemp.hasPermission("tppets.tpanywhere")) {
                     sittableTemp.setSitting(true);
                     e.setCancelled(true);
-                    thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering restricted region.");
+                    thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering protected region.");
                 } else if (thisPlugin.isInLostRegion(e.getFrom())) {
                     sittableTemp.setSitting(true);
                     e.setCancelled(true);

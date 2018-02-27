@@ -1,6 +1,5 @@
 package com.maxwellwheeler.plugins.tppets;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +25,7 @@ import net.milkbowl.vault.permission.Permission;
 
 public class TPPets extends JavaPlugin implements Listener {
     // Configuration-based data types
-    private ArrayList<ProtectedRegion> restrictedRegions = new ArrayList<ProtectedRegion>();
+    private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<String, ProtectedRegion>();
     private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<String, LostAndFoundRegion>();
     private Hashtable<String, List<String>> commandAliases = new Hashtable<String, List<String>>();
 
@@ -95,8 +94,8 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
-    private void initializeRestrictedRegions() {
-        restrictedRegions = dbc.getProtectedRegions();
+    private void initializeProtectedRegions() {
+        protectedRegions = dbc.getProtectedRegions();
     }
     
     private void initializeLostRegions() {
@@ -135,7 +134,7 @@ public class TPPets extends JavaPlugin implements Listener {
         // Database pulling
         getLogger().info("Getting data from database.");
         initializeLostRegions();
-        initializeRestrictedRegions();
+        initializeProtectedRegions();
         initializePetIndex();
         
         // Register events + commands
@@ -159,29 +158,20 @@ public class TPPets extends JavaPlugin implements Listener {
      */
     
     public void addProtectedRegion (ProtectedRegion pr) {
-        restrictedRegions.add(pr);
+        protectedRegions.put(pr.getZoneName(), pr);
     }
     
-    public ProtectedRegion inProtectedRegion(Location lc) {
-        for (ProtectedRegion pr : restrictedRegions) {
-            if (pr.isInZone(lc)) {
-                return pr;
+    public ProtectedRegion getProtectedRegionWithin(Location lc) {
+        for (String key : protectedRegions.keySet()) { 
+            if (protectedRegions.get(key).isInZone(lc)) {
+                return protectedRegions.get(key);
             }
         }
         return null;
     }
     
-    public ProtectedRegion inProtectedRegion(Player pl) {
-        return inProtectedRegion(pl.getLocation());
-    }
-    
     public boolean isInProtectedRegion(Location lc) {
-        for (ProtectedRegion pr : restrictedRegions) {
-            if (pr.isInZone(lc)) {
-                return true;
-            }
-        }
-        return false;
+        return getProtectedRegionWithin(lc) != null;
     }
     
     public boolean isInProtectedRegion(Player pl) {
@@ -189,34 +179,26 @@ public class TPPets extends JavaPlugin implements Listener {
     }
     
     public ProtectedRegion getProtectedRegion(String name) {
-        for (ProtectedRegion pr : restrictedRegions) {
-            if (pr.getZoneName().equals(name)) {
-                return pr;
-            }
-        }
-        return null;
+        return protectedRegions.get(name);
     }
 
     public void removeProtectedRegion(String name) {
-        for (int i = 0; i < restrictedRegions.size(); i++) {
-            if (restrictedRegions.get(i).getZoneName().equals(name)) {
-                restrictedRegions.remove(i);
-                break;
-            }
-        }
+        protectedRegions.remove(name);
     }
     
     public void updateLFReference(String lfRegionName) {
-        for (ProtectedRegion pr : restrictedRegions) {
-            if (pr.getLfName().equals(lfRegionName)) {
+        for (String key : protectedRegions.keySet()) {
+            ProtectedRegion pr = protectedRegions.get(key);
+            if (pr != null && pr.getLfName().equals(lfRegionName)) {
                 pr.updateLFReference();
             }
         }
     }
     
     public void removeLFReference(String lfRegionName) {
-        for (ProtectedRegion pr : restrictedRegions) {
-            if (pr.getLfName().equals(lfRegionName)) {
+        for (String key : protectedRegions.keySet()) {
+            ProtectedRegion pr = protectedRegions.get(key);
+            if (pr != null && pr.getLfName().equals(lfRegionName)) {
                 pr.setLfReference(null);
             }
         }
@@ -253,8 +235,8 @@ public class TPPets extends JavaPlugin implements Listener {
         return dbc;
     }
     
-    public ArrayList<ProtectedRegion> getProtectedRegions() {
-        return restrictedRegions;
+    public Hashtable<String, ProtectedRegion> getProtectedRegions() {
+        return protectedRegions;
     }
     
     public Hashtable<String, LostAndFoundRegion> getLostRegions() {
