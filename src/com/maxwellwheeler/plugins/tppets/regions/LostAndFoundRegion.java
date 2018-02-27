@@ -1,37 +1,21 @@
 package com.maxwellwheeler.plugins.tppets.regions;
 
 import org.bukkit.Location;
-import org.bukkit.configuration.file.FileConfiguration;
-
-import com.maxwellwheeler.plugins.tppets.TPPets;
 
 public class LostAndFoundRegion extends Region {
 
     @Override
     public String toString() {
-        return String.format("zoneName = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", getZoneName(), getZoneName(), getMinLoc().getBlockX(), getMinLoc().getBlockY(), getMinLoc().getBlockZ(), getMaxLoc().getBlockX(), getMaxLoc().getBlockY(), getMaxLoc().getBlockZ());
+        return String.format("zoneName = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", zoneName, worldName, minLoc.getBlockX(), minLoc.getBlockY(), minLoc.getBlockZ(), maxLoc.getBlockX(), maxLoc.getBlockY(), maxLoc.getBlockZ());
     }
     
-    public LostAndFoundRegion(String zoneName, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo,
-            int zTwo) {
-        super(zoneName, worldName, xOne, yOne, zOne, xTwo, yTwo, zTwo);
+    public LostAndFoundRegion(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY,
+            int maxZ) {
+        super(zoneName, worldName, minX, minY, minZ, maxX, maxY, maxZ);
     }
     
-    public LostAndFoundRegion(String zoneName, String worldName, Location locOne, Location locTwo) {
-        super(zoneName, worldName, locOne, locTwo);
-    }
-    
-    public LostAndFoundRegion(String zoneName, TPPets thisPlugin) {
-        super(zoneName, thisPlugin);
-    }
-    
-    @Override
-    public void writeToConfig(TPPets thisPlugin) {
-        FileConfiguration config = thisPlugin.getConfig();
-        config.set("lost_and_found." + getZoneName() + ".world_name", getWorldName());
-        int coordinatesTemp[] = new int[]{getMinLoc().getBlockX(), getMinLoc().getBlockY(), getMinLoc().getBlockZ(), getMaxLoc().getBlockX(), getMaxLoc().getBlockY(), getMaxLoc().getBlockZ()};
-        config.set("lost_and_found." + getZoneName() + ".coordinates", coordinatesTemp);
-        thisPlugin.saveConfig();
+    public LostAndFoundRegion(String zoneName, String worldName, Location minLoc, Location maxLoc) {
+        super(zoneName, worldName, minLoc, maxLoc);
     }
     
     private int getMiddleInt(int min, int max) {
@@ -39,6 +23,6 @@ public class LostAndFoundRegion extends Region {
     }
     
     public Location getApproxCenter() {
-        return new Location(getMinLoc().getWorld(), getMiddleInt(getMinLoc().getBlockX(), getMaxLoc().getBlockX()), getMiddleInt(getMinLoc().getBlockY(), getMaxLoc().getBlockY()), getMiddleInt(getMinLoc().getBlockZ(), getMaxLoc().getBlockZ()));
+        return new Location(minLoc.getWorld(), getMiddleInt(minLoc.getBlockX(), maxLoc.getBlockX()), getMiddleInt(minLoc.getBlockY(), maxLoc.getBlockY()), getMiddleInt(minLoc.getBlockZ(), maxLoc.getBlockZ()));
     }
 }
