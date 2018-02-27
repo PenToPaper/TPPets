@@ -1,4 +1,4 @@
-package com.maxwellwheeler.plugins.tppets.region;
+package com.maxwellwheeler.plugins.tppets.regions;
 
 import java.util.ArrayList;
 import java.util.List;

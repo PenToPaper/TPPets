@@ -16,8 +16,8 @@ import com.maxwellwheeler.plugins.tppets.commands.CommandTpForward;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
-import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
 import com.maxwellwheeler.plugins.tppets.storage.SQLite;
 

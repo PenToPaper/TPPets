@@ -7,7 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 
 public class CommandProtected extends RegionCommand {
     public void processCommand(CommandSender sender, String[] args) {

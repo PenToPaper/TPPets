@@ -16,7 +16,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.permissions.Permissible;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 import net.md_5.bungee.api.ChatColor;
@@ -24,12 +24,12 @@ import net.md_5.bungee.api.ChatColor;
 import java.util.Hashtable;
 
 public class TPPetsPlayerListener implements Listener {
-    TPPets pluginInstance;
+    TPPets thisPlugin;
     Hashtable<String, ProtectedRegion> protRegions;
     
-    public TPPetsPlayerListener(TPPets pluginInstance) {
-        this.pluginInstance = pluginInstance;
-        this.protRegions = pluginInstance.getProtectedRegions();
+    public TPPetsPlayerListener(TPPets thisPlugin) {
+        this.thisPlugin = thisPlugin;
+        this.protRegions = thisPlugin.getProtectedRegions();
     }
     
     @EventHandler (priority=EventPriority.LOW)
@@ -43,10 +43,10 @@ public class TPPetsPlayerListener implements Listener {
                         Sittable sittableTemp = (Sittable) ent;
                         if (tameableTemp.isTamed()) {
                             // TODO implement permissions
-                            if (!onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!pluginInstance.getVaultEnabled() || !offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld()))) {
+                            if (!onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld()))) {
                                 sittableTemp.setSitting(false);
                                 pr.tpToLostRegion(ent);
-                                pluginInstance.getSQLite().updateOrInsertPet(ent);
+                                thisPlugin.getSQLite().updateOrInsertPet(ent);
                             }
                         }
                     }
@@ -62,23 +62,23 @@ public class TPPetsPlayerListener implements Listener {
     
     private boolean offlineHasPerms(AnimalTamer at, String permission, World world) {
         // Player extends OfflinePlayer
-        return (at instanceof OfflinePlayer && pluginInstance.getPerms().playerHas(world.getName(), (OfflinePlayer) at, "tppets.tpanywhere"));
+        return (at instanceof OfflinePlayer && thisPlugin.getPerms().playerHas(world.getName(), (OfflinePlayer) at, "tppets.tpanywhere"));
     }
     
     // If player right-clicks a pet they've tamed with shears while crouching, untames that entity
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
-        if (pluginInstance.getAllowUntamingPets() && e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.SHEARS)) {
+        if (thisPlugin.getAllowUntamingPets() && e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.SHEARS)) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
             if (tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall")) {
                 Sittable sittableTemp = (Sittable) e.getRightClicked();
                 sittableTemp.setSitting(false);
                 tameableTemp.setTamed(false);
-                pluginInstance.getSQLite().deletePet(e.getRightClicked().getUniqueId(), e.getPlayer().getUniqueId());
+                thisPlugin.getSQLite().deletePet(e.getRightClicked().getUniqueId(), e.getPlayer().getUniqueId());
                 String ownerUUIDString = e.getPlayer().getUniqueId().toString();
                 String entityUUIDString = e.getRightClicked().getUniqueId().toString();
-                pluginInstance.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
-                pluginInstance.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
+                thisPlugin.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
+                thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
                 e.getPlayer().sendMessage(ChatColor.BLUE + "Un-taming pet.");
             }
         } else if (e.getRightClicked() instanceof Sittable && e.getRightClicked() instanceof Tameable && e.getPlayer().isSneaking() && e.getHand().equals(EquipmentSlot.HAND) && e.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.BONE)) {

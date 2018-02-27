@@ -34,14 +34,14 @@ public class PlayerPetIndex {
     }
     
     private Hashtable<String, AllPetsList> index = new Hashtable<String, AllPetsList>();
-    private TPPets pluginInstance;
+    private TPPets thisPlugin;
     private int totalLimit;
     private int dogLimit;
     private int catLimit;
     private int birdLimit;
     
-    public PlayerPetIndex(TPPets pluginInstance, int totalLimit, int dogLimit, int catLimit, int birdLimit) {
-        this.pluginInstance = pluginInstance;
+    public PlayerPetIndex(TPPets thisPlugin, int totalLimit, int dogLimit, int catLimit, int birdLimit) {
+        this.thisPlugin = thisPlugin;
         this.totalLimit = totalLimit;
         this.dogLimit = dogLimit;
         this.catLimit = catLimit;
@@ -70,9 +70,9 @@ public class PlayerPetIndex {
                     }
                 }
             }
-            List<PetStorage> psList = pluginInstance.getSQLite().getPetsByWorld(wld.getName());
+            List<PetStorage> psList = thisPlugin.getSQLite().getPetsByWorld(wld.getName());
             if (psList != null) {
-                for (PetStorage ps : pluginInstance.getSQLite().getPetsByWorld(wld.getName())) {
+                for (PetStorage ps : thisPlugin.getSQLite().getPetsByWorld(wld.getName())) {
                     if (!index.containsKey(ps.ownerId)) {
                         index.put(ps.ownerId, new AllPetsList());
                     } else {

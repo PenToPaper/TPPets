@@ -5,7 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 
 public class CommandLost extends RegionCommand {
     

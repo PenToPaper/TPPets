@@ -20,11 +20,11 @@ import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Wolf;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.region.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.region.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 
 public class SQLite {
-    private TPPets plugin;
+    private TPPets thisPlugin;
     private String dbPath;
     private String dbName;
     private String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS unloadedpets (\n"
@@ -74,7 +74,7 @@ public class SQLite {
     private Connection dbc;
     
     public SQLite (TPPets plugin, String dbPath, String dbName) {
-        this.plugin = plugin;
+        this.thisPlugin = plugin;
         this.dbPath = dbPath;
         this.dbName = dbName;
     }
@@ -142,7 +142,7 @@ public class SQLite {
                 insertPStatement.setString(10, pr.getLfName());
                 insertPStatement.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Protected region " + pr.getZoneName() + " added to database.");
+                thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " added to database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "inserting protected region into database", e);
@@ -166,7 +166,7 @@ public class SQLite {
                 insertPStatement.setString(8, lfr.getWorldName());
                 insertPStatement.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Protected region " + lfr.getZoneName() + " added to database.");
+                thisPlugin.getLogger().info("Protected region " + lfr.getZoneName() + " added to database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "inserting lost and found region into database", e);
@@ -214,7 +214,7 @@ public class SQLite {
     public boolean deleteProtectedRegion(ProtectedRegion pr) {
         try {
             deleteRegion(true, pr.getZoneName());
-            plugin.getLogger().info("Deleted protected region " + pr.getZoneName() + " from database.");
+            thisPlugin.getLogger().info("Deleted protected region " + pr.getZoneName() + " from database.");
             return true;
         } catch (SQLException e) {
             logSevere("SQL Exception", "deleting protected region from database", e);
@@ -225,7 +225,7 @@ public class SQLite {
     public boolean deleteLostRegion(LostAndFoundRegion lfr) {
         try {
             deleteRegion(false, lfr.getZoneName());
-            plugin.getLogger().info("Deleted lost and found region region " + lfr.getZoneName() + " from database.");
+            thisPlugin.getLogger().info("Deleted lost and found region region " + lfr.getZoneName() + " from database.");
             return true;
         } catch (SQLException e) {
             logSevere("SQL Exception", "deleting lost region from database", e);
@@ -252,7 +252,7 @@ public class SQLite {
                 pstmt.setString(2, protectedZoneName);
                 pstmt.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Updated lfZoneName for protected region " + protectedZoneName + " in database.");
+                thisPlugin.getLogger().info("Updated lfZoneName for protected region " + protectedZoneName + " in database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "updating pet entry in database", e);
@@ -286,7 +286,7 @@ public class SQLite {
                         insertPStatement.setString(6, entity.getWorld().getName());
                         insertPStatement.setString(7, shortenUUID(tameableTemp.getOwner().getUniqueId().toString()));
                         insertPStatement.executeUpdate();
-                        plugin.getLogger().info("Inserting pet with UUID " + entity.getUniqueId().toString() + " into database.");
+                        thisPlugin.getLogger().info("Inserting pet with UUID " + entity.getUniqueId().toString() + " into database.");
                     } catch (SQLException e) {
                         logSevere("SQL Exception", "inserting pet into database", e);
                     }
@@ -311,7 +311,7 @@ public class SQLite {
                 pstmt.setString(2, playerIdString);
                 pstmt.executeUpdate();
                 dbc.close();
-                plugin.getLogger().info("Deleted pet with UUID " + petId.toString() +  " from database.");
+                thisPlugin.getLogger().info("Deleted pet with UUID " + petId.toString() +  " from database.");
                 return true;
             } catch (SQLException e) {
                 logSevere("SQL Exception", "deleting pet from database", e);
@@ -345,7 +345,7 @@ public class SQLite {
                     pstmt.setString(6, playerIdString);
                     pstmt.executeUpdate();
                     dbc.close();
-                    plugin.getLogger().info("Updating pet with UUID " + ent.getUniqueId().toString() + " in database.");
+                    thisPlugin.getLogger().info("Updating pet with UUID " + ent.getUniqueId().toString() + " in database.");
                 } catch (SQLException e) {
                     logSevere("SQL Exception", "updating pet entry in database", e);
                 }
@@ -451,7 +451,7 @@ public class SQLite {
     }
     
     private void logSevere(String exceptionType, String exceptionWhile, Exception e) {
-        plugin.getLogger().log(Level.SEVERE, exceptionType + " while " + exceptionWhile + ": " + e.getMessage());
+        thisPlugin.getLogger().log(Level.SEVERE, exceptionType + " while " + exceptionWhile + ": " + e.getMessage());
     }
     
     private String getJDBCPath() {

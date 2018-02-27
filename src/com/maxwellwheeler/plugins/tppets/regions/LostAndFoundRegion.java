@@ -1,4 +1,4 @@
-package com.maxwellwheeler.plugins.tppets.region;
+package com.maxwellwheeler.plugins.tppets.regions;
 
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
