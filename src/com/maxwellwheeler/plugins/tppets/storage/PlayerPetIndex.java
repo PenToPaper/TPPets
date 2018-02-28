@@ -60,7 +60,6 @@ public class PlayerPetIndex {
                         index.put(trimmedOwnerUUID, new AllPetsList());
                     } else {
                         if (ent instanceof Wolf) {
-                            System.out.println("FOUND WOLF THING");
                             index.get(trimmedOwnerUUID).addDog(trimmedEntityUUID);
                         } else if (ent instanceof Ocelot) {
                             index.get(trimmedOwnerUUID).addCat(trimmedEntityUUID);
@@ -107,7 +106,6 @@ public class PlayerPetIndex {
     public void removePetTamed(String playerUUID, String entityUUID, PetType.Pets pt) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedEntityUUID = UUIDUtils.trimUUID(entityUUID);
-        System.out.println("Attempting to remove pet " + pt.toString() + " with uuid " + trimmedEntityUUID + " from player " + trimmedPlayerUUID);
         if (index.containsKey(trimmedPlayerUUID)) {
             index.get(trimmedPlayerUUID).removePet(trimmedEntityUUID, pt);
         }
@@ -119,11 +117,6 @@ public class PlayerPetIndex {
     
     public RuleRestriction allowTame(String playerUUID, PetType.Pets pt) {
         String trimmedUUID = UUIDUtils.trimUUID(playerUUID);
-        for (String key : index.keySet()) {
-            for (String id : index.get(key).getPets(pt)) {
-                System.out.println(key + " has pet " + pt.toString() + " with id " + id);
-            }
-        }
         if (index.containsKey(trimmedUUID)) {
             if (!isWithinLimit(totalLimit, index.get(trimmedUUID).getTotalLength())) {
                 return RuleRestriction.TOTAL;

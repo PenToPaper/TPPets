@@ -39,20 +39,22 @@ public class CommandTPPets {
             Player tempPlayer = (Player) sender;
             ProtectedRegion tempProtected = thisPlugin.getProtectedRegionWithin(tempPlayer.getLocation());
             if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
-                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsToTeleport(pt, tempPlayer).size()) + " " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
+                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsAndTeleport(pt, tempPlayer).size()) + " " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
                 announceComplete(sender, pt);
             } else {
                 tempPlayer.sendMessage(tempProtected.getEnterMessage());
             }
+        } else {
+            sender.sendMessage(ChatColor.RED + "Can't teleport pets to a non-player.");
         }
     }
 
-    private List<UUID> getPetsToTeleport(PetType.Pets pt, Player pl) {
+    private List<UUID> getPetsAndTeleport(PetType.Pets pt, Player pl) {
         List<World> worldsList = Bukkit.getServer().getWorlds();
         List<UUID> teleportedEnts = new ArrayList<UUID>();
-        if (thisPlugin.getAllowTp()) {
+        if (thisPlugin.getAllowTpBetweenWorlds()) {
             for (World world : worldsList) {
-                teleportedEnts = loadAndTp(teleportedEnts, world, pt, pl);
+                teleportedEnts.addAll(loadAndTp(teleportedEnts, world, pt, pl));
             }
         } else {
             teleportedEnts = loadAndTp(teleportedEnts, pl.getWorld(), pt, pl);

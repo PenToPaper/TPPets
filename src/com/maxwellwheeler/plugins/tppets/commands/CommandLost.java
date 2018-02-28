@@ -45,8 +45,8 @@ public class CommandLost extends RegionCommand {
         if (sender instanceof Player) {
             Player pl = (Player) sender;
             Location[] lcs = getWePoints(pl);
-            if (lcs != null && truncatedArgs.length == 1) {
-                LostAndFoundRegion lfr = new LostAndFoundRegion(truncatedArgs[0], pl.getWorld().getName(), lcs[0], lcs[1]);
+            if (lcs != null) {
+                LostAndFoundRegion lfr = new LostAndFoundRegion(truncatedArgs[0], lcs[0].getWorld(), lcs[0], lcs[1]);
                 if (thisPlugin.getSQLite().insertLostRegion(lfr)) {
                     thisPlugin.addLostRegion(lfr);
                     thisPlugin.updateLFReference(lfr.getZoneName());
@@ -55,8 +55,10 @@ public class CommandLost extends RegionCommand {
                 } else {
                     sender.sendMessage(ChatColor.RED + "Unable to add lost and found region  " + ChatColor.WHITE + truncatedArgs[0]);
                 }
+                return;
             }
         }
+        sender.sendMessage(ChatColor.RED + "Can't find WorldEdit selection.");
     }
     
     private void removeRegion(CommandSender sender, String[] truncatedArgs) {
@@ -77,7 +79,7 @@ public class CommandLost extends RegionCommand {
     
     private void listRegions(CommandSender sender, String[] truncatedArgs) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Lost and Found Regions]" + ChatColor.DARK_GRAY + "---------");
-        if (truncatedArgs.length == 1 && truncatedArgs[0] != null) {
+        if (validateArgs(truncatedArgs, 1)) {
             LostAndFoundRegion lfr = thisPlugin.getLostRegion(truncatedArgs[0]);
             if (lfr != null) {
                 displayLfrInfo(sender, lfr);

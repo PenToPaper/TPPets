@@ -20,7 +20,6 @@ public class AllPetsList {
     
     public void addDog(String entUUID) {
         this.dogs.add(entUUID);
-        System.out.println("Dogs set has length: " + Integer.toString(dogs.size()));
     }
     
     public void addCat(String entUUID) {

@@ -53,8 +53,8 @@ public class CommandProtected extends RegionCommand {
         if (sender instanceof Player) {
             Player pl = (Player) sender;
             Location[] lcs = getWePoints(pl);
-            if (lcs != null && truncatedArgs.length == 3) {
-                ProtectedRegion pr = new ProtectedRegion(truncatedArgs[0], truncatedArgs[2], pl.getWorld().getName(), lcs[0], lcs[1], truncatedArgs[1]);
+            if (lcs != null) {
+                ProtectedRegion pr = new ProtectedRegion(truncatedArgs[0], truncatedArgs[2], lcs[0].getWorld(), lcs[0], lcs[1], truncatedArgs[1]);
                 if (thisPlugin.getSQLite().insertProtectedRegion(pr)) {
                     thisPlugin.addProtectedRegion(pr);
                     sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
@@ -88,7 +88,7 @@ public class CommandProtected extends RegionCommand {
     
     private void listRegions(CommandSender sender, String[] truncatedArgs) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Protected Regions]" + ChatColor.DARK_GRAY + "---------");
-        if (truncatedArgs.length == 1 && truncatedArgs[0] != null) {
+        if (truncatedArgs.length >= 1 && truncatedArgs[0] != null) {
             ProtectedRegion pr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
             if (pr != null) {
                 displayPrInfo(sender, pr);

@@ -15,6 +15,7 @@ import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.entity.EntityTeleportEvent;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
 
@@ -33,15 +34,14 @@ public class TPPetsEntityListener implements Listener {
     public void onEntityTeleportEvent(EntityTeleportEvent e) {
         if (e.getEntity() instanceof Sittable && e.getEntity() instanceof Tameable) {
             Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() instanceof Player) {
-                Player playerTemp = (Player) tameableTemp.getOwner();
+            if (tameableTemp.isTamed() && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", e.getEntity().getLocation().getWorld(), thisPlugin))) {
                 Sittable sittableTemp = (Sittable) e.getEntity();
-                if (thisPlugin.isInProtectedRegion(e.getTo()) && !playerTemp.hasPermission("tppets.tpanywhere")) {
-                    sittableTemp.setSitting(true);
+                if (thisPlugin.isInProtectedRegion(e.getTo())) {
+                    sittableTemp.setSitting(false);
                     e.setCancelled(true);
                     thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering protected region.");
                 } else if (thisPlugin.isInLostRegion(e.getFrom())) {
-                    sittableTemp.setSitting(true);
+                    sittableTemp.setSitting(false);
                     e.setCancelled(true);
                 }
             }
@@ -96,7 +96,7 @@ public class TPPetsEntityListener implements Listener {
                     // Indirect damage
                     } else if (e.getDamager() instanceof Projectile) {
                         Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof LivingEntity && !projTemp.getShooter().equals(tameableTemp.getOwner())) {
+                        if (projTemp.getShooter() instanceof LivingEntity && !(projTemp.getShooter() instanceof Player)) {
                             e.setCancelled(true);
                             thisPlugin.getLogger().info("Prevented mob damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                             return;
@@ -143,7 +143,7 @@ public class TPPetsEntityListener implements Listener {
         }
     }
     
-    @EventHandler (priority=EventPriority.HIGH)
+    @EventHandler (priority=EventPriority.LOW)
     public void onEntityTameEvent(EntityTameEvent e) {
         PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
         PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner().getUniqueId().toString(), pt);

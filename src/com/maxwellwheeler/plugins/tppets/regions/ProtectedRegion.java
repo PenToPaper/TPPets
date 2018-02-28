@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.regions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Sittable;
 
@@ -30,7 +31,11 @@ public class ProtectedRegion extends Region {
     }
     
     public ProtectedRegion(String zoneName, String enterMessage, String worldName, Location minLoc, Location maxLoc, String lfString) {
-        super(zoneName, worldName, minLoc, maxLoc);
+        this(zoneName, enterMessage, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc, lfString);
+    }
+    
+    public ProtectedRegion(String zoneName, String enterMessage, World world, Location minLoc, Location maxLoc, String lfString) {
+        super(zoneName, world, minLoc, maxLoc);
         this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
         this.lfReference = getLfReference(lfString);
         this.lfName = lfString;

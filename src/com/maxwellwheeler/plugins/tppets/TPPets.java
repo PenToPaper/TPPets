@@ -267,7 +267,7 @@ public class TPPets extends JavaPlugin implements Listener {
         return vaultEnabled;
     }
     
-    public boolean getAllowTp() {
+    public boolean getAllowTpBetweenWorlds() {
         return allowTpBetweenWorlds;
     }
     

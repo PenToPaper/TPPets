@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.regions;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 
 public class LostAndFoundRegion extends Region {
 
@@ -16,6 +17,10 @@ public class LostAndFoundRegion extends Region {
     
     public LostAndFoundRegion(String zoneName, String worldName, Location minLoc, Location maxLoc) {
         super(zoneName, worldName, minLoc, maxLoc);
+    }
+    
+    public LostAndFoundRegion(String zoneName, World world, Location minLoc, Location maxLoc) {
+        super(zoneName, world, minLoc, maxLoc);
     }
     
     private int getMiddleInt(int min, int max) {
