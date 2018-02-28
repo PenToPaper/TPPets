@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -18,8 +19,6 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
-
-import net.md_5.bungee.api.ChatColor;
 
 public class TPPetsEntityListener implements Listener {
     

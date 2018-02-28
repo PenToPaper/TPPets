@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
 import org.bukkit.Material;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sittable;
@@ -16,8 +17,6 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
-
-import net.md_5.bungee.api.ChatColor;
 
 import java.util.Hashtable;
 
