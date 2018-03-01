@@ -19,8 +19,8 @@ public class LostAndFoundRegion extends Region {
         super(zoneName, worldName, minLoc, maxLoc);
     }
     
-    public LostAndFoundRegion(String zoneName, World world, Location minLoc, Location maxLoc) {
-        super(zoneName, world, minLoc, maxLoc);
+    public LostAndFoundRegion(String zoneName, String worldName, World world, Location minLoc, Location maxLoc) {
+        super(zoneName, worldName, world, minLoc, maxLoc);
     }
     
     private int getMiddleInt(int min, int max) {

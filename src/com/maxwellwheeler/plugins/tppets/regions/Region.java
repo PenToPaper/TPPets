@@ -17,17 +17,18 @@ public abstract class Region {
     protected Location maxLoc;
     protected TPPets thisPlugin;
     
+    // If worldName points to a non-existent world, world will be null but worldName will be what the world was.
     public Region(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        this(zoneName, Bukkit.getServer().getWorld(worldName), new Location(Bukkit.getServer().getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getServer().getWorld(worldName), maxX, maxY, maxZ));
+        this(zoneName, worldName, Bukkit.getServer().getWorld(worldName), new Location(Bukkit.getServer().getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getServer().getWorld(worldName), maxX, maxY, maxZ));
     }
     
     public Region(String zoneName, String worldName, Location minLoc, Location maxLoc) {
-        this(zoneName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc);
+        this(zoneName, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc);
     }
     
-    public Region(String zoneName, World world, Location minLoc, Location maxLoc) {
+    public Region(String zoneName, String worldName, World world, Location minLoc, Location maxLoc) {
         this.zoneName = zoneName;
-        this.worldName = world.getName();
+        this.worldName = worldName;
         this.world = world;
         this.minLoc = minLoc;
         this.maxLoc = maxLoc;
@@ -52,7 +53,7 @@ public abstract class Region {
     }
     
     public boolean isInZone(Location lc) {
-        return (lc.getWorld().equals(minLoc.getWorld()) && isBetween(minLoc.getBlockX(), lc.getBlockX(), maxLoc.getBlockX()) && isBetween(minLoc.getBlockY(), lc.getBlockY(), maxLoc.getBlockY()) && isBetween(minLoc.getBlockZ(), lc.getBlockZ(), maxLoc.getBlockZ()));
+        return (minLoc.getWorld() != null && maxLoc.getWorld() != null && (lc.getWorld().equals(minLoc.getWorld()) && isBetween(minLoc.getBlockX(), lc.getBlockX(), maxLoc.getBlockX()) && isBetween(minLoc.getBlockY(), lc.getBlockY(), maxLoc.getBlockY()) && isBetween(minLoc.getBlockZ(), lc.getBlockZ(), maxLoc.getBlockZ())));
     }
     
     public abstract String toString();

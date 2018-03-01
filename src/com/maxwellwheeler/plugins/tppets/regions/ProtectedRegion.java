@@ -31,11 +31,11 @@ public class ProtectedRegion extends Region {
     }
     
     public ProtectedRegion(String zoneName, String enterMessage, String worldName, Location minLoc, Location maxLoc, String lfString) {
-        this(zoneName, enterMessage, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc, lfString);
+        this(zoneName, enterMessage, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc, lfString);
     }
     
-    public ProtectedRegion(String zoneName, String enterMessage, World world, Location minLoc, Location maxLoc, String lfString) {
-        super(zoneName, world, minLoc, maxLoc);
+    public ProtectedRegion(String zoneName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString) {
+        super(zoneName, worldName, world, minLoc, maxLoc);
         this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
         this.lfReference = getLfReference(lfString);
         this.lfName = lfString;
@@ -45,7 +45,7 @@ public class ProtectedRegion extends Region {
         if (ent instanceof Sittable) {
             ((Sittable) ent).setSitting(false);
         }
-        if (lfReference != null) {
+        if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
             ent.teleport(lfReference.getApproxCenter());
             getPlugin().getLogger().info("Teleported pet with UUID " + ent.getUniqueId().toString() +  " away from " + zoneName + " to " + this.getLfReference().zoneName);
         }

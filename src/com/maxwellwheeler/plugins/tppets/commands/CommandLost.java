@@ -46,7 +46,7 @@ public class CommandLost extends RegionCommand {
             Player pl = (Player) sender;
             Location[] lcs = getWePoints(pl);
             if (lcs != null) {
-                LostAndFoundRegion lfr = new LostAndFoundRegion(truncatedArgs[0], lcs[0].getWorld(), lcs[0], lcs[1]);
+                LostAndFoundRegion lfr = new LostAndFoundRegion(truncatedArgs[0], lcs[0].getWorld().getName(), lcs[0].getWorld(), lcs[0], lcs[1]);
                 if (thisPlugin.getSQLite().insertLostRegion(lfr)) {
                     thisPlugin.addLostRegion(lfr);
                     thisPlugin.updateLFReference(lfr.getZoneName());

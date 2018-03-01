@@ -54,7 +54,7 @@ public class CommandProtected extends RegionCommand {
             Player pl = (Player) sender;
             Location[] lcs = getWePoints(pl);
             if (lcs != null) {
-                ProtectedRegion pr = new ProtectedRegion(truncatedArgs[0], truncatedArgs[2], lcs[0].getWorld(), lcs[0], lcs[1], truncatedArgs[1]);
+                ProtectedRegion pr = new ProtectedRegion(truncatedArgs[0], truncatedArgs[2], lcs[0].getWorld().getName(), lcs[0].getWorld(), lcs[0], lcs[1], truncatedArgs[1]);
                 if (thisPlugin.getSQLite().insertProtectedRegion(pr)) {
                     thisPlugin.addProtectedRegion(pr);
                     sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
@@ -97,7 +97,7 @@ public class CommandProtected extends RegionCommand {
             }
         } else {
             for (String key : thisPlugin.getProtectedRegions().keySet()) {
-                thisPlugin.getProtectedRegion(key);
+                displayPrInfo(sender, thisPlugin.getProtectedRegion(key));
             }
         }
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------------------------------");

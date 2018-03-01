@@ -37,7 +37,7 @@ public class TPPetsPlayerListener implements Listener {
                 if (ent instanceof Tameable && ent instanceof Sittable && pr.isInZone(ent.getLocation())) {
                     Tameable tameableTemp = (Tameable) ent;
                     if (tameableTemp.isTamed()) {
-                        if (!PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin))) {
+                        if (!PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin))) {
                             pr.tpToLostRegion(ent);
                             thisPlugin.getSQLite().updateOrInsertPet(ent);
                         }
