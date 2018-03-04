@@ -55,7 +55,7 @@ public class CommandProtected extends RegionCommand {
             Location[] lcs = getWePoints(pl);
             if (lcs != null) {
                 ProtectedRegion pr = new ProtectedRegion(truncatedArgs[0], truncatedArgs[2], lcs[0].getWorld().getName(), lcs[0].getWorld(), lcs[0], lcs[1], truncatedArgs[1]);
-                if (thisPlugin.getSQLite().insertProtectedRegion(pr)) {
+                if (thisPlugin.getDatabase().insertProtectedRegion(pr)) {
                     thisPlugin.addProtectedRegion(pr);
                     sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
                     if (pr.getLfReference() == null) {
@@ -74,7 +74,7 @@ public class CommandProtected extends RegionCommand {
     private void removeRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
         if (tempPr != null) {
-            if (thisPlugin.getSQLite().deleteProtectedRegion(tempPr)) {
+            if (thisPlugin.getDatabase().deleteProtectedRegion(tempPr)) {
                 thisPlugin.removeProtectedRegion(truncatedArgs[0]);
                 sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
                 thisPlugin.getLogger().info("Player " + sender.getName() + " removed protected region " + truncatedArgs[0]);
@@ -105,7 +105,7 @@ public class CommandProtected extends RegionCommand {
     
     private void relinkRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
-        if (thisPlugin.getSQLite().updateProtectedRegion(tempPr.getZoneName(), tempPr.getLfReference().getZoneName())) {
+        if (thisPlugin.getDatabase().updateProtectedRegion(tempPr)) {
             tempPr.setLfReference(truncatedArgs[1]);
             sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Updated!");
             thisPlugin.getLogger().info("Player " + sender.getName() + " relinked protected region " + truncatedArgs[0] + " to " + truncatedArgs[1]);

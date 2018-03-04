@@ -19,7 +19,7 @@ import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
-import com.maxwellwheeler.plugins.tppets.storage.SQLite;
+import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 
 import net.milkbowl.vault.permission.Permission;
 
@@ -30,7 +30,7 @@ public class TPPets extends JavaPlugin implements Listener {
     private Hashtable<String, List<String>> commandAliases = new Hashtable<String, List<String>>();
 
     // Database
-    private SQLite dbc;
+    private DBWrapper database;
     
     private boolean preventPlayerDamage;
     private boolean preventEnvironmentalDamage;
@@ -56,9 +56,17 @@ public class TPPets extends JavaPlugin implements Listener {
     }
     
     private void initializeDBC() {
-        dbc = new SQLite(this, getDataFolder().getPath(), "tppets");
-        dbc.createDatabase();
-        dbc.createTables();
+        // Keep it this way, it can be null
+        if (getConfig().getBoolean("mysql.enable") != true) {
+            // Use SQLite connection
+            database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
+        } else {
+            
+            database = new DBWrapper(getConfig().getString("mysql.host"), getConfig().getInt("mysql.port"), getConfig().getString("mysql.database"), getConfig().getString("mysql.username"), getConfig().getString("mysql.password"), this);
+        }
+        if (!database.initializeTables()) {
+            database = null;
+        }
     }
     
     private void initializeAllowTP() {
@@ -95,11 +103,11 @@ public class TPPets extends JavaPlugin implements Listener {
     }
     
     private void initializeProtectedRegions() {
-        protectedRegions = dbc.getProtectedRegions();
+        protectedRegions = database.getProtectedRegions();
     }
     
     private void initializeLostRegions() {
-        lostRegions = dbc.getLostRegions();
+        lostRegions = database.getLostRegions();
     }
     
     private void initializeVault() {
@@ -136,6 +144,9 @@ public class TPPets extends JavaPlugin implements Listener {
         initializeLostRegions();
         initializeProtectedRegions();
         initializePetIndex();
+        
+        DBWrapper sql = new DBWrapper("localhost", 3306, "minecraft", "mcpluginuser", "password", this);
+        sql.initializeTables();
         
         // Register events + commands
         getLogger().info("Registering commands and events.");
@@ -231,8 +242,8 @@ public class TPPets extends JavaPlugin implements Listener {
      * 
      */
     
-    public SQLite getSQLite() {
-        return dbc;
+    public DBWrapper getDatabase() {
+        return database;
     }
     
     public Hashtable<String, ProtectedRegion> getProtectedRegions() {

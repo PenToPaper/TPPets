@@ -12,3 +12,10 @@ command_aliases:
   cats: [cat, ocelot, ocelots]
   birds: [bird, parrots, parrot]
   help: [pls]
+mysql:
+  enable: true
+  host: localhost
+  port: 3306
+  database: minecraft
+  username: 'mcpluginuser'
+  password: 'password'

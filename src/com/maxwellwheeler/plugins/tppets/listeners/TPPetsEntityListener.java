@@ -53,7 +53,7 @@ public class TPPetsEntityListener implements Listener {
         if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
-                if (thisPlugin.getSQLite().deletePet(e.getEntity().getUniqueId(), tameableTemp.getOwner().getUniqueId())) {
+                if (thisPlugin.getDatabase().deletePet(e.getEntity())) {
                     thisPlugin.getPetIndex().removePetTamed(e.getEntity().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString(), PetType.getEnumByEntity(e.getEntity()));
                 }
             }

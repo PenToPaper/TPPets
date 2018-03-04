@@ -39,7 +39,7 @@ public class TPPetsPlayerListener implements Listener {
                     if (tameableTemp.isTamed()) {
                         if (!PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin))) {
                             pr.tpToLostRegion(ent);
-                            thisPlugin.getSQLite().updateOrInsertPet(ent);
+                            thisPlugin.getDatabase().updateOrInsertPet(ent);
                         }
                     }
                 }
@@ -56,7 +56,7 @@ public class TPPetsPlayerListener implements Listener {
                 Sittable sittableTemp = (Sittable) e.getRightClicked();
                 sittableTemp.setSitting(false);
                 tameableTemp.setTamed(false);
-                thisPlugin.getSQLite().deletePet(e.getRightClicked().getUniqueId(), e.getPlayer().getUniqueId());
+                thisPlugin.getDatabase().deletePet(e.getRightClicked());
                 String ownerUUIDString = e.getPlayer().getUniqueId().toString();
                 String entityUUIDString = e.getRightClicked().getUniqueId().toString();
                 thisPlugin.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));

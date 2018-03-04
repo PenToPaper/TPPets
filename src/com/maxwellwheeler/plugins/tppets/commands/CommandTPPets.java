@@ -20,18 +20,18 @@ import org.bukkit.entity.Wolf;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
-import com.maxwellwheeler.plugins.tppets.storage.SQLite;
 
 
 public class CommandTPPets {
     private TPPets thisPlugin;
-    private SQLite dbc;
+    private DBWrapper dbc;
     
     public CommandTPPets() {
         this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
-        this.dbc = this.thisPlugin.getSQLite();
+        this.dbc = this.thisPlugin.getDatabase();
     }
     
     public void processCommand(CommandSender sender, PetType.Pets pt) {
@@ -64,7 +64,7 @@ public class CommandTPPets {
     }
     
     private List<UUID> loadAndTp(List<UUID> entList, World world, PetType.Pets pt, Player pl) {
-        ArrayList<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pt, world.getName(), pl.getUniqueId().toString());
+        List<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pl.getUniqueId().toString(), world.getName(), pt);
         for (PetStorage pet : unloadedPetsInWorld) {
             Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
             tempLoadedChunk.load();

@@ -69,9 +69,9 @@ public class PlayerPetIndex {
                     }
                 }
             }
-            List<PetStorage> psList = thisPlugin.getSQLite().getPetsByWorld(wld.getName());
+            List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromWorld(wld.getName());
             if (psList != null) {
-                for (PetStorage ps : thisPlugin.getSQLite().getPetsByWorld(wld.getName())) {
+                for (PetStorage ps : thisPlugin.getDatabase().getPetsFromWorld(wld.getName())) {
                     if (!index.containsKey(ps.ownerId)) {
                         index.put(ps.ownerId, new AllPetsList());
                     } else {
