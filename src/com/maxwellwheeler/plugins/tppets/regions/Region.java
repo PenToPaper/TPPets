@@ -41,7 +41,9 @@ public abstract class Region {
             Sittable tempSittable = (Sittable) entity;
             tempSittable.setSitting(true);
         }
-        thisPlugin.getDatabase().updateOrInsertPet(entity);
+        if (thisPlugin.getDatabase() != null) {
+            thisPlugin.getDatabase().updateOrInsertPet(entity);
+        }
     }
     
     private boolean isBetween(int min, int middle, int max) {

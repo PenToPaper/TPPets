@@ -4,14 +4,14 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Tameable;
-import org.bukkit.entity.Wolf;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 
 public class PlayerPetIndex {
@@ -33,7 +33,7 @@ public class PlayerPetIndex {
         }
     }
     
-    private Hashtable<String, AllPetsList> index = new Hashtable<String, AllPetsList>();
+    private Hashtable<String, AllPetsList> playerIndex = new Hashtable<String, AllPetsList>();
     private TPPets thisPlugin;
     private int totalLimit;
     private int dogLimit;
@@ -56,26 +56,21 @@ public class PlayerPetIndex {
                 if (tameableTemp.isTamed()) {
                     String trimmedOwnerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
                     String trimmedEntityUUID = UUIDUtils.trimUUID(ent.getUniqueId());
-                    if (!index.containsKey(trimmedOwnerUUID)) {
-                        index.put(trimmedOwnerUUID, new AllPetsList());
-                    } else {
-                        if (ent instanceof Wolf) {
-                            index.get(trimmedOwnerUUID).addDog(trimmedEntityUUID);
-                        } else if (ent instanceof Ocelot) {
-                            index.get(trimmedOwnerUUID).addCat(trimmedEntityUUID);
-                        } else if (ent instanceof Parrot) {
-                            index.get(trimmedOwnerUUID).addBird(trimmedEntityUUID);
-                        }
+                    if (!playerIndex.containsKey(trimmedOwnerUUID)) {
+                        playerIndex.put(trimmedOwnerUUID, new AllPetsList());
                     }
+                    playerIndex.get(trimmedOwnerUUID).addPet(trimmedEntityUUID, PetType.getEnumByEntity(ent));
                 }
             }
-            List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromWorld(wld.getName());
-            if (psList != null) {
-                for (PetStorage ps : thisPlugin.getDatabase().getPetsFromWorld(wld.getName())) {
-                    if (!index.containsKey(ps.ownerId)) {
-                        index.put(ps.ownerId, new AllPetsList());
-                    } else {
-                        index.get(ps.ownerId).addPet(ps.petId, ps.petType);
+            if (thisPlugin.getDatabase() != null) {
+                List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromWorld(wld.getName());
+                if (psList != null) {
+                    for (PetStorage ps : thisPlugin.getDatabase().getPetsFromWorld(wld.getName())) {
+                        if (!playerIndex.containsKey(ps.ownerId)) {
+                            playerIndex.put(ps.ownerId, new AllPetsList());
+                        } else {
+                            playerIndex.get(ps.ownerId).addPet(ps.petId, ps.petType);
+                        }
                     }
                 }
             }
@@ -98,16 +93,16 @@ public class PlayerPetIndex {
     public void newPetTamed(String playerUUID, String entityUUID, PetType.Pets pt) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedEntityUUID = UUIDUtils.trimUUID(entityUUID);
-        if (index.containsKey(trimmedPlayerUUID)) {
-            index.get(trimmedPlayerUUID).addPet(trimmedEntityUUID, pt);
+        if (playerIndex.containsKey(trimmedPlayerUUID)) {
+            playerIndex.get(trimmedPlayerUUID).addPet(trimmedEntityUUID, pt);
         }
     }
     
     public void removePetTamed(String playerUUID, String entityUUID, PetType.Pets pt) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedEntityUUID = UUIDUtils.trimUUID(entityUUID);
-        if (index.containsKey(trimmedPlayerUUID)) {
-            index.get(trimmedPlayerUUID).removePet(trimmedEntityUUID, pt);
+        if (playerIndex.containsKey(trimmedPlayerUUID)) {
+            playerIndex.get(trimmedPlayerUUID).removePet(trimmedEntityUUID, pt);
         }
     }
     
@@ -115,12 +110,15 @@ public class PlayerPetIndex {
         return limit < 0 || within < limit;
     }
     
-    public RuleRestriction allowTame(String playerUUID, PetType.Pets pt) {
-        String trimmedUUID = UUIDUtils.trimUUID(playerUUID);
-        if (index.containsKey(trimmedUUID)) {
-            if (!isWithinLimit(totalLimit, index.get(trimmedUUID).getTotalLength())) {
+    public RuleRestriction allowTame(AnimalTamer at, Location loc, PetType.Pets pt) {
+        if (PermissionChecker.offlineHasPerms(at, "tppets.bypasslimit", loc.getWorld(), thisPlugin) || PermissionChecker.onlineHasPerms(at, "tppets.bypasslimit")) {
+            return RuleRestriction.ALLOWED;
+        }
+        String trimmedUUID = UUIDUtils.trimUUID(at.getUniqueId());
+        if (playerIndex.containsKey(trimmedUUID)) {
+            if (!isWithinLimit(totalLimit, playerIndex.get(trimmedUUID).getTotalLength())) {
                 return RuleRestriction.TOTAL;
-            } else if (!isWithinLimit(getSpecificLimit(pt), index.get(trimmedUUID).getPetsLength(pt))) {
+            } else if (!isWithinLimit(getSpecificLimit(pt), playerIndex.get(trimmedUUID).getPetsLength(pt))) {
                 return enumLink(pt);
             }
         }

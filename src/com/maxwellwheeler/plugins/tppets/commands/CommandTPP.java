@@ -87,7 +87,7 @@ public class CommandTPP implements CommandExecutor {
         sender.sendMessage(ChatColor.BLUE + "/tpp dogs     ->    Teleports your dogs to your location");
         sender.sendMessage(ChatColor.BLUE + "/tpp cats     ->    Teleports your cats to your location");
         sender.sendMessage(ChatColor.BLUE + "/tpp birds    ->    Teleports your birds to your location");
-        sender.sendMessage(ChatColor.BLUE + "/tpp restrocted [add, remove, list, relink]    ->    Creates a region where pets will not be allowed");
+        sender.sendMessage(ChatColor.BLUE + "/tpp protected [add, remove, list, relink]    ->    Creates a region where pets will not be allowed");
         sender.sendMessage(ChatColor.BLUE + "/tpp lost [add, remove, list]    ->    Creates a region where lost pets will be teleported to");
         sender.sendMessage(ChatColor.DARK_GRAY + "---------------------------");
     }

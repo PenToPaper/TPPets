@@ -1,5 +1,5 @@
 name: TPPets
-version: 0.9.1
+version: 1.0.0
 description: Teleport pets to certain areas of the map
 load: POSTWORLD
 author: GatheringExp
@@ -12,10 +12,6 @@ commands:
     description: Base command for TPPets
     aliases: [teleportpets]
     usage: "Usage: /tpp [parrots/dogs/cats/protected/lost]"
-  generate-tamed-cats:
-    description: Testing only
-  tp-forward:
-    description: Testing only
 
 permissions:
   tppets.*:
@@ -35,6 +31,9 @@ permissions:
   tppets.bypassprotection:
     default: op
     description: Allows user to damage pets that they don't own.
+  tppets.bypasslimit:
+    default: op
+    description: Allows user to tame pets past the pet taming limit.
   tppets.tpanywhere:
     default: op
     description: Allows user to teleport pets in protected regions.

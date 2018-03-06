@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,64 +23,64 @@ public class DBWrapper {
     /*
      *      TABLES
      */
-    private String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS unloadedpets (\n"
-            + "petId CHAR(32) PRIMARY KEY,\n"
-            + "petType TINYINT NOT NULL,\n"
-            + "petX INT NOT NULL,\n"
-            + "petY INT NOT NULL,\n"
-            + "petZ INT NOT NULL,\n"
-            + "petWorld VARCHAR(25) NOT NULL,\n"
-            + "ownerId CHAR(32) NOT NULL\n"
+    private String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+            + "pet_id CHAR(32) PRIMARY KEY,\n"
+            + "pet_type TINYINT NOT NULL,\n"
+            + "pet_x INT NOT NULL,\n"
+            + "pet_y INT NOT NULL,\n"
+            + "pet_z INT NOT NULL,\n"
+            + "pet_world VARCHAR(25) NOT NULL,\n"
+            + "owner_id CHAR(32) NOT NULL\n"
             + ");";
-    private String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS lostregions (\n"
-            + "zoneName VARCHAR(64) PRIMARY KEY,\n"
-            + "minX INT NOT NULL,\n"
-            + "minY INT NOT NULL,\n"
-            + "minZ INT NOT NULL,\n"
-            + "maxX INT NOT NULL,\n"
-            + "maxY INT NOT NULL,\n"
-            + "maxZ INT NOT NULL,\n"
-            + "worldName VARCHAR(25) NOT NULL);";
-    private String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS protectedregions (\n"
-            + "zoneName VARCHAR(64) PRIMARY KEY,\n"
-            + "enterMessage VARCHAR(255),\n"
-            + "minX INT NOT NULL,\n"
-            + "minY INT NOT NULL,\n"
-            + "minZ INT NOT NULL,\n"
-            + "maxX INT NOT NULL,\n"
-            + "maxY INT NOT NULL,\n"
-            + "maxZ INT NOT NULL,\n"
-            + "worldName VARCHAR(25) NOT NULL,\n"
-            + "lfZoneName VARCHAR(64),\n"
-            + "FOREIGN KEY(lfZoneName) REFERENCES lostregions(zoneName));";
+    private String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS tpp_lost_regions (\n"
+            + "zone_name VARCHAR(64) PRIMARY KEY,\n"
+            + "min_x INT NOT NULL,\n"
+            + "min_y INT NOT NULL,\n"
+            + "min_z INT NOT NULL,\n"
+            + "max_x INT NOT NULL,\n"
+            + "max_y INT NOT NULL,\n"
+            + "max_z INT NOT NULL,\n"
+            + "world_name VARCHAR(25) NOT NULL);";
+    private String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS tpp_protected_regions (\n"
+            + "zone_name VARCHAR(64) PRIMARY KEY,\n"
+            + "enter_message VARCHAR(255),\n"
+            + "min_x INT NOT NULL,\n"
+            + "min_y INT NOT NULL,\n"
+            + "min_z INT NOT NULL,\n"
+            + "max_x INT NOT NULL,\n"
+            + "max_y INT NOT NULL,\n"
+            + "max_z INT NOT NULL,\n"
+            + "world_name VARCHAR(25) NOT NULL,\n"
+            + "lf_zone_name VARCHAR(64));";
+            // + "FOREIGN KEY(lf_zone_name) REFERENCES tpp_lost_regions(zone_name));";
     
     /*
-     *      UNLOADEDPETS STATEMENTS
+     *      UNLOADED_PETS STATEMENTS
      */
-    private String insertPet = "INSERT INTO unloadedpets(petId, petType, petX, petY, petZ, petWorld, ownerId) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private String deletePet = "DELETE FROM unloadedpets WHERE petId = ? AND ownerId=?";
-    private String updatePet = "UPDATE unloadedpets SET petX = ?, petY = ?, petZ = ?, petWorld = ? WHERE petId = ? AND ownerId = ?";
-    private String selectPetFromUuid = "SELECT * FROM unloadedpets WHERE petId = ?";
+    private String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
+    private String updatePet = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
+    private String selectPetFromUuid = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
     
-    private String selectPetsFromOwner = "SELECT * FROM unloadedpets WHERE ownerId = ?";
-    private String selectPetsFromUuids = "SELECT * FROM unloadedpets WHERE petId = ? AND ownerId = ?";
-    private String selectPetsGeneric = "SELECT * FROM unloadedpets WHERE ownerId = ? AND petWorld = ? AND petType = ?";
-    private String selectPetsFromWorld = "SELECT * FROM unloadedpets WHERE petWorld = ?";
+    private String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
+    private String selectPetsFromUuids = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
+    private String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ? AND pet_type = ?";
+    private String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
     
     /*
      *      LOST AND FOUND REGION STATEMENTS
      */
-    private String insertLost = "INSERT INTO lostregions(zoneName, minX, minY, minZ, maxX, maxY, maxZ, worldName) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private String deleteLost = "DELETE FROM lostregions WHERE zoneName = ?";
-    private String selectLostPrep = "SELECT * FROM lostregions";
+    private String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
+    private String selectLost = "SELECT * FROM tpp_lost_regions";
     
     /*
      *      PROTECTED REGION STATEMENTS
      */
-    private String insertProtected = "INSERT INTO protectedregions(zoneName, enterMessage, minX, minY, minZ, maxX, maxY, maxZ, worldName, lfZoneName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private String deleteProtected = "DELETE FROM protectedregions WHERE zoneName = ?";
-    private String selectProtected = "SELECT * FROM protectedregions";
-    private String updateProtected = "UPDATE protectedregions SET lfZoneName = ? WHERE zoneName = ?";
+    private String insertProtected = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
+    private String selectProtected = "SELECT * FROM tpp_protected_regions";
+    private String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
     
     public DBWrapper(String host, int port, String dbName, String dbUsername, String dbPassword, TPPets thisPlugin) {
         database = new MySQLFrame(host, port, dbName, dbUsername, dbPassword, thisPlugin);
@@ -98,7 +99,7 @@ public class DBWrapper {
     }
     
     /*
-     *      UNLOADEDPETS METHODS
+     *      UNLOADED_PETS METHODS
      */
     
     public boolean insertPet(Entity ent) {
@@ -107,7 +108,13 @@ public class DBWrapper {
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
             int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(ent));
-            return database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID);
+            if (database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID)) {
+                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
+                return true;
+            } else {
+                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be added to database.");
+                return false;
+            }
         }
         return false;
     }
@@ -117,7 +124,13 @@ public class DBWrapper {
             Tameable tameableTemp = (Tameable) ent;
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
-            return database.deletePrepStatement(deletePet, trimmedEntUUID, trimmedPlayerUUID);
+            if (database.deletePrepStatement(deletePet, trimmedEntUUID, trimmedPlayerUUID)) {
+                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " removed from database.");
+                return true;
+            } else {
+                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be removed from database.");
+                return false;
+            }
         }
         return false;
     }
@@ -127,7 +140,13 @@ public class DBWrapper {
             Tameable tameableTemp = (Tameable) ent;
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
-            return database.updatePrepStatement(updatePet, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getLocation().getWorld().getName(), trimmedEntUUID, trimmedPlayerUUID);
+            if (database.updatePrepStatement(updatePet, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getLocation().getWorld().getName(), trimmedEntUUID, trimmedPlayerUUID)) {
+                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " updated in database.");
+                return true;
+            } else {
+                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be updated in database.");
+                return false;
+            }
         }
         return false;
     }
@@ -144,39 +163,84 @@ public class DBWrapper {
     
     public boolean petInTable(Entity ent) {
         String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
-        try {
-            return database.selectPrepStatement(selectPetFromUuid, trimmedEntUUID).next();
-        } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception selecting pet from table: " + e.getMessage());
-            return false;
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                boolean ret = database.selectPrepStatement(dbConn, selectPetFromUuid, trimmedEntUUID).next();
+                dbConn.close();
+                return ret;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception selecting pet from table: " + e.getMessage());
+            }
         }
+        return false;
     }
     
     public List<PetStorage> getPetsFromOwner(String uuid) { 
         String trimmedUuid = UUIDUtils.trimUUID(uuid);
-        return getPetsList(database.selectPrepStatement(selectPetsFromOwner, trimmedUuid));
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromOwner, trimmedUuid));
+            try {
+                dbConn.close();
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from owner: " + e.getMessage());
+            }
+            return ret;
+        }
+        return null;
     }
     
     public List<PetStorage> getPetsFromUUIDs(String petUuid, String playerUuid) {
         String trimmedPetUuid = UUIDUtils.trimUUID(petUuid);
         String trimmedPlayerUuid = UUIDUtils.trimUUID(playerUuid);
-        return getPetsList(database.selectPrepStatement(selectPetsFromUuids, trimmedPetUuid, trimmedPlayerUuid));
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromUuids, trimmedPetUuid, trimmedPlayerUuid));
+            try {
+                dbConn.close();
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from UUIDs: " + e.getMessage());
+            }
+            return ret;
+        }
+        return null;
     }
     
     public List<PetStorage> getPetsGeneric(String playerUuid, String worldName, PetType.Pets petType) {
         String trimmedPlayerUuid = UUIDUtils.trimUUID(playerUuid);
-        return getPetsList(database.selectPrepStatement(selectPetsGeneric, trimmedPlayerUuid, worldName, PetType.getIndexFromPet(petType)));
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsGeneric, trimmedPlayerUuid, worldName, PetType.getIndexFromPet(petType)));
+            try {
+                dbConn.close();
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets: " + e.getMessage());
+            }
+            return ret;
+        }
+        return null;
     }
     
     public List<PetStorage> getPetsFromWorld(String worldName) {
-        return getPetsList(database.selectPrepStatement(selectPetsFromWorld, worldName));
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromWorld, worldName));
+            try {
+                dbConn.close();
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from world: " + e.getMessage());
+            }
+            return ret;
+        }
+        return null;
     }
     
     private List<PetStorage> getPetsList(ResultSet rs) {
         List<PetStorage> ret = new ArrayList<PetStorage>();
         try {
             while (rs.next()) {
-                ret.add(new PetStorage(rs.getString("petId"), rs.getInt("petType"), rs.getInt("petX"), rs.getInt("petY"), rs.getInt("petZ"), rs.getString("petWorld"), rs.getString("ownerId")));
+                ret.add(new PetStorage(rs.getString("pet_id"), rs.getInt("pet_type"), rs.getInt("pet_x"), rs.getInt("pet_y"), rs.getInt("pet_z"), rs.getString("pet_world"), rs.getString("owner_id")));
             }
         } catch (SQLException e) {
             thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception generating list from database results", e.getMessage());
@@ -189,22 +253,38 @@ public class DBWrapper {
      */
     
     public boolean insertLostRegion(LostAndFoundRegion lfr) {
-        return database.insertPrepStatement(insertLost, lfr.getZoneName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName());
+        if (database.insertPrepStatement(insertLost, lfr.getZoneName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName())) {
+            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " added to database.");
+            return true;
+        } else {
+            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " can't be added to database.");
+            return false;
+        }
     }
     
     public boolean deleteLostRegion(LostAndFoundRegion lfr) {
-        return database.deletePrepStatement(deleteLost, lfr.getZoneName());
+        if (database.deletePrepStatement(deleteLost, lfr.getZoneName())) {
+            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " removed from database.");
+            return true;
+        } else {
+            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " can't be removed from database.");
+            return false;
+        }
     }
     
     public Hashtable<String, LostAndFoundRegion> getLostRegions() {
         Hashtable<String, LostAndFoundRegion> ret = new Hashtable<String, LostAndFoundRegion>();
-        ResultSet rs = database.selectPrepStatement(selectLostPrep);
-        try {
-            while (rs.next()) {
-                ret.put(rs.getString("zoneName"), new LostAndFoundRegion(rs.getString("zoneName"), rs.getString("worldName"), rs.getInt("minX"), rs.getInt("minY"), rs.getInt("minZ"), rs.getInt("maxX"), rs.getInt("maxY"), rs.getInt("maxZ")));
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                ResultSet rs = database.selectPrepStatement(dbConn, selectLost);
+                while (rs.next()) {
+                    ret.put(rs.getString("zone_name"), new LostAndFoundRegion(rs.getString("zone_name"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z")));
+                }
+                dbConn.close();
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting lost and found regions: " + e.getMessage());
             }
-        } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting lost and found regions");
         }
         return ret;
     }
@@ -214,27 +294,53 @@ public class DBWrapper {
      */
     
     public boolean insertProtectedRegion(ProtectedRegion pr) {
-        return database.insertPrepStatement(insertProtected, pr.getZoneName(), pr.getEnterMessage(), pr.getMinLoc().getBlockX(), pr.getMinLoc().getBlockY(), pr.getMinLoc().getBlockZ(), pr.getMaxLoc().getBlockX(), pr.getMaxLoc().getBlockY(), pr.getMaxLoc().getBlockZ(), pr.getWorldName(), pr.getLfName());
+        if (database.insertPrepStatement(insertProtected, pr.getZoneName(), pr.getEnterMessage(), pr.getMinLoc().getBlockX(), pr.getMinLoc().getBlockY(), pr.getMinLoc().getBlockZ(), pr.getMaxLoc().getBlockX(), pr.getMaxLoc().getBlockY(), pr.getMaxLoc().getBlockZ(), pr.getWorldName(), pr.getLfName())) {
+            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " added to database.");
+            return true;
+        } else {
+            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be added to database.");
+            return false;
+        }
     }
     
     public boolean deleteProtectedRegion(ProtectedRegion pr) {
-        return database.deletePrepStatement(deleteProtected, pr.getZoneName());
+        if (database.deletePrepStatement(deleteProtected, pr.getZoneName())) {
+            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " removed from database.");
+            return true;
+        } else {
+            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be removed from database.");
+            return false;
+        }
     }
     
     public Hashtable<String, ProtectedRegion> getProtectedRegions() {
         Hashtable<String, ProtectedRegion> ret = new Hashtable<String, ProtectedRegion>();
-        ResultSet rs = database.selectPrepStatement(selectProtected);
-        try {
-            while (rs.next()) {
-                ret.put(rs.getString("zoneName"), new ProtectedRegion(rs.getString("zoneName"), rs.getString("enterMessage"), rs.getString("worldName"), rs.getInt("minX"), rs.getInt("minY"), rs.getInt("minZ"), rs.getInt("maxX"), rs.getInt("maxY"), rs.getInt("maxZ"), rs.getString("lfZoneName")));
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                ResultSet rs = database.selectPrepStatement(dbConn, selectProtected);
+                while (rs.next()) {
+                    ret.put(rs.getString("zone_name"), new ProtectedRegion(rs.getString("zone_name"), rs.getString("enter_message"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"), rs.getString("lf_zone_name")));
+                }
+                dbConn.close();
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting protected regions" + e.getMessage());
             }
-        } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting lost and found regions");
         }
         return ret;
     }
     
     public boolean updateProtectedRegion(ProtectedRegion pr) {
-        return database.updatePrepStatement(updateProtected, pr.getLfName(), pr.getZoneName());
+        if (database.updatePrepStatement(updateProtected, pr.getLfName(), pr.getZoneName())) {
+            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " updated in database.");
+            return true;
+        } else {
+            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be updated in database.");
+            return true;
+        }
+    }
+    
+    public DBFrame getRealDatabase() {
+        return database;
     }
 }

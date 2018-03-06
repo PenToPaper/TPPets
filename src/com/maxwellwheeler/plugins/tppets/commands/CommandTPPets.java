@@ -1,7 +1,9 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -27,11 +29,11 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 public class CommandTPPets {
     private TPPets thisPlugin;
-    private DBWrapper dbc;
+    private DBWrapper dbConn;
     
     public CommandTPPets() {
         this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
-        this.dbc = this.thisPlugin.getDatabase();
+        this.dbConn = this.thisPlugin.getDatabase();
     }
     
     public void processCommand(CommandSender sender, PetType.Pets pt) {
@@ -49,9 +51,9 @@ public class CommandTPPets {
         }
     }
 
-    private List<UUID> getPetsAndTeleport(PetType.Pets pt, Player pl) {
+    private Set<UUID> getPetsAndTeleport(PetType.Pets pt, Player pl) {
         List<World> worldsList = Bukkit.getServer().getWorlds();
-        List<UUID> teleportedEnts = new ArrayList<UUID>();
+        Set<UUID> teleportedEnts = new HashSet<UUID>();
         if (thisPlugin.getAllowTpBetweenWorlds()) {
             for (World world : worldsList) {
                 teleportedEnts.addAll(loadAndTp(teleportedEnts, world, pt, pl));
@@ -63,8 +65,11 @@ public class CommandTPPets {
         return teleportedEnts;
     }
     
-    private List<UUID> loadAndTp(List<UUID> entList, World world, PetType.Pets pt, Player pl) {
-        List<PetStorage> unloadedPetsInWorld = dbc.getPetsGeneric(pl.getUniqueId().toString(), world.getName(), pt);
+    private Set<UUID> loadAndTp(Set<UUID> entList, World world, PetType.Pets pt, Player pl) {
+        List<PetStorage> unloadedPetsInWorld = new ArrayList<PetStorage>();
+        if (dbConn != null) {
+            unloadedPetsInWorld = dbConn.getPetsGeneric(pl.getUniqueId().toString(), world.getName(), pt);
+        }
         for (PetStorage pet : unloadedPetsInWorld) {
             Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
             tempLoadedChunk.load();

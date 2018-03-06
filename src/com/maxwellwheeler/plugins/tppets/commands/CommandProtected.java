@@ -55,7 +55,7 @@ public class CommandProtected extends RegionCommand {
             Location[] lcs = getWePoints(pl);
             if (lcs != null) {
                 ProtectedRegion pr = new ProtectedRegion(truncatedArgs[0], truncatedArgs[2], lcs[0].getWorld().getName(), lcs[0].getWorld(), lcs[0], lcs[1], truncatedArgs[1]);
-                if (thisPlugin.getDatabase().insertProtectedRegion(pr)) {
+                if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().insertProtectedRegion(pr)) {
                     thisPlugin.addProtectedRegion(pr);
                     sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
                     if (pr.getLfReference() == null) {
@@ -74,7 +74,7 @@ public class CommandProtected extends RegionCommand {
     private void removeRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
         if (tempPr != null) {
-            if (thisPlugin.getDatabase().deleteProtectedRegion(tempPr)) {
+            if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deleteProtectedRegion(tempPr)) {
                 thisPlugin.removeProtectedRegion(truncatedArgs[0]);
                 sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
                 thisPlugin.getLogger().info("Player " + sender.getName() + " removed protected region " + truncatedArgs[0]);
@@ -105,8 +105,9 @@ public class CommandProtected extends RegionCommand {
     
     private void relinkRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
-        if (thisPlugin.getDatabase().updateProtectedRegion(tempPr)) {
-            tempPr.setLfReference(truncatedArgs[1]);
+        if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().updateProtectedRegion(tempPr)) {
+            tempPr.setLfName(truncatedArgs[1]);
+            tempPr.updateLFReference();
             sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Updated!");
             thisPlugin.getLogger().info("Player " + sender.getName() + " relinked protected region " + truncatedArgs[0] + " to " + truncatedArgs[1]);
             if (tempPr.getLfReference() == null) {
@@ -118,7 +119,7 @@ public class CommandProtected extends RegionCommand {
     }
     
     private void displayPrInfo(CommandSender sender, ProtectedRegion pr) {
-        String tempLfName = pr.getLfReference() == null ? "null" : pr.getLfReference().getZoneName();
+        String tempLfName = pr.getLfName() + (pr.getLfReference() == null ? " (Unset)" : ""); 
         sender.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + pr.getZoneName());
         sender.sendMessage(ChatColor.BLUE + "    " + "enter message: " + ChatColor.WHITE + pr.getEnterMessage());
         sender.sendMessage(ChatColor.BLUE + "    " + "world: " + ChatColor.WHITE + pr.getWorldName());

@@ -28,9 +28,9 @@ public abstract class DBGeneral implements DBFrame {
         }
     }
 
-    public ResultSet selectPrepStatement(String prepStatement, Object... args) {
+    public ResultSet selectPrepStatement(Connection dbConn, String prepStatement, Object... args) {
         try {
-            return executeQuery(prepStatement, args);
+            return executeQuery(dbConn, prepStatement, args);
         } catch (SQLException e) {
             thisPlugin.getLogger().log(Level.SEVERE, "Can't execute select statement: " + e.getMessage());
             return null;
@@ -56,23 +56,24 @@ public abstract class DBGeneral implements DBFrame {
     }
 
     public boolean createStatement(String statement) {
-        try {
-            Connection dbc = getConnection();
-            Statement stmt = dbc.createStatement();
-            int tempInt = stmt.executeUpdate(statement);
-            System.out.println(tempInt);
-            dbc.close();
-            return 0 == tempInt;
-        } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "Can't execute create statement: " + e.getMessage());
+        Connection dbConn = getConnection();
+        if (dbConn != null) {
+            try {
+                Statement stmt = dbConn.createStatement();
+                int tempInt = stmt.executeUpdate(statement);
+                dbConn.close();
+                return 0 == tempInt;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "Can't execute create statement: " + e.getMessage());
+            }
         }
         return false;
     }
     
     protected int executeUpdate(String prepStatement, Object... args) throws SQLException {
-        Connection dbc = getConnection();
-        if (dbc != null) {
-            PreparedStatement pstmt = dbc.prepareStatement(prepStatement);
+        Connection dbConn = getConnection();
+        if (dbConn != null) {
+            PreparedStatement pstmt = dbConn.prepareStatement(prepStatement);
             for (int i = 0; i < args.length; i++) {
                 if (args[i] instanceof Integer) {
                     pstmt.setInt(i + 1, (Integer) args[i]);
@@ -81,21 +82,20 @@ public abstract class DBGeneral implements DBFrame {
                 } else {
                     pstmt.setNull(i + 1, Types.NULL);
                     pstmt.close();
-                    dbc.close();
+                    dbConn.close();
                     return -1;
                 }
             }
             int result = pstmt.executeUpdate();
-            dbc.close();
+            dbConn.close();
             return result;
         }
         return -1;
     }
     
-    protected ResultSet executeQuery(String prepStatement, Object... args) throws SQLException {
-        Connection dbc = getConnection();
-        if (dbc != null) {
-            PreparedStatement pstmt = dbc.prepareStatement(prepStatement);
+    protected ResultSet executeQuery(Connection dbConn, String prepStatement, Object... args) throws SQLException {
+        if (dbConn != null) {
+            PreparedStatement pstmt = dbConn.prepareStatement(prepStatement);
             for (int i = 0; i < args.length; i++) {
                 if (args[i] instanceof Integer) {
                     pstmt.setInt(i + 1, (Integer) args[i]);
@@ -105,13 +105,11 @@ public abstract class DBGeneral implements DBFrame {
                     pstmt.setNull(i + 1, Types.NULL);
                 } else {
                     pstmt.close();
-                    dbc.close();
+                    dbConn.close();
                     return null;
                 }
             }
-            ResultSet result = pstmt.executeQuery();
-            dbc.close();
-            return result;
+            return pstmt.executeQuery();
         }
         return null;
     }

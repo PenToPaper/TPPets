@@ -47,7 +47,7 @@ public class CommandLost extends RegionCommand {
             Location[] lcs = getWePoints(pl);
             if (lcs != null) {
                 LostAndFoundRegion lfr = new LostAndFoundRegion(truncatedArgs[0], lcs[0].getWorld().getName(), lcs[0].getWorld(), lcs[0], lcs[1]);
-                if (thisPlugin.getDatabase().insertLostRegion(lfr)) {
+                if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().insertLostRegion(lfr)) {
                     thisPlugin.addLostRegion(lfr);
                     thisPlugin.updateLFReference(lfr.getZoneName());
                     sender.sendMessage(ChatColor.BLUE + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
@@ -64,7 +64,7 @@ public class CommandLost extends RegionCommand {
     private void removeRegion(CommandSender sender, String[] truncatedArgs) {
         LostAndFoundRegion tempLfr = thisPlugin.getLostRegion(truncatedArgs[0]);
         if (tempLfr != null) {
-            if (thisPlugin.getDatabase().deleteLostRegion(tempLfr)) {
+            if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deleteLostRegion(tempLfr)) {
                 thisPlugin.removeLFReference(tempLfr.getZoneName());
                 thisPlugin.removeLostRegion(tempLfr);
                 sender.sendMessage(ChatColor.BLUE + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");

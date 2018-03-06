@@ -22,7 +22,7 @@ public class TPPetsChunkListener implements Listener {
         for (Entity ent : e.getChunk().getEntities()) {
            if (ent instanceof Sittable && ent instanceof Tameable) {
                Tameable tameableTemp = (Tameable) ent;
-               if (tameableTemp.isTamed()) {
+               if (tameableTemp.isTamed() && thisPlugin.getDatabase() != null) {
                    thisPlugin.getDatabase().updateOrInsertPet(ent);
                }
            }

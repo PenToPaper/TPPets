@@ -13,8 +13,8 @@ public class ProtectedRegion extends Region {
     private String lfName;
     private LostAndFoundRegion lfReference;
     
-    private LostAndFoundRegion getLfReference (String lfReference) {
-        return thisPlugin.getLostRegion(lfReference);
+    private LostAndFoundRegion getLfReference (String lfName) {
+        return thisPlugin.getLostRegion(lfName);
     }
     
     public void updateLFReference() {
@@ -63,8 +63,11 @@ public class ProtectedRegion extends Region {
         return lfName;
     }
     
-    public void setLfReference(String lfString) {
+    public void setLfName(String lfString) {
         this.lfName = lfString;
+    }
+    
+    public void setLfReference(String lfString) {
         this.lfReference = lfString == null ? null : getLfReference(lfString);
     }
 }

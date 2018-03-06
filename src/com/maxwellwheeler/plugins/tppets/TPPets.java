@@ -10,9 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.maxwellwheeler.plugins.tppets.commands.CommandCreateCats;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
-import com.maxwellwheeler.plugins.tppets.commands.CommandTpForward;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
@@ -56,13 +54,14 @@ public class TPPets extends JavaPlugin implements Listener {
     }
     
     private void initializeDBC() {
-        // Keep it this way, it can be null
-        if (getConfig().getBoolean("mysql.enable") != true) {
+        if (!getConfig().getBoolean("mysql.enable")) {
             // Use SQLite connection
             database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
         } else {
-            
             database = new DBWrapper(getConfig().getString("mysql.host"), getConfig().getInt("mysql.port"), getConfig().getString("mysql.database"), getConfig().getString("mysql.username"), getConfig().getString("mysql.password"), this);
+            if (database.getRealDatabase().getConnection() == null) {
+                database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
+            }
         }
         if (!database.initializeTables()) {
             database = null;
@@ -145,9 +144,6 @@ public class TPPets extends JavaPlugin implements Listener {
         initializeProtectedRegions();
         initializePetIndex();
         
-        DBWrapper sql = new DBWrapper("localhost", 3306, "minecraft", "mcpluginuser", "password", this);
-        sql.initializeTables();
-        
         // Register events + commands
         getLogger().info("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
@@ -155,8 +151,6 @@ public class TPPets extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases));
-        this.getCommand("generate-tamed-cats").setExecutor(new CommandCreateCats());
-        this.getCommand("tp-forward").setExecutor(new CommandTpForward());
 
         initializeDamageConfigs();
         initializeLostRegions();

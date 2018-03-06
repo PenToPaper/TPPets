@@ -13,7 +13,6 @@ public class MySQLFrame extends DBGeneral {
     private String dbName;
     private String dbUsername;
     private String dbPassword;
-    private TPPets thisPlugin;
     
     public MySQLFrame(String host, int port, String dbName, String dbUsername, String dbPassword, TPPets thisPlugin) {
         super(thisPlugin);
@@ -27,9 +26,11 @@ public class MySQLFrame extends DBGeneral {
     @Override
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName, dbUsername, dbPassword);
+            if (host != null && port >= 0 && port <= 65535 && dbName != null && dbUsername != null && dbPassword != null) {
+                return DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false", dbUsername, dbPassword);
+            }
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "Can't connect to MySQL database: " + dbName + " error: " + e.getMessage());
+            thisPlugin.getLogger().log(Level.SEVERE, "Can't connect to MySQL database:" + e.getMessage());
         }
         return null;
     }

@@ -36,11 +36,11 @@ public class TPPetsEntityListener implements Listener {
             if (tameableTemp.isTamed() && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", e.getEntity().getLocation().getWorld(), thisPlugin))) {
                 Sittable sittableTemp = (Sittable) e.getEntity();
                 if (thisPlugin.isInProtectedRegion(e.getTo())) {
-                    sittableTemp.setSitting(false);
+                    sittableTemp.setSitting(true);
                     e.setCancelled(true);
                     thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering protected region.");
                 } else if (thisPlugin.isInLostRegion(e.getFrom())) {
-                    sittableTemp.setSitting(false);
+                    sittableTemp.setSitting(true);
                     e.setCancelled(true);
                 }
             }
@@ -53,7 +53,7 @@ public class TPPetsEntityListener implements Listener {
         if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
-                if (thisPlugin.getDatabase().deletePet(e.getEntity())) {
+                if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deletePet(e.getEntity())) {
                     thisPlugin.getPetIndex().removePetTamed(e.getEntity().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString(), PetType.getEnumByEntity(e.getEntity()));
                 }
             }
@@ -143,9 +143,9 @@ public class TPPetsEntityListener implements Listener {
     }
     
     @EventHandler (priority=EventPriority.LOW)
-    public void onEntityTameEvent(EntityTameEvent e) {
+    public void onEntityTameEvent(EntityTameEvent e) {        
         PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
-        PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner().getUniqueId().toString(), pt);
+        PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
         if (!rr.equals(PlayerPetIndex.RuleRestriction.ALLOWED)) {
             e.setCancelled(true);
             if (e.getOwner() instanceof Player) {

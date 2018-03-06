@@ -9,7 +9,6 @@ import java.util.logging.Level;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 
 public class SQLiteFrame extends DBGeneral {
-    private TPPets thisPlugin;
     private String dbPath;
     private String dbName;
     
@@ -27,15 +26,15 @@ public class SQLiteFrame extends DBGeneral {
             try {
                 dbDir.mkdir();
             } catch (SecurityException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "Security Exception creating database");
+                thisPlugin.getLogger().log(Level.SEVERE, "Security Exception creating database" + e.getMessage());
             }
         }
         
         try {
-            Connection dbc = DriverManager.getConnection(getJDBCPath());
-            return dbc;
+            Connection dbConn = DriverManager.getConnection(getJDBCPath());
+            return dbConn;
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception creating database");
+            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception creating database" + e.getMessage());
             return null;
         }
     }

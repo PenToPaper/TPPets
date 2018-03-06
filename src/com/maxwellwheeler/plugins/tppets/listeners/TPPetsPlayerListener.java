@@ -37,7 +37,7 @@ public class TPPetsPlayerListener implements Listener {
                 if (ent instanceof Tameable && ent instanceof Sittable && pr.isInZone(ent.getLocation())) {
                     Tameable tameableTemp = (Tameable) ent;
                     if (tameableTemp.isTamed()) {
-                        if (!PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin))) {
+                        if (thisPlugin.getDatabase() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin)) && pr.getLfReference() != null) {
                             pr.tpToLostRegion(ent);
                             thisPlugin.getDatabase().updateOrInsertPet(ent);
                         }
@@ -52,7 +52,7 @@ public class TPPetsPlayerListener implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
         if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), Material.SHEARS)) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
-            if (tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall")) {
+            if (thisPlugin.getDatabase() != null && tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall")) {
                 Sittable sittableTemp = (Sittable) e.getRightClicked();
                 sittableTemp.setSitting(false);
                 tameableTemp.setTamed(false);
