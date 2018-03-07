@@ -13,7 +13,7 @@ command_aliases:
   birds: [bird, parrots, parrot]
   help: [pls]
 mysql:
-  enable: true
+  enable: false
   host: localhost
   port: 3306
   database: minecraft
