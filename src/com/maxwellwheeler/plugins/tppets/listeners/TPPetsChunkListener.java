@@ -10,13 +10,26 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 
+/**
+ * The event listener that handles chunk events
+ * @author GatheringExp
+ *
+ */
 public class TPPetsChunkListener implements Listener {
     private TPPets thisPlugin;
     
+    /**
+     * General constructor, saves reference to TPPets plugin
+     * @param thisPlugin The TPPets plugin reference
+     */
     public TPPetsChunkListener(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
     
+    /**
+     * The handler for the ChunkUnloadEvent. It checks the chunk for pets, and logs them into the database.
+     * @param e The ChunkUnloadEvent
+     */
     @EventHandler (priority=EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent e) {
         for (Entity ent : e.getChunk().getEntities()) {

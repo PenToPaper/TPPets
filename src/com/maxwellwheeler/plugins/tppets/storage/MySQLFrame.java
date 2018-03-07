@@ -7,6 +7,11 @@ import java.util.logging.Level;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 
+/**
+ * A class that interfaces with the MySQL Server
+ * @author GatheringExp
+ *
+ */
 public class MySQLFrame extends DBGeneral {
     private String host;
     private int port;
@@ -14,6 +19,15 @@ public class MySQLFrame extends DBGeneral {
     private String dbUsername;
     private String dbPassword;
     
+    /**
+     * The initializer storing all the data needed for the MySQL connection.
+     * @param host The host address.
+     * @param port The port number, between 0 and 65535
+     * @param dbName The name of the database.
+     * @param dbUsername The user to use in the connection
+     * @param dbPassword The password to use in the connection
+     * @param thisPlugin A reference to the TPPets plugin instance
+     */
     public MySQLFrame(String host, int port, String dbName, String dbUsername, String dbPassword, TPPets thisPlugin) {
         super(thisPlugin);
         this.host = host;

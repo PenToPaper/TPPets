@@ -8,10 +8,21 @@ import java.util.logging.Level;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 
+/**
+ * A class that interfaces with the SQLite File
+ * @author GatheringExp
+ *
+ */
 public class SQLiteFrame extends DBGeneral {
     private String dbPath;
     private String dbName;
     
+    /**
+     * The initializer storing all the data needed for the SQLite connection.
+     * @param dbPath The path to the SQLite database.
+     * @param dbName The name of the database file itself, without the file extension.
+     * @param thisPlugin A reference to the TPPets plugin instance.
+     */
     public SQLiteFrame(String dbPath, String dbName, TPPets thisPlugin) {
         super(thisPlugin);
         this.dbPath = dbPath;

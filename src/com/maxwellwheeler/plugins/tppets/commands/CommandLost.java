@@ -7,10 +7,21 @@ import org.bukkit.entity.Player;
 
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 
+/**
+ * Object that processes /tpp lost commands
+ * @author GatheringExp
+ *
+ */
 public class CommandLost extends RegionCommand {
-    
+
+    /**
+     * Processes the command passed to it
+     * @param sender The CommandSender object that originally sent the command.
+     * @param args The arguments passed with the command - doesn't include the "tpp lostandfound" in command. Ex: /tpp lostandfound add PrimaryLost, String args[] would have {add PrimaryLost}.
+     */
     public void processCommand(CommandSender sender, String[] args) {
         if (validateArgs(args, 1)) {
+            // Changes behavior based on the 3rd index of the original commmand, but first index of the arguments passed to this method.
             switch (args[0]) {
                 case "add":
                     if (validateArgs(args, 2)) {
@@ -41,11 +52,14 @@ public class CommandLost extends RegionCommand {
         }
     }
     
-    private void addRegion(CommandSender sender, String[] truncatedArgs) {
+    
+    @Override
+    protected void addRegion(CommandSender sender, String[] truncatedArgs) {
         if (sender instanceof Player) {
             Player pl = (Player) sender;
             Location[] lcs = getWePoints(pl);
             if (lcs != null) {
+                // Creates new LostAndFound object, stores it in memory, and stores it in the database.
                 LostAndFoundRegion lfr = new LostAndFoundRegion(truncatedArgs[0], lcs[0].getWorld().getName(), lcs[0].getWorld(), lcs[0], lcs[1]);
                 if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().insertLostRegion(lfr)) {
                     thisPlugin.addLostRegion(lfr);
@@ -61,10 +75,13 @@ public class CommandLost extends RegionCommand {
         sender.sendMessage(ChatColor.RED + "Can't find WorldEdit selection.");
     }
     
-    private void removeRegion(CommandSender sender, String[] truncatedArgs) {
+    
+    @Override
+    protected void removeRegion(CommandSender sender, String[] truncatedArgs) {
         LostAndFoundRegion tempLfr = thisPlugin.getLostRegion(truncatedArgs[0]);
         if (tempLfr != null) {
             if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deleteLostRegion(tempLfr)) {
+                // Next two lines make sure protected regions that link to this lost and found region are taken care of.
                 thisPlugin.removeLFReference(tempLfr.getZoneName());
                 thisPlugin.removeLostRegion(tempLfr);
                 sender.sendMessage(ChatColor.BLUE + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
@@ -77,7 +94,9 @@ public class CommandLost extends RegionCommand {
         }
     }
     
-    private void listRegions(CommandSender sender, String[] truncatedArgs) {
+    
+    @Override
+    protected void listRegions(CommandSender sender, String[] truncatedArgs) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Lost and Found Regions]" + ChatColor.DARK_GRAY + "---------");
         if (validateArgs(truncatedArgs, 1)) {
             LostAndFoundRegion lfr = thisPlugin.getLostRegion(truncatedArgs[0]);
@@ -95,6 +114,11 @@ public class CommandLost extends RegionCommand {
         sender.sendMessage(ChatColor.DARK_GRAY + "-----------------------------------------");
     }
     
+    /**
+     * Displays {@link LostAndFoundRegion} data to specified {@link CommandSender}.
+     * @param sender Player to send data to.
+     * @param lfr {@link LostAndFoundRegion} to display the data of.
+     */
     private void displayLfrInfo(CommandSender sender, LostAndFoundRegion lfr) {
         sender.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + lfr.getZoneName());
         sender.sendMessage(ChatColor.BLUE + "    " + "world: " + ChatColor.WHITE + lfr.getWorldName());

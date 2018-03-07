@@ -12,14 +12,22 @@ import org.bukkit.command.CommandSender;
 
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
+/**
+ * Core command handler to the plugin.
+ * @author GatheringExp
+ *
+ */
 public class CommandTPP implements CommandExecutor {
     private Hashtable<String, List<String>> commandAliases;
     
+    /**
+     * Initializes the core command handler with the commandAliases provided.
+     * @param commandAliases Hashtable linking <Real command name, List<Aliases of real command name>>
+     */
     public CommandTPP(Hashtable<String, List<String>> commandAliases) {
         this.commandAliases = commandAliases;
     }
     
-    // Main command handler for the plugin, forwards commands to appropriate sub-commands
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length >= 1 && args[0] != null) {
@@ -82,6 +90,10 @@ public class CommandTPP implements CommandExecutor {
         return false;
     }
     
+    /**
+     * Sends help message to player
+     * @param sender The player that the help message should be sent to
+     */
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Commands]" + ChatColor.DARK_GRAY + "---------");
         sender.sendMessage(ChatColor.BLUE + "/tpp dogs     ->    Teleports your dogs to your location");
@@ -92,7 +104,12 @@ public class CommandTPP implements CommandExecutor {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------------------------");
     }
     
-    // Returns an adjusted array of args, with the input array being truncated to the input length
+    /**
+     * Takes an inputArray of strings, and truncates it to length truncate, taking all leftover elements of the array and combining it into the last element of the truncated one. Ex: separateArgs(new String[]{"Hi", "Hello", " World"}, 2) = {"Hi", "Hello World"} 
+     * @param inputArray The array to be concatenated
+     * @param truncate The length of the final array
+     * @return A truncated String[] array, with all elements after truncate combined into the last element.
+     */
     private String[] separateArgs(String[] inputArray, int truncate) {
         if (inputArray.length < truncate) {
             return inputArray;
@@ -107,6 +124,10 @@ public class CommandTPP implements CommandExecutor {
         return retList.toArray(new String[truncate]);
     }
     
+    /**
+     * Sends a permission denied message
+     * @param sender Represents where to send the message.
+     */
     private void permissionMessage(CommandSender sender) {
         sender.sendMessage(ChatColor.RED + "You do not have permission to use that command.");
     }

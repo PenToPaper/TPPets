@@ -10,15 +10,33 @@ import java.util.logging.Level;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 
+/**
+ * A general class that governs the classes {@link MySQLFrame} and {@link SQLiteFrame}.
+ * @author GatheringExp
+ *
+ */
 public abstract class DBGeneral implements DBFrame {
     protected TPPets thisPlugin;
     
+    /**
+     * General constructor. Stores a reference to the TPPets plugin instance.
+     * @param thisPlugin TPPets plugin instance.
+     */
     public DBGeneral(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
     
+    /**
+     * Gets a connection to the database
+     */
     public abstract Connection getConnection();
     
+    /**
+     * Executes an insert prepared statement in the database.
+     * @param prepStatement A string representing the prepared statement.
+     * @param args Arguments representing the fillers for the ?s in the prepared statement.
+     * @return True if successful, false if not.
+     */
     public boolean insertPrepStatement(String prepStatement, Object... args) {
         try {
             return 1 == executeUpdate(prepStatement, args);
@@ -28,6 +46,12 @@ public abstract class DBGeneral implements DBFrame {
         }
     }
 
+    /**
+     * Executes a select prepared statement in the database.
+     * @param prepStatement A string representing the prepared statement.
+     * @param args Arguments representing the fillers for the ?s in the prepared statement.
+     * @return True if successful, false if not.
+     */
     public ResultSet selectPrepStatement(Connection dbConn, String prepStatement, Object... args) {
         try {
             return executeQuery(dbConn, prepStatement, args);
@@ -37,6 +61,12 @@ public abstract class DBGeneral implements DBFrame {
         }
     }
 
+    /**
+     * Executes a delete prepared statement in the database.
+     * @param prepStatement A string representing the prepared statement.
+     * @param args Arguments representing the fillers for the ?s in the prepared statement.
+     * @return True if successful, false if not.
+     */
     public boolean deletePrepStatement(String prepStatement, Object... args) {
         try {
             return 0 <= executeUpdate(prepStatement, args);
@@ -46,6 +76,12 @@ public abstract class DBGeneral implements DBFrame {
         }
     }
 
+    /**
+     * Executes an update prepared statement in the database.
+     * @param prepStatement A string representing the prepared statement.
+     * @param args Arguments representing the fillers for the ?s in the prepared statement.
+     * @return True if successful, false if not.
+     */
     public boolean updatePrepStatement(String prepStatement, Object... args) {
         try {
             return 0 <= executeUpdate(prepStatement, args);
@@ -55,6 +91,11 @@ public abstract class DBGeneral implements DBFrame {
         }
     }
 
+    /**
+     * Executes a create statement in the database.
+     * @param prepStatement A string representing the statement.
+     * @return True if successful, false if not.
+     */
     public boolean createStatement(String statement) {
         Connection dbConn = getConnection();
         if (dbConn != null) {
@@ -70,6 +111,12 @@ public abstract class DBGeneral implements DBFrame {
         return false;
     }
     
+    /**
+     * Executes an update prepared statement in the database.
+     * @param prepStatement A string representing the prepared statement.
+     * @param args Arguments representing the fillers for the ?s in the prepared statement.
+     * @return True if successful, false if not.
+     */
     protected int executeUpdate(String prepStatement, Object... args) throws SQLException {
         Connection dbConn = getConnection();
         if (dbConn != null) {
@@ -93,6 +140,13 @@ public abstract class DBGeneral implements DBFrame {
         return -1;
     }
     
+    /**
+     * Passes a general query statement through the provided dbConn. Acts as a mediator between the database object and the calling method.
+     * @param dbConn An active connection to a database, presumably provided by a getConnection() implementation.
+     * @param prepStatement A string representing the prepared statement.
+     * @param args Arguments representing the fillers for the ?s in the prepared statement.
+     * @return A ResultSet representing the values returned from the database. This requires the connection to remain open, so it takes the dbConn as an argument.
+     */
     protected ResultSet executeQuery(Connection dbConn, String prepStatement, Object... args) throws SQLException {
         if (dbConn != null) {
             PreparedStatement pstmt = dbConn.prepareStatement(prepStatement);

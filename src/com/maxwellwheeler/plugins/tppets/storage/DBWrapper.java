@@ -17,6 +17,11 @@ import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 
+/**
+ * A wrapper class that abstracts away the specific database being used.
+ * @author GatheringExp
+ *
+ */
 public class DBWrapper {
     private DBFrame database;
     private TPPets thisPlugin;
@@ -52,7 +57,6 @@ public class DBWrapper {
             + "max_z INT NOT NULL,\n"
             + "world_name VARCHAR(25) NOT NULL,\n"
             + "lf_zone_name VARCHAR(64));";
-            // + "FOREIGN KEY(lf_zone_name) REFERENCES tpp_lost_regions(zone_name));";
     
     /*
      *      UNLOADED_PETS STATEMENTS
@@ -82,16 +86,35 @@ public class DBWrapper {
     private String selectProtected = "SELECT * FROM tpp_protected_regions";
     private String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
     
+    /**
+     * Creates a MySQLFrame object that executes subsequent sql operations.
+     * @param host The host
+     * @param port The port number, between 0 and 65535
+     * @param dbName The name of the database
+     * @param dbUsername The username to use the database
+     * @param dbPassword The password of the user
+     * @param thisPlugin A reference to the TPPets plugin instance
+     */
     public DBWrapper(String host, int port, String dbName, String dbUsername, String dbPassword, TPPets thisPlugin) {
         database = new MySQLFrame(host, port, dbName, dbUsername, dbPassword, thisPlugin);
         this.thisPlugin = thisPlugin;
     }
     
+    /**
+     * Creates an SQLiteFrame object that executes subsequent sql operations.
+     * @param dbPath The path to the object, most often the plugin's directory
+     * @param dbName The name of the database
+     * @param thisPlugin A reference to the TPPets plugin instance.
+     */
     public DBWrapper(String dbPath, String dbName, TPPets thisPlugin) {
         database = new SQLiteFrame(dbPath, dbName, thisPlugin);
         this.thisPlugin = thisPlugin;
     }
     
+    /**
+     * Creates all needed tables if they don't exist.
+     * @return True if successful, false if not.
+     */
     public boolean initializeTables() {
         return database.createStatement(makeTableUnloadedPets)
                 && database.createStatement(makeTableLostRegions)
@@ -102,6 +125,11 @@ public class DBWrapper {
      *      UNLOADED_PETS METHODS
      */
     
+    /**
+     * Inserts a pet into the tpp_unloaded_pets table
+     * @param ent The entity to be inserted, implementing Tameable and Sittable
+     * @return True if successful, false if not
+     */
     public boolean insertPet(Entity ent) {
         if (ent instanceof Tameable && ent instanceof Sittable) {
             Tameable tameableTemp = (Tameable) ent;
@@ -119,6 +147,11 @@ public class DBWrapper {
         return false;
     }
     
+    /**
+     * Deletes a pet from the tpp_unloaded_pets table
+     * @param ent The entity to be deleted, implementing Tameable and Sittable
+     * @return True if successful, false if not
+     */
     public boolean deletePet(Entity ent) {
         if (ent instanceof Tameable && ent instanceof Sittable) {
             Tameable tameableTemp = (Tameable) ent;
@@ -135,6 +168,11 @@ public class DBWrapper {
         return false;
     }
     
+    /**
+     * Updates the pet in the tpp_unloaded_pets table
+     * @param ent The entity to be updated 
+     * @return True if successful, false if not
+     */
     public boolean updatePet(Entity ent) {
         if (ent instanceof Tameable && ent instanceof Sittable) {
             Tameable tameableTemp = (Tameable) ent;
@@ -151,6 +189,11 @@ public class DBWrapper {
         return false;
     }
     
+    /**
+     * Updates OR inserts the pet, based on whether or not it's already in the table tpp_unloaded_pets. This is recommended to be used whenever possible.
+     * @param ent The entity to be updated.
+     * @return True if successful, false if not
+     */
     public boolean updateOrInsertPet(Entity ent) {
         if (ent instanceof Tameable && ent instanceof Sittable) {
             if (petInTable(ent)) {
@@ -161,6 +204,11 @@ public class DBWrapper {
         return false;
     }
     
+    /**
+     * Checks if the pet is already in the table tpp_unloaded_pets
+     * @param ent The entity to be checked
+     * @return True if the entity is in the table, false if not
+     */
     public boolean petInTable(Entity ent) {
         String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
         Connection dbConn = database.getConnection();
@@ -176,6 +224,11 @@ public class DBWrapper {
         return false;
     }
     
+    /**
+     * Gets a list of pets from storage based on the owner's UUID.
+     * @param uuid The trimmed or non-trimmed UUID string of the owner.
+     * @return A list of pets from storage that are owned by the provided UUID.
+     */
     public List<PetStorage> getPetsFromOwner(String uuid) { 
         String trimmedUuid = UUIDUtils.trimUUID(uuid);
         Connection dbConn = database.getConnection();
@@ -191,6 +244,12 @@ public class DBWrapper {
         return null;
     }
     
+    /**
+     * Gets a list of pets from storage based on the pet's UUID and owner's UUID
+     * @param petUuid The trimmed or non-trimmed UUID string of the pet.
+     * @param playerUuid The trimmed or non-trimmed UUID string of the owner.
+     * @return A list of pets from storage that have the uuid PetUuid and are owned by playerUuid
+     */
     public List<PetStorage> getPetsFromUUIDs(String petUuid, String playerUuid) {
         String trimmedPetUuid = UUIDUtils.trimUUID(petUuid);
         String trimmedPlayerUuid = UUIDUtils.trimUUID(playerUuid);
@@ -207,6 +266,13 @@ public class DBWrapper {
         return null;
     }
     
+    /**
+     * Gets a list of pets from storage based on the owner's UUId, world, and type of pets. Useful for teleporting pets from unloaded chunks.
+     * @param playerUuid The trimmed or non-trimmed UUID string of the owner.
+     * @param worldName The name of the world to be searched.
+     * @param petType The type of pet to be searched for.
+     * @return A list of pets from storage that are owned by the playerUuid, are in the worldName, and are of type petType.
+     */
     public List<PetStorage> getPetsGeneric(String playerUuid, String worldName, PetType.Pets petType) {
         String trimmedPlayerUuid = UUIDUtils.trimUUID(playerUuid);
         Connection dbConn = database.getConnection();
@@ -222,6 +288,11 @@ public class DBWrapper {
         return null;
     }
     
+    /**
+     * Gets a list of pets from storage based on the world.
+     * @param worldName The name of the world to be searched.
+     * @return A list of pets from storage that are in the worldName.
+     */
     public List<PetStorage> getPetsFromWorld(String worldName) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -236,6 +307,11 @@ public class DBWrapper {
         return null;
     }
     
+    /**
+     * Gets a list of pets from storage based on a given ResultSet. This is used in the processing of most other getPets-type methods.
+     * @param rs The ResultSet to analyze, presumably from the tpp_unloaded_pets table.
+     * @return A list of pets created from rs.
+     */
     private List<PetStorage> getPetsList(ResultSet rs) {
         List<PetStorage> ret = new ArrayList<PetStorage>();
         try {
@@ -252,6 +328,11 @@ public class DBWrapper {
      *      LOST AND FOUND REGION STATEMENTS
      */
     
+    /**
+     * Inserts a {@link LostAndFoundRegion} into the database.
+     * @param lfr The {@link LostAndFoundRegion} instance to add to the database.
+     * @return True if successful, false if not
+     */
     public boolean insertLostRegion(LostAndFoundRegion lfr) {
         if (database.insertPrepStatement(insertLost, lfr.getZoneName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName())) {
             thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " added to database.");
@@ -262,6 +343,11 @@ public class DBWrapper {
         }
     }
     
+    /**
+     * Removes a {@link LostAndFoundRegion} from the database.
+     * @param lfr The {@link LostAndFoundRegion} instance to remove from the database.
+     * @return True if successful, false if not.
+     */
     public boolean deleteLostRegion(LostAndFoundRegion lfr) {
         if (database.deletePrepStatement(deleteLost, lfr.getZoneName())) {
             thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " removed from database.");
@@ -272,6 +358,10 @@ public class DBWrapper {
         }
     }
     
+    /**
+     * Gets the Hashtable used by the plugin internally to store the {@link LostAndFoundRegion} in memory from the database.
+     * @return The hashtable of <LostAndFoundRegion's name, LostAndFoundRegion instance>
+     */
     public Hashtable<String, LostAndFoundRegion> getLostRegions() {
         Hashtable<String, LostAndFoundRegion> ret = new Hashtable<String, LostAndFoundRegion>();
         Connection dbConn = database.getConnection();
@@ -293,6 +383,11 @@ public class DBWrapper {
      *      PROTECTED REGION STATEMENTS
      */
     
+    /**
+     * Inserts a {@link ProtectedRegion} into the database.
+     * @param lfr The {@link ProtectedRegion} instance to add to the database.
+     * @return True if successful, false if not
+     */
     public boolean insertProtectedRegion(ProtectedRegion pr) {
         if (database.insertPrepStatement(insertProtected, pr.getZoneName(), pr.getEnterMessage(), pr.getMinLoc().getBlockX(), pr.getMinLoc().getBlockY(), pr.getMinLoc().getBlockZ(), pr.getMaxLoc().getBlockX(), pr.getMaxLoc().getBlockY(), pr.getMaxLoc().getBlockZ(), pr.getWorldName(), pr.getLfName())) {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " added to database.");
@@ -303,6 +398,11 @@ public class DBWrapper {
         }
     }
     
+    /**
+     * Removes a {@link ProtectedRegion} from the database.
+     * @param lfr The {@link ProtectedRegion} instance to remove from the database.
+     * @return True if successful, false if not.
+     */
     public boolean deleteProtectedRegion(ProtectedRegion pr) {
         if (database.deletePrepStatement(deleteProtected, pr.getZoneName())) {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " removed from database.");
@@ -313,6 +413,10 @@ public class DBWrapper {
         }
     }
     
+    /**
+     * Gets the Hashtable used by the plugin internally to store the {@link ProtectedRegion} in memory from the database.
+     * @return The hashtable of <ProtectedRegion's name, ProtectedRegion instance>
+     */
     public Hashtable<String, ProtectedRegion> getProtectedRegions() {
         Hashtable<String, ProtectedRegion> ret = new Hashtable<String, ProtectedRegion>();
         Connection dbConn = database.getConnection();
@@ -330,6 +434,11 @@ public class DBWrapper {
         return ret;
     }
     
+    /**
+     * Updates the given {@link ProtectedRegion}'s lfName in the database.
+     * @param lfr The {@link ProtectedRegion} whose lfName is to be updated.
+     * @return True if successful, false if not.
+     */
     public boolean updateProtectedRegion(ProtectedRegion pr) {
         if (database.updatePrepStatement(updateProtected, pr.getLfName(), pr.getZoneName())) {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " updated in database.");
@@ -340,6 +449,9 @@ public class DBWrapper {
         }
     }
     
+    /**
+     * @return The underlying database object, either of type {@link MySQLFrame} or {@link SQLiteFrame}
+     */
     public DBFrame getRealDatabase() {
         return database;
     }

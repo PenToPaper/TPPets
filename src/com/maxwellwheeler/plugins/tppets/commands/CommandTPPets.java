@@ -26,16 +26,28 @@ import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
-
+/**
+ * Processes commands that actually teleport pets around
+ * @author GatheringExp
+ *
+ */
 public class CommandTPPets {
     private TPPets thisPlugin;
     private DBWrapper dbConn;
     
+    /**
+     * Grabs plugin instance and database instance from Bukkit
+     */
     public CommandTPPets() {
         this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
         this.dbConn = this.thisPlugin.getDatabase();
     }
     
+    /**
+     * Core command handling
+     * @param sender Represents who sent the command. If it isn't a player, an error message is displayed.
+     * @param pt The type of pet to be teleported
+     */
     public void processCommand(CommandSender sender, PetType.Pets pt) {
         if (sender instanceof Player) {
             Player tempPlayer = (Player) sender;
@@ -51,12 +63,18 @@ public class CommandTPPets {
         }
     }
 
+    /**
+     * Gets a full set of entities to be teleported, and teleports them.
+     * @param pt The type of pet to be teleported.
+     * @param pl The player to whom the pets should be teleported to.
+     * @return A set of UUIDs of the entities that are teleported.
+     */
     private Set<UUID> getPetsAndTeleport(PetType.Pets pt, Player pl) {
         List<World> worldsList = Bukkit.getServer().getWorlds();
         Set<UUID> teleportedEnts = new HashSet<UUID>();
         if (thisPlugin.getAllowTpBetweenWorlds()) {
             for (World world : worldsList) {
-                teleportedEnts.addAll(loadAndTp(teleportedEnts, world, pt, pl));
+                teleportedEnts = loadAndTp(teleportedEnts, world, pt, pl);
             }
         } else {
             teleportedEnts = loadAndTp(teleportedEnts, pl.getWorld(), pt, pl);
@@ -65,6 +83,14 @@ public class CommandTPPets {
         return teleportedEnts;
     }
     
+    /**
+     * Teleports owned entities that are known in unloaded chunks or in loaded chunks to player, returning a list of entities teleported.
+     * @param entList A list of already teleported entities.
+     * @param world The world where entities will be teleported.
+     * @param pt The type of entity to be teleported.
+     * @param pl The player to teleport the entities to, also used to check if the player owns the entities.
+     * @return The entList set with new entities that have been added
+     */
     private Set<UUID> loadAndTp(Set<UUID> entList, World world, PetType.Pets pt, Player pl) {
         List<PetStorage> unloadedPetsInWorld = new ArrayList<PetStorage>();
         if (dbConn != null) {
@@ -87,6 +113,13 @@ public class CommandTPPets {
         return entList;
     }
     
+    /**
+     * Checks if a pet is of type pt, and is owned by pl.
+     * @param pt The type of pet expected.
+     * @param pet The entity to be checked.
+     * @param pl The player that might own the entity.
+     * @return If the player owns the entity and it is of the expected type
+     */
     private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {
         if (pet instanceof Tameable) {
             Tameable tameableTemp = (Tameable) pet;
@@ -107,10 +140,22 @@ public class CommandTPPets {
         return false;
     }
     
+    /**
+     * Gets the chunk using normal x and z coordinates, rather than the chunkwide x and z coordinates
+     * @param world The world where the chunk is.
+     * @param x The normal x coordinate where the chunk is.
+     * @param z The normal z coordinate where the chunk is.
+     * @return The found chunk
+     */
     private Chunk getChunkFromCoords(World world, int x, int z) {
         return new Location(world, x, 64, z).getChunk();
     }
     
+    /**
+     * Teleports the pet to the player
+     * @param pl The player the pet is to be teleported to.
+     * @param entity The entity to be teleported
+     */
     private void teleportPet(Player pl, Entity entity) {
         if (entity instanceof Sittable) {
             Sittable tempSittable = (Sittable) entity;
@@ -119,6 +164,11 @@ public class CommandTPPets {
         entity.teleport(pl);
     }
     
+    /**
+     * Sends a message to the player after their pets have been teleported
+     * @param sender The sender to send a confirmation for
+     * @param pt The pet type that was teleported
+     */
     private void announceComplete(CommandSender sender, PetType.Pets pt) {
         switch (pt) {
             case CAT:
@@ -135,6 +185,11 @@ public class CommandTPPets {
         }
     }
     
+    /**
+     * Formats the location in a readable way
+     * @param lc Location to format
+     * @return The readable string of location data
+     */
     private String formatLocation(Location lc) {
         return "x: " + Integer.toString(lc.getBlockX()) + ", " + "y: " + Integer.toString(lc.getBlockY()) + ", " + "z: " + Integer.toString(lc.getBlockZ());
     }

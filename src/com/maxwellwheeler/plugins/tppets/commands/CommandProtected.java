@@ -7,11 +7,25 @@ import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 
+/**
+ * Object that processes /tpp protected commands.
+ * @author GatheringExp
+ *
+ */
 public class CommandProtected extends RegionCommand {
+    
+    /**
+     * Processes the command passed to it
+     * @param sender The CommandSender object that originally sent the command.
+     * @param args The arguments passed with the command - doesn't include the "tpp protected" in command.
+     * Ex: /tpp protected add PrimaryProtected PrimaryLost You can't do that here, String args[] would have {add PrimaryProtected PrimaryLost You can't do that here}.
+     */
     public void processCommand(CommandSender sender, String[] args) {
         if (validateArgs(args, 1)) {
+            // Changes behavior based on the 3rd index of the original command, but first index of the arguments provided here.
             switch (args[0]) {
                 case "add":
                     if (validateArgs(args, 4)) {
@@ -49,7 +63,8 @@ public class CommandProtected extends RegionCommand {
         }
     }
     
-    private void addRegion(CommandSender sender, String[] truncatedArgs) {
+    @Override
+    protected void addRegion(CommandSender sender, String[] truncatedArgs) {
         if (sender instanceof Player) {
             Player pl = (Player) sender;
             Location[] lcs = getWePoints(pl);
@@ -71,7 +86,8 @@ public class CommandProtected extends RegionCommand {
         sender.sendMessage(ChatColor.RED + "Can't find WorldEdit selection.");
     }
     
-    private void removeRegion(CommandSender sender, String[] truncatedArgs) {
+    @Override
+    protected void removeRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
         if (tempPr != null) {
             if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deleteProtectedRegion(tempPr)) {
@@ -86,7 +102,8 @@ public class CommandProtected extends RegionCommand {
         }
     }
     
-    private void listRegions(CommandSender sender, String[] truncatedArgs) {
+    @Override
+    protected void listRegions(CommandSender sender, String[] truncatedArgs) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Protected Regions]" + ChatColor.DARK_GRAY + "---------");
         if (truncatedArgs.length >= 1 && truncatedArgs[0] != null) {
             ProtectedRegion pr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
@@ -103,6 +120,11 @@ public class CommandProtected extends RegionCommand {
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------------------------------");
     }
     
+    /**
+     * Relinks given {@link ProtectedRegion} to given {@link LostAndFoundRegion}
+     * @param sender The {@link CommandSender} that ran the command to change this.
+     * @param truncatedArgs A truncated list of arguments passded to the relink function. It really only includes [0] The {@link ProtectedRegion}'s name, and [1] The {@link LostAndFoundRegion}'s name
+     */
     private void relinkRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
         if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().updateProtectedRegion(tempPr)) {
@@ -118,6 +140,11 @@ public class CommandProtected extends RegionCommand {
         }
     }
     
+    /**
+     * Displays {@link ProtectedRegion} data to specified {@link CommandSender}.
+     * @param sender Player to send data to.
+     * @param pr {@link ProtectedRegion} to display the data of.
+     */
     private void displayPrInfo(CommandSender sender, ProtectedRegion pr) {
         String tempLfName = pr.getLfName() + (pr.getLfReference() == null ? " (Unset)" : ""); 
         sender.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + pr.getZoneName());

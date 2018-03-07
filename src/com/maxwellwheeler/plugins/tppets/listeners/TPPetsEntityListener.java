@@ -20,15 +20,28 @@ import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
 
+/**
+ * The event listener that handles entity events
+ * @author GatheringExp
+ *
+ */
 public class TPPetsEntityListener implements Listener {
     
     private TPPets thisPlugin;
     
+    /**
+     * General constructor, saves reference to TPPets plugin
+     * @param thisPlugin The TPPets plugin reference
+     */
     public TPPetsEntityListener(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
     
-    // When an entity tries to teleport, determine if it is a tameable and sittable entity, and if it is, check if it can teleport there
+    /**
+     * Event handler for EntityTeleportEvent. It checks if the entity is a pet that's teleporting into a {@link ProtectedRegion} or teleporting out of a {@link LostAndFoundRegion} and prevents that.
+     * Note that entities can be teleported out of the {@link LostAndFoundRegion} with the command, just not through natrual mob behavior.
+     * @param e The event
+     */
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityTeleportEvent(EntityTeleportEvent e) {
         if (e.getEntity() instanceof Sittable && e.getEntity() instanceof Tameable) {
@@ -47,7 +60,10 @@ public class TPPetsEntityListener implements Listener {
         }
     }
     
-    // Removes entity from database if needed
+    /**
+     * Event handler for EntityDeathEvent. It removes it from the database if it was a previously tracked pet.
+     * @param e The event
+     */
     @EventHandler (priority=EventPriority.MONITOR)
     public void onEntityDeathEvent(EntityDeathEvent e) {
         if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
@@ -60,7 +76,10 @@ public class TPPetsEntityListener implements Listener {
         }
     }
     
-    // Deals with player-based and mob-based damage protection
+    /**
+     * Event handler for EntityDamageByEntityEvent. It prevents player damage and mob damage, even through potions and arrows.
+     * @param e The event.
+     */
     @SuppressWarnings("unlikely-arg-type")
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
@@ -106,7 +125,10 @@ public class TPPetsEntityListener implements Listener {
         }
     }
     
-    // Deals with environmental damage
+    /**
+     * Event handler for EntityDamageEvent. It prevents environmental damage.
+     * @param e The event
+     */
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityDamageEvent(EntityDamageEvent e) {
         if ((thisPlugin.getPreventEnvironmentalDamage()) && e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
@@ -142,6 +164,10 @@ public class TPPetsEntityListener implements Listener {
         }
     }
     
+    /**
+     * Event handler for EntityTameEvent. It checks if the tamed entity should be allowed to be tamed based on the pet limits. If it can, it adds that to the {@link PlayerPetIndex}
+     * @param e
+     */
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityTameEvent(EntityTameEvent e) {        
         PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());

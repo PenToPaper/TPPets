@@ -20,9 +20,12 @@ import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 
 import net.milkbowl.vault.permission.Permission;
-
+/**
+ * The plugin's main class.
+ * @author GatheringExp
+ *
+ */
 public class TPPets extends JavaPlugin implements Listener {
-    // Configuration-based data types
     private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<String, ProtectedRegion>();
     private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<String, LostAndFoundRegion>();
     private Hashtable<String, List<String>> commandAliases = new Hashtable<String, List<String>>();
@@ -49,17 +52,26 @@ public class TPPets extends JavaPlugin implements Listener {
      * 
      */
     
+    /**
+     * Initializes the {@link PlayerPetIndex} based on total_pet_limit, dog_limit, cat_limit, and bird_limit integers in the config.
+     */
     private void initializePetIndex() {
         petIndex = new PlayerPetIndex(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"));
     }
     
+    /**
+     * Initializes the {@link DBWrapper} based on config options mysql.enable, mysql.host, mysql.port, mysql.database, mysql.username, and mysql.password.
+     * If DBWrapper is false, it will use the SQLite connection rather than a MySQL one.
+     */
     private void initializeDBC() {
         if (!getConfig().getBoolean("mysql.enable")) {
             // Use SQLite connection
             database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
         } else {
+            // Use MySQL connection
             database = new DBWrapper(getConfig().getString("mysql.host"), getConfig().getInt("mysql.port"), getConfig().getString("mysql.database"), getConfig().getString("mysql.username"), getConfig().getString("mysql.password"), this);
             if (database.getRealDatabase().getConnection() == null) {
+                // Unless MySQL connection fails
                 database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
             }
         }
@@ -68,14 +80,23 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
+    /**
+     * Loads configuration option tp_pets_between_worlds into memory.
+     */
     private void initializeAllowTP() {
         allowTpBetweenWorlds = getConfig().getBoolean("tp_pets_between_worlds");
     }
     
+    /**
+     * Loads configuration option allow_untaming_pets into memory.
+     */
     private void initializeAllowUntamingPets() {
         allowUntamingPets = getConfig().getBoolean("allow_untaming_pets");
     }
     
+    /**
+     * Initializes local variables tracking what damage to prevent.
+     */
     private void initializeDamageConfigs() {
         List<String> configList = getConfig().getStringList("protect_pets_from");
         if (configList.contains("PlayerDamage")) {
@@ -92,6 +113,9 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
+    /**
+     * Initializes local variables of command aliases.
+     */
     private void initializeCommandAliases() {
         Set<String> configKeyList = getConfig().getConfigurationSection("command_aliases").getKeys(false);
         for (String key : configKeyList) {
@@ -101,14 +125,23 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
+    /**
+     * Initializes protected regions in a list
+     */
     private void initializeProtectedRegions() {
         protectedRegions = database.getProtectedRegions();
     }
     
+    /**
+     * Initializes protected regions in a list
+     */
     private void initializeLostRegions() {
         lostRegions = database.getLostRegions();
     }
     
+    /**
+     * Checks if vault (soft dependency) is enabled
+     */
     private void initializeVault() {
         if (vaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault")) {
             initializePermissions();
@@ -118,13 +151,16 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
+    /**
+     * Initializes vault permissions object
+     * @return if the operation was successful
+     */
     private boolean initializePermissions() {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
         perms = rsp.getProvider();
         return perms != null;
     }
-
-
+    
     @Override
     public void onEnable() {
         // Config setup and pulling
@@ -162,10 +198,19 @@ public class TPPets extends JavaPlugin implements Listener {
      * 
      */
     
+    /**
+     * Adds protected region to list in memory of protected regions actively being protected
+     * @param pr The {@link ProtectedRegion} to be added.
+     */
     public void addProtectedRegion (ProtectedRegion pr) {
         protectedRegions.put(pr.getZoneName(), pr);
     }
     
+    /**
+     * 
+     * @param lc The location to be checked
+     * @return {@link ProtectedRegion} that the location is in, null otherwise
+     */
     public ProtectedRegion getProtectedRegionWithin(Location lc) {
         for (String key : protectedRegions.keySet()) { 
             if (protectedRegions.get(key).isInZone(lc)) {
@@ -175,22 +220,45 @@ public class TPPets extends JavaPlugin implements Listener {
         return null;
     }
     
+    /**
+     * 
+     * @param lc The location to be checked
+     * @return if location is in a {@link ProtectedRegion}
+     */
     public boolean isInProtectedRegion(Location lc) {
         return getProtectedRegionWithin(lc) != null;
     }
     
+    /**
+     * Checks if a player object is located within any regions
+     * @param pl The player to be checked.
+     * @return if player's location is in a {@link ProtectedRegion}
+     */
     public boolean isInProtectedRegion(Player pl) {
         return isInProtectedRegion(pl.getLocation());
     }
     
+    /**
+     * Returns a protected region with a given name
+     * @param name Name of {@link ProtectedRegion}
+     * @return the referenced {@link ProtectedRegion}, null otherwise.
+     */
     public ProtectedRegion getProtectedRegion(String name) {
         return protectedRegions.get(name);
     }
 
+    /**
+     * Removes a protected region from memory, but not from disk.
+     * @param name Name of the protected region
+     */
     public void removeProtectedRegion(String name) {
         protectedRegions.remove(name);
     }
     
+    /**
+     * Updates the lfReference property of {@link ProtectedRegion}s that have {@link LostAndFoundRegion} of name lfRegionName
+     * @param lfRegionName {@link LostAndFoundRegion}'s name that should be refreshed within all {@link ProtectedRegion}s.
+     */
     public void updateLFReference(String lfRegionName) {
         for (String key : protectedRegions.keySet()) {
             ProtectedRegion pr = protectedRegions.get(key);
@@ -200,6 +268,10 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
     
+    /**
+     * Removes all lfRefernece properties of {@link ProtectedRegion}s that have name lfRegionName
+     * @param lfRegionName The name of the {@link LostAndFoundRegion} that is being removed
+     */
     public void removeLFReference(String lfRegionName) {
         for (String key : protectedRegions.keySet()) {
             ProtectedRegion pr = protectedRegions.get(key);
@@ -214,6 +286,11 @@ public class TPPets extends JavaPlugin implements Listener {
      * 
      */
     
+    /**
+     * Tests if a location is in a lost region
+     * @param lc Location to be tested.
+     * @return Boolean representing if the location is in a lost region.
+     */
     public boolean isInLostRegion(Location lc) {
         for (String lfKey : lostRegions.keySet()) {
             if (lostRegions.get(lfKey).isInZone(lc)) {
@@ -223,10 +300,18 @@ public class TPPets extends JavaPlugin implements Listener {
         return false;
     }
     
+    /**
+     * Adds {@link LostAndFoundRegion} to active {@link LostAndFoundRegion} list
+     * @param lfr {@link LostAndFoundRegion} to add.
+     */
     public void addLostRegion(LostAndFoundRegion lfr) {
         lostRegions.put(lfr.getZoneName(), lfr);
     }
     
+    /**
+     * Removes {@link LostAndFoundRegion} from active {@link LostAndFoundRegion} list
+     * @param lfr {@link LostAndFoundRegion} to remove.
+     */
     public void removeLostRegion(LostAndFoundRegion lfr) {
         lostRegions.remove(lfr.getZoneName());
     }

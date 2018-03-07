@@ -20,15 +20,28 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 import java.util.Hashtable;
 
+/**
+ * The event listener that handles player events
+ * @author GatheringExp
+ *
+ */
 public class TPPetsPlayerListener implements Listener {
     TPPets thisPlugin;
     Hashtable<String, ProtectedRegion> protRegions;
     
+    /**
+     * General constructor, saves reference to TPPets plugin
+     * @param thisPlugin The TPPets plugin reference
+     */
     public TPPetsPlayerListener(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
         this.protRegions = thisPlugin.getProtectedRegions();
     }
     
+    /**
+     * Event handler for PlayerMoveEvent. It checks if the player is within a {@link ProtectedRegion}. If they are, it removes pets that shouldn't be there that are within their vicinity.
+     * @param e
+     */
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerMove(PlayerMoveEvent e) {
         ProtectedRegion pr = thisPlugin.getProtectedRegionWithin(e.getTo());
@@ -47,7 +60,12 @@ public class TPPetsPlayerListener implements Listener {
         }
     }
     
-    // If player right-clicks a pet they've tamed with shears while crouching, untames that entity
+    /**
+     * Event handler for PlayerInteractEntityEvent.
+     * If the player shift right-clicks a pet with shears, it checks if the player owns it or can untame it through the permission node, and untames it, also removing it from the database.
+     * If the player shift right-clicks a pet with a bone, it tells them whether or not it is tamed. 
+     * @param e The event
+     */
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
         if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), Material.SHEARS)) {
@@ -73,6 +91,13 @@ public class TPPetsPlayerListener implements Listener {
         }
     }
     
+    /**
+     * Checks if the interaction is applicable based on certain parameters.
+     * @param ent The entity that was interacted with.
+     * @param pl The player that did the interacting.
+     * @param mat The material the player is expected to be holding.
+     * @return if the entity is of the correct type, the player is sneaking, and the player is holding the right item
+     */
     private boolean isApplicableInteraction(Entity ent, Player pl, Material mat) {
         return ent instanceof Sittable && ent instanceof Tameable && pl.isSneaking() && pl.getInventory().getItemInMainHand().getType().equals(mat);
     }
