@@ -3,7 +3,7 @@
   <groupId>com.maxwellwheeler.plugins.tpanimals</groupId>
   <artifactId>TPAnimals</artifactId>
   <version>0.8.0-SNAPSHOT</version>
-  <name>TPAnimals</name>
+  <name>TPPets</name>
   <description>Minecraft plugin for teleporting pets</description>
   <build>
     <sourceDirectory>src</sourceDirectory>
