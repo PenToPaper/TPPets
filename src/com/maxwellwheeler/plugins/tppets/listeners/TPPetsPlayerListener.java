@@ -72,9 +72,9 @@ public class TPPetsPlayerListener implements Listener {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
             if (thisPlugin.getDatabase() != null && tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall")) {
                 Sittable sittableTemp = (Sittable) e.getRightClicked();
+                thisPlugin.getDatabase().deletePet(e.getRightClicked());
                 sittableTemp.setSitting(false);
                 tameableTemp.setTamed(false);
-                thisPlugin.getDatabase().deletePet(e.getRightClicked());
                 String ownerUUIDString = e.getPlayer().getUniqueId().toString();
                 String entityUUIDString = e.getRightClicked().getUniqueId().toString();
                 thisPlugin.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
