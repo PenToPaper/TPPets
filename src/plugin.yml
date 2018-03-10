@@ -1,6 +1,6 @@
 name: TPPets
 version: 1.0.0
-description: Teleport pets to certain areas of the map
+description: Teleport pets around the map, but not in areas you don't want
 load: POSTWORLD
 author: GatheringExp
 main: com.maxwellwheeler.plugins.tppets.TPPets
@@ -15,7 +15,7 @@ commands:
 
 permissions:
   tppets.*:
-    description: Allows teleportation of every pet, and allows teleportation in protected areas.
+    description: Parent node of all tppets permissions.
     default: op
     children:
       tppets.bypassprotection: true
@@ -36,19 +36,19 @@ permissions:
     description: Allows user to tame pets past the pet taming limit.
   tppets.tpanywhere:
     default: op
-    description: Allows user to teleport pets in protected regions.
+    description: Allows user to teleport pets into, and keep pets inside, protected regions.
   tppets.protected:
     default: op
     description: Allows user to set cuboid regions where pets are not allowed.
   tppets.lost:
     default: op
-    description: Allows user to set cuboid regions where pets are teleported if they are caught in a no-pets area.
+    description: Allows user to set cuboid regions where pets found in protected regions are sent.
   tppets.dogs:
     default: true
-    description: Allows teleporting dogs.
+    description: Allows user to teleport their dogs to them.
   tppets.cats:
     default: true
-    description: Allows teleporting cats.
+    description: Allows user to teleport their cats to them.
   tppets.birds:
     default: true
-    description: Allows teleporting parrots.
+    description: Allows user to teleport their birds to them.
