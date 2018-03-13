@@ -35,7 +35,7 @@ public class PetType {
     }
     
     /**
-     * Gets the enum {@link PetType.Pets} based on the entity's type.
+     * Gets the enum {@link Pets} based on the entity's type.
      * @param ent The entity to be checked
      * @return The enum value representing the entity's type
      */
@@ -63,7 +63,7 @@ public class PetType {
     }
     
     /**
-     * Gets the {@link PetType.Pets} enum value from the integer, used when pulling pets from database storage.
+     * Gets the {@link Pets} enum value from the integer, used when pulling pets from database storage.
      * @param i The index of the pet, consistent with the getIndexFromPet(Pets pt) method.
      * @return The pet's type
      */

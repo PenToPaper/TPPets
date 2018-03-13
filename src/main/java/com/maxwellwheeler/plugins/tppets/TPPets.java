@@ -1,10 +1,13 @@
 package com.maxwellwheeler.plugins.tppets;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -29,6 +32,7 @@ public class TPPets extends JavaPlugin implements Listener {
     private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<String, ProtectedRegion>();
     private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<String, LostAndFoundRegion>();
     private Hashtable<String, List<String>> commandAliases = new Hashtable<String, List<String>>();
+    private Hashtable<String, List<Material>> customTools = new Hashtable<String, List<Material>>();
 
     // Database
     private DBWrapper database;
@@ -51,7 +55,21 @@ public class TPPets extends JavaPlugin implements Listener {
      * VARIABLE INITIALIZERS
      * 
      */
-    
+
+    /**
+     * Initializes the customTools Hashtable, which is later used to allow servers to configure which tools can be applied to which tasks.
+     */
+    private void initializeCustomTools() {
+        ConfigurationSection toolsSection = getConfig().getConfigurationSection("tools");
+        for (String key : toolsSection.getKeys(false)) {
+            List<Material> rMat = new ArrayList<Material>();
+            for (String materialName : toolsSection.getStringList(key)) {
+                rMat.add(Material.getMaterial(materialName));
+            }
+            customTools.put(key, rMat);
+        }
+    }
+
     /**
      * Initializes the {@link PlayerPetIndex} based on total_pet_limit, dog_limit, cat_limit, and bird_limit integers in the config.
      */
@@ -169,6 +187,7 @@ public class TPPets extends JavaPlugin implements Listener {
         initializeCommandAliases();
         initializeAllowTP();
         initializeAllowUntamingPets();
+        initializeCustomTools();
         
         // Database setup
         getLogger().info("Setting up database.");
@@ -184,7 +203,7 @@ public class TPPets extends JavaPlugin implements Listener {
         getLogger().info("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
-        getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this), this);
+        getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this, customTools), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases));
 

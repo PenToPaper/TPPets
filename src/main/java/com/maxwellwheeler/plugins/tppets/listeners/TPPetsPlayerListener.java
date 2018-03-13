@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
+import com.maxwellwheeler.plugins.tppets.helpers.ToolsChecker;
 import org.bukkit.Material;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
@@ -19,6 +20,7 @@ import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 import java.util.Hashtable;
+import java.util.List;
 
 /**
  * The event listener that handles player events
@@ -26,16 +28,18 @@ import java.util.Hashtable;
  *
  */
 public class TPPetsPlayerListener implements Listener {
-    TPPets thisPlugin;
-    Hashtable<String, ProtectedRegion> protRegions;
-    
+    private TPPets thisPlugin;
+    private Hashtable<String, ProtectedRegion> protRegions;
+    private Hashtable<String, List<Material>> customTools;
+
     /**
      * General constructor, saves reference to TPPets plugin
      * @param thisPlugin The TPPets plugin reference
      */
-    public TPPetsPlayerListener(TPPets thisPlugin) {
+    public TPPetsPlayerListener(TPPets thisPlugin, Hashtable<String, List<Material>> customTools) {
         this.thisPlugin = thisPlugin;
         this.protRegions = thisPlugin.getProtectedRegions();
+        this.customTools = customTools;
     }
     
     /**
@@ -68,7 +72,7 @@ public class TPPetsPlayerListener implements Listener {
      */
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
-        if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), Material.SHEARS)) {
+        if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "untame_pets")) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
             if (thisPlugin.getDatabase() != null && tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall")) {
                 Sittable sittableTemp = (Sittable) e.getRightClicked();
@@ -81,7 +85,7 @@ public class TPPetsPlayerListener implements Listener {
                 thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
                 e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");
             }
-        } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), Material.BONE)) {
+        } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "get_owner")) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
             if (tameableTemp.getOwner() != null) {
                 e.getPlayer().sendMessage(ChatColor.BLUE + "This pet belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
@@ -95,10 +99,10 @@ public class TPPetsPlayerListener implements Listener {
      * Checks if the interaction is applicable based on certain parameters.
      * @param ent The entity that was interacted with.
      * @param pl The player that did the interacting.
-     * @param mat The material the player is expected to be holding.
+     * @param key The type of material data expected, per config options
      * @return if the entity is of the correct type, the player is sneaking, and the player is holding the right item
      */
-    private boolean isApplicableInteraction(Entity ent, Player pl, Material mat) {
-        return ent instanceof Sittable && ent instanceof Tameable && pl.isSneaking() && pl.getInventory().getItemInMainHand().getType().equals(mat);
+    private boolean isApplicableInteraction(Entity ent, Player pl, String key) {
+        return ent instanceof Sittable && ent instanceof Tameable && pl.isSneaking() && ToolsChecker.isInList(customTools, key, pl.getInventory().getItemInMainHand().getType());
     }
 }

@@ -30,7 +30,7 @@ public class PlayerPetIndex {
     }
     
     /**
-     * Links the enum {@link PlayerPetIndex.RuleRestriction} with the enum {@link PetType.Pets}
+     * Links the enum {@link RuleRestriction} with the enum {@link PetType.Pets}
      * @param pt The {@link PetType.Pets} enum value
      * @return The rule restriction represented by pt
      */
