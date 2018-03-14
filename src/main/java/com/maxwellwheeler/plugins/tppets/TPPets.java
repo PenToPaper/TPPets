@@ -1,10 +1,14 @@
 package com.maxwellwheeler.plugins.tppets;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Set;
-
+import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
+import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
+import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
+import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -13,16 +17,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
-import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
-import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
-import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
-
-import net.milkbowl.vault.permission.Permission;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
 /**
  * The plugin's main class.
  * @author GatheringExp

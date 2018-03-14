@@ -1,12 +1,11 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 
 /**
  * Object that processes /tpp lost commands

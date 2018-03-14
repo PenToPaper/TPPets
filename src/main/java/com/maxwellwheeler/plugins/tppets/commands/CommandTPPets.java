@@ -9,12 +9,9 @@ import java.util.UUID;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
-import org.bukkit.entity.Wolf;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -133,16 +130,7 @@ public class CommandTPPets {
         if (pet instanceof Tameable) {
             Tameable tameableTemp = (Tameable) pet;
             if ((ownerName.equals("") && tameableTemp.isTamed() && pl.equals(tameableTemp.getOwner())) || (tameableTemp.isTamed() && ownerName.equals(tameableTemp.getOwner().getName()))) {
-                switch (pt) {
-                    case CAT:
-                        return pet instanceof Ocelot;
-                    case DOG:
-                        return pet instanceof Wolf;
-                    case PARROT:
-                        return pet instanceof Parrot;
-                    default:
-                        return false;
-                }
+                return pt.equals(PetType.getEnumByEntity(pet));
             }
         }
         return false;

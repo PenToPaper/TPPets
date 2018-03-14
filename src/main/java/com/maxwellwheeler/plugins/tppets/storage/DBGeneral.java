@@ -1,14 +1,9 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.logging.Level;
-
 import com.maxwellwheeler.plugins.tppets.TPPets;
+
+import java.sql.*;
+import java.util.logging.Level;
 
 /**
  * A general class that governs the classes {@link MySQLFrame} and {@link SQLiteFrame}.

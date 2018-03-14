@@ -1,19 +1,16 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
-import java.util.*;
-
 import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
-import org.bukkit.Bukkit;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import com.maxwellwheeler.plugins.tppets.storage.PetType;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Core command handler to the plugin.
@@ -78,6 +75,42 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.birds")) {
                         CommandTPPets parrotTPP = getTPPets(sender, args);
                         parrotTPP.processCommand(sender, PetType.Pets.PARROT);
+                        return true;
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
+                case "horses":
+                    if (sender.hasPermission("tppets.horses")) {
+                        CommandTPPets horseTPP = getTPPets(sender, args);
+                        horseTPP.processCommand(sender, PetType.Pets.HORSE);
+                        return true;
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
+                case "mules":
+                    if (sender.hasPermission("tppets.mules")) {
+                        CommandTPPets muleTPP = getTPPets(sender, args);
+                        muleTPP.processCommand(sender, PetType.Pets.MULE);
+                        return true;
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
+                case "llamas":
+                    if (sender.hasPermission("tppets.llamas")) {
+                        CommandTPPets llamaTPP = getTPPets(sender, args);
+                        llamaTPP.processCommand(sender, PetType.Pets.LLAMA);
+                        return true;
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
+                case "donkeys":
+                    if (sender.hasPermission("tppets.donkeys")) {
+                        CommandTPPets donkeyTPP = getTPPets(sender, args);
+                        donkeyTPP.processCommand(sender, PetType.Pets.DONKEY);
                         return true;
                     } else {
                         permissionMessage(sender);

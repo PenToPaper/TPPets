@@ -1,8 +1,8 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
-import java.util.Hashtable;
-import java.util.List;
-
+import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
+import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -10,9 +10,8 @@ import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
-import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
-import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * An index of how many pets each player owns. Used for the limiting of tamed pets.

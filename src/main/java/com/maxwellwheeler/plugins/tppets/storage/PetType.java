@@ -1,12 +1,9 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
+import org.bukkit.entity.*;
+
 import java.util.Arrays;
 import java.util.Hashtable;
-
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Parrot;
-import org.bukkit.entity.Wolf;
 
 /**
  * Class that classifies entities by the types we care about, CAT, DOG, and PARROT
@@ -22,18 +19,22 @@ public class PetType {
      * UNKNOWN = a pet not of the above three types
      */
     public static enum Pets {
-        CAT, DOG, PARROT, UNKNOWN
+        CAT, DOG, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
     }
     
-    private static final Hashtable<Pets, Class<?>> classTranslate;
+    private static final Hashtable<Pets, Class<?>[]> classTranslate;
     
     static {
-        classTranslate = new Hashtable<Pets, Class<?>>();
-        classTranslate.put(Pets.CAT, org.bukkit.entity.Ocelot.class);
-        classTranslate.put(Pets.DOG, org.bukkit.entity.Wolf.class);
-        classTranslate.put(Pets.PARROT, org.bukkit.entity.Parrot.class);
+        classTranslate = new Hashtable<Pets, Class<?>[]>();
+        classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Ocelot.class});
+        classTranslate.put(Pets.DOG, new Class<?>[]{org.bukkit.entity.Wolf.class});
+        classTranslate.put(Pets.PARROT, new Class<?>[]{org.bukkit.entity.Parrot.class});
+        classTranslate.put(Pets.MULE, new Class<?>[]{org.bukkit.entity.Mule.class});
+        classTranslate.put(Pets.LLAMA, new Class<?>[]{org.bukkit.entity.Llama.class});
+        classTranslate.put(Pets.DONKEY, new Class<?>[]{org.bukkit.entity.Donkey.class});
+        classTranslate.put(Pets.HORSE, new Class<?>[]{org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class});
     }
-    
+
     /**
      * Gets the enum {@link Pets} based on the entity's type.
      * @param ent The entity to be checked
@@ -46,12 +47,20 @@ public class PetType {
             return Pets.CAT;
         } else if (ent instanceof Parrot) {
             return Pets.PARROT;
+        } else if (ent instanceof Mule) {
+            return Pets.MULE;
+        } else if (ent instanceof Llama) {
+            return Pets.LLAMA;
+        } else if (ent instanceof Donkey) {
+            return Pets.DONKEY;
+        } else if (ent instanceof Horse || ent instanceof ZombieHorse || ent instanceof SkeletonHorse) {
+            return Pets.HORSE;
         } else {
             return Pets.UNKNOWN;
         }
     }
     
-    private static final Pets[] indexTranslation = new Pets[] {Pets.UNKNOWN, Pets.CAT, Pets.DOG, Pets.PARROT};
+    private static final Pets[] indexTranslation = new Pets[] {Pets.UNKNOWN, Pets.CAT, Pets.DOG, Pets.PARROT, Pets.MULE, Pets.LLAMA, Pets.DONKEY, Pets.HORSE};
     
     /**
      * Gets a numeric index based on the pet type, used in the database storage of the pet. While MySQL supports enums directly, SQLite does not, so this plugin uses integers to store this data.
@@ -76,7 +85,7 @@ public class PetType {
      * @param pt The type of pets to get the class reference of
      * @return A reference to the class
      */
-    public static Class<?> getClassTranslate(Pets pt) {
+    public static Class<?>[] getClassTranslate(Pets pt) {
         return classTranslate.get(pt);
     }
 }

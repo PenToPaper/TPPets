@@ -1,12 +1,12 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
-
-import com.maxwellwheeler.plugins.tppets.TPPets;
 
 /**
  * A class that interfaces with the SQLite File

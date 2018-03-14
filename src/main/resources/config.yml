@@ -14,6 +14,10 @@ command_aliases:
   dogs: [wolves, dog, wolf]
   cats: [cat, ocelot, ocelots]
   birds: [bird, parrots, parrot]
+  horses: [horse]
+  mules: [mule]
+  llamas: [llama]
+  donkeys: [donkey]
   help: [pls]
 mysql:
   enable: false

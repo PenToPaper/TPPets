@@ -58,3 +58,15 @@ permissions:
   tppets.birds:
     default: true
     description: Allows user to teleport their birds to them.
+  tppets.horses:
+    default: true
+    description: Allows user to teleport their horses to them.
+  tppets.mules:
+    default: true
+    description: Allows user to teleport their mules to them.
+  tppets.llamas:
+    default: true
+    description: Allows user to teleport their llamas to them.
+  tppets.donkeys:
+    default: true
+    description: Allows user to teleport their donkeys to them.

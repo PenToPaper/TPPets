@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
@@ -7,8 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
-
-import com.maxwellwheeler.plugins.tppets.TPPets;
 
 /**
  * The event listener that handles chunk events

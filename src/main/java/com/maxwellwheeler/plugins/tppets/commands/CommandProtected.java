@@ -1,15 +1,14 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
-import java.util.Arrays;
-
+import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
+import java.util.Arrays;
 
 /**
  * Object that processes /tpp protected commands.

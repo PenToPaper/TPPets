@@ -1,8 +1,12 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsChecker;
-import org.bukkit.Material;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sittable;
@@ -13,11 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
-
-import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 import java.util.Hashtable;
 import java.util.List;

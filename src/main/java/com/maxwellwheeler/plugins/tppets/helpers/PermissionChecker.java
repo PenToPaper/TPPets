@@ -1,11 +1,10 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.permissions.Permissible;
-
-import com.maxwellwheeler.plugins.tppets.TPPets;
 
 /**
  * Checks online and/or offline player permissions, if there's vault.

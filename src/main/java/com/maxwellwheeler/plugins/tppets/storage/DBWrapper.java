@@ -1,5 +1,13 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Sittable;
+import org.bukkit.entity.Tameable;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,15 +15,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Level;
-
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Sittable;
-import org.bukkit.entity.Tameable;
-
-import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 
 /**
  * A wrapper class that abstracts away the specific database being used.
