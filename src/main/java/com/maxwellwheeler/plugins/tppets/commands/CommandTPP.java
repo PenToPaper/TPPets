@@ -1,16 +1,19 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
+import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 
 /**
  * Core command handler to the plugin.
@@ -30,7 +33,7 @@ public class CommandTPP implements CommandExecutor {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length >= 1 && args[0] != null) {
+        if (CheckArgs.validateArgs(args, 1)) {
             String realCommand = "";
             for (String commands : commandAliases.keySet()) {
                 if (commandAliases.get(commands).contains(args[0])) {
@@ -57,7 +60,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "dogs":
                     if (sender.hasPermission("tppets.dogs")) {
-                        CommandTPPets dogTPP = new CommandTPPets();
+                        CommandTPPets dogTPP = getTPPets(sender, args);
                         dogTPP.processCommand(sender, PetType.Pets.DOG);
                     } else {
                         permissionMessage(sender);
@@ -65,7 +68,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "cats":
                     if (sender.hasPermission("tppets.cats")) {
-                        CommandTPPets catTPP = new CommandTPPets();
+                        CommandTPPets catTPP = getTPPets(sender, args);
                         catTPP.processCommand(sender, PetType.Pets.CAT);
                     } else {
                         permissionMessage(sender);
@@ -73,7 +76,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "birds":
                     if (sender.hasPermission("tppets.birds")) {
-                        CommandTPPets parrotTPP = new CommandTPPets();
+                        CommandTPPets parrotTPP = getTPPets(sender, args);
                         parrotTPP.processCommand(sender, PetType.Pets.PARROT);
                         return true;
                     } else {
@@ -88,6 +91,18 @@ public class CommandTPP implements CommandExecutor {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Sends appropriate arguments to CommandTPPets constructor
+     * @param args The arguments originally sent to the onCommand method.
+     * @return An instance of {@link CommandTPPets}, constructed based on the number of args.
+     */
+    private CommandTPPets getTPPets(CommandSender sender, String[] args) {
+        if (CheckArgs.validateArgs(args, 2) && sender.hasPermission("tppets.teleportother")) {
+            return new CommandTPPets(args[1]);
+        }
+        return new CommandTPPets();
     }
     
     /**

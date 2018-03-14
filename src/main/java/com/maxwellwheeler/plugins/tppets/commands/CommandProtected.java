@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
 
 /**
  * Object that processes /tpp protected commands.
@@ -24,32 +25,32 @@ public class CommandProtected extends RegionCommand {
      * Ex: /tpp protected add PrimaryProtected PrimaryLost You can't do that here, String args[] would have {add PrimaryProtected PrimaryLost You can't do that here}.
      */
     public void processCommand(CommandSender sender, String[] args) {
-        if (validateArgs(args, 1)) {
+        if (CheckArgs.validateArgs(args, 1)) {
             // Changes behavior based on the 3rd index of the original command, but first index of the arguments provided here.
             switch (args[0]) {
                 case "add":
-                    if (validateArgs(args, 4)) {
+                    if (CheckArgs.validateArgs(args, 4)) {
                         addRegion(sender, Arrays.copyOfRange(args, 1, args.length));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp protected add [name] [lost region] [enter message]");
                     }
                     break;
                 case "remove":
-                    if (validateArgs(args, 2)) {
+                    if (CheckArgs.validateArgs(args, 2)) {
                         removeRegion(sender, new String[] {args[1]});
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp protected remove [name]");
                     }
                     break;
                 case "list":
-                    if (validateArgs(args, 2)) {
+                    if (CheckArgs.validateArgs(args, 2)) {
                         listRegions(sender, new String[] {args[1]});
                     } else {
                         listRegions(sender, new String[] {});
                     }
                     break;
                 case "relink":
-                    if (validateArgs(args, 3)) {
+                    if (CheckArgs.validateArgs(args, 3)) {
                         relinkRegion(sender, Arrays.copyOfRange(args, 1, 3));
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp protected relink [name] [lost region]");

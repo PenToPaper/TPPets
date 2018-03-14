@@ -50,23 +50,6 @@ public abstract class RegionCommand {
     protected String getLocationString(Location lc) {
         return Integer.toString(lc.getBlockX()) + ", " + Integer.toString(lc.getBlockY()) + ", " + Integer.toString(lc.getBlockZ());
     }
-    /**
-     * Used to validate the number of arguments for commands with multiple arguments, and a certain number of them expected.
-     * @param args The list of arguments.
-     * @param length The expected length.
-     * @return True if non-null values occupy the args array up to length, false if otherwise.
-     */
-    protected boolean validateArgs(String[] args, int length) {
-        if (args.length >= length) {
-            for (int i = 0; i < args.length; i++) {
-                if (args[i] == null) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
     
     /**
      * Processes the command passed to it

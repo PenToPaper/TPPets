@@ -6,11 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ocelot;
@@ -34,6 +30,8 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 public class CommandTPPets {
     private TPPets thisPlugin;
     private DBWrapper dbConn;
+    private String ownerName;
+    private OfflinePlayer ownerOfflinePlayer;
     
     /**
      * Grabs plugin instance and database instance from Bukkit
@@ -41,6 +39,14 @@ public class CommandTPPets {
     public CommandTPPets() {
         this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
         this.dbConn = this.thisPlugin.getDatabase();
+        this.ownerName = "";
+        ownerOfflinePlayer = null;
+    }
+
+    public CommandTPPets(String ownerName) {
+        this();
+        this.ownerName = ownerName;
+        this.ownerOfflinePlayer = Bukkit.getOfflinePlayer(ownerName);
     }
     
     /**
@@ -53,7 +59,8 @@ public class CommandTPPets {
             Player tempPlayer = (Player) sender;
             ProtectedRegion tempProtected = thisPlugin.getProtectedRegionWithin(tempPlayer.getLocation());
             if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
-                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsAndTeleport(pt, tempPlayer).size()) + " " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
+                String ownerTeleported = ownerName.equals("") ? tempPlayer.getName() : ownerName;
+                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsAndTeleport(pt, tempPlayer).size()) + " of " + ownerTeleported + "'s " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
                 announceComplete(sender, pt);
             } else {
                 tempPlayer.sendMessage(tempProtected.getEnterMessage());
@@ -93,8 +100,10 @@ public class CommandTPPets {
      */
     private Set<UUID> loadAndTp(Set<UUID> entList, World world, PetType.Pets pt, Player pl) {
         List<PetStorage> unloadedPetsInWorld = new ArrayList<PetStorage>();
-        if (dbConn != null) {
+        if (dbConn != null && ownerName.equals("")) {
             unloadedPetsInWorld = dbConn.getPetsGeneric(pl.getUniqueId().toString(), world.getName(), pt);
+        } else if (ownerOfflinePlayer != null) {
+            unloadedPetsInWorld = dbConn.getPetsGeneric(ownerOfflinePlayer.getUniqueId().toString(), world.getName(), pt);
         }
         for (PetStorage pet : unloadedPetsInWorld) {
             Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
@@ -123,8 +132,7 @@ public class CommandTPPets {
     private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {
         if (pet instanceof Tameable) {
             Tameable tameableTemp = (Tameable) pet;
-
-            if (tameableTemp.isTamed() && pl.equals(tameableTemp.getOwner())) {
+            if ((ownerName.equals("") && tameableTemp.isTamed() && pl.equals(tameableTemp.getOwner())) || (tameableTemp.isTamed() && ownerName.equals(tameableTemp.getOwner().getName()))) {
                 switch (pt) {
                     case CAT:
                         return pet instanceof Ocelot;
@@ -170,15 +178,16 @@ public class CommandTPPets {
      * @param pt The pet type that was teleported
      */
     private void announceComplete(CommandSender sender, PetType.Pets pt) {
+        String firstWord = ownerName.equals("") ? "Your " : ownerName + "'s ";
         switch (pt) {
             case CAT:
-                sender.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + "cats " + ChatColor.BLUE + "have been teleported to you.");
+                sender.sendMessage(ChatColor.BLUE + firstWord + ChatColor.WHITE + "cats " + ChatColor.BLUE + "have been teleported to you.");
                 break;
             case DOG:
-                sender.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + "dogs " + ChatColor.BLUE + "have been teleported to you.");
+                sender.sendMessage(ChatColor.BLUE + firstWord + ChatColor.WHITE + "dogs " + ChatColor.BLUE + "have been teleported to you.");
                 break;
             case PARROT:
-                sender.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + "birds " + ChatColor.BLUE + "have been teleported to you.");
+                sender.sendMessage(ChatColor.BLUE + firstWord + ChatColor.WHITE + "birds " + ChatColor.BLUE + "have been teleported to you.");
                 break;
             default:
                 break;
