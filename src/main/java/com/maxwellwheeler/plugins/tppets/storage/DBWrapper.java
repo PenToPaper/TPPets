@@ -130,17 +130,19 @@ public class DBWrapper {
      * @return True if successful, false if not
      */
     public boolean insertPet(Entity ent) {
-        if (ent instanceof Tameable && ent instanceof Sittable) {
+        if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) ent;
-            String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
-            String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
-            int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(ent));
-            if (database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID)) {
-                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
-                return true;
-            } else {
-                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be added to database.");
-                return false;
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
+                String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
+                String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
+                int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(ent));
+                if (database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID)) {
+                    thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
+                    return true;
+                } else {
+                    thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be added to database.");
+                    return false;
+                }
             }
         }
         return false;
@@ -152,7 +154,7 @@ public class DBWrapper {
      * @return True if successful, false if not
      */
     public boolean deletePet(Entity ent) {
-        if (ent instanceof Tameable && ent instanceof Sittable) {
+        if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) ent;
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
@@ -173,7 +175,7 @@ public class DBWrapper {
      * @return True if successful, false if not
      */
     public boolean updatePet(Entity ent) {
-        if (ent instanceof Tameable && ent instanceof Sittable) {
+        if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) ent;
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
@@ -194,7 +196,7 @@ public class DBWrapper {
      * @return True if successful, false if not
      */
     public boolean updateOrInsertPet(Entity ent) {
-        if (ent instanceof Tameable && ent instanceof Sittable) {
+        if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
             if (petInTable(ent)) {
                 return updatePet(ent);
             }
@@ -384,7 +386,7 @@ public class DBWrapper {
     
     /**
      * Inserts a {@link ProtectedRegion} into the database.
-     * @param lfr The {@link ProtectedRegion} instance to add to the database.
+     * @param pr The {@link ProtectedRegion} instance to add to the database.
      * @return True if successful, false if not
      */
     public boolean insertProtectedRegion(ProtectedRegion pr) {
@@ -399,7 +401,7 @@ public class DBWrapper {
     
     /**
      * Removes a {@link ProtectedRegion} from the database.
-     * @param lfr The {@link ProtectedRegion} instance to remove from the database.
+     * @param pr The {@link ProtectedRegion} instance to remove from the database.
      * @return True if successful, false if not.
      */
     public boolean deleteProtectedRegion(ProtectedRegion pr) {
@@ -435,7 +437,7 @@ public class DBWrapper {
     
     /**
      * Updates the given {@link ProtectedRegion}'s lfName in the database.
-     * @param lfr The {@link ProtectedRegion} whose lfName is to be updated.
+     * @param pr The {@link ProtectedRegion} whose lfName is to be updated.
      * @return True if successful, false if not.
      */
     public boolean updateProtectedRegion(ProtectedRegion pr) {

@@ -5,6 +5,10 @@ total_pet_limit: -1
 dog_limit: -1
 cat_limit: -1
 bird_limit: -1
+horse_limit: -1
+mule_limit: -1
+llama_limit: -1
+donkey_limit: -1
 tools:
   untame_pets: [SHEARS]
   get_owner: [BONE]

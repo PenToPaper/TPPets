@@ -25,34 +25,20 @@ public class PlayerPetIndex {
      *
      */
     public enum RuleRestriction {
-        ALLOWED, TOTAL, DOG, CAT, PARROT, UNKNOWN
+        ALLOWED, TOTAL, DOG, CAT, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
     }
-    
-    /**
-     * Links the enum {@link RuleRestriction} with the enum {@link PetType.Pets}
-     * @param pt The {@link PetType.Pets} enum value
-     * @return The rule restriction represented by pt
-     */
-    private RuleRestriction enumLink(PetType.Pets pt) {
-        switch (pt) {
-        case DOG:
-            return RuleRestriction.DOG;
-        case CAT:
-            return RuleRestriction.CAT;
-        case PARROT:
-            return RuleRestriction.PARROT;
-        case UNKNOWN:
-        default:
-            return RuleRestriction.UNKNOWN;
-        }
-    }
-    
+
     private Hashtable<String, AllPetsList> playerIndex = new Hashtable<String, AllPetsList>();
     private TPPets thisPlugin;
     private int totalLimit;
     private int dogLimit;
     private int catLimit;
     private int birdLimit;
+    private int horseLimit;
+    private int muleLimit;
+    private int llamaLimit;
+    private int donkeyLimit;
+
     
     /**
      * General constructor, referencing the plugin instance, and pet limits from the config file.
@@ -62,12 +48,16 @@ public class PlayerPetIndex {
      * @param catLimit The limit of all cats owned.
      * @param birdLimit The limit of all birds owned.
      */
-    public PlayerPetIndex(TPPets thisPlugin, int totalLimit, int dogLimit, int catLimit, int birdLimit) {
+    public PlayerPetIndex(TPPets thisPlugin, int totalLimit, int dogLimit, int catLimit, int birdLimit, int horseLimit, int muleLimit, int llamaLimit, int donkeyLimit) {
         this.thisPlugin = thisPlugin;
         this.totalLimit = totalLimit;
         this.dogLimit = dogLimit;
         this.catLimit = catLimit;
         this.birdLimit = birdLimit;
+        this.horseLimit = horseLimit;
+        this.muleLimit = muleLimit;
+        this.llamaLimit = llamaLimit;
+        this.donkeyLimit = donkeyLimit;
         initializePetIndex();
     }
     
@@ -76,26 +66,28 @@ public class PlayerPetIndex {
      */
     private void initializePetIndex() {
         for (World wld : Bukkit.getServer().getWorlds()) {
-            for (Entity ent : wld.getEntitiesByClasses(org.bukkit.entity.Sittable.class)) {
-                Tameable tameableTemp = (Tameable) ent;
-                if (tameableTemp.isTamed()) {
-                    String trimmedOwnerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
-                    String trimmedEntityUUID = UUIDUtils.trimUUID(ent.getUniqueId());
-                    if (!playerIndex.containsKey(trimmedOwnerUUID)) {
-                        playerIndex.put(trimmedOwnerUUID, new AllPetsList());
+            for (Entity ent : wld.getEntitiesByClasses(org.bukkit.entity.Tameable.class)) {
+                PetType.Pets pt = PetType.getEnumByEntity(ent);
+                if (!pt.equals(PetType.Pets.UNKNOWN)) {
+                    Tameable tameableTemp = (Tameable) ent;
+                    if (tameableTemp.isTamed()) {
+                        String trimmedOwnerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
+                        String trimmedEntityUUID = UUIDUtils.trimUUID(ent.getUniqueId());
+                        if (!playerIndex.containsKey(trimmedOwnerUUID)) {
+                            playerIndex.put(trimmedOwnerUUID, new AllPetsList());
+                        }
+                        playerIndex.get(trimmedOwnerUUID).addPet(trimmedEntityUUID, pt);
                     }
-                    playerIndex.get(trimmedOwnerUUID).addPet(trimmedEntityUUID, PetType.getEnumByEntity(ent));
                 }
             }
             if (thisPlugin.getDatabase() != null) {
                 List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromWorld(wld.getName());
                 if (psList != null) {
-                    for (PetStorage ps : thisPlugin.getDatabase().getPetsFromWorld(wld.getName())) {
+                    for (PetStorage ps : psList) {
                         if (!playerIndex.containsKey(ps.ownerId)) {
                             playerIndex.put(ps.ownerId, new AllPetsList());
-                        } else {
-                            playerIndex.get(ps.ownerId).addPet(ps.petId, ps.petType);
                         }
+                        playerIndex.get(ps.ownerId).addPet(ps.petId, ps.petType);
                     }
                 }
             }
@@ -115,6 +107,14 @@ public class PlayerPetIndex {
                 return catLimit;
             case PARROT:
                 return birdLimit;
+            case HORSE:
+                return horseLimit;
+            case MULE:
+                return muleLimit;
+            case LLAMA:
+                return llamaLimit;
+            case DONKEY:
+                return donkeyLimit;
             default:
                 return -1;
         }
@@ -134,6 +134,46 @@ public class PlayerPetIndex {
         }
         playerIndex.get(trimmedPlayerUUID).addPet(trimmedEntityUUID, pt);
     }
+
+    /**
+     * Adds a new pet tamed to a player's count
+     * @param ent The entity to add
+     */
+    public void newPetTamed(Entity ent) {
+        if (ent instanceof Tameable) {
+            Tameable tameableTemp = (Tameable) ent;
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
+                newPetTamed(tameableTemp.getOwner().getUniqueId().toString(), ent.getUniqueId().toString(), PetType.getEnumByEntity(ent));
+            }
+        }
+    }
+
+    /**
+     * Links the enum {@link RuleRestriction} with the enum {@link PetType.Pets}
+     * @param pt The {@link PetType.Pets} enum value
+     * @return The rule restriction represented by pt
+     */
+    private RuleRestriction enumLink(PetType.Pets pt) {
+        switch (pt) {
+            case DOG:
+                return RuleRestriction.DOG;
+            case CAT:
+                return RuleRestriction.CAT;
+            case PARROT:
+                return RuleRestriction.PARROT;
+            case HORSE:
+                return RuleRestriction.HORSE;
+            case MULE:
+                return RuleRestriction.MULE;
+            case LLAMA:
+                return RuleRestriction.LLAMA;
+            case DONKEY:
+                return RuleRestriction.DONKEY;
+            case UNKNOWN:
+            default:
+                return RuleRestriction.UNKNOWN;
+        }
+    }
     
     /**
      * Removes a pet from the player's count with
@@ -146,6 +186,19 @@ public class PlayerPetIndex {
         String trimmedEntityUUID = UUIDUtils.trimUUID(entityUUID);
         if (playerIndex.containsKey(trimmedPlayerUUID)) {
             playerIndex.get(trimmedPlayerUUID).removePet(trimmedEntityUUID, pt);
+        }
+    }
+
+    /**
+     * Removes a new pet tamed from a player's count
+     * @param ent The entity to remove
+     */
+    public void removePetTamed(Entity ent) {
+        if (ent instanceof Tameable) {
+            Tameable tameableTemp = (Tameable) ent;
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
+                removePetTamed(tameableTemp.getOwner().getUniqueId().toString(), ent.getUniqueId().toString(), PetType.getEnumByEntity(ent));
+            }
         }
     }
     
@@ -167,7 +220,7 @@ public class PlayerPetIndex {
      * @return The ruling. It can be allowed, disallowed because of X, or unknown
      */
     public RuleRestriction allowTame(AnimalTamer at, Location loc, PetType.Pets pt) {
-        if (PermissionChecker.offlineHasPerms(at, "tppets.bypasslimit", loc.getWorld(), thisPlugin) || PermissionChecker.onlineHasPerms(at, "tppets.bypasslimit")) {
+        if (PermissionChecker.onlineHasPerms(at, "tppets.bypasslimit") || PermissionChecker.offlineHasPerms(at, "tppets.bypasslimit", loc.getWorld(), thisPlugin)) {
             return RuleRestriction.ALLOWED;
         }
         String trimmedUUID = UUIDUtils.trimUUID(at.getUniqueId());

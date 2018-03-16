@@ -6,6 +6,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,6 +122,14 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "help":
                 default:
+                    if (sender instanceof Player) {
+                        Player playerTemp = (Player) sender;
+                        Entity entTemp = playerTemp.getWorld().spawnEntity(playerTemp.getLocation(), EntityType.SKELETON_HORSE);
+                        if (entTemp instanceof Tameable) {
+                            Tameable tameableTemp = (Tameable) entTemp;
+                            tameableTemp.setOwner(playerTemp);
+                        }
+                    }
                     sendHelp(sender);
                     break;
             }

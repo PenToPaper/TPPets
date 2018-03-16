@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
@@ -32,10 +33,11 @@ public class TPPetsChunkListener implements Listener {
     @EventHandler (priority=EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent e) {
         for (Entity ent : e.getChunk().getEntities()) {
-           if (ent instanceof Sittable && ent instanceof Tameable) {
+           if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
                Tameable tameableTemp = (Tameable) ent;
                if (tameableTemp.isTamed() && thisPlugin.getDatabase() != null) {
                    thisPlugin.getDatabase().updateOrInsertPet(ent);
+                   thisPlugin.getPetIndex().newPetTamed(ent);
                }
            }
         }

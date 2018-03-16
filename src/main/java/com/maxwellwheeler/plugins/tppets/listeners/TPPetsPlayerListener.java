@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsChecker;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -50,7 +51,7 @@ public class TPPetsPlayerListener implements Listener {
         ProtectedRegion pr = thisPlugin.getProtectedRegionWithin(e.getTo());
         if (pr != null) {
             for (Entity ent : e.getPlayer().getNearbyEntities(10, 10, 10)) {
-                if (ent instanceof Tameable && ent instanceof Sittable && pr.isInZone(ent.getLocation())) {
+                if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN) && pr.isInZone(ent.getLocation())) {
                     Tameable tameableTemp = (Tameable) ent;
                     if (tameableTemp.isTamed()) {
                         if (thisPlugin.getDatabase() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin)) && pr.getLfReference() != null) {
@@ -73,23 +74,21 @@ public class TPPetsPlayerListener implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
         if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "untame_pets")) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
-            if (thisPlugin.getDatabase() != null && tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall")) {
-                Sittable sittableTemp = (Sittable) e.getRightClicked();
+            if (thisPlugin.getDatabase() != null && tameableTemp.isTamed() && (tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(e.getPlayer())) || e.getPlayer().hasPermission("tppets.untameall")) {
+                EntityActions.setSitting(e.getRightClicked());
                 thisPlugin.getDatabase().deletePet(e.getRightClicked());
-                sittableTemp.setSitting(false);
+                tameableTemp.setOwner(null);
                 tameableTemp.setTamed(false);
-                String ownerUUIDString = e.getPlayer().getUniqueId().toString();
-                String entityUUIDString = e.getRightClicked().getUniqueId().toString();
-                thisPlugin.getPetIndex().removePetTamed(ownerUUIDString, entityUUIDString, PetType.getEnumByEntity(e.getRightClicked()));
+                thisPlugin.getPetIndex().removePetTamed(e.getRightClicked());
                 thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
                 e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");
             }
         } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "get_owner")) {
             Tameable tameableTemp = (Tameable) e.getRightClicked();
-            if (tameableTemp.getOwner() != null) {
-                e.getPlayer().sendMessage(ChatColor.BLUE + "This pet belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
-            } else {
+            if (tameableTemp.getOwner() == null) {
                 e.getPlayer().sendMessage(ChatColor.BLUE + "This pet does not belong to anybody.");
+            } else {
+                e.getPlayer().sendMessage(ChatColor.BLUE + "This pet belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
             }
         }
     }
@@ -102,6 +101,6 @@ public class TPPetsPlayerListener implements Listener {
      * @return if the entity is of the correct type, the player is sneaking, and the player is holding the right item
      */
     private boolean isApplicableInteraction(Entity ent, Player pl, String key) {
-        return ent instanceof Sittable && ent instanceof Tameable && pl.isSneaking() && ToolsChecker.isInList(customTools, key, pl.getInventory().getItemInMainHand().getType());
+        return ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN) && pl.isSneaking() && ToolsChecker.isInList(customTools, key, pl.getInventory().getItemInMainHand().getType());
     }
 }

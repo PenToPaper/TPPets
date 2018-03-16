@@ -1,9 +1,12 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -30,21 +33,20 @@ public class TPPetsEntityListener implements Listener {
     
     /**
      * Event handler for EntityTeleportEvent. It checks if the entity is a pet that's teleporting into a {@link ProtectedRegion} or teleporting out of a {@link LostAndFoundRegion} and prevents that.
-     * Note that entities can be teleported out of the {@link LostAndFoundRegion} with the command, just not through natrual mob behavior.
+     * Note that entities can be teleported out of the {@link LostAndFoundRegion} with the command, just not through natural mob behavior.
      * @param e The event
      */
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityTeleportEvent(EntityTeleportEvent e) {
-        if (e.getEntity() instanceof Sittable && e.getEntity() instanceof Tameable) {
+        if (e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed() && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", e.getEntity().getLocation().getWorld(), thisPlugin))) {
-                Sittable sittableTemp = (Sittable) e.getEntity();
                 if (thisPlugin.isInProtectedRegion(e.getTo())) {
-                    sittableTemp.setSitting(true);
+                    EntityActions.setSitting(e.getEntity());
                     e.setCancelled(true);
                     thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering protected region.");
                 } else if (thisPlugin.isInLostRegion(e.getFrom())) {
-                    sittableTemp.setSitting(true);
+                    EntityActions.setSitting(e.getEntity());
                     e.setCancelled(true);
                 }
             }
@@ -57,7 +59,7 @@ public class TPPetsEntityListener implements Listener {
      */
     @EventHandler (priority=EventPriority.MONITOR)
     public void onEntityDeathEvent(EntityDeathEvent e) {
-        if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
+        if (e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
                 if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deletePet(e.getEntity())) {
@@ -75,7 +77,7 @@ public class TPPetsEntityListener implements Listener {
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
         // First three lines determine if this is an entity we care about
-        if (e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
+        if (e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
                 // If we're supposed to prevent player damage, prevent damage directly from players that don't own the pet, and indirectly through projectiles.
@@ -122,13 +124,14 @@ public class TPPetsEntityListener implements Listener {
      */
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityDamageEvent(EntityDamageEvent e) {
-        if ((thisPlugin.getPreventEnvironmentalDamage()) && e.getEntity() instanceof Tameable && e.getEntity() instanceof Sittable) {
+        if ((thisPlugin.getPreventEnvironmentalDamage()) && e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
                 switch (e.getCause()) {
                     case BLOCK_EXPLOSION:
                     case CONTACT:
                     case CRAMMING:
+                    case CUSTOM:
                     case DRAGON_BREATH:
                     case DROWNING:
                     case FALL:
@@ -170,7 +173,7 @@ public class TPPetsEntityListener implements Listener {
                 playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
             }
         } else {
-            thisPlugin.getPetIndex().newPetTamed(e.getOwner().getUniqueId().toString(), e.getEntity().getUniqueId().toString(), pt);
+            thisPlugin.getPetIndex().newPetTamed(e.getEntity());
         }
     }
 }

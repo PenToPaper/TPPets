@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -129,7 +130,7 @@ public class CommandTPPets {
     private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {
         if (pet instanceof Tameable) {
             Tameable tameableTemp = (Tameable) pet;
-            if ((ownerName.equals("") && tameableTemp.isTamed() && pl.equals(tameableTemp.getOwner())) || (tameableTemp.isTamed() && ownerName.equals(tameableTemp.getOwner().getName()))) {
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && ((ownerName.equals("") && pl.equals(tameableTemp.getOwner())) || (ownerName.equals(tameableTemp.getOwner().getName())))) {
                 return pt.equals(PetType.getEnumByEntity(pet));
             }
         }
@@ -153,10 +154,7 @@ public class CommandTPPets {
      * @param entity The entity to be teleported
      */
     private void teleportPet(Player pl, Entity entity) {
-        if (entity instanceof Sittable) {
-            Sittable tempSittable = (Sittable) entity;
-            tempSittable.setSitting(false);
-        }
+        EntityActions.setSitting(entity);
         entity.teleport(pl);
     }
     

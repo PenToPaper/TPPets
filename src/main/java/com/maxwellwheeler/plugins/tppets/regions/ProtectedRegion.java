@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.regions;
 
+import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -96,9 +97,7 @@ public class ProtectedRegion extends Region {
      * @param ent The entity to teleport.
      */
     public void tpToLostRegion(Entity ent) {
-        if (ent instanceof Sittable) {
-            ((Sittable) ent).setSitting(false);
-        }
+        EntityActions.setSitting(ent);
         if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
             ent.teleport(lfReference.getApproxCenter());
             getPlugin().getLogger().info("Teleported pet with UUID " + ent.getUniqueId().toString() +  " away from " + zoneName + " to " + this.getLfReference().zoneName);

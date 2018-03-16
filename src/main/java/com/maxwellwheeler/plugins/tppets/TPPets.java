@@ -72,7 +72,7 @@ public class TPPets extends JavaPlugin implements Listener {
      * Initializes the {@link PlayerPetIndex} based on total_pet_limit, dog_limit, cat_limit, and bird_limit integers in the config.
      */
     private void initializePetIndex() {
-        petIndex = new PlayerPetIndex(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"));
+        petIndex = new PlayerPetIndex(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
     }
     
     /**
