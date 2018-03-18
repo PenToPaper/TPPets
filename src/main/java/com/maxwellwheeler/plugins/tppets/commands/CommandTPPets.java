@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -52,16 +53,27 @@ public class CommandTPPets {
      * @param sender Represents who sent the command. If it isn't a player, an error message is displayed.
      * @param pt The type of pet to be teleported
      */
-    public void processCommand(CommandSender sender, PetType.Pets pt) {
+    public void processCommand(CommandSender sender, String[] args, PetType.Pets pt) {
         if (sender instanceof Player) {
             Player tempPlayer = (Player) sender;
-            ProtectedRegion tempProtected = thisPlugin.getProtectedRegionWithin(tempPlayer.getLocation());
-            if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
-                String ownerTeleported = ownerName.equals("") ? tempPlayer.getName() : ownerName;
-                thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsAndTeleport(pt, tempPlayer).size()) + " of " + ownerTeleported + "'s " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
-                announceComplete(sender, pt);
+            if (CheckArgs.validateArgs(args, 1)) {
+                switch (args[0]) {
+                    case "list":
+                        listPets(tempPlayer, pt);
+                        break;
+                    default:
+                        sender.sendMessage(ChatColor.RED + "Can't process command.");
+                        break;
+                }
             } else {
-                tempPlayer.sendMessage(tempProtected.getEnterMessage());
+                ProtectedRegion tempProtected = thisPlugin.getProtectedRegionWithin(tempPlayer.getLocation());
+                if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
+                    String ownerTeleported = ownerName.equals("") ? tempPlayer.getName() : ownerName;
+                    thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsAndTeleport(pt, tempPlayer).size()) + " of " + ownerTeleported + "'s " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
+                    announceComplete(sender, pt);
+                } else {
+                    tempPlayer.sendMessage(tempProtected.getEnterMessage());
+                }
             }
         } else {
             sender.sendMessage(ChatColor.RED + "Can't teleport pets to a non-player.");
@@ -187,5 +199,16 @@ public class CommandTPPets {
      */
     private String formatLocation(Location lc) {
         return "x: " + Integer.toString(lc.getBlockX()) + ", " + "y: " + Integer.toString(lc.getBlockY()) + ", " + "z: " + Integer.toString(lc.getBlockZ());
+    }
+
+    private void listPets(Player pl, PetType.Pets pt) {
+        pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Your " + pt.toString() + " names]" + ChatColor.DARK_GRAY + "---------");
+        for (World wld : Bukkit.getServer().getWorlds()) {
+            List<PetStorage> tempPs = thisPlugin.getDatabase().getPetsGeneric(pl.getUniqueId().toString(), wld.getName(), pt);
+            for (int i = 0; i < tempPs.size(); i++) {
+                pl.sendMessage(ChatColor.WHITE + Integer.toString(i+1) + ") " + tempPs.get(i).petName);
+            }
+        }
+        pl.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
     }
 }

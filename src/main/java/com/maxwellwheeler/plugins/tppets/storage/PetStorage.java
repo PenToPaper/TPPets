@@ -13,6 +13,7 @@ public class PetStorage {
     public int petZ;
     public String petWorld;
     public String ownerId;
+    public String petName;
     
     /**
      * General constructor, using data from the database table tpp_unloaded_pets
@@ -24,7 +25,7 @@ public class PetStorage {
      * @param petWorld The name of the world.
      * @param ownerId A string version of the pet owner's UUID, trimmed.
      */
-    public PetStorage(String petId, int petTypeIndex, int petX, int petY, int petZ, String petWorld, String ownerId) {
+    public PetStorage(String petId, int petTypeIndex, int petX, int petY, int petZ, String petWorld, String ownerId, String petName) {
         this.petId = petId;
         this.petType = PetType.getPetFromIndex(petTypeIndex);
         this.petX = petX;
@@ -32,5 +33,6 @@ public class PetStorage {
         this.petZ = petZ;
         this.petWorld = petWorld;
         this.ownerId = ownerId;
+        this.petName = petName;
     }
 }

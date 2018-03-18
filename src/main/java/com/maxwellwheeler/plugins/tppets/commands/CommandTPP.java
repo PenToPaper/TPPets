@@ -62,7 +62,7 @@ public class CommandTPP implements CommandExecutor {
                 case "dogs":
                     if (sender.hasPermission("tppets.dogs")) {
                         CommandTPPets dogTPP = getTPPets(sender, args);
-                        dogTPP.processCommand(sender, PetType.Pets.DOG);
+                        dogTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DOG);
                     } else {
                         permissionMessage(sender);
                     }
@@ -70,7 +70,7 @@ public class CommandTPP implements CommandExecutor {
                 case "cats":
                     if (sender.hasPermission("tppets.cats")) {
                         CommandTPPets catTPP = getTPPets(sender, args);
-                        catTPP.processCommand(sender, PetType.Pets.CAT);
+                        catTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.CAT);
                     } else {
                         permissionMessage(sender);
                     }
@@ -78,7 +78,7 @@ public class CommandTPP implements CommandExecutor {
                 case "birds":
                     if (sender.hasPermission("tppets.birds")) {
                         CommandTPPets parrotTPP = getTPPets(sender, args);
-                        parrotTPP.processCommand(sender, PetType.Pets.PARROT);
+                        parrotTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.PARROT);
                         return true;
                     } else {
                         permissionMessage(sender);
@@ -87,7 +87,7 @@ public class CommandTPP implements CommandExecutor {
                 case "horses":
                     if (sender.hasPermission("tppets.horses")) {
                         CommandTPPets horseTPP = getTPPets(sender, args);
-                        horseTPP.processCommand(sender, PetType.Pets.HORSE);
+                        horseTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.HORSE);
                         return true;
                     } else {
                         permissionMessage(sender);
@@ -96,7 +96,7 @@ public class CommandTPP implements CommandExecutor {
                 case "mules":
                     if (sender.hasPermission("tppets.mules")) {
                         CommandTPPets muleTPP = getTPPets(sender, args);
-                        muleTPP.processCommand(sender, PetType.Pets.MULE);
+                        muleTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.MULE);
                         return true;
                     } else {
                         permissionMessage(sender);
@@ -105,7 +105,7 @@ public class CommandTPP implements CommandExecutor {
                 case "llamas":
                     if (sender.hasPermission("tppets.llamas")) {
                         CommandTPPets llamaTPP = getTPPets(sender, args);
-                        llamaTPP.processCommand(sender, PetType.Pets.LLAMA);
+                        llamaTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.LLAMA);
                         return true;
                     } else {
                         permissionMessage(sender);
@@ -114,7 +114,7 @@ public class CommandTPP implements CommandExecutor {
                 case "donkeys":
                     if (sender.hasPermission("tppets.donkeys")) {
                         CommandTPPets donkeyTPP = getTPPets(sender, args);
-                        donkeyTPP.processCommand(sender, PetType.Pets.DONKEY);
+                        donkeyTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DONKEY);
                         return true;
                     } else {
                         permissionMessage(sender);
