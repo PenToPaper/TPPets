@@ -49,6 +49,7 @@ public abstract class DBGeneral implements DBFrame {
      */
     public ResultSet selectPrepStatement(Connection dbConn, String prepStatement, Object... args) {
         try {
+            System.out.println(prepStatement);
             return executeQuery(dbConn, prepStatement, args);
         } catch (SQLException e) {
             thisPlugin.getLogger().log(Level.SEVERE, "Can't execute select statement: " + e.getMessage());
@@ -88,7 +89,7 @@ public abstract class DBGeneral implements DBFrame {
 
     /**
      * Executes a create statement in the database.
-     * @param prepStatement A string representing the statement.
+     * @param statement A string representing the statement.
      * @return True if successful, false if not.
      */
     public boolean createStatement(String statement) {

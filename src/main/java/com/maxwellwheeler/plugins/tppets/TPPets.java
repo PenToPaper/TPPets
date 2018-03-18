@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets;
 
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
+import com.maxwellwheeler.plugins.tppets.helpers.DBUpdater;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
@@ -34,6 +35,7 @@ public class TPPets extends JavaPlugin implements Listener {
 
     // Database
     private DBWrapper database;
+    private DBUpdater databaseUpdater;
     
     private boolean preventPlayerDamage;
     private boolean preventEnvironmentalDamage;
@@ -41,6 +43,7 @@ public class TPPets extends JavaPlugin implements Listener {
     
     // Vault stuff
     private Permission perms;
+
     private boolean vaultEnabled;
     
     private boolean allowTpBetweenWorlds;
@@ -94,6 +97,11 @@ public class TPPets extends JavaPlugin implements Listener {
         if (!database.initializeTables()) {
             database = null;
         }
+    }
+
+    private void updateDBC() {
+        databaseUpdater = new DBUpdater(this);
+        databaseUpdater.update(this.getDatabase());
     }
     
     /**
@@ -190,6 +198,7 @@ public class TPPets extends JavaPlugin implements Listener {
         // Database setup
         getLogger().info("Setting up database.");
         initializeDBC();
+        updateDBC();
         
         // Database pulling
         getLogger().info("Getting data from database.");
@@ -384,5 +393,9 @@ public class TPPets extends JavaPlugin implements Listener {
     
     public PlayerPetIndex getPetIndex() {
         return petIndex;
+    }
+
+    public DBUpdater getDatabaseUpdater() {
+        return databaseUpdater;
     }
 }

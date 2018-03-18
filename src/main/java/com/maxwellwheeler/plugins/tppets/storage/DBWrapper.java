@@ -56,7 +56,7 @@ public class DBWrapper {
             + "max_z INT NOT NULL,\n"
             + "world_name VARCHAR(25) NOT NULL,\n"
             + "lf_zone_name VARCHAR(64));";
-    
+
     /*
      *      UNLOADED_PETS STATEMENTS
      */
@@ -84,6 +84,7 @@ public class DBWrapper {
     private String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
     private String selectProtected = "SELECT * FROM tpp_protected_regions";
     private String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
+
     
     /**
      * Creates a MySQLFrame object that executes subsequent sql operations.
@@ -120,7 +121,7 @@ public class DBWrapper {
                 && database.createStatement(makeTableProtectedRegions);
     }
     
-    /*
+    /**
      *      UNLOADED_PETS METHODS
      */
     
