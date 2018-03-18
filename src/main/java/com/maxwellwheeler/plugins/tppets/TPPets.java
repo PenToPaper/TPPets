@@ -212,7 +212,7 @@ public class TPPets extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this, customTools), this);
         initializeCommandAliases();
-        this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases));
+        this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));
 
         initializeDamageConfigs();
         initializeLostRegions();

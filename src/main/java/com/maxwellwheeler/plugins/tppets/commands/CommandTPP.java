@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
@@ -23,13 +24,15 @@ import java.util.List;
  */
 public class CommandTPP implements CommandExecutor {
     private Hashtable<String, List<String>> commandAliases;
+    private TPPets thisPlugin;
     
     /**
      * Initializes the core command handler with the commandAliases provided.
      * @param commandAliases Hashtable linking <Real command name, List<Aliases of real command name>>
      */
-    public CommandTPP(Hashtable<String, List<String>> commandAliases) {
+    public CommandTPP(Hashtable<String, List<String>> commandAliases, TPPets thisPlugin) {
         this.commandAliases = commandAliases;
+        this.thisPlugin = thisPlugin;
     }
     
     @Override
@@ -120,6 +123,10 @@ public class CommandTPP implements CommandExecutor {
                         permissionMessage(sender);
                     }
                     break;
+                case "rename":
+                    CommandRename renamePet = new CommandRename(thisPlugin);
+                    renamePet.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                    return true;
                 case "help":
                 default:
                     if (sender instanceof Player) {

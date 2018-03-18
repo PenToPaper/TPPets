@@ -5,7 +5,6 @@ import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
 
 import java.sql.Connection;
@@ -62,8 +61,9 @@ public class DBWrapper {
      */
     private String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
     private String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
-    private String updatePet = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
+    private String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
     private String selectPetFromUuid = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
+    private String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
     
     private String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
     private String selectPetsFromUuids = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
@@ -180,7 +180,7 @@ public class DBWrapper {
             Tameable tameableTemp = (Tameable) ent;
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
-            if (database.updatePrepStatement(updatePet, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getLocation().getWorld().getName(), trimmedEntUUID, trimmedPlayerUUID)) {
+            if (database.updatePrepStatement(updatePetLocation, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getLocation().getWorld().getName(), trimmedEntUUID, trimmedPlayerUUID)) {
                 thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " updated in database.");
                 return true;
             } else {
@@ -225,7 +225,18 @@ public class DBWrapper {
         }
         return false;
     }
-    
+
+    public boolean renamePet(String ownerUUID, String oldName, String newName) {
+        String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
+        if (database.updatePrepStatement(updatePetName, newName, trimmedOwnerUUID, oldName)) {
+            thisPlugin.getLogger().info("Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);
+            return true;
+        } else {
+            thisPlugin.getLogger().info("Unable to execute: Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);
+            return false;
+        }
+    }
+
     /**
      * Gets a list of pets from storage based on the owner's UUID.
      * @param uuid The trimmed or non-trimmed UUID string of the owner.

@@ -28,10 +28,13 @@ public class DBUpdater {
                 tables.close();
                 ResultSet versionData = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT version FROM tpp_db_version");
                 if (versionData == null) {
+                    dbConn.close();
                     return 1;
                 }
                 if (versionData.next()) {
-                    return versionData.getInt("version");
+                    int returnInt = versionData.getInt("version");
+                    dbConn.close();
+                    return returnInt;
                 }
             }
             dbConn.close();
@@ -50,6 +53,8 @@ public class DBUpdater {
     }
 
     public boolean update(DBWrapper dbw) {
+        System.out.println("schema version:" + schemaVersion);
+        System.out.println("updated version: " + updatedVersion);
         if (schemaVersion != updatedVersion) {
             if (schemaVersion == 1) {
                 return oneToTwo(dbw);

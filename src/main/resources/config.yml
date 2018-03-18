@@ -22,6 +22,7 @@ command_aliases:
   mules: [mule]
   llamas: [llama]
   donkeys: [donkey]
+  rename: [setname]
   help: [pls]
 mysql:
   enable: false
