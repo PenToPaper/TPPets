@@ -69,6 +69,7 @@ public class DBWrapper {
     private String selectPetsFromUuids = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
     private String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ? AND pet_type = ?";
     private String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
+    private String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
     
     /*
      *      LOST AND FOUND REGION STATEMENTS
@@ -235,6 +236,21 @@ public class DBWrapper {
             thisPlugin.getLogger().info("Unable to execute: Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);
             return false;
         }
+    }
+
+    public List<PetStorage> getPetsFromOwnerNamePetType(String ownerUUID, String petName, PetType.Pets pt) {
+        String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromOwnerNamePetType, trimmedOwnerUUID, petName, PetType.getIndexFromPet(pt)));
+            try {
+             dbConn.close();
+            } catch (SQLException e) {
+             thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from owner and name: " + e.getMessage());
+            }
+            return ret;
+        }
+        return null;
     }
 
     /**

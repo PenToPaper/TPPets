@@ -8,15 +8,14 @@ import java.util.UUID;
 
 import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
+import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
@@ -29,6 +28,7 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 public class CommandTPPets {
     private TPPets thisPlugin;
     private DBWrapper dbConn;
+    private String petName;
     private String ownerName;
     private OfflinePlayer ownerOfflinePlayer;
     
@@ -38,116 +38,131 @@ public class CommandTPPets {
     public CommandTPPets() {
         this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
         this.dbConn = this.thisPlugin.getDatabase();
-        this.ownerName = "";
+        this.ownerName = null;
+        this.petName = null;
         ownerOfflinePlayer = null;
     }
 
-    public CommandTPPets(String ownerName) {
-        this();
-        this.ownerName = ownerName;
-        this.ownerOfflinePlayer = Bukkit.getOfflinePlayer(ownerName);
-    }
-    
+    // Desired syntax: /tpp dog  <--- Teleports all of command senders' dogs to them
+    // Desired syntax: /tpp dog list  <--- Lists all owned dogs in chat
+    // Desired syntax: /tpp dog DogName  <--- Teleports command sender's dog with that name to them
+    // Desired syntax: /tpp dog f:OwnerName  <--- Teleports all of OwnerName's dogs to command sender
+    // Desired syntax: /tpp dog f:OwnerName DogName  <--- Teleports OwnerName's dog with DogName to command sender
+    // Desired syntax: /tpp dog f:OwnerName list  <--- Lists all dogs owned by OwnerName
     /**
      * Core command handling
      * @param sender Represents who sent the command. If it isn't a player, an error message is displayed.
      * @param pt The type of pet to be teleported
      */
     public void processCommand(CommandSender sender, String[] args, PetType.Pets pt) {
-        if (sender instanceof Player) {
-            Player tempPlayer = (Player) sender;
-            if (CheckArgs.validateArgs(args, 1)) {
-                switch (args[0]) {
-                    case "list":
-                        listPets(tempPlayer, pt);
-                        break;
-                    default:
-                        sender.sendMessage(ChatColor.RED + "Can't process command.");
-                        break;
+        if (!(sender instanceof Player)) {
+            return;
+        }
+        Player tempPlayer = (Player) sender;
+        if (CheckArgs.validateArgs(args, 1)) {
+            this.ownerName =  isForSomeoneElse(args[0]);
+            if (this.ownerName != null) {
+                ownerOfflinePlayer = Bukkit.getOfflinePlayer(this.ownerName);
+                if (ownerOfflinePlayer != null) {
+                    if (CheckArgs.validateArgs(args, 2)) {
+                        if (args[1].equals("list")) {
+                            // Syntax received: /tpp dog f:OwnerName list
+                            listPets(tempPlayer, ownerOfflinePlayer, pt);
+                        } else {
+                            // Syntax received: /tpp dog f:OwnerName DogName
+                            getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt);
+                        }
+                    } else {
+                        // Syntax received: /tpp dog f:OwnerName
+                        getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt);
+                    }
                 }
             } else {
-                ProtectedRegion tempProtected = thisPlugin.getProtectedRegionWithin(tempPlayer.getLocation());
-                if (tempProtected == null || tempPlayer.hasPermission("tppets.tpanywhere")) {
-                    String ownerTeleported = ownerName.equals("") ? tempPlayer.getName() : ownerName;
-                    thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(getPetsAndTeleport(pt, tempPlayer).size()) + " of " + ownerTeleported + "'s " + pt.toString() + " to their location at " + formatLocation(tempPlayer.getLocation()));
-                    announceComplete(sender, pt);
+                if (args[0].equals("list")) {
+                    // Syntax received: /tpp dog list
+                    listPets(tempPlayer, tempPlayer, pt);
                 } else {
-                    tempPlayer.sendMessage(tempProtected.getEnterMessage());
+                    // Syntax received: /tpp dog DogName
+                    // TODO validate pet name
+                    teleportSpecificPet(tempPlayer, tempPlayer, args[0], pt);
                 }
             }
         } else {
-            sender.sendMessage(ChatColor.RED + "Can't teleport pets to a non-player.");
+            // Syntax received: /tpp dog
+            getPetsAndTeleport(tempPlayer, tempPlayer, pt);
         }
     }
 
-    /**
-     * Gets a full set of entities to be teleported, and teleports them.
-     * @param pt The type of pet to be teleported.
-     * @param pl The player to whom the pets should be teleported to.
-     * @return A set of UUIDs of the entities that are teleported.
-     */
-    private Set<UUID> getPetsAndTeleport(PetType.Pets pt, Player pl) {
-        List<World> worldsList = Bukkit.getServer().getWorlds();
-        Set<UUID> teleportedEnts = new HashSet<UUID>();
-        if (thisPlugin.getAllowTpBetweenWorlds()) {
-            for (World world : worldsList) {
-                teleportedEnts = loadAndTp(teleportedEnts, world, pt, pl);
+    private void loadApplicableChunks(List<PetStorage> psList) {
+        for (PetStorage ps : psList) {
+            World world = Bukkit.getWorld(ps.petWorld);
+            if (world != null) {
+                Chunk tempLoadedChunk = getChunkFromCoords(world, ps.petX, ps.petZ);
+                tempLoadedChunk.load();
             }
-        } else {
-            teleportedEnts = loadAndTp(teleportedEnts, pl.getWorld(), pt, pl);
         }
-
-        return teleportedEnts;
     }
-    
-    /**
-     * Teleports owned entities that are known in unloaded chunks or in loaded chunks to player, returning a list of entities teleported.
-     * @param entList A list of already teleported entities.
-     * @param world The world where entities will be teleported.
-     * @param pt The type of entity to be teleported.
-     * @param pl The player to teleport the entities to, also used to check if the player owns the entities.
-     * @return The entList set with new entities that have been added
-     */
-    private Set<UUID> loadAndTp(Set<UUID> entList, World world, PetType.Pets pt, Player pl) {
-        List<PetStorage> unloadedPetsInWorld = new ArrayList<PetStorage>();
-        if (dbConn != null && ownerName.equals("")) {
-            unloadedPetsInWorld = dbConn.getPetsGeneric(pl.getUniqueId().toString(), world.getName(), pt);
-        } else if (ownerOfflinePlayer != null) {
-            unloadedPetsInWorld = dbConn.getPetsGeneric(ownerOfflinePlayer.getUniqueId().toString(), world.getName(), pt);
-        }
-        for (PetStorage pet : unloadedPetsInWorld) {
-            Chunk tempLoadedChunk = getChunkFromCoords(world, pet.petX, pet.petZ);
-            tempLoadedChunk.load();
-        }
-        for (Entity entity : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
-            if (isTeleportablePet(pt, entity, pl)) {
-                if (!entList.contains(entity.getUniqueId())) {
-                    teleportPet(pl, entity);
-                    entList.add(entity.getUniqueId());
-                } else {
-                    entity.remove();
+
+    private boolean teleportSpecificPet(Player sendTo, OfflinePlayer sendFrom, String name, PetType.Pets pt) {
+        if (dbConn != null && sendFrom != null && name != null) {
+            List<PetStorage> psList = dbConn.getPetsFromOwnerNamePetType(sendFrom.getUniqueId().toString(), name, pt);
+            loadApplicableChunks(psList);
+            for (World world : Bukkit.getWorlds()) {
+                for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
+                    for (PetStorage ps : psList) {
+                        if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
+                            teleportPet(sendTo, ent);
+                            return true;
+                        }
+                    }
                 }
-            }
-        }
-        return entList;
-    }
-    
-    /**
-     * Checks if a pet is of type pt, and is owned by pl.
-     * @param pt The type of pet expected.
-     * @param pet The entity to be checked.
-     * @param pl The player that might own the entity.
-     * @return If the player owns the entity and it is of the expected type
-     */
-    private boolean isTeleportablePet(PetType.Pets pt, Entity pet, Player pl) {
-        if (pet instanceof Tameable) {
-            Tameable tameableTemp = (Tameable) pet;
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && ((ownerName.equals("") && pl.equals(tameableTemp.getOwner())) || (ownerName.equals(tameableTemp.getOwner().getName())))) {
-                return pt.equals(PetType.getEnumByEntity(pet));
             }
         }
         return false;
     }
+
+    private Set<UUID> getPetsAndTeleport(Player sendTo, OfflinePlayer sendFrom, PetType.Pets pt) {
+        List<World> worlds = Bukkit.getServer().getWorlds();
+        Set<UUID> teleportedEnts = new HashSet<UUID>();
+        if (thisPlugin.getAllowTpBetweenWorlds()) {
+            for (World world : worlds) {
+                teleportedEnts.addAll(loadAndTp(sendTo, sendFrom, world, pt, teleportedEnts));
+            }
+        } else {
+            teleportedEnts.addAll(loadAndTp(sendTo, sendFrom, sendTo.getWorld(), pt, teleportedEnts));
+        }
+        return teleportedEnts;
+    }
+
+    private Set<UUID> loadAndTp(Player sendTo, OfflinePlayer sendFrom, World world, PetType.Pets pt, Set<UUID> alreadyTeleportedPets) {
+        if (dbConn != null && sendFrom != null && sendTo != null && world != null) {
+            List<PetStorage> unloadedPetsInWorld = dbConn.getPetsGeneric(sendFrom.getUniqueId().toString(), world.getName(), pt);
+            loadApplicableChunks(unloadedPetsInWorld);
+            for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
+                if (isTeleportablePet(sendTo, sendFrom, ent, pt)) {
+                    if (!alreadyTeleportedPets.contains(ent.getUniqueId())) {
+                        teleportPet(sendTo, ent);
+                        alreadyTeleportedPets.add(ent.getUniqueId());
+                    } else {
+                        ent.remove();
+                    }
+                }
+            }
+            return alreadyTeleportedPets;
+        }
+        return null;
+    }
+
+    private boolean isTeleportablePet(Player sendTo, OfflinePlayer sendFrom, Entity ent, PetType.Pets pt) {
+        if (ent instanceof Tameable) {
+            Tameable tameableTemp = (Tameable) ent;
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(sendFrom) && PetType.getEnumByEntity(ent).equals(pt)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     
     /**
      * Gets the chunk using normal x and z coordinates, rather than the chunkwide x and z coordinates
@@ -201,7 +216,7 @@ public class CommandTPPets {
         return "x: " + Integer.toString(lc.getBlockX()) + ", " + "y: " + Integer.toString(lc.getBlockY()) + ", " + "z: " + Integer.toString(lc.getBlockZ());
     }
 
-    private void listPets(Player pl, PetType.Pets pt) {
+    private void listPets(Player pl, OfflinePlayer dogOwner, PetType.Pets pt) {
         pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Your " + pt.toString() + " names]" + ChatColor.DARK_GRAY + "---------");
         for (World wld : Bukkit.getServer().getWorlds()) {
             List<PetStorage> tempPs = thisPlugin.getDatabase().getPetsGeneric(pl.getUniqueId().toString(), wld.getName(), pt);
@@ -210,5 +225,14 @@ public class CommandTPPets {
             }
         }
         pl.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
+    }
+
+    private String isForSomeoneElse(String argOne) {
+        // indexOf == 0 WHEN f: leads the string
+        if (argOne.indexOf("f:") == 0) {
+            // f: leads the string
+            return argOne.substring(2);
+        }
+        return null;
     }
 }

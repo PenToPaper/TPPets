@@ -129,14 +129,6 @@ public class CommandTPP implements CommandExecutor {
                     return true;
                 case "help":
                 default:
-                    if (sender instanceof Player) {
-                        Player playerTemp = (Player) sender;
-                        Entity entTemp = playerTemp.getWorld().spawnEntity(playerTemp.getLocation(), EntityType.SKELETON_HORSE);
-                        if (entTemp instanceof Tameable) {
-                            Tameable tameableTemp = (Tameable) entTemp;
-                            tameableTemp.setOwner(playerTemp);
-                        }
-                    }
                     sendHelp(sender);
                     break;
             }
@@ -152,7 +144,7 @@ public class CommandTPP implements CommandExecutor {
      */
     private CommandTPPets getTPPets(CommandSender sender, String[] args) {
         if (CheckArgs.validateArgs(args, 2) && sender.hasPermission("tppets.teleportother")) {
-            return new CommandTPPets(args[1]);
+            return new CommandTPPets();
         }
         return new CommandTPPets();
     }
