@@ -34,6 +34,7 @@ public class DBWrapper {
             + "pet_z INT NOT NULL,\n"
             + "pet_world VARCHAR(25) NOT NULL,\n"
             + "owner_id CHAR(32) NOT NULL\n"
+            // TODO UPDATE THIS TABLE
             + ");";
     private String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS tpp_lost_regions (\n"
             + "zone_name VARCHAR(64) PRIMARY KEY,\n"

@@ -2,6 +2,8 @@ package com.maxwellwheeler.plugins.tppets.helpers;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -53,8 +55,6 @@ public class DBUpdater {
     }
 
     public boolean update(DBWrapper dbw) {
-        System.out.println("schema version:" + schemaVersion);
-        System.out.println("updated version: " + updatedVersion);
         if (schemaVersion != updatedVersion) {
             if (schemaVersion == 1) {
                 return oneToTwo(dbw);
@@ -65,8 +65,6 @@ public class DBUpdater {
 
     private boolean oneToTwo(DBWrapper dbw) {
         boolean addColumn = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)");
-        System.out.println("::::ADD COLUMN::::");
-        System.out.println(addColumn);
         oneToTwoFillColumns(dbw);
         boolean createVersionTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)");
         if (createVersionTable) {
@@ -75,26 +73,35 @@ public class DBUpdater {
         }
         return false;
     }
+    //    private String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+    //            + "pet_id CHAR(32) PRIMARY KEY,\n"
+    //            + "pet_type TINYINT NOT NULL,\n"
+    //            + "pet_x INT NOT NULL,\n"
+    //            + "pet_y INT NOT NULL,\n"
+    //            + "pet_z INT NOT NULL,\n"
+    //            + "pet_world VARCHAR(25) NOT NULL,\n"
+    //            + "owner_id CHAR(32) NOT NULL\n"
+    //            + ");";
 
     private boolean oneToTwoFillColumns(DBWrapper dbw) {
         try {
             // Hashtable<owner_id, Set<pet_id>>, used to establish a list of how many pets a player owns, so that they can be assigned default names later.
-            Hashtable<String, Set<String>> tempPetStorage = new Hashtable<String, Set<String>>();
+            Hashtable<String, Set<PetStorage>> tempPetStorage = new Hashtable<String, Set<PetStorage>>();
 
             Connection conn = dbw.getRealDatabase().getConnection();
-            ResultSet getPets = dbw.getRealDatabase().selectPrepStatement(conn, "SELECT owner_id, pet_id FROM tpp_unloaded_pets");
+            ResultSet getPets = dbw.getRealDatabase().selectPrepStatement(conn, "SELECT * FROM tpp_unloaded_pets");
             while (getPets.next()) {
                 if (!tempPetStorage.containsKey(getPets.getString("owner_id"))) {
-                    tempPetStorage.put(getPets.getString("owner_id"), new HashSet<String>());
+                    tempPetStorage.put(getPets.getString("owner_id"), new HashSet<PetStorage>());
                 }
-                tempPetStorage.get(getPets.getString("owner_id")).add(getPets.getString("pet_id"));
+                tempPetStorage.get(getPets.getString("owner_id")).add(new PetStorage(getPets.getString("pet_id"), getPets.getInt("pet_type"), getPets.getInt("pet_x"), getPets.getInt("pet_y"), getPets.getInt("pet_z"), getPets.getString("pet_world"), getPets.getString("owner_id"),null));
             }
             conn.close();
 
             for(String key : tempPetStorage.keySet()) {
                 int numPetsUpdated = 0;
-                for (String pet_id : tempPetStorage.get(key)) {
-                    if (!dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_unloaded_pets SET pet_name = ? WHERE pet_id = ?", Integer.toString(++numPetsUpdated), pet_id)) {
+                for (PetStorage ps : tempPetStorage.get(key)) {
+                    if (!dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_unloaded_pets SET pet_name = ? WHERE pet_id = ?", ps.petType.toString() + Integer.toString(++numPetsUpdated), ps.petId)) {
                         return false;
                     }
                 }

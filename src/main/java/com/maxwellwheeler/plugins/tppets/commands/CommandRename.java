@@ -25,7 +25,7 @@ public class CommandRename {
 
     private boolean renamePet(Player pl, String oldName, String newName) {
         if (thisPlugin.getDatabase().renamePet(pl.getUniqueId().toString(), oldName, newName)) {
-            pl.sendMessage(ChatColor.BLUE + "Renamed pet " + oldName + " to " + newName);
+            pl.sendMessage(ChatColor.BLUE + "Renamed pet " + ChatColor.WHITE + oldName + ChatColor.BLUE + " to " + ChatColor.WHITE + newName);
             return true;
         } else {
             pl.sendMessage(ChatColor.RED + "Unable to rename pet");
