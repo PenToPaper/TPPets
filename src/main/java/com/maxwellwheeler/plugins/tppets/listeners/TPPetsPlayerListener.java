@@ -5,6 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsChecker;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -88,7 +89,12 @@ public class TPPetsPlayerListener implements Listener {
             if (tameableTemp.getOwner() == null) {
                 e.getPlayer().sendMessage(ChatColor.BLUE + "This pet does not belong to anybody.");
             } else {
-                e.getPlayer().sendMessage(ChatColor.BLUE + "This pet belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
+                List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromUUIDs(e.getRightClicked().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString());
+                if (psList.size() == 1) {
+                    e.getPlayer().sendMessage(ChatColor.BLUE + "This pet is named " + ChatColor.WHITE + psList.get(0).petName + ChatColor.BLUE + " and belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
+                } else {
+                    e.getPlayer().sendMessage(ChatColor.RED + "Error getting pet data.");
+                }
             }
         }
     }
