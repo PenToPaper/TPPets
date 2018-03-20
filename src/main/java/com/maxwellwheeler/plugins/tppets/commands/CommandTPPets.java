@@ -72,6 +72,8 @@ public class CommandTPPets {
                             if (teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
                                 thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them.");
                                 tempPlayer.sendMessage(ChatColor.BLUE + ownerOfflinePlayer.getName() + "'s pet " + args[1] + " has been teleported to you.");
+                            } else {
+                                tempPlayer.sendMessage(ChatColor.RED + "Can't find pet with name: " + ChatColor.WHITE + args[1]);
                             }
                         }
                     } else {
@@ -86,11 +88,11 @@ public class CommandTPPets {
                     listPets(tempPlayer, tempPlayer, pt);
                 } else {
                     // Syntax received: /tpp dog DogName
-                    // TODO validate pet name
                     if (teleportSpecificPet(tempPlayer, tempPlayer, args[0], pt)) {
                         thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported their " + pt.toString() + ", " + args[0] + ", to them");
                         tempPlayer.sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you.");
-
+                    } else {
+                        tempPlayer.sendMessage(ChatColor.RED + "Can't find pet with name: " + ChatColor.WHITE + args[0]);
                     }
                 }
             }

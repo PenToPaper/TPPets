@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -33,8 +34,8 @@ public class DBWrapper {
             + "pet_y INT NOT NULL,\n"
             + "pet_z INT NOT NULL,\n"
             + "pet_world VARCHAR(25) NOT NULL,\n"
-            + "owner_id CHAR(32) NOT NULL\n"
-            // TODO UPDATE THIS TABLE
+            + "owner_id CHAR(32) NOT NULL,\n"
+            + "pet_name VARCHAR(64)"
             + ");";
     private String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS tpp_lost_regions (\n"
             + "zone_name VARCHAR(64) PRIMARY KEY,\n"
@@ -60,7 +61,7 @@ public class DBWrapper {
     /*
      *      UNLOADED_PETS STATEMENTS
      */
-    private String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     private String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
     private String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
     private String selectPetFromUuid = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
@@ -71,6 +72,7 @@ public class DBWrapper {
     private String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ? AND pet_type = ?";
     private String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
     private String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
+    private String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ?";
     
     /*
      *      LOST AND FOUND REGION STATEMENTS
@@ -126,7 +128,23 @@ public class DBWrapper {
     /**
      *      UNLOADED_PETS METHODS
      */
-    
+
+    public boolean isNameUnique(String ownerUUID, String petName) {
+        String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            ResultSet rs = database.selectPrepStatement(dbConn, selectIsNameUnique, trimmedOwnerUUID, petName);
+            try {
+                boolean ret = rs.next();
+                dbConn.close();
+                return !ret;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception checking if pet name is unique: " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
     /**
      * Inserts a pet into the tpp_unloaded_pets table
      * @param ent The entity to be inserted, implementing Tameable and Sittable
@@ -139,7 +157,8 @@ public class DBWrapper {
                 String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
                 String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
                 int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(ent));
-                if (database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID)) {
+                String uniqueName = generateUniqueName(trimmedPlayerUUID, PetType.getEnumByEntity((ent)));
+                if (uniqueName != null && database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID, uniqueName)) {
                     thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
                     return true;
                 } else {
@@ -149,6 +168,28 @@ public class DBWrapper {
             }
         }
         return false;
+    }
+
+    public String generateUniqueName(String ownerUUID, PetType.Pets pt) {
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            List<PetStorage> psList = getPetsFromOwner(ownerUUID);
+            int lastIndexChecked = psList.size();
+            String ret;
+            do {
+                ret = pt.toString() + Integer.toString(lastIndexChecked);
+                System.out.println("Is name unique?" + isNameUnique(ownerUUID, ret));
+                System.out.println("Name:" + ret);
+                lastIndexChecked++;
+            } while (!isNameUnique(ownerUUID, ret));
+            try {
+                dbConn.close();
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception generating name: " + e.getMessage());
+            }
+            return ret;
+        }
+        return null;
     }
     
     /**

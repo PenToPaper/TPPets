@@ -1,5 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
+import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,8 +24,8 @@ public class ArgValidator {
         return false;
     }
 
-    public static boolean validatePetName(String petName) {
+    public static boolean validatePetName(DBWrapper dbw, String ownerUUID, String petName) {
         Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
-        return nameMatcher.find() && !petName.equals("list");
+        return nameMatcher.find() && !petName.equals("list") && dbw.isNameUnique(ownerUUID, petName);
     }
 }

@@ -173,6 +173,7 @@ public class TPPetsEntityListener implements Listener {
                 playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
             }
         } else {
+            thisPlugin.getDatabase().insertPet(e.getEntity());
             thisPlugin.getPetIndex().newPetTamed(e.getEntity());
         }
     }

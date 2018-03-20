@@ -24,7 +24,11 @@ public class CommandRename {
     }
 
     private boolean renamePet(Player pl, String oldName, String newName) {
-        if (ArgValidator.validatePetName(newName) && thisPlugin.getDatabase().renamePet(pl.getUniqueId().toString(), oldName, newName)) {
+        if (!ArgValidator.validatePetName(thisPlugin.getDatabase(), pl.getUniqueId().toString(), newName)) {
+            pl.sendMessage(ChatColor.RED + "You already have a pet with that name!");
+            return false;
+        }
+        if (thisPlugin.getDatabase().renamePet(pl.getUniqueId().toString(), oldName, newName)) {
             pl.sendMessage(ChatColor.BLUE + "Renamed pet " + ChatColor.WHITE + oldName + ChatColor.BLUE + " to " + ChatColor.WHITE + newName);
             return true;
         } else {

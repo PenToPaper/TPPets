@@ -22,6 +22,10 @@ public class DBUpdater {
         this.schemaVersion = getSchemaVersionFromDB(thisPlugin.getDatabase());
     }
 
+    public boolean isUpToDate() {
+        return schemaVersion == updatedVersion;
+    }
+
     public int getSchemaVersionFromDB(DBWrapper dbw) {
         try {
             Connection dbConn = dbw.getRealDatabase().getConnection();
