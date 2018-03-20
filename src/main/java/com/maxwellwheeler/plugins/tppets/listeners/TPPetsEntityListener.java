@@ -162,19 +162,21 @@ public class TPPetsEntityListener implements Listener {
      * Event handler for EntityTameEvent. It checks if the tamed entity should be allowed to be tamed based on the pet limits. If it can, it adds that to the {@link PlayerPetIndex}
      * @param e
      */
-    @EventHandler (priority=EventPriority.LOW)
-    public void onEntityTameEvent(EntityTameEvent e) {        
-        PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
-        PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
-        if (!rr.equals(PlayerPetIndex.RuleRestriction.ALLOWED)) {
-            e.setCancelled(true);
-            if (e.getOwner() instanceof Player) {
-                Player playerTemp = (Player) e.getOwner();
-                playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
+    @EventHandler (priority=EventPriority.HIGHEST)
+    public void onEntityTameEvent(EntityTameEvent e) {
+        if (!e.isCancelled()) {
+            PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
+            PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
+            if (!rr.equals(PlayerPetIndex.RuleRestriction.ALLOWED)) {
+                e.setCancelled(true);
+                if (e.getOwner() instanceof Player) {
+                    Player playerTemp = (Player) e.getOwner();
+                    playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
+                }
+            } else {
+                thisPlugin.getDatabase().insertPet(e.getEntity(), e.getOwner().getUniqueId().toString());
+                thisPlugin.getPetIndex().newPetTamed(e.getEntity());
             }
-        } else {
-            thisPlugin.getDatabase().insertPet(e.getEntity());
-            thisPlugin.getPetIndex().newPetTamed(e.getEntity());
         }
     }
 }

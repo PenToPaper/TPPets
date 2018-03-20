@@ -147,15 +147,24 @@ public class DBWrapper {
 
     /**
      * Inserts a pet into the tpp_unloaded_pets table
-     * @param ent The entity to be inserted, implementing Tameable and Sittable
+     * @param ent The entity to be inserted, implementing Tameable
      * @return True if successful, false if not
      */
     public boolean insertPet(Entity ent) {
         if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) ent;
             if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
+                return insertPet(ent, tameableTemp.getOwner().getUniqueId().toString());
+            }
+        }
+        return false;
+    }
+
+    public boolean insertPet(Entity ent, String ownerUUID) {
+        if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
+            if (ownerUUID != null) {
                 String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
-                String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
+                String trimmedPlayerUUID = UUIDUtils.trimUUID(ownerUUID);
                 int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(ent));
                 String uniqueName = generateUniqueName(trimmedPlayerUUID, PetType.getEnumByEntity((ent)));
                 if (uniqueName != null && database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID, uniqueName)) {
