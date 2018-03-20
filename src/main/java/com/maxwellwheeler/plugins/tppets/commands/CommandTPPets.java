@@ -1,12 +1,11 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
+import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import org.bukkit.*;
@@ -59,12 +58,12 @@ public class CommandTPPets {
             return;
         }
         Player tempPlayer = (Player) sender;
-        if (CheckArgs.validateArgs(args, 1)) {
+        if (ArgValidator.validateArgs(args, 1)) {
             this.ownerName =  isForSomeoneElse(args[0]);
             if (this.ownerName != null) {
                 ownerOfflinePlayer = Bukkit.getOfflinePlayer(this.ownerName);
                 if (ownerOfflinePlayer != null) {
-                    if (CheckArgs.validateArgs(args, 2)) {
+                    if (ArgValidator.validateArgs(args, 2)) {
                         if (args[1].equals("list")) {
                             // Syntax received: /tpp dog f:OwnerName list
                             listPets(tempPlayer, ownerOfflinePlayer, pt);

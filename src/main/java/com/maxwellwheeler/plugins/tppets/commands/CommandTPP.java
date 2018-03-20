@@ -1,16 +1,12 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.helpers.CheckArgs;
+import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +33,7 @@ public class CommandTPP implements CommandExecutor {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (CheckArgs.validateArgs(args, 1)) {
+        if (ArgValidator.validateArgs(args, 1)) {
             String realCommand = "";
             for (String commands : commandAliases.keySet()) {
                 if (commandAliases.get(commands).contains(args[0])) {
@@ -143,7 +139,7 @@ public class CommandTPP implements CommandExecutor {
      * @return An instance of {@link CommandTPPets}, constructed based on the number of args.
      */
     private CommandTPPets getTPPets(CommandSender sender, String[] args) {
-        if (CheckArgs.validateArgs(args, 2) && sender.hasPermission("tppets.teleportother")) {
+        if (ArgValidator.validateArgs(args, 2) && sender.hasPermission("tppets.teleportother")) {
             return new CommandTPPets();
         }
         return new CommandTPPets();

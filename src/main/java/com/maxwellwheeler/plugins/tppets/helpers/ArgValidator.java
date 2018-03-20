@@ -1,6 +1,9 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
-public class CheckArgs {
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class ArgValidator {
     /**
      * Used to validate the number of arguments for commands with multiple arguments, and a certain number of them expected.
      * @param args The list of arguments.
@@ -17,5 +20,10 @@ public class CheckArgs {
             return true;
         }
         return false;
+    }
+
+    public static boolean validatePetName(String petName) {
+        Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
+        return nameMatcher.find() && !petName.equals("list");
     }
 }
