@@ -25,7 +25,10 @@ public class ArgValidator {
     }
 
     public static boolean validatePetName(DBWrapper dbw, String ownerUUID, String petName) {
-        Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
-        return nameMatcher.find() && !petName.equals("list") && dbw.isNameUnique(ownerUUID, petName);
+        if (dbw != null) {
+            Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
+            return nameMatcher.find() && !petName.equals("list") && dbw.isNameUnique(ownerUUID, petName);
+        }
+        return false;
     }
 }

@@ -105,10 +105,13 @@ public class TPPets extends JavaPlugin implements Listener {
     private void updateDBC() {
         databaseUpdater = new DBUpdater(this);
         databaseUpdater.update(this.getDatabase());
+        if (!databaseUpdater.isUpToDate()) {
+            database = null;
+        }
     }
 
     private void createTables() {
-        if (!database.initializeTables()) {
+        if (database != null && !database.initializeTables()) {
             database = null;
         }
     }
@@ -167,14 +170,18 @@ public class TPPets extends JavaPlugin implements Listener {
      * Initializes protected regions in a list
      */
     private void initializeProtectedRegions() {
-        protectedRegions = database.getProtectedRegions();
+        if (database != null) {
+            protectedRegions = database.getProtectedRegions();
+        }
     }
     
     /**
      * Initializes protected regions in a list
      */
     private void initializeLostRegions() {
-        lostRegions = database.getLostRegions();
+        if (database != null) {
+            lostRegions = database.getLostRegions();
+        }
     }
     
     /**
