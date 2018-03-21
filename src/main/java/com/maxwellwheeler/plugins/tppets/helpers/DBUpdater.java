@@ -84,8 +84,9 @@ public class DBUpdater {
             oneToTwoFillColumns(dbw);
             boolean createVersionTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)");
             if (createVersionTable) {
-                //TODO REVERT IF FAILED
                 return addColumn && createVersionTable && oneToTwoInitializeVersion(dbw) && setCurrentSchemaVersion(dbw, 2);
+            } else {
+                twoToOne(dbw);
             }
         }
         return false;
@@ -119,6 +120,25 @@ public class DBUpdater {
             } catch (SQLException e) {
                 thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception updating database from version one to version two: " + e.getMessage());
             }
+        }
+        return false;
+    }
+
+    public boolean twoToOne(DBWrapper dbw) {
+        if (dbw != null) {
+            boolean renameTable = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp");
+            boolean createTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+                    + "pet_id CHAR(32) PRIMARY KEY,\n"
+                    + "pet_type TINYINT NOT NULL,\n"
+                    + "pet_x INT NOT NULL,\n"
+                    + "pet_y INT NOT NULL,\n"
+                    + "pet_z INT NOT NULL,\n"
+                    + "pet_world VARCHAR(25) NOT NULL,\n"
+                    + "owner_id CHAR(32) NOT NULL"
+                    + ");");
+            boolean transferData = dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id FROM tpp_unloaded_pets_temp");
+            boolean dropTempTable = dbw.getRealDatabase().updatePrepStatement("DROP TABLE tpp_unloaded_pets_temp");
+            return renameTable && createTable && transferData && dropTempTable;
         }
         return false;
     }

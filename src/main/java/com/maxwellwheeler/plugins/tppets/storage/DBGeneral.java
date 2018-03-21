@@ -34,7 +34,7 @@ public abstract class DBGeneral implements DBFrame {
      */
     public boolean insertPrepStatement(String prepStatement, Object... args) {
         try {
-            return 1 == executeUpdate(prepStatement, args);
+            return 1 <= executeUpdate(prepStatement, args);
         } catch (SQLException e) {
             thisPlugin.getLogger().log(Level.SEVERE, "Can't execute insert statement: " + e.getMessage());
             return false;
@@ -49,7 +49,6 @@ public abstract class DBGeneral implements DBFrame {
      */
     public ResultSet selectPrepStatement(Connection dbConn, String prepStatement, Object... args) {
         try {
-            System.out.println(prepStatement);
             return executeQuery(dbConn, prepStatement, args);
         } catch (SQLException e) {
             thisPlugin.getLogger().log(Level.SEVERE, "Can't execute select statement: " + e.getMessage());
