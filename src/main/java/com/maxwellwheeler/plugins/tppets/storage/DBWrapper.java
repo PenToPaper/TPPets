@@ -57,6 +57,7 @@ public class DBWrapper {
             + "max_z INT NOT NULL,\n"
             + "world_name VARCHAR(25) NOT NULL,\n"
             + "lf_zone_name VARCHAR(64));";
+    private String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)";
 
     /*
      *      UNLOADED_PETS STATEMENTS
@@ -122,7 +123,8 @@ public class DBWrapper {
     public boolean initializeTables() {
         return database.createStatement(makeTableUnloadedPets)
                 && database.createStatement(makeTableLostRegions)
-                && database.createStatement(makeTableProtectedRegions);
+                && database.createStatement(makeTableProtectedRegions)
+                && database.createStatement(makeTableDBVersion) && thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
     
     /**

@@ -50,6 +50,10 @@ public class DBUpdater {
         return 1;
     }
 
+    public boolean updateSchemaVersion(DBWrapper dbw) {
+        return setCurrentSchemaVersion(dbw, updatedVersion);
+    }
+
     public boolean setCurrentSchemaVersion(DBWrapper dbw, int schemaVersion) {
         boolean databaseUpdate = dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_db_version SET version = ?", schemaVersion);
         if (databaseUpdate) {
