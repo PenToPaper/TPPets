@@ -244,6 +244,9 @@ public class CommandTPPets {
             // f: leads the string
             return argOne.substring(2);
         }
+        if (argOne.indexOf("from:") == 0) {
+            return argOne.substring(5);
+        }
         return null;
     }
 }
