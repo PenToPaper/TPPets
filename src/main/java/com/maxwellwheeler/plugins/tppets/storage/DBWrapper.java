@@ -124,7 +124,8 @@ public class DBWrapper {
         return database.createStatement(makeTableUnloadedPets)
                 && database.createStatement(makeTableLostRegions)
                 && database.createStatement(makeTableProtectedRegions)
-                && database.createStatement(makeTableDBVersion) && thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
+                && database.createStatement(makeTableDBVersion)
+                && thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
     
     /**

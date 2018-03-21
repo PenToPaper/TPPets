@@ -31,3 +31,4 @@ mysql:
   database: minecraft
   username: 'mcpluginuser'
   password: 'password'
+schema_version: 2

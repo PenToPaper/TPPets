@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets;
 
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
+import com.maxwellwheeler.plugins.tppets.helpers.ConfigUpdater;
 import com.maxwellwheeler.plugins.tppets.helpers.DBUpdater;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
@@ -36,6 +37,11 @@ public class TPPets extends JavaPlugin implements Listener {
     // Database
     private DBWrapper database;
     private DBUpdater databaseUpdater;
+
+
+
+    // Config
+    private ConfigUpdater configUpdater;
     
     private boolean preventPlayerDamage;
     private boolean preventEnvironmentalDamage;
@@ -94,14 +100,22 @@ public class TPPets extends JavaPlugin implements Listener {
                 database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
             }
         }
-        if (!database.initializeTables()) {
-            database = null;
-        }
     }
 
     private void updateDBC() {
         databaseUpdater = new DBUpdater(this);
         databaseUpdater.update(this.getDatabase());
+    }
+
+    private void createTables() {
+        if (!database.initializeTables()) {
+            database = null;
+        }
+    }
+
+    private void updateConfig() {
+        configUpdater = new ConfigUpdater(this);
+        configUpdater.update();
     }
     
     /**
@@ -190,6 +204,7 @@ public class TPPets extends JavaPlugin implements Listener {
         // Config setup and pulling
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
+        updateConfig();
         initializeCommandAliases();
         initializeAllowTP();
         initializeAllowUntamingPets();
@@ -199,7 +214,8 @@ public class TPPets extends JavaPlugin implements Listener {
         getLogger().info("Setting up database.");
         initializeDBC();
         updateDBC();
-        
+        createTables();
+
         // Database pulling
         getLogger().info("Getting data from database.");
         initializeLostRegions();
@@ -397,5 +413,9 @@ public class TPPets extends JavaPlugin implements Listener {
 
     public DBUpdater getDatabaseUpdater() {
         return databaseUpdater;
+    }
+
+    public ConfigUpdater getConfigUpdater() {
+        return configUpdater;
     }
 }
