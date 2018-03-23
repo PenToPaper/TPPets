@@ -28,6 +28,11 @@ permissions:
       tppets.dogs: true
       tppets.cats: true
       tppets.birds: true
+      tppets.horses: true
+      tppets.mules: true
+      tppets.llamas: true
+      tppets.donkeys: true
+      tppets.rename: true
   tppets.teleportother:
     default: op
     description: Allows user to teleport pets owned by someone else to their location.
@@ -70,3 +75,6 @@ permissions:
   tppets.donkeys:
     default: true
     description: Allows user to teleport their donkeys to them.
+  tppets.rename:
+    default: true
+    description: Allows user to rename their pets.

@@ -120,9 +120,14 @@ public class CommandTPP implements CommandExecutor {
                     }
                     break;
                 case "rename":
-                    CommandRename renamePet = new CommandRename(thisPlugin);
-                    renamePet.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
-                    return true;
+                    if (sender.hasPermission("tppets.rename")) {
+                        CommandRename renamePet = new CommandRename(thisPlugin);
+                        renamePet.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                        return true;
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
                 case "help":
                 default:
                     sendHelp(sender);
