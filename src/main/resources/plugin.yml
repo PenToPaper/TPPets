@@ -18,6 +18,7 @@ permissions:
     description: Parent node of all tppets permissions.
     default: op
     children:
+      tppets.renameall: true
       tppets.teleportother: true
       tppets.untameall: true
       tppets.bypassprotection: true
@@ -33,6 +34,9 @@ permissions:
       tppets.llamas: true
       tppets.donkeys: true
       tppets.rename: true
+  tppets.renameall:
+    default: op
+    description: Allows user to rename pets that do not belong to them.
   tppets.teleportother:
     default: op
     description: Allows user to teleport pets owned by someone else to their location.

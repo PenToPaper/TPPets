@@ -59,7 +59,7 @@ public class CommandTPPets {
         }
         Player tempPlayer = (Player) sender;
         if (ArgValidator.validateArgs(args, 1)) {
-            this.ownerName =  isForSomeoneElse(args[0]);
+            this.ownerName =  ArgValidator.isForSomeoneElse(args[0]);
             if (this.ownerName != null) {
                 ownerOfflinePlayer = Bukkit.getOfflinePlayer(this.ownerName);
                 if (ownerOfflinePlayer != null) {
@@ -236,17 +236,5 @@ public class CommandTPPets {
             }
         }
         pl.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
-    }
-
-    private String isForSomeoneElse(String argOne) {
-        // indexOf == 0 WHEN f: leads the string
-        if (argOne.indexOf("f:") == 0) {
-            // f: leads the string
-            return argOne.substring(2);
-        }
-        if (argOne.indexOf("from:") == 0) {
-            return argOne.substring(5);
-        }
-        return null;
     }
 }
