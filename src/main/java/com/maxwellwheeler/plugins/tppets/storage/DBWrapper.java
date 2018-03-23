@@ -27,7 +27,7 @@ public class DBWrapper {
     /*
      *      TABLES
      */
-    private String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+    private final String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
             + "pet_id CHAR(32) PRIMARY KEY,\n"
             + "pet_type TINYINT NOT NULL,\n"
             + "pet_x INT NOT NULL,\n"
@@ -37,7 +37,7 @@ public class DBWrapper {
             + "owner_id CHAR(32) NOT NULL,\n"
             + "pet_name VARCHAR(64)"
             + ");";
-    private String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS tpp_lost_regions (\n"
+    private final String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS tpp_lost_regions (\n"
             + "zone_name VARCHAR(64) PRIMARY KEY,\n"
             + "min_x INT NOT NULL,\n"
             + "min_y INT NOT NULL,\n"
@@ -46,7 +46,7 @@ public class DBWrapper {
             + "max_y INT NOT NULL,\n"
             + "max_z INT NOT NULL,\n"
             + "world_name VARCHAR(25) NOT NULL);";
-    private String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS tpp_protected_regions (\n"
+    private final String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS tpp_protected_regions (\n"
             + "zone_name VARCHAR(64) PRIMARY KEY,\n"
             + "enter_message VARCHAR(255),\n"
             + "min_x INT NOT NULL,\n"
@@ -57,38 +57,38 @@ public class DBWrapper {
             + "max_z INT NOT NULL,\n"
             + "world_name VARCHAR(25) NOT NULL,\n"
             + "lf_zone_name VARCHAR(64));";
-    private String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)";
+    private final String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)";
 
     /*
      *      UNLOADED_PETS STATEMENTS
      */
-    private String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
-    private String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
-    private String selectPetFromUuid = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
-    private String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
-    
-    private String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
-    private String selectPetsFromUuids = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
-    private String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ? AND pet_type = ?";
-    private String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
-    private String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
-    private String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ?";
+    private final String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
+    private final String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
+    private final String selectPetFromUuid = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
+    private final String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
+
+    private final String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
+    private final String selectPetsFromUuids = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
+    private final String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ? AND pet_type = ?";
+    private final String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
+    private final String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
+    private final String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ?";
     
     /*
      *      LOST AND FOUND REGION STATEMENTS
      */
-    private String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
-    private String selectLost = "SELECT * FROM tpp_lost_regions";
+    private final String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
+    private final String selectLost = "SELECT * FROM tpp_lost_regions";
     
     /*
      *      PROTECTED REGION STATEMENTS
      */
-    private String insertProtected = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
-    private String selectProtected = "SELECT * FROM tpp_protected_regions";
-    private String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
+    private final String insertProtected = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private final String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
+    private final String selectProtected = "SELECT * FROM tpp_protected_regions";
+    private final String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
 
     
     /**
