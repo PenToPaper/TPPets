@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
+import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -13,6 +14,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.*;
+import org.spigotmc.event.entity.EntityMountEvent;
+
+import java.util.List;
 
 /**
  * The event listener that handles entity events
@@ -176,6 +180,24 @@ public class TPPetsEntityListener implements Listener {
             } else {
                 thisPlugin.getDatabase().insertPet(e.getEntity(), e.getOwner().getUniqueId().toString());
                 thisPlugin.getPetIndex().newPetTamed(e.getEntity());
+            }
+        }
+    }
+
+    @EventHandler (priority = EventPriority.LOW)
+    public void onEntityMountEvent(EntityMountEvent e) {
+        // e.getEntity = player
+        // e.getMount = mounted mob (horse, etc)
+        if (!PetType.getEnumByEntity(e.getMount()).equals(PetType.Pets.UNKNOWN)) {
+            Tameable tameableTemp = (Tameable) e.getMount();
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && e.getEntity() instanceof Player && !((Player)e.getEntity()).hasPermission("tppets.mountother") && !tameableTemp.getOwner().equals(e.getEntity())) {
+                List<String> allowedPlayers = thisPlugin.getDatabase().getAllowedPlayers(e.getMount().getUniqueId().toString());
+                for (String allowedPlayer : allowedPlayers) {
+                    if (allowedPlayer.equals(UUIDUtils.trimUUID(e.getEntity().getUniqueId()))) {
+                        return;
+                    }
+                }
+                e.setCancelled(true);
             }
         }
     }

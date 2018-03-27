@@ -4,9 +4,13 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Horse;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,8 +132,18 @@ public class CommandTPP implements CommandExecutor {
                         permissionMessage(sender);
                     }
                     break;
+                case "allow":
+                    if (sender.hasPermission("tppets.addallow")) {
+                        CommandAllow allowPlayer = new CommandAllow(thisPlugin);
+                        allowPlayer.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                    }
                 case "help":
                 default:
+                    if (sender instanceof Player) {
+                        Player tempPlayer = (Player) sender;
+                        Horse tempHorse = (Horse) tempPlayer.getWorld().spawnEntity(new Location(tempPlayer.getWorld(), 1000, 100, 1000), EntityType.HORSE);
+                        tempHorse.setOwner(tempPlayer);
+                    }
                     sendHelp(sender);
                     break;
             }

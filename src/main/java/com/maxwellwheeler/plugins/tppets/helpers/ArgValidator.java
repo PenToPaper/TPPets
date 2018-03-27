@@ -24,12 +24,21 @@ public class ArgValidator {
         return false;
     }
 
+    public static boolean softValidatePetName(String petName) {
+        Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
+        return nameMatcher.find();
+    }
+
     public static boolean validatePetName(DBWrapper dbw, String ownerUUID, String petName) {
         if (dbw != null) {
-            Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
-            return nameMatcher.find() && !petName.equals("list") && dbw.isNameUnique(ownerUUID, petName);
+            return softValidatePetName(petName) && !petName.equals("list") && dbw.isNameUnique(ownerUUID, petName);
         }
         return false;
+    }
+
+    public static boolean validateUsername(String userName) {
+        Matcher nameMatcher = Pattern.compile("^\\w{3,16}$").matcher(userName);
+        return nameMatcher.find();
     }
 
     public static String isForSomeoneElse(String argOne) {

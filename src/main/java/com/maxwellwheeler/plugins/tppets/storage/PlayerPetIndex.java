@@ -70,7 +70,7 @@ public class PlayerPetIndex {
                 PetType.Pets pt = PetType.getEnumByEntity(ent);
                 if (!pt.equals(PetType.Pets.UNKNOWN)) {
                     Tameable tameableTemp = (Tameable) ent;
-                    if (tameableTemp.isTamed()) {
+                    if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                         String trimmedOwnerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
                         String trimmedEntityUUID = UUIDUtils.trimUUID(ent.getUniqueId());
                         if (!playerIndex.containsKey(trimmedOwnerUUID)) {

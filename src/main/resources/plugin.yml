@@ -34,6 +34,10 @@ permissions:
       tppets.llamas: true
       tppets.donkeys: true
       tppets.rename: true
+      tppets.addallow: true
+  tppets.mountother:
+    default: op
+    description: Allows user to mount pets that do not belong to them.
   tppets.renameall:
     default: op
     description: Allows user to rename pets that do not belong to them.
@@ -82,3 +86,6 @@ permissions:
   tppets.rename:
     default: true
     description: Allows user to rename their pets.
+  tppets.addallow:
+    default: true
+    description: Allows user to allow other users to their pets.

@@ -44,6 +44,7 @@ public class ConfigUpdater {
         thisPlugin.getConfig().set("command_aliases.llamas", new String[]{"llama"});
         thisPlugin.getConfig().set("command_aliases.donkeys", new String[]{"donkey"});
         thisPlugin.getConfig().set("command_aliases.rename", new String[]{"setname"});
+        thisPlugin.getConfig().set("command_aliases.allow", new String[]{"add"});
         thisPlugin.saveConfig();
     }
 }

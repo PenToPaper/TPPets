@@ -57,7 +57,8 @@ public class DBWrapper {
             + "max_z INT NOT NULL,\n"
             + "world_name VARCHAR(25) NOT NULL,\n"
             + "lf_zone_name VARCHAR(64));";
-    private final String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)";
+    private final String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY);";
+    private final String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id));";
 
     /*
      *      UNLOADED_PETS STATEMENTS
@@ -74,6 +75,10 @@ public class DBWrapper {
     private final String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
     private final String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
     private final String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ?";
+    private final String selectAllowedPlayers = "SELECT * FROM tpp_allowed_players WHERE pet_id = ?";
+    private final String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? LIMIT 1";
+
+    private final String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
     
     /*
      *      LOST AND FOUND REGION STATEMENTS
@@ -125,6 +130,7 @@ public class DBWrapper {
                 && database.createStatement(makeTableLostRegions)
                 && database.createStatement(makeTableProtectedRegions)
                 && database.createStatement(makeTableDBVersion)
+                && database.createStatement(makeTableAllowedPlayers)
                 && thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
     
@@ -292,6 +298,24 @@ public class DBWrapper {
         }
     }
 
+    public List<String> getAllowedPlayers(String entityUUID) {
+        String trimmedEntityUUID = UUIDUtils.trimUUID(entityUUID);
+        Connection dbConn = database.getConnection();
+        List<String> uuidList = new ArrayList<String>();
+        if (dbConn != null) {
+            try {
+                ResultSet ret = database.selectPrepStatement(dbConn, selectAllowedPlayers, trimmedEntityUUID);
+                while (ret.next()) {
+                    uuidList.add(ret.getString("user_id"));
+                }
+                return uuidList;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().info("SQL Exception getting allowed players from table");
+            }
+        }
+        return uuidList;
+    }
+
     public List<PetStorage> getPetsFromOwnerNamePetType(String ownerUUID, String petName, PetType.Pets pt) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
@@ -305,6 +329,29 @@ public class DBWrapper {
             return ret;
         }
         return null;
+    }
+
+    // Returns null if connection can't be made, returns "" if no pet by that name exists, returns pet UUID if a pet is found.
+    public String getPetUUIDByName(String ownerUUID, String petName) {
+        String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try (ResultSet rs = database.selectPrepStatement(dbConn, selectUUIDFromPet, trimmedOwnerUUID, petName)) {
+                if (rs.next()) {
+                    return rs.getString("pet_id");
+                }
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pet UUID from name: " + e.getMessage());
+            }
+            return "";
+        }
+        return null;
+    }
+
+    public boolean insertAllowedPlayer(String petUUID, String playerUUID) {
+        String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
+        String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
+        return database.insertPrepStatement(insertAllowedPlayer, trimmedPetUUID, trimmedPlayerUUID);
     }
 
     /**

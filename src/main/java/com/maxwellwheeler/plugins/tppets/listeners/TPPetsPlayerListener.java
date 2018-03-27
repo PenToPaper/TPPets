@@ -73,27 +73,29 @@ public class TPPetsPlayerListener implements Listener {
      */
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
-        if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "untame_pets")) {
-            Tameable tameableTemp = (Tameable) e.getRightClicked();
-            if (thisPlugin.getDatabase() != null && tameableTemp.isTamed() && (tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(e.getPlayer())) || e.getPlayer().hasPermission("tppets.untameall")) {
-                EntityActions.setSitting(e.getRightClicked());
-                thisPlugin.getDatabase().deletePet(e.getRightClicked());
-                tameableTemp.setOwner(null);
-                tameableTemp.setTamed(false);
-                thisPlugin.getPetIndex().removePetTamed(e.getRightClicked());
-                thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
-                e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");
-            }
-        } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "get_owner")) {
-            Tameable tameableTemp = (Tameable) e.getRightClicked();
-            if (tameableTemp.getOwner() == null) {
-                e.getPlayer().sendMessage(ChatColor.BLUE + "This pet does not belong to anybody.");
-            } else {
-                List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromUUIDs(e.getRightClicked().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString());
-                if (psList.size() == 1) {
-                    e.getPlayer().sendMessage(ChatColor.BLUE + "This pet is named " + ChatColor.WHITE + psList.get(0).petName + ChatColor.BLUE + " and belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
+        if (!e.isCancelled()) {
+            if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "untame_pets")) {
+                Tameable tameableTemp = (Tameable) e.getRightClicked();
+                if (thisPlugin.getDatabase() != null && tameableTemp.isTamed() && (tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(e.getPlayer())) || e.getPlayer().hasPermission("tppets.untameall")) {
+                    EntityActions.setSitting(e.getRightClicked());
+                    thisPlugin.getDatabase().deletePet(e.getRightClicked());
+                    tameableTemp.setOwner(null);
+                    tameableTemp.setTamed(false);
+                    thisPlugin.getPetIndex().removePetTamed(e.getRightClicked());
+                    thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
+                    e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");
+                }
+            } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "get_owner")) {
+                Tameable tameableTemp = (Tameable) e.getRightClicked();
+                if (tameableTemp.getOwner() == null) {
+                    e.getPlayer().sendMessage(ChatColor.BLUE + "This pet does not belong to anybody.");
                 } else {
-                    e.getPlayer().sendMessage(ChatColor.RED + "Error getting pet data.");
+                    List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromUUIDs(e.getRightClicked().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString());
+                    if (psList.size() == 1) {
+                        e.getPlayer().sendMessage(ChatColor.BLUE + "This pet is named " + ChatColor.WHITE + psList.get(0).petName + ChatColor.BLUE + " and belongs to " + ChatColor.WHITE + tameableTemp.getOwner().getName() + ".");
+                    } else {
+                        e.getPlayer().sendMessage(ChatColor.RED + "Error getting pet data.");
+                    }
                 }
             }
         }
