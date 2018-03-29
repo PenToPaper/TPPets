@@ -66,20 +66,29 @@ public class CommandTPPets {
                     if (ArgValidator.validateArgs(args, 2)) {
                         if (args[1].equals("list")) {
                             // Syntax received: /tpp dog f:OwnerName list
-                            listPets(tempPlayer, ownerOfflinePlayer, pt);
+                            if (tempPlayer.hasPermission("tppets.teleportother")) {
+                                listPets(tempPlayer, ownerOfflinePlayer, pt);
+                            } else {
+                                // Player shouldn't be allowed to teleport that pet
+                                tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that!");
+                            }
                         } else {
                             // Syntax received: /tpp dog f:OwnerName DogName
-                            if (teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
+                            if (hasPermissionToTp(tempPlayer, petName) && teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
                                 thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them.");
                                 tempPlayer.sendMessage(ChatColor.BLUE + ownerOfflinePlayer.getName() + "'s pet " + args[1] + " has been teleported to you.");
                             } else {
-                                tempPlayer.sendMessage(ChatColor.RED + "Can't find pet with name: " + ChatColor.WHITE + args[1]);
+                                tempPlayer.sendMessage(ChatColor.RED + "Unable to teleport pet." + ChatColor.WHITE + args[1]);
                             }
                         }
                     } else {
                         // Syntax received: /tpp dog f:OwnerName
-                        int numPetsTeleported = getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt).size();
-                        thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + args[1] + "'s " + pt.toString() + "s to their location.");
+                        if (tempPlayer.hasPermission("tppets.teleport")) {
+                            int numPetsTeleported = getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt).size();
+                            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + args[1] + "'s " + pt.toString() + "s to their location.");
+                        } else {
+                            tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that.");
+                        }
                     }
                 }
             } else {
@@ -102,6 +111,11 @@ public class CommandTPPets {
             thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of their " + pt.toString() + "s to their location.");
             tempPlayer.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + pt.toString() + "s" + ChatColor.BLUE + " have been teleported to you.");
         }
+    }
+
+    private boolean hasPermissionToTp(Player pl, String petName) {
+        List<String> playersWithPermissionForPet = thisPlugin.getAllowedPlayers().get(thisPlugin.getDatabase().getPetUUIDByName(ownerOfflinePlayer.getUniqueId().toString(), petName));
+        return pl.hasPermission("tppets.teleportother") || (playersWithPermissionForPet != null && playersWithPermissionForPet.contains(UUIDUtils.trimUUID(pl.getUniqueId().toString())));
     }
 
     private void loadApplicableChunks(List<PetStorage> psList) {

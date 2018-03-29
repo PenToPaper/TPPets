@@ -82,7 +82,7 @@ public class DBUpdater {
         if (dbw != null) {
             boolean addColumn = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)");
             oneToTwoFillColumns(dbw);
-            boolean createAllowedPlayersTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id));");
+            boolean createAllowedPlayersTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id), FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);");
             boolean createVersionTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)");
             if (createVersionTable && createAllowedPlayersTable) {
                 return addColumn && createVersionTable && oneToTwoInitializeVersion(dbw) && setCurrentSchemaVersion(dbw, 2);

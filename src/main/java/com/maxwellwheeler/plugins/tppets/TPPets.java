@@ -33,6 +33,7 @@ public class TPPets extends JavaPlugin implements Listener {
     private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<String, LostAndFoundRegion>();
     private Hashtable<String, List<String>> commandAliases = new Hashtable<String, List<String>>();
     private Hashtable<String, List<Material>> customTools = new Hashtable<String, List<Material>>();
+    private Hashtable<String, List<String>> allowedPlayers = new Hashtable<String, List<String>>();
 
     // Database
     private DBWrapper database;
@@ -62,6 +63,10 @@ public class TPPets extends JavaPlugin implements Listener {
      * VARIABLE INITIALIZERS
      * 
      */
+
+    private void initializeAllowedPlayers() {
+        allowedPlayers = database.getAllAllowedPlayers();
+    }
 
     /**
      * Initializes the customTools Hashtable, which is later used to allow servers to configure which tools can be applied to which tasks.
@@ -424,5 +429,9 @@ public class TPPets extends JavaPlugin implements Listener {
 
     public ConfigUpdater getConfigUpdater() {
         return configUpdater;
+    }
+
+    public Hashtable<String, List<String>> getAllowedPlayers() {
+        return allowedPlayers;
     }
 }

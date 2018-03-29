@@ -191,11 +191,9 @@ public class TPPetsEntityListener implements Listener {
         if (!PetType.getEnumByEntity(e.getMount()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getMount();
             if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && e.getEntity() instanceof Player && !((Player)e.getEntity()).hasPermission("tppets.mountother") && !tameableTemp.getOwner().equals(e.getEntity())) {
-                List<String> allowedPlayers = thisPlugin.getDatabase().getAllowedPlayers(e.getMount().getUniqueId().toString());
-                for (String allowedPlayer : allowedPlayers) {
-                    if (allowedPlayer.equals(UUIDUtils.trimUUID(e.getEntity().getUniqueId()))) {
-                        return;
-                    }
+                List<String> allowedPlayers = thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getMount().getUniqueId().toString()));
+                if (allowedPlayers.contains(UUIDUtils.trimUUID(e.getEntity().getUniqueId()))) {
+                    return;
                 }
                 e.setCancelled(true);
             }

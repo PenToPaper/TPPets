@@ -58,7 +58,11 @@ public class DBWrapper {
             + "world_name VARCHAR(25) NOT NULL,\n"
             + "lf_zone_name VARCHAR(64));";
     private final String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY);";
-    private final String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id));";
+    private final String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
+            "pet_id CHAR(32)," +
+            "user_id CHAR(32)," +
+            "PRIMARY KEY(pet_id, user_id)," +
+            "FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);";
 
     /*
      *      UNLOADED_PETS STATEMENTS
@@ -79,6 +83,7 @@ public class DBWrapper {
     private final String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? LIMIT 1";
 
     private final String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
+    private final String selectAllAllowedPlayers = "SELECT * FROM tpp_allowed_players ORDER BY pet_id";
     
     /*
      *      LOST AND FOUND REGION STATEMENTS
@@ -558,7 +563,31 @@ public class DBWrapper {
                 }
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting protected regions" + e.getMessage());
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting protected regions: " + e.getMessage());
+            }
+        }
+        return ret;
+    }
+
+    public Hashtable<String, List<String>> getAllAllowedPlayers() {
+        Hashtable<String, List<String>> ret = new Hashtable<String, List<String>>();
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                ResultSet rs = database.selectPrepStatement(dbConn, selectAllAllowedPlayers);
+                String petID = "";
+                List<String> allowedPlayersID = new ArrayList<String>();
+                while (rs.next()) {
+                    if (!petID.equals(rs.getString("pet_id"))) {
+                        ret.put(petID, allowedPlayersID);
+                        petID = rs.getString("pet_id");
+                        allowedPlayersID = new ArrayList<String>();
+                    }
+                    allowedPlayersID.add(rs.getString("player_id"));
+                }
+                ret.put(petID, allowedPlayersID);
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting allowed players: " + e.getMessage());
             }
         }
         return ret;
