@@ -20,25 +20,25 @@ public class CommandLost extends RegionCommand {
      * @param args The arguments passed with the command - doesn't include the "tpp lostandfound" in command. Ex: /tpp lostandfound add PrimaryLost, String args[] would have {add PrimaryLost}.
      */
     public void processCommand(CommandSender sender, String[] args) {
-        if (ArgValidator.validateArgs(args, 1)) {
+        if (ArgValidator.validateArgsLength(args, 1)) {
             // Changes behavior based on the 3rd index of the original commmand, but first index of the arguments passed to this method.
             switch (args[0]) {
                 case "add":
-                    if (ArgValidator.validateArgs(args, 2)) {
+                    if (ArgValidator.validateArgsLength(args, 2)) {
                         addRegion(sender, new String[] {args[1]});
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp lostandfound add [name]");
                     }
                     break;
                 case "remove":
-                    if (ArgValidator.validateArgs(args, 2)) {
+                    if (ArgValidator.validateArgsLength(args, 2)) {
                         removeRegion(sender, new String[] {args[1]});
                     } else {
                         sender.sendMessage(ChatColor.RED + "Syntax error: /tpp lostandfound remove [name]");
                     }
                     break;
                 case "list":
-                    if (ArgValidator.validateArgs(args, 2)) {
+                    if (ArgValidator.validateArgsLength(args, 2)) {
                         listRegions(sender, new String[] {args[1]});
                     } else {
                         listRegions(sender, new String[] {});
@@ -98,7 +98,7 @@ public class CommandLost extends RegionCommand {
     @Override
     protected void listRegions(CommandSender sender, String[] truncatedArgs) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Lost and Found Regions]" + ChatColor.DARK_GRAY + "---------");
-        if (ArgValidator.validateArgs(truncatedArgs, 1)) {
+        if (ArgValidator.validateArgsLength(truncatedArgs, 1)) {
             LostAndFoundRegion lfr = thisPlugin.getLostRegion(truncatedArgs[0]);
             if (lfr != null) {
                 displayLfrInfo(sender, lfr);

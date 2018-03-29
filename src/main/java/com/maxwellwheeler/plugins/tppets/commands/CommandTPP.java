@@ -4,13 +4,9 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +33,7 @@ public class CommandTPP implements CommandExecutor {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (ArgValidator.validateArgs(args, 1)) {
+        if (ArgValidator.validateArgsLength(args, 1)) {
             String realCommand = "";
             for (String commands : commandAliases.keySet()) {
                 if (commandAliases.get(commands).contains(args[0])) {
@@ -82,7 +78,6 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.birds")) {
                         CommandTPPets parrotTPP = getTPPets(sender, args);
                         parrotTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.PARROT);
-                        return true;
                     } else {
                         permissionMessage(sender);
                     }
@@ -91,7 +86,6 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.horses")) {
                         CommandTPPets horseTPP = getTPPets(sender, args);
                         horseTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.HORSE);
-                        return true;
                     } else {
                         permissionMessage(sender);
                     }
@@ -100,7 +94,6 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.mules")) {
                         CommandTPPets muleTPP = getTPPets(sender, args);
                         muleTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.MULE);
-                        return true;
                     } else {
                         permissionMessage(sender);
                     }
@@ -109,7 +102,6 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.llamas")) {
                         CommandTPPets llamaTPP = getTPPets(sender, args);
                         llamaTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.LLAMA);
-                        return true;
                     } else {
                         permissionMessage(sender);
                     }
@@ -118,7 +110,6 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.donkeys")) {
                         CommandTPPets donkeyTPP = getTPPets(sender, args);
                         donkeyTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DONKEY);
-                        return true;
                     } else {
                         permissionMessage(sender);
                     }
@@ -127,23 +118,36 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.rename")) {
                         CommandRename renamePet = new CommandRename(thisPlugin);
                         renamePet.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
-                        return true;
                     } else {
                         permissionMessage(sender);
                     }
                     break;
                 case "allow":
                     if (sender.hasPermission("tppets.addallow")) {
-                        CommandAllow allowPlayer = new CommandAllow(thisPlugin);
-                        allowPlayer.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandPermissions allowPlayer = new CommandPermissions(thisPlugin);
+                        allowPlayer.allowPlayer(sender, Arrays.copyOfRange(args, 1, args.length));
+                    } else {
+                        permissionMessage(sender);
                     }
+                    break;
+                case "remove":
+                    if (sender.hasPermission("tppets.removeallow")) {
+                        CommandPermissions removePlayer = new CommandPermissions(thisPlugin);
+                        removePlayer.removePlayer(sender, Arrays.copyOfRange(args, 1, args.length));
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
+                case "list":
+                    if (sender.hasPermission("tppets.listallow")) {
+                        CommandPermissions listPlayer = new CommandPermissions(thisPlugin);
+                        listPlayer.listPlayers(sender, Arrays.copyOfRange(args, 1, args.length));
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
                 case "help":
                 default:
-                    if (sender instanceof Player) {
-                        Player tempPlayer = (Player) sender;
-                        Horse tempHorse = (Horse) tempPlayer.getWorld().spawnEntity(new Location(tempPlayer.getWorld(), 1000, 100, 1000), EntityType.HORSE);
-                        tempHorse.setOwner(tempPlayer);
-                    }
                     sendHelp(sender);
                     break;
             }
@@ -158,7 +162,7 @@ public class CommandTPP implements CommandExecutor {
      * @return An instance of {@link CommandTPPets}, constructed based on the number of args.
      */
     private CommandTPPets getTPPets(CommandSender sender, String[] args) {
-        if (ArgValidator.validateArgs(args, 2) && sender.hasPermission("tppets.teleportother")) {
+        if (ArgValidator.validateArgsLength(args, 2) && sender.hasPermission("tppets.teleportother")) {
             return new CommandTPPets();
         }
         return new CommandTPPets();

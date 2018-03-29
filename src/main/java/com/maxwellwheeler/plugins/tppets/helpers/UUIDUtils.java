@@ -25,4 +25,11 @@ public class UUIDUtils {
     public static String trimUUID(String idString) {
         return idString.replace("-", "");
     }
+
+    public static String unTrimUUID(String idString) {
+        if (idString.length() == 32) {
+            return idString.substring(0, 8) + "-" + idString.substring(8, 12) + "-" + idString.substring(12, 16) + "-" + idString.substring(16, 20) + "-" + idString.substring(20);
+        }
+        return null;
+    }
 }

@@ -18,14 +18,14 @@ public class PetType {
      * PARROT = parrot
      * UNKNOWN = a pet not of the above three types
      */
-    public static enum Pets {
+    public enum Pets {
         CAT, DOG, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
     }
     
     private static final Hashtable<Pets, Class<?>[]> classTranslate;
     
     static {
-        classTranslate = new Hashtable<Pets, Class<?>[]>();
+        classTranslate = new Hashtable<>();
         classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Ocelot.class});
         classTranslate.put(Pets.DOG, new Class<?>[]{org.bukkit.entity.Wolf.class});
         classTranslate.put(Pets.PARROT, new Class<?>[]{org.bukkit.entity.Parrot.class});

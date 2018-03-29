@@ -7,6 +7,13 @@ public class EntityActions {
     public static void setSitting(Entity ent) {
         if (ent instanceof Sittable) {
             Sittable sittableTemp = (Sittable) ent;
+            sittableTemp.setSitting(true);
+        }
+    }
+
+    public static void setStanding(Entity ent) {
+        if (ent instanceof Sittable) {
+            Sittable sittableTemp = (Sittable) ent;
             sittableTemp.setSitting(false);
         }
     }

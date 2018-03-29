@@ -20,11 +20,23 @@ public class DBUpdater {
         this.schemaVersion = getSchemaVersionFromDB(thisPlugin.getDatabase());
     }
 
+    public boolean update(DBWrapper dbw) {
+        if (dbw != null) {
+            if (schemaVersion != updatedVersion) {
+                if (schemaVersion == 1) {
+                    return oneToTwo(dbw);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
     public boolean isUpToDate() {
         return schemaVersion == updatedVersion;
     }
 
-    public int getSchemaVersionFromDB(DBWrapper dbw) {
+    private int getSchemaVersionFromDB(DBWrapper dbw) {
         if (dbw != null) {
             try {
                 Connection dbConn = dbw.getRealDatabase().getConnection();
@@ -52,10 +64,10 @@ public class DBUpdater {
     }
 
     public boolean updateSchemaVersion(DBWrapper dbw) {
-        return dbw != null && setCurrentSchemaVersion(dbw, updatedVersion);
+        return setCurrentSchemaVersion(dbw, updatedVersion);
     }
 
-    public boolean setCurrentSchemaVersion(DBWrapper dbw, int schemaVersion) {
+    private boolean setCurrentSchemaVersion(DBWrapper dbw, int schemaVersion) {
         if (dbw != null) {
             boolean databaseUpdate = dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_db_version SET version = ?", schemaVersion);
             if (databaseUpdate) {
@@ -66,26 +78,24 @@ public class DBUpdater {
         return false;
     }
 
-    public boolean update(DBWrapper dbw) {
-        if (dbw != null) {
-            if (schemaVersion != updatedVersion) {
-                if (schemaVersion == 1) {
-                    return oneToTwo(dbw);
-                }
-            }
-            return true;
-        }
-        return false;
-    }
-
     private boolean oneToTwo(DBWrapper dbw) {
         if (dbw != null) {
             boolean addColumn = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)");
-            oneToTwoFillColumns(dbw);
-            boolean createAllowedPlayersTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id), FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);");
-            boolean createVersionTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)");
-            if (createVersionTable && createAllowedPlayersTable) {
-                return addColumn && createVersionTable && oneToTwoInitializeVersion(dbw) && setCurrentSchemaVersion(dbw, 2);
+
+            boolean fillColumn = false;
+            if (addColumn) {
+                fillColumn = oneToTwoFillColumns(dbw);
+            }
+
+            boolean createAllowedPlayersTable = false;
+            boolean createVersionTable = false;
+            if (fillColumn) {
+                createAllowedPlayersTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id), FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);");
+                createVersionTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)");
+            }
+
+            if (createAllowedPlayersTable && createVersionTable) {
+                return oneToTwoInitializeVersion(dbw) && setCurrentSchemaVersion(dbw, 2);
             } else {
                 twoToOne(dbw);
             }
@@ -97,13 +107,13 @@ public class DBUpdater {
         if (dbw != null) {
             try {
                 // Hashtable<owner_id, Set<pet_id>>, used to establish a list of how many pets a player owns, so that they can be assigned default names later.
-                Hashtable<String, Set<PetStorage>> tempPetStorage = new Hashtable<String, Set<PetStorage>>();
+                Hashtable<String, Set<PetStorage>> tempPetStorage = new Hashtable<>();
 
                 Connection conn = dbw.getRealDatabase().getConnection();
                 ResultSet getPets = dbw.getRealDatabase().selectPrepStatement(conn, "SELECT * FROM tpp_unloaded_pets");
                 while (getPets.next()) {
                     if (!tempPetStorage.containsKey(getPets.getString("owner_id"))) {
-                        tempPetStorage.put(getPets.getString("owner_id"), new HashSet<PetStorage>());
+                        tempPetStorage.put(getPets.getString("owner_id"), new HashSet<>());
                     }
                     tempPetStorage.get(getPets.getString("owner_id")).add(new PetStorage(getPets.getString("pet_id"), getPets.getInt("pet_type"), getPets.getInt("pet_x"), getPets.getInt("pet_y"), getPets.getInt("pet_z"), getPets.getString("pet_world"), getPets.getString("owner_id"),null));
                 }
@@ -139,6 +149,8 @@ public class DBUpdater {
                     + ");");
             boolean transferData = dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id FROM tpp_unloaded_pets_temp");
             boolean dropTempTable = dbw.getRealDatabase().updatePrepStatement("DROP TABLE tpp_unloaded_pets_temp");
+            dbw.getRealDatabase().updatePrepStatement("DROP TABLE IF EXISTS tpp_allowed_players");
+            dbw.getRealDatabase().updatePrepStatement("DROP TABLE IF EXISTS tpp_db_version");
             return renameTable && createTable && transferData && dropTempTable;
         }
         return false;

@@ -24,6 +24,8 @@ command_aliases:
   donkeys: [donkey]
   rename: [setname]
   allow: [add]
+  remove: [take]
+  list: [show]
   help: [pls]
 mysql:
   enable: false

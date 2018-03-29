@@ -53,39 +53,41 @@ public class CommandTPPets {
      * @param sender Represents who sent the command. If it isn't a player, an error message is displayed.
      * @param pt The type of pet to be teleported
      */
+    @SuppressWarnings("deprecation")
     public void processCommand(CommandSender sender, String[] args, PetType.Pets pt) {
         if (!(sender instanceof Player)) {
             return;
         }
         Player tempPlayer = (Player) sender;
-        if (ArgValidator.validateArgs(args, 1)) {
+        if (ArgValidator.validateArgsLength(args, 1)) {
             this.ownerName =  ArgValidator.isForSomeoneElse(args[0]);
             if (this.ownerName != null) {
                 ownerOfflinePlayer = Bukkit.getOfflinePlayer(this.ownerName);
                 if (ownerOfflinePlayer != null) {
-                    if (ArgValidator.validateArgs(args, 2)) {
+                    if (ArgValidator.validateArgsLength(args, 2)) {
                         if (args[1].equals("list")) {
                             // Syntax received: /tpp dog f:OwnerName list
                             if (tempPlayer.hasPermission("tppets.teleportother")) {
                                 listPets(tempPlayer, ownerOfflinePlayer, pt);
                             } else {
-                                // Player shouldn't be allowed to teleport that pet
+                                // Player isn't allowed to teleport the pet, and shouldn't be allowed to check the player's pet names
                                 tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that!");
                             }
                         } else {
                             // Syntax received: /tpp dog f:OwnerName DogName
                             if (hasPermissionToTp(tempPlayer, petName) && teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
-                                thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them.");
-                                tempPlayer.sendMessage(ChatColor.BLUE + ownerOfflinePlayer.getName() + "'s pet " + args[1] + " has been teleported to you.");
+                                thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them at: " + formatLocation(tempPlayer.getLocation()));
+                                tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + ChatColor.BLUE + "'s pet " + args[1] + " has been teleported to you.");
                             } else {
                                 tempPlayer.sendMessage(ChatColor.RED + "Unable to teleport pet." + ChatColor.WHITE + args[1]);
                             }
                         }
                     } else {
                         // Syntax received: /tpp dog f:OwnerName
-                        if (tempPlayer.hasPermission("tppets.teleport")) {
+                        if (tempPlayer.hasPermission("tppets.teleportother")) {
                             int numPetsTeleported = getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt).size();
-                            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + args[1] + "'s " + pt.toString() + "s to their location.");
+                            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + args[1] + "'s " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
+                            tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + ChatColor.BLUE + "'s " + ChatColor.WHITE + pt.toString() + ChatColor.BLUE + "s have been teleported to you");
                         } else {
                             tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that.");
                         }
@@ -98,7 +100,7 @@ public class CommandTPPets {
                 } else {
                     // Syntax received: /tpp dog DogName
                     if (teleportSpecificPet(tempPlayer, tempPlayer, args[0], pt)) {
-                        thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported their " + pt.toString() + ", " + args[0] + ", to them");
+                        thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported their " + pt.toString() + ", " + args[0] + ", to their location at: " + formatLocation(tempPlayer.getLocation()));
                         tempPlayer.sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you.");
                     } else {
                         tempPlayer.sendMessage(ChatColor.RED + "Can't find pet with name: " + ChatColor.WHITE + args[0]);
@@ -108,7 +110,7 @@ public class CommandTPPets {
         } else {
             // Syntax received: /tpp dog
             int numPetsTeleported = getPetsAndTeleport(tempPlayer, tempPlayer, pt).size();
-            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of their " + pt.toString() + "s to their location.");
+            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of their " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
             tempPlayer.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + pt.toString() + "s" + ChatColor.BLUE + " have been teleported to you.");
         }
     }
@@ -148,13 +150,19 @@ public class CommandTPPets {
 
     private Set<UUID> getPetsAndTeleport(Player sendTo, OfflinePlayer sendFrom, PetType.Pets pt) {
         List<World> worlds = Bukkit.getServer().getWorlds();
-        Set<UUID> teleportedEnts = new HashSet<UUID>();
+        Set<UUID> teleportedEnts = new HashSet<>();
         if (thisPlugin.getAllowTpBetweenWorlds()) {
             for (World world : worlds) {
-                teleportedEnts.addAll(loadAndTp(sendTo, sendFrom, world, pt, teleportedEnts));
+                Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, world, pt, teleportedEnts);
+                if (teleportedTemp != null) {
+                    teleportedEnts.addAll(teleportedTemp);
+                }
             }
         } else {
-            teleportedEnts.addAll(loadAndTp(sendTo, sendFrom, sendTo.getWorld(), pt, teleportedEnts));
+            Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, sendTo.getWorld(), pt, teleportedEnts);
+            if (teleportedTemp != null) {
+                teleportedEnts.addAll(teleportedTemp);
+            }
         }
         return teleportedEnts;
     }
@@ -164,7 +172,7 @@ public class CommandTPPets {
             List<PetStorage> unloadedPetsInWorld = dbConn.getPetsGeneric(sendFrom.getUniqueId().toString(), world.getName(), pt);
             loadApplicableChunks(unloadedPetsInWorld);
             for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
-                if (isTeleportablePet(sendTo, sendFrom, ent, pt)) {
+                if (isTeleportablePet(sendFrom, ent, pt)) {
                     if (!alreadyTeleportedPets.contains(ent.getUniqueId())) {
                         teleportPet(sendTo, ent);
                         alreadyTeleportedPets.add(ent.getUniqueId());
@@ -178,7 +186,7 @@ public class CommandTPPets {
         return null;
     }
 
-    private boolean isTeleportablePet(Player sendTo, OfflinePlayer sendFrom, Entity ent, PetType.Pets pt) {
+    private boolean isTeleportablePet(OfflinePlayer sendFrom, Entity ent, PetType.Pets pt) {
         if (ent instanceof Tameable) {
             Tameable tameableTemp = (Tameable) ent;
             if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(sendFrom) && PetType.getEnumByEntity(ent).equals(pt)) {
@@ -206,30 +214,8 @@ public class CommandTPPets {
      * @param entity The entity to be teleported
      */
     private void teleportPet(Player pl, Entity entity) {
-        EntityActions.setSitting(entity);
+        EntityActions.setStanding(entity);
         entity.teleport(pl);
-    }
-    
-    /**
-     * Sends a message to the player after their pets have been teleported
-     * @param sender The sender to send a confirmation for
-     * @param pt The pet type that was teleported
-     */
-    private void announceComplete(CommandSender sender, PetType.Pets pt) {
-        String firstWord = ownerName.equals("") ? "Your " : ownerName + "'s ";
-        switch (pt) {
-            case CAT:
-                sender.sendMessage(ChatColor.BLUE + firstWord + ChatColor.WHITE + "cats " + ChatColor.BLUE + "have been teleported to you.");
-                break;
-            case DOG:
-                sender.sendMessage(ChatColor.BLUE + firstWord + ChatColor.WHITE + "dogs " + ChatColor.BLUE + "have been teleported to you.");
-                break;
-            case PARROT:
-                sender.sendMessage(ChatColor.BLUE + firstWord + ChatColor.WHITE + "birds " + ChatColor.BLUE + "have been teleported to you.");
-                break;
-            default:
-                break;
-        }
     }
     
     /**

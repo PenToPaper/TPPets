@@ -29,17 +29,15 @@ import java.util.Set;
  *
  */
 public class TPPets extends JavaPlugin implements Listener {
-    private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<String, ProtectedRegion>();
-    private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<String, LostAndFoundRegion>();
-    private Hashtable<String, List<String>> commandAliases = new Hashtable<String, List<String>>();
-    private Hashtable<String, List<Material>> customTools = new Hashtable<String, List<Material>>();
-    private Hashtable<String, List<String>> allowedPlayers = new Hashtable<String, List<String>>();
+    private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<>();
+    private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<>();
+    private Hashtable<String, List<String>> commandAliases = new Hashtable<>();
+    private Hashtable<String, List<Material>> customTools = new Hashtable<>();
+    private Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
 
     // Database
     private DBWrapper database;
     private DBUpdater databaseUpdater;
-
-
 
     // Config
     private ConfigUpdater configUpdater;
@@ -64,17 +62,13 @@ public class TPPets extends JavaPlugin implements Listener {
      * 
      */
 
-    private void initializeAllowedPlayers() {
-        allowedPlayers = database.getAllAllowedPlayers();
-    }
-
     /**
      * Initializes the customTools Hashtable, which is later used to allow servers to configure which tools can be applied to which tasks.
      */
     private void initializeCustomTools() {
         ConfigurationSection toolsSection = getConfig().getConfigurationSection("tools");
         for (String key : toolsSection.getKeys(false)) {
-            List<Material> rMat = new ArrayList<Material>();
+            List<Material> rMat = new ArrayList<>();
             for (String materialName : toolsSection.getStringList(key)) {
                 rMat.add(Material.getMaterial(materialName));
             }
@@ -210,6 +204,10 @@ public class TPPets extends JavaPlugin implements Listener {
         perms = rsp.getProvider();
         return perms != null;
     }
+
+    private void initializeAllowedPlayers() {
+        allowedPlayers = database.getAllAllowedPlayers();
+    }
     
     @Override
     public void onEnable() {
@@ -227,6 +225,7 @@ public class TPPets extends JavaPlugin implements Listener {
         initializeDBC();
         updateDBC();
         createTables();
+        initializeAllowedPlayers();
 
         // Database pulling
         getLogger().info("Getting data from database.");
@@ -282,16 +281,7 @@ public class TPPets extends JavaPlugin implements Listener {
     public boolean isInProtectedRegion(Location lc) {
         return getProtectedRegionWithin(lc) != null;
     }
-    
-    /**
-     * Checks if a player object is located within any regions
-     * @param pl The player to be checked.
-     * @return if player's location is in a {@link ProtectedRegion}
-     */
-    public boolean isInProtectedRegion(Player pl) {
-        return isInProtectedRegion(pl.getLocation());
-    }
-    
+
     /**
      * Returns a protected region with a given name
      * @param name Name of {@link ProtectedRegion}

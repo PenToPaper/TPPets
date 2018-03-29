@@ -76,13 +76,13 @@ public class TPPetsPlayerListener implements Listener {
         if (!e.isCancelled()) {
             if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "untame_pets")) {
                 Tameable tameableTemp = (Tameable) e.getRightClicked();
-                if (thisPlugin.getDatabase() != null && tameableTemp.isTamed() && (tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(e.getPlayer())) || e.getPlayer().hasPermission("tppets.untameall")) {
-                    EntityActions.setSitting(e.getRightClicked());
+                if (thisPlugin.getDatabase() != null && tameableTemp.isTamed() && tameableTemp.getOwner() != null && (tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall"))) {
+                    EntityActions.setStanding(e.getRightClicked());
                     thisPlugin.getDatabase().deletePet(e.getRightClicked());
                     tameableTemp.setOwner(null);
                     tameableTemp.setTamed(false);
                     thisPlugin.getPetIndex().removePetTamed(e.getRightClicked());
-                    thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId());
+                    thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId().toString());
                     e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");
                 }
             } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "get_owner")) {

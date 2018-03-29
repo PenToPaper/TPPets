@@ -83,6 +83,7 @@ public class DBWrapper {
     private final String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? LIMIT 1";
 
     private final String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
+    private final String deleteAllowedPlayer = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
     private final String selectAllAllowedPlayers = "SELECT * FROM tpp_allowed_players ORDER BY pet_id";
     
     /*
@@ -359,6 +360,12 @@ public class DBWrapper {
         return database.insertPrepStatement(insertAllowedPlayer, trimmedPetUUID, trimmedPlayerUUID);
     }
 
+    public boolean deleteAllowedPlayer(String petUUID, String playerUUID) {
+        String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
+        String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
+        return database.deletePrepStatement(deleteAllowedPlayer, trimmedPetUUID, trimmedPlayerUUID);
+    }
+
     /**
      * Gets a list of pets from storage based on the owner's UUID.
      * @param uuid The trimmed or non-trimmed UUID string of the owner.
@@ -570,18 +577,18 @@ public class DBWrapper {
     }
 
     public Hashtable<String, List<String>> getAllAllowedPlayers() {
-        Hashtable<String, List<String>> ret = new Hashtable<String, List<String>>();
+        Hashtable<String, List<String>> ret = new Hashtable<>();
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
             try {
                 ResultSet rs = database.selectPrepStatement(dbConn, selectAllAllowedPlayers);
                 String petID = "";
-                List<String> allowedPlayersID = new ArrayList<String>();
+                List<String> allowedPlayersID = new ArrayList<>();
                 while (rs.next()) {
                     if (!petID.equals(rs.getString("pet_id"))) {
                         ret.put(petID, allowedPlayersID);
                         petID = rs.getString("pet_id");
-                        allowedPlayersID = new ArrayList<String>();
+                        allowedPlayersID = new ArrayList<>();
                     }
                     allowedPlayersID.add(rs.getString("player_id"));
                 }

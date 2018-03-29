@@ -9,17 +9,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class CommandRename {
-    TPPets thisPlugin;
+    private TPPets thisPlugin;
     public CommandRename(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 
+    @SuppressWarnings("deprecation")
     public void processCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
             Player playerTemp = (Player) sender;
-            if (ArgValidator.validateArgs(args,2)) {
-                if (ArgValidator.isForSomeoneElse(args[0]) != null && sender.hasPermission("tppets.renameall") && ArgValidator.validateArgs(args, 3)) {
-                    OfflinePlayer offlinePlayerTemp = Bukkit.getOfflinePlayer(args[0]);
+            if (ArgValidator.validateArgsLength(args,2)) {
+                String someoneElse = ArgValidator.isForSomeoneElse(args[0]);
+                if (someoneElse != null && sender.hasPermission("tppets.renameall") && ArgValidator.validateArgsLength(args, 3)) {
+                    OfflinePlayer offlinePlayerTemp = Bukkit.getOfflinePlayer(someoneElse);
                     if (offlinePlayerTemp != null) {
                         renamePet(playerTemp, offlinePlayerTemp, args[1], args[2]);
                     } else {
@@ -28,6 +30,8 @@ public class CommandRename {
                 } else {
                     renamePet(playerTemp, playerTemp, args[0], args[1]);
                 }
+            } else {
+                sender.sendMessage(ChatColor.RED + "Syntax error. Usage: /tpp rename [old name] [new name]");
             }
         } else {
             sender.sendMessage(ChatColor.RED + "Error: Sender is not a player.");
@@ -42,9 +46,8 @@ public class CommandRename {
         if (thisPlugin.getDatabase().renamePet(commandAbout.getUniqueId().toString(), oldName, newName)) {
             pl.sendMessage(ChatColor.BLUE + "Renamed pet " + ChatColor.WHITE + oldName + ChatColor.BLUE + " to " + ChatColor.WHITE + newName);
             return true;
-        } else {
-            pl.sendMessage(ChatColor.RED + "Unable to rename pet");
-            return false;
         }
+        pl.sendMessage(ChatColor.RED + "Unable to rename pet");
+        return false;
     }
 }

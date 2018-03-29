@@ -50,6 +50,7 @@ public class TPPetsEntityListener implements Listener {
                     e.setCancelled(true);
                     thisPlugin.getLogger().info("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering protected region.");
                 } else if (thisPlugin.isInLostRegion(e.getFrom())) {
+                    // direct calls to entity.teleport() methods do not call this event, so cancelling this does not prevent players from taking their pets home
                     EntityActions.setSitting(e.getEntity());
                     e.setCancelled(true);
                 }
@@ -66,9 +67,10 @@ public class TPPetsEntityListener implements Listener {
         if (e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
-                if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deletePet(e.getEntity())) {
-                    thisPlugin.getPetIndex().removePetTamed(e.getEntity().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString(), PetType.getEnumByEntity(e.getEntity()));
+                if (thisPlugin.getDatabase() != null) {
+                    thisPlugin.getDatabase().deletePet(e.getEntity());
                 }
+                thisPlugin.getPetIndex().removePetTamed(e.getEntity().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString(), PetType.getEnumByEntity(e.getEntity()));
             }
         }
     }
@@ -87,14 +89,14 @@ public class TPPetsEntityListener implements Listener {
                 // If we're supposed to prevent player damage, prevent damage directly from players that don't own the pet, and indirectly through projectiles.
                 if (thisPlugin.getPreventPlayerDamage()) {
                     // Direct damage
-                    if (e.getDamager() instanceof Player && !(e.getDamager().equals(tameableTemp.getOwner())) && !((Player)e.getDamager()).hasPermission("tppets.bypassprotection")) {
+                    if (e.getDamager() instanceof Player && !(e.getDamager().equals(tameableTemp.getOwner())) && !(e.getDamager().hasPermission("tppets.bypassprotection")) && !thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getEntity().getUniqueId())).contains(UUIDUtils.trimUUID(e.getDamager().getUniqueId()))) {
                         e.setCancelled(true);
                         thisPlugin.getLogger().info("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                         return;
                     // Indirect damage
                     } else if (e.getDamager() instanceof Projectile) {
                         Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner()) && !((Player)e.getDamager()).hasPermission("tppets.bypassprotection")) {
+                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner()) && !((Player)e.getDamager()).hasPermission("tppets.bypassprotection") && !thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getEntity().getUniqueId())).contains(UUIDUtils.trimUUID(e.getDamager().getUniqueId()))) {
                             e.setCancelled(true);
                             thisPlugin.getLogger().info("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                             return;
@@ -190,13 +192,18 @@ public class TPPetsEntityListener implements Listener {
         // e.getMount = mounted mob (horse, etc)
         if (!PetType.getEnumByEntity(e.getMount()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getMount();
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && e.getEntity() instanceof Player && !((Player)e.getEntity()).hasPermission("tppets.mountother") && !tameableTemp.getOwner().equals(e.getEntity())) {
-                List<String> allowedPlayers = thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getMount().getUniqueId().toString()));
-                if (allowedPlayers.contains(UUIDUtils.trimUUID(e.getEntity().getUniqueId()))) {
-                    return;
-                }
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && e.getEntity() instanceof Player && !isAllowedToMount((Player)e.getEntity(), e.getMount())) {
                 e.setCancelled(true);
             }
         }
+    }
+
+    private boolean isAllowedToMount(Player pl, Entity ent) {
+        if (ent instanceof Tameable) {
+            Tameable tameableTemp = (Tameable) ent;
+            List<String> allowedPlayers = thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(ent.getUniqueId()));
+            return pl.hasPermission("tppets.mountother") || tameableTemp.getOwner().equals(pl) || allowedPlayers.contains(UUIDUtils.trimUUID(pl.getUniqueId()));
+        }
+        return false;
     }
 }

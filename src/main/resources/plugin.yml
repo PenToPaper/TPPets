@@ -11,7 +11,7 @@ commands:
   tpp:
     description: Base command for TPPets
     aliases: [teleportpets]
-    usage: "Usage: /tpp [parrots/dogs/cats/protected/lost]"
+    usage: "Usage: /tpp [birds/dogs/cats/horses/mules/llamas/donkeys/protected/lost]"
 
 permissions:
   tppets.*:
@@ -35,6 +35,20 @@ permissions:
       tppets.donkeys: true
       tppets.rename: true
       tppets.addallow: true
+
+  tppets.teleport:
+    description: Parent node of tppets teleporting permissions.
+    default: true
+    children:
+      tppets.dogs: true
+      tppets.cats: true
+      tppets.birds: true
+      tppets.horses: true
+      tppets.mules: true
+      tppets.llamas: true
+      tppets.donkeys: true
+
+  # Admin management permissions
   tppets.mountother:
     default: op
     description: Allows user to mount pets that do not belong to them.
@@ -56,12 +70,30 @@ permissions:
   tppets.tpanywhere:
     default: op
     description: Allows user to teleport pets into, and keep pets inside, protected regions.
+
+  # Player management permissions
+  tppets.rename:
+    default: true
+    description: Allows user to rename their pets.
+  tppets.addallow:
+    default: true
+    description: Allows user to allow other users to their pets.
+  tppets.removeallow:
+    default: true
+    description: Allows user to disallow other users to their pets.
+  tppets.listallow:
+    default: true
+    description: Allows user to list players that are allowed to a pet.
+
+  # Region commands
   tppets.protected:
     default: op
     description: Allows user to set cuboid regions where pets are not allowed.
   tppets.lost:
     default: op
     description: Allows user to set cuboid regions where pets found in protected regions are sent.
+
+  # Teleportation commands
   tppets.dogs:
     default: true
     description: Allows user to teleport their dogs to them.
@@ -83,9 +115,4 @@ permissions:
   tppets.donkeys:
     default: true
     description: Allows user to teleport their donkeys to them.
-  tppets.rename:
-    default: true
-    description: Allows user to rename their pets.
-  tppets.addallow:
-    default: true
-    description: Allows user to allow other users to their pets.
+
