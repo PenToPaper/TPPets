@@ -205,7 +205,9 @@ public class TPPets extends JavaPlugin implements Listener {
     }
 
     private void initializeAllowedPlayers() {
-        allowedPlayers = database.getAllAllowedPlayers();
+        if (database != null) {
+            allowedPlayers = database.getAllAllowedPlayers();
+        }
     }
     
     @Override

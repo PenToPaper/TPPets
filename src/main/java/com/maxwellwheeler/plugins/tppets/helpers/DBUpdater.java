@@ -40,21 +40,25 @@ public class DBUpdater {
         if (dbw != null) {
             try {
                 Connection dbConn = dbw.getRealDatabase().getConnection();
-                ResultSet tables = dbConn.getMetaData().getTables(null, null, "tpp_db_version", null);
-                if (tables.next() && tables.getString("TABLE_NAME").equals("tpp_db_version")) {
-                    tables.close();
-                    ResultSet versionData = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT version FROM tpp_db_version");
-                    if (versionData == null) {
-                        dbConn.close();
-                        return 1;
+                if (dbConn != null) {
+                    ResultSet tables = dbConn.getMetaData().getTables(null, null, "tpp_db_version", null);
+                    if (tables.next() && tables.getString("TABLE_NAME").equals("tpp_db_version")) {
+                        tables.close();
+                        ResultSet versionData = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT version FROM tpp_db_version");
+                        if (versionData == null) {
+                            dbConn.close();
+                            return 1;
+                        }
+                        if (versionData.next()) {
+                            int returnInt = versionData.getInt("version");
+                            dbConn.close();
+                            return returnInt;
+                        }
                     }
-                    if (versionData.next()) {
-                        int returnInt = versionData.getInt("version");
-                        dbConn.close();
-                        return returnInt;
-                    }
+                    dbConn.close();
+                } else {
+                    return -1;
                 }
-                dbConn.close();
             } catch (SQLException e) {
                 thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception finding current database version: " + e.getMessage());
             }

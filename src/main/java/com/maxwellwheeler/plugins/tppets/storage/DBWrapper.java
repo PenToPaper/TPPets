@@ -169,8 +169,6 @@ public class DBWrapper {
             String ret;
             do {
                 ret = pt.toString() + Integer.toString(lastIndexChecked);
-                System.out.println("Is name unique?" + isNameUnique(ownerUUID, ret));
-                System.out.println("Name:" + ret);
                 lastIndexChecked++;
             } while (!isNameUnique(ownerUUID, ret));
             try {

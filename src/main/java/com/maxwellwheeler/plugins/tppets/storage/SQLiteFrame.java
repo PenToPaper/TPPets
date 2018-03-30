@@ -16,7 +16,8 @@ import java.util.logging.Level;
 public class SQLiteFrame extends DBGeneral {
     private final String dbPath;
     private final String dbName;
-    
+    private File dbDir;
+
     /**
      * The initializer storing all the data needed for the SQLite connection.
      * @param dbPath The path to the SQLite database.
@@ -35,15 +36,15 @@ public class SQLiteFrame extends DBGeneral {
         File dbDir = new File(dbPath);
         if (!dbDir.exists()) {
             try {
-                boolean makeDirectory = dbDir.mkdir();
-                if (makeDirectory) {
-                    return DriverManager.getConnection(getJDBCPath());
-                }
+                dbDir.mkdir();
             } catch (SecurityException e) {
                 thisPlugin.getLogger().log(Level.SEVERE, "Security Exception creating database" + e.getMessage());
-            } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception creating database" + e.getMessage());
             }
+        }
+        try {
+            return DriverManager.getConnection(getJDBCPath());
+        } catch (SQLException e) {
+            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception creating database" + e.getMessage());
         }
         return null;
     }
