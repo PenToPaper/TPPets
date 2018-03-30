@@ -86,7 +86,7 @@ class CommandTPPets {
                         // Syntax received: /tpp dog f:OwnerName
                         if (tempPlayer.hasPermission("tppets.teleportother")) {
                             int numPetsTeleported = getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt).size();
-                            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + args[1] + "'s " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
+                            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + this.ownerName + "'s " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
                             tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + ChatColor.BLUE + "'s " + ChatColor.WHITE + pt.toString() + ChatColor.BLUE + "s have been teleported to you");
                         } else {
                             tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that.");
