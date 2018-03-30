@@ -56,9 +56,9 @@ public class DBWrapper {
      */
     public boolean initializeTables() {
         String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
-                "pet_id CHAR(32)," +
-                "user_id CHAR(32)," +
-                "PRIMARY KEY(pet_id, user_id)," +
+                "pet_id CHAR(32),\n" +
+                "user_id CHAR(32),\n" +
+                "PRIMARY KEY(pet_id, user_id),\n" +
                 "FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);";
         String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY);";
         String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS tpp_protected_regions (\n"
@@ -80,7 +80,8 @@ public class DBWrapper {
                 + "max_x INT NOT NULL,\n"
                 + "max_y INT NOT NULL,\n"
                 + "max_z INT NOT NULL,\n"
-                + "world_name VARCHAR(25) NOT NULL);";/*
+                + "world_name VARCHAR(25) NOT NULL);";
+        /*
          *      TABLES
          */
         String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
