@@ -138,7 +138,7 @@ class CommandTPPets {
                 for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                     for (PetStorage ps : psList) {
                         if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
-                            teleportPet(sendTo, ent);
+                            teleportPet(sendTo, ent, !sendTo.equals(sendFrom));
                             return true;
                         }
                     }
@@ -174,7 +174,7 @@ class CommandTPPets {
             for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                 if (isTeleportablePet(sendFrom, ent, pt)) {
                     if (!alreadyTeleportedPets.contains(ent.getUniqueId())) {
-                        teleportPet(sendTo, ent);
+                        teleportPet(sendTo, ent, !sendTo.equals(sendFrom));
                         alreadyTeleportedPets.add(ent.getUniqueId());
                     } else {
                         ent.remove();
@@ -211,9 +211,12 @@ class CommandTPPets {
      * @param pl The player the pet is to be teleported to.
      * @param entity The entity to be teleported
      */
-    private void teleportPet(Player pl, Entity entity) {
+    private void teleportPet(Player pl, Entity entity, boolean keepSitting) {
         EntityActions.setStanding(entity);
         entity.teleport(pl);
+        if (keepSitting) {
+            EntityActions.setSitting(entity);
+        }
     }
     
     /**
