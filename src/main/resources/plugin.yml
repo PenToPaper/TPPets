@@ -55,6 +55,9 @@ permissions:
   tppets.renameall:
     default: op
     description: Allows user to rename pets that do not belong to them.
+  tppets.allowother:
+    default: op
+    description: Allows user to /tpp allow, /tpp remove, and /tpp list as if they were other players.
   tppets.teleportother:
     default: op
     description: Allows user to teleport pets owned by someone else to their location.
