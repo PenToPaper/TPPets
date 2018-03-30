@@ -96,7 +96,7 @@ public class TPPetsEntityListener implements Listener {
                     // Indirect damage
                     } else if (e.getDamager() instanceof Projectile) {
                         Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner()) && !((Player)e.getDamager()).hasPermission("tppets.bypassprotection") && !thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getEntity().getUniqueId())).contains(UUIDUtils.trimUUID(e.getDamager().getUniqueId()))) {
+                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner()) && !(e.getDamager()).hasPermission("tppets.bypassprotection") && !thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getEntity().getUniqueId())).contains(UUIDUtils.trimUUID(e.getDamager().getUniqueId()))) {
                             e.setCancelled(true);
                             thisPlugin.getLogger().info("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                             return;
@@ -166,7 +166,7 @@ public class TPPetsEntityListener implements Listener {
     
     /**
      * Event handler for EntityTameEvent. It checks if the tamed entity should be allowed to be tamed based on the pet limits. If it can, it adds that to the {@link PlayerPetIndex}
-     * @param e
+     * @param e The EntityTameEvent object to respond to
      */
     @EventHandler (priority=EventPriority.HIGHEST)
     public void onEntityTameEvent(EntityTameEvent e) {

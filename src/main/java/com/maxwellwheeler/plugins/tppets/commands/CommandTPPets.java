@@ -24,7 +24,7 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
  * @author GatheringExp
  *
  */
-public class CommandTPPets {
+class CommandTPPets {
     private TPPets thisPlugin;
     private DBWrapper dbConn;
     private String petName;
@@ -189,9 +189,7 @@ public class CommandTPPets {
     private boolean isTeleportablePet(OfflinePlayer sendFrom, Entity ent, PetType.Pets pt) {
         if (ent instanceof Tameable) {
             Tameable tameableTemp = (Tameable) ent;
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(sendFrom) && PetType.getEnumByEntity(ent).equals(pt)) {
-                return true;
-            }
+            return tameableTemp.isTamed() && tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(sendFrom) && PetType.getEnumByEntity(ent).equals(pt);
         }
         return false;
     }
@@ -227,10 +225,10 @@ public class CommandTPPets {
         return "x: " + Integer.toString(lc.getBlockX()) + ", " + "y: " + Integer.toString(lc.getBlockY()) + ", " + "z: " + Integer.toString(lc.getBlockZ());
     }
 
-    private void listPets(Player pl, OfflinePlayer dogOwner, PetType.Pets pt) {
-        pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Your " + pt.toString() + " names]" + ChatColor.DARK_GRAY + "---------");
+    private void listPets(Player pl, OfflinePlayer petsFrom, PetType.Pets pt) {
+        pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[" + petsFrom.getName() + "'s " + pt.toString() + " names]" + ChatColor.DARK_GRAY + "---------");
         for (World wld : Bukkit.getServer().getWorlds()) {
-            List<PetStorage> tempPs = thisPlugin.getDatabase().getPetsGeneric(pl.getUniqueId().toString(), wld.getName(), pt);
+            List<PetStorage> tempPs = thisPlugin.getDatabase().getPetsGeneric(petsFrom.getUniqueId().toString(), wld.getName(), pt);
             for (int i = 0; i < tempPs.size(); i++) {
                 pl.sendMessage(ChatColor.WHITE + Integer.toString(i+1) + ") " + tempPs.get(i).petName);
             }

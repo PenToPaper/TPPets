@@ -135,7 +135,7 @@ public class DBUpdater {
         return false;
     }
 
-    public boolean twoToOne(DBWrapper dbw) {
+    private boolean twoToOne(DBWrapper dbw) {
         if (dbw != null) {
             boolean renameTable = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp");
             boolean createTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"

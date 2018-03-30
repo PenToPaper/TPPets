@@ -23,14 +23,14 @@ public abstract class Region {
      * A general constructor, used primarily for regeneration of the regions from databases.
      * @param zoneName The name of the zone.
      * @param worldName The name of the world the zone is in. If worldName points to a non-existent world, world will be null but worldName will be what the world was.
-     * @param xOne The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's X location.
-     * @param yOne The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's Y location.
-     * @param zOne The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's Z location.
-     * @param xTwo The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's X location.
-     * @param yTwo The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Y location.
-     * @param zTwo The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Z location.
+     * @param minX The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's X location.
+     * @param minY The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's Y location.
+     * @param minZ The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's Z location.
+     * @param maxX The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's X location.
+     * @param maxY The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Y location.
+     * @param maxZ The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Z location.
      */
-    public Region(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    Region(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         this(zoneName, worldName, Bukkit.getServer().getWorld(worldName), new Location(Bukkit.getServer().getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getServer().getWorld(worldName), maxX, maxY, maxZ));
     }
     

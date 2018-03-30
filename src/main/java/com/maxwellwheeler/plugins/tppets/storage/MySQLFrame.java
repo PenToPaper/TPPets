@@ -13,11 +13,11 @@ import java.util.logging.Level;
  *
  */
 public class MySQLFrame extends DBGeneral {
-    private String host;
-    private int port;
-    private String dbName;
-    private String dbUsername;
-    private String dbPassword;
+    private final String host;
+    private final int port;
+    private final String dbName;
+    private final String dbUsername;
+    private final String dbPassword;
     
     /**
      * The initializer storing all the data needed for the MySQL connection.

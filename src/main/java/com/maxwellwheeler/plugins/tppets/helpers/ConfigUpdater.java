@@ -5,21 +5,25 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 public class ConfigUpdater {
     private TPPets thisPlugin;
     private int schemaVersion;
-    private int updatedVersion = 2;
+    private final int updatedVersion = 2;
 
     public ConfigUpdater(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
         this.schemaVersion = getSchemaVersionFromConfig();
     }
 
-    public int getSchemaVersionFromConfig() {
+    private int getSchemaVersionFromConfig() {
         return thisPlugin.getConfig().getInt("schema_version", 1);
     }
 
-    public void setSchemaVersion(int version) {
+    private void setSchemaVersion(int version) {
         thisPlugin.getConfig().set("schema_version", version);
         thisPlugin.saveConfig();
         schemaVersion = version;
+    }
+
+    public boolean isUpToDate() {
+        return thisPlugin.getConfig().getInt("schema_version", -1) == updatedVersion;
     }
 
     public void update() {

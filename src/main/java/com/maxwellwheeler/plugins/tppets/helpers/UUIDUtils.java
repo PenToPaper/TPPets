@@ -14,7 +14,10 @@ public class UUIDUtils {
      * @return A trimmed version of the UUID's .toString()
      */
     public static String trimUUID(UUID id) {
-        return trimUUID(id.toString());
+        if (id != null) {
+            return trimUUID(id.toString());
+        }
+        return null;
     }
     
     /**

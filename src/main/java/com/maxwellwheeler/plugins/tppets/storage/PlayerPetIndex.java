@@ -28,7 +28,7 @@ public class PlayerPetIndex {
         ALLOWED, TOTAL, DOG, CAT, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
     }
 
-    private Hashtable<String, AllPetsList> playerIndex = new Hashtable<String, AllPetsList>();
+    private Hashtable<String, AllPetsList> playerIndex = new Hashtable<>();
     private TPPets thisPlugin;
     private int totalLimit;
     private int dogLimit;

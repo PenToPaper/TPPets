@@ -12,8 +12,8 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.UUID;
 
-public class CommandPermissions {
-    TPPets thisPlugin;
+class CommandPermissions {
+    private TPPets thisPlugin;
     public CommandPermissions(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
@@ -61,9 +61,12 @@ public class CommandPermissions {
                 List<String> playerUUIDs = thisPlugin.getDatabase().getAllowedPlayers(petUUID);
                 sender.sendMessage(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  args[0] + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------");
                 for (String playerUUID : playerUUIDs) {
-                    OfflinePlayer offlinePlTemp = Bukkit.getOfflinePlayer(UUID.fromString(UUIDUtils.unTrimUUID(playerUUID)));
-                    if (offlinePlTemp != null) {
-                        sender.sendMessage(ChatColor.WHITE + offlinePlTemp.getName());
+                    String untrimmedUUID = UUIDUtils.unTrimUUID(playerUUID);
+                    if (untrimmedUUID != null) {
+                        OfflinePlayer offlinePlTemp = Bukkit.getOfflinePlayer(UUID.fromString(untrimmedUUID));
+                        if (offlinePlTemp != null) {
+                            sender.sendMessage(ChatColor.WHITE + offlinePlTemp.getName());
+                        }
                     }
                 }
                 sender.sendMessage(ChatColor.GRAY + "-------------------------------------------");

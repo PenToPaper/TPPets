@@ -19,7 +19,7 @@ import java.util.List;
  *
  */
 public class CommandTPP implements CommandExecutor {
-    private Hashtable<String, List<String>> commandAliases;
+    private final Hashtable<String, List<String>> commandAliases;
     private TPPets thisPlugin;
     
     /**
@@ -193,12 +193,12 @@ public class CommandTPP implements CommandExecutor {
             return inputArray;
         }
         String[] truncatedArrayBits = Arrays.copyOfRange(inputArray, truncate-1, inputArray.length);
-        List<String> retList = new ArrayList<String>(Arrays.asList(Arrays.copyOfRange(inputArray, 0, truncate-1)));
-        String replacementTruncation = "";
+        List<String> retList = new ArrayList<>(Arrays.asList(Arrays.copyOfRange(inputArray, 0, truncate - 1)));
+        StringBuilder replacementTruncation = new StringBuilder();
         for (String str : truncatedArrayBits) {
-            replacementTruncation = replacementTruncation + str + " ";
+            replacementTruncation.append(str).append(" ");
         }
-        retList.add(replacementTruncation);
+        retList.add(replacementTruncation.toString());
         return retList.toArray(new String[truncate]);
     }
     

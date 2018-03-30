@@ -9,13 +9,13 @@ import java.util.Set;
  *
  */
 public class AllPetsList {
-    private Set<String> dogs = new HashSet<String>();
-    private Set<String> cats = new HashSet<String>();
-    private Set<String> birds = new HashSet<String>();
-    private Set<String> horses = new HashSet<String>();
-    private Set<String> mules = new HashSet<String>();
-    private Set<String> llamas = new HashSet<String>();
-    private Set<String> donkeys = new HashSet<String>();
+    private Set<String> dogs = new HashSet<>();
+    private Set<String> cats = new HashSet<>();
+    private Set<String> birds = new HashSet<>();
+    private Set<String> horses = new HashSet<>();
+    private Set<String> mules = new HashSet<>();
+    private Set<String> llamas = new HashSet<>();
+    private Set<String> donkeys = new HashSet<>();
 
     public AllPetsList() {
 

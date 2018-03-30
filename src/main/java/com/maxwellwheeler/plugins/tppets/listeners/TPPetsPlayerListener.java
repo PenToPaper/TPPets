@@ -11,7 +11,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,7 +29,6 @@ import java.util.List;
  */
 public class TPPetsPlayerListener implements Listener {
     private TPPets thisPlugin;
-    private Hashtable<String, ProtectedRegion> protRegions;
     private Hashtable<String, List<Material>> customTools;
 
     /**
@@ -39,13 +37,12 @@ public class TPPetsPlayerListener implements Listener {
      */
     public TPPetsPlayerListener(TPPets thisPlugin, Hashtable<String, List<Material>> customTools) {
         this.thisPlugin = thisPlugin;
-        this.protRegions = thisPlugin.getProtectedRegions();
         this.customTools = customTools;
     }
     
     /**
      * Event handler for PlayerMoveEvent. It checks if the player is within a {@link ProtectedRegion}. If they are, it removes pets that shouldn't be there that are within their vicinity.
-     * @param e
+     * @param e The PlayerMoveEvent to respond to.
      */
     @EventHandler (priority=EventPriority.LOW)
     public void onPlayerMove(PlayerMoveEvent e) {

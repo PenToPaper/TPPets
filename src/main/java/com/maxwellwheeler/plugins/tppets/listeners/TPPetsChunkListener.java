@@ -3,7 +3,6 @@ package com.maxwellwheeler.plugins.tppets.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Sittable;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

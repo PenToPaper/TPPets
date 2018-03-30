@@ -15,14 +15,14 @@ import org.bukkit.entity.Player;
  * @author GatheringExp
  *
  */
-public abstract class RegionCommand {
+abstract class RegionCommand {
     protected TPPets thisPlugin;
     protected WorldEditPlugin we;
     
     /**
      * Gets plugin instance and worldedit instance from Bukkit object
      */
-    public RegionCommand() {
+    RegionCommand() {
         thisPlugin = (TPPets) Bukkit.getServer().getPluginManager().getPlugin("TPPets");
         we = (WorldEditPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldEdit");
     }
@@ -35,7 +35,7 @@ public abstract class RegionCommand {
     protected Location[] getWePoints(Player pl) {
         Selection playerSelection = we.getSelection(pl);
         Location[] ret = null;
-        if (playerSelection != null && playerSelection instanceof CuboidSelection) {
+        if (playerSelection instanceof CuboidSelection) {
             ret = new Location[] {playerSelection.getMinimumPoint(), playerSelection.getMaximumPoint()};
         }
         return ret;
@@ -73,7 +73,7 @@ public abstract class RegionCommand {
     abstract protected void removeRegion(CommandSender sender, String[] truncatedArgs);
     
     /**
-     * Lists regions to sender in chat. If args[0] is specified, it will only list that {@link LostAndFoundRegion}'s data
+     * Lists regions to sender in chat. If args[0] is specified, it will only list that {@link com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion}'s data
      * @param sender The {@link CommandSender} that ran the command.
      * @param truncatedArgs A truncated list of arguments passed with the addRegion command. For command /tpp lostandfound list PrimaryLost, it would include PrimaryLost.
      */

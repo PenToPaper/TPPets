@@ -1,7 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -24,84 +23,8 @@ import java.util.logging.Level;
 public class DBWrapper {
     private DBFrame database;
     private TPPets thisPlugin;
-    /*
-     *      TABLES
-     */
-    private final String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
-            + "pet_id CHAR(32) PRIMARY KEY,\n"
-            + "pet_type TINYINT NOT NULL,\n"
-            + "pet_x INT NOT NULL,\n"
-            + "pet_y INT NOT NULL,\n"
-            + "pet_z INT NOT NULL,\n"
-            + "pet_world VARCHAR(25) NOT NULL,\n"
-            + "owner_id CHAR(32) NOT NULL,\n"
-            + "pet_name VARCHAR(64)"
-            + ");";
-    private final String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS tpp_lost_regions (\n"
-            + "zone_name VARCHAR(64) PRIMARY KEY,\n"
-            + "min_x INT NOT NULL,\n"
-            + "min_y INT NOT NULL,\n"
-            + "min_z INT NOT NULL,\n"
-            + "max_x INT NOT NULL,\n"
-            + "max_y INT NOT NULL,\n"
-            + "max_z INT NOT NULL,\n"
-            + "world_name VARCHAR(25) NOT NULL);";
-    private final String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS tpp_protected_regions (\n"
-            + "zone_name VARCHAR(64) PRIMARY KEY,\n"
-            + "enter_message VARCHAR(255),\n"
-            + "min_x INT NOT NULL,\n"
-            + "min_y INT NOT NULL,\n"
-            + "min_z INT NOT NULL,\n"
-            + "max_x INT NOT NULL,\n"
-            + "max_y INT NOT NULL,\n"
-            + "max_z INT NOT NULL,\n"
-            + "world_name VARCHAR(25) NOT NULL,\n"
-            + "lf_zone_name VARCHAR(64));";
-    private final String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY);";
-    private final String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
-            "pet_id CHAR(32)," +
-            "user_id CHAR(32)," +
-            "PRIMARY KEY(pet_id, user_id)," +
-            "FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);";
 
-    /*
-     *      UNLOADED_PETS STATEMENTS
-     */
-    private final String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private final String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
-    private final String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
-    private final String selectPetFromUuid = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
-    private final String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
 
-    private final String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
-    private final String selectPetsFromUuids = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
-    private final String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ? AND pet_type = ?";
-    private final String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
-    private final String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
-    private final String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ?";
-    private final String selectAllowedPlayers = "SELECT * FROM tpp_allowed_players WHERE pet_id = ?";
-    private final String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? LIMIT 1";
-
-    private final String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
-    private final String deleteAllowedPlayer = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
-    private final String selectAllAllowedPlayers = "SELECT * FROM tpp_allowed_players ORDER BY pet_id";
-    
-    /*
-     *      LOST AND FOUND REGION STATEMENTS
-     */
-    private final String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private final String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
-    private final String selectLost = "SELECT * FROM tpp_lost_regions";
-    
-    /*
-     *      PROTECTED REGION STATEMENTS
-     */
-    private final String insertProtected = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private final String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
-    private final String selectProtected = "SELECT * FROM tpp_protected_regions";
-    private final String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
-
-    
     /**
      * Creates a MySQLFrame object that executes subsequent sql operations.
      * @param host The host
@@ -132,6 +55,44 @@ public class DBWrapper {
      * @return True if successful, false if not.
      */
     public boolean initializeTables() {
+        String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
+                "pet_id CHAR(32)," +
+                "user_id CHAR(32)," +
+                "PRIMARY KEY(pet_id, user_id)," +
+                "FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);";
+        String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY);";
+        String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS tpp_protected_regions (\n"
+                + "zone_name VARCHAR(64) PRIMARY KEY,\n"
+                + "enter_message VARCHAR(255),\n"
+                + "min_x INT NOT NULL,\n"
+                + "min_y INT NOT NULL,\n"
+                + "min_z INT NOT NULL,\n"
+                + "max_x INT NOT NULL,\n"
+                + "max_y INT NOT NULL,\n"
+                + "max_z INT NOT NULL,\n"
+                + "world_name VARCHAR(25) NOT NULL,\n"
+                + "lf_zone_name VARCHAR(64));";
+        String makeTableLostRegions = "CREATE TABLE IF NOT EXISTS tpp_lost_regions (\n"
+                + "zone_name VARCHAR(64) PRIMARY KEY,\n"
+                + "min_x INT NOT NULL,\n"
+                + "min_y INT NOT NULL,\n"
+                + "min_z INT NOT NULL,\n"
+                + "max_x INT NOT NULL,\n"
+                + "max_y INT NOT NULL,\n"
+                + "max_z INT NOT NULL,\n"
+                + "world_name VARCHAR(25) NOT NULL);";/*
+         *      TABLES
+         */
+        String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+                + "pet_id CHAR(32) PRIMARY KEY,\n"
+                + "pet_type TINYINT NOT NULL,\n"
+                + "pet_x INT NOT NULL,\n"
+                + "pet_y INT NOT NULL,\n"
+                + "pet_z INT NOT NULL,\n"
+                + "pet_world VARCHAR(25) NOT NULL,\n"
+                + "owner_id CHAR(32) NOT NULL,\n"
+                + "pet_name VARCHAR(64)"
+                + ");";
         return database.createStatement(makeTableUnloadedPets)
                 && database.createStatement(makeTableLostRegions)
                 && database.createStatement(makeTableProtectedRegions)
@@ -148,6 +109,7 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
+            String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ?";
             ResultSet rs = database.selectPrepStatement(dbConn, selectIsNameUnique, trimmedOwnerUUID, petName);
             try {
                 boolean ret = rs.next();
@@ -182,6 +144,10 @@ public class DBWrapper {
                 String trimmedPlayerUUID = UUIDUtils.trimUUID(ownerUUID);
                 int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(ent));
                 String uniqueName = generateUniqueName(trimmedPlayerUUID, PetType.getEnumByEntity((ent)));
+                /*
+                 *      UNLOADED_PETS STATEMENTS
+                 */
+                String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 if (uniqueName != null && database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID, uniqueName)) {
                     thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
                     return true;
@@ -226,6 +192,7 @@ public class DBWrapper {
             Tameable tameableTemp = (Tameable) ent;
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
+            String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
             if (database.deletePrepStatement(deletePet, trimmedEntUUID, trimmedPlayerUUID)) {
                 thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " removed from database.");
                 return true;
@@ -247,6 +214,7 @@ public class DBWrapper {
             Tameable tameableTemp = (Tameable) ent;
             String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
+            String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
             if (database.updatePrepStatement(updatePetLocation, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getLocation().getWorld().getName(), trimmedEntUUID, trimmedPlayerUUID)) {
                 thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " updated in database.");
                 return true;
@@ -278,11 +246,12 @@ public class DBWrapper {
      * @param ent The entity to be checked
      * @return True if the entity is in the table, false if not
      */
-    public boolean petInTable(Entity ent) {
+    private boolean petInTable(Entity ent) {
         String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
             try {
+                String selectPetFromUuid = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
                 boolean ret = database.selectPrepStatement(dbConn, selectPetFromUuid, trimmedEntUUID).next();
                 dbConn.close();
                 return ret;
@@ -295,6 +264,7 @@ public class DBWrapper {
 
     public boolean renamePet(String ownerUUID, String oldName, String newName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
+        String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
         if (database.updatePrepStatement(updatePetName, newName, trimmedOwnerUUID, oldName)) {
             thisPlugin.getLogger().info("Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);
             return true;
@@ -307,9 +277,10 @@ public class DBWrapper {
     public List<String> getAllowedPlayers(String entityUUID) {
         String trimmedEntityUUID = UUIDUtils.trimUUID(entityUUID);
         Connection dbConn = database.getConnection();
-        List<String> uuidList = new ArrayList<String>();
+        List<String> uuidList = new ArrayList<>();
         if (dbConn != null) {
             try {
+                String selectAllowedPlayers = "SELECT * FROM tpp_allowed_players WHERE pet_id = ?";
                 ResultSet ret = database.selectPrepStatement(dbConn, selectAllowedPlayers, trimmedEntityUUID);
                 while (ret.next()) {
                     uuidList.add(ret.getString("user_id"));
@@ -326,6 +297,7 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
+            String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
             List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromOwnerNamePetType, trimmedOwnerUUID, petName, PetType.getIndexFromPet(pt)));
             try {
              dbConn.close();
@@ -342,6 +314,7 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
+            String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? LIMIT 1";
             try (ResultSet rs = database.selectPrepStatement(dbConn, selectUUIDFromPet, trimmedOwnerUUID, petName)) {
                 if (rs.next()) {
                     return rs.getString("pet_id");
@@ -357,12 +330,14 @@ public class DBWrapper {
     public boolean insertAllowedPlayer(String petUUID, String playerUUID) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
+        String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
         return database.insertPrepStatement(insertAllowedPlayer, trimmedPetUUID, trimmedPlayerUUID);
     }
 
     public boolean deleteAllowedPlayer(String petUUID, String playerUUID) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
+        String deleteAllowedPlayer = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
         return database.deletePrepStatement(deleteAllowedPlayer, trimmedPetUUID, trimmedPlayerUUID);
     }
 
@@ -375,6 +350,7 @@ public class DBWrapper {
         String trimmedUuid = UUIDUtils.trimUUID(uuid);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
+            String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
             List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromOwner, trimmedUuid));
             try {
                 dbConn.close();
@@ -397,6 +373,7 @@ public class DBWrapper {
         String trimmedPlayerUuid = UUIDUtils.trimUUID(playerUuid);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
+            String selectPetsFromUuids = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
             List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromUuids, trimmedPetUuid, trimmedPlayerUuid));
             try {
                 dbConn.close();
@@ -419,6 +396,7 @@ public class DBWrapper {
         String trimmedPlayerUuid = UUIDUtils.trimUUID(playerUuid);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
+            String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ? AND pet_type = ?";
             List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsGeneric, trimmedPlayerUuid, worldName, PetType.getIndexFromPet(petType)));
             try {
                 dbConn.close();
@@ -438,6 +416,7 @@ public class DBWrapper {
     public List<PetStorage> getPetsFromWorld(String worldName) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
+            String selectPetsFromWorld = "SELECT * FROM tpp_unloaded_pets WHERE pet_world = ?";
             List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromWorld, worldName));
             try {
                 dbConn.close();
@@ -455,7 +434,7 @@ public class DBWrapper {
      * @return A list of pets created from rs.
      */
     private List<PetStorage> getPetsList(ResultSet rs) {
-        List<PetStorage> ret = new ArrayList<PetStorage>();
+        List<PetStorage> ret = new ArrayList<>();
         try {
             while (rs.next()) {
                 ret.add(new PetStorage(rs.getString("pet_id"), rs.getInt("pet_type"), rs.getInt("pet_x"), rs.getInt("pet_y"), rs.getInt("pet_z"), rs.getString("pet_world"), rs.getString("owner_id"), rs.getString("pet_name")));
@@ -476,6 +455,10 @@ public class DBWrapper {
      * @return True if successful, false if not
      */
     public boolean insertLostRegion(LostAndFoundRegion lfr) {
+        /*
+         *      LOST AND FOUND REGION STATEMENTS
+         */
+        String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         if (database.insertPrepStatement(insertLost, lfr.getZoneName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName())) {
             thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " added to database.");
             return true;
@@ -491,6 +474,7 @@ public class DBWrapper {
      * @return True if successful, false if not.
      */
     public boolean deleteLostRegion(LostAndFoundRegion lfr) {
+        String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
         if (database.deletePrepStatement(deleteLost, lfr.getZoneName())) {
             thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " removed from database.");
             return true;
@@ -505,10 +489,11 @@ public class DBWrapper {
      * @return The hashtable of <LostAndFoundRegion's name, LostAndFoundRegion instance>
      */
     public Hashtable<String, LostAndFoundRegion> getLostRegions() {
-        Hashtable<String, LostAndFoundRegion> ret = new Hashtable<String, LostAndFoundRegion>();
+        Hashtable<String, LostAndFoundRegion> ret = new Hashtable<>();
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
             try {
+                String selectLost = "SELECT * FROM tpp_lost_regions";
                 ResultSet rs = database.selectPrepStatement(dbConn, selectLost);
                 while (rs.next()) {
                     ret.put(rs.getString("zone_name"), new LostAndFoundRegion(rs.getString("zone_name"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z")));
@@ -531,6 +516,10 @@ public class DBWrapper {
      * @return True if successful, false if not
      */
     public boolean insertProtectedRegion(ProtectedRegion pr) {
+        /*
+         *      PROTECTED REGION STATEMENTS
+         */
+        String insertProtected = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         if (database.insertPrepStatement(insertProtected, pr.getZoneName(), pr.getEnterMessage(), pr.getMinLoc().getBlockX(), pr.getMinLoc().getBlockY(), pr.getMinLoc().getBlockZ(), pr.getMaxLoc().getBlockX(), pr.getMaxLoc().getBlockY(), pr.getMaxLoc().getBlockZ(), pr.getWorldName(), pr.getLfName())) {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " added to database.");
             return true;
@@ -546,6 +535,7 @@ public class DBWrapper {
      * @return True if successful, false if not.
      */
     public boolean deleteProtectedRegion(ProtectedRegion pr) {
+        String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
         if (database.deletePrepStatement(deleteProtected, pr.getZoneName())) {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " removed from database.");
             return true;
@@ -560,10 +550,11 @@ public class DBWrapper {
      * @return The hashtable of <ProtectedRegion's name, ProtectedRegion instance>
      */
     public Hashtable<String, ProtectedRegion> getProtectedRegions() {
-        Hashtable<String, ProtectedRegion> ret = new Hashtable<String, ProtectedRegion>();
+        Hashtable<String, ProtectedRegion> ret = new Hashtable<>();
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
             try {
+                String selectProtected = "SELECT * FROM tpp_protected_regions";
                 ResultSet rs = database.selectPrepStatement(dbConn, selectProtected);
                 while (rs.next()) {
                     ret.put(rs.getString("zone_name"), new ProtectedRegion(rs.getString("zone_name"), rs.getString("enter_message"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"), rs.getString("lf_zone_name")));
@@ -581,6 +572,7 @@ public class DBWrapper {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
             try {
+                String selectAllAllowedPlayers = "SELECT * FROM tpp_allowed_players ORDER BY pet_id";
                 ResultSet rs = database.selectPrepStatement(dbConn, selectAllAllowedPlayers);
                 String petID = "";
                 List<String> allowedPlayersID = new ArrayList<>();
@@ -606,12 +598,13 @@ public class DBWrapper {
      * @return True if successful, false if not.
      */
     public boolean updateProtectedRegion(ProtectedRegion pr) {
+        String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
         if (database.updatePrepStatement(updateProtected, pr.getLfName(), pr.getZoneName())) {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " updated in database.");
             return true;
         } else {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be updated in database.");
-            return true;
+            return false;
         }
     }
     

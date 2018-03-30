@@ -17,7 +17,7 @@ public abstract class DBGeneral implements DBFrame {
      * General constructor. Stores a reference to the TPPets plugin instance.
      * @param thisPlugin TPPets plugin instance.
      */
-    public DBGeneral(TPPets thisPlugin) {
+    DBGeneral(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
     

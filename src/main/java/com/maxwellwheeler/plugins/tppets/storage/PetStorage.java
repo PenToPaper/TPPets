@@ -6,14 +6,14 @@ package com.maxwellwheeler.plugins.tppets.storage;
  *
  */
 public class PetStorage {
-    public String petId;
-    public PetType.Pets petType;
-    public int petX;
-    public int petY;
-    public int petZ;
-    public String petWorld;
-    public String ownerId;
-    public String petName;
+    public final String petId;
+    public final PetType.Pets petType;
+    public final int petX;
+    public final int petY;
+    public final int petZ;
+    public final String petWorld;
+    public final String ownerId;
+    public final String petName;
     
     /**
      * General constructor, using data from the database table tpp_unloaded_pets
