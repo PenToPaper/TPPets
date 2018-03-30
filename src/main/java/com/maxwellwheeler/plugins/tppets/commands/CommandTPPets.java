@@ -77,7 +77,7 @@ class CommandTPPets {
                             // Syntax received: /tpp dog f:OwnerName DogName
                             if (hasPermissionToTp(tempPlayer, petName) && teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
                                 thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them at: " + formatLocation(tempPlayer.getLocation()));
-                                tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + ChatColor.BLUE + "'s pet " + args[1] + " has been teleported to you.");
+                                tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + "'s " + ChatColor.BLUE + "pet " + ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been teleported to you.");
                             } else {
                                 tempPlayer.sendMessage(ChatColor.RED + "Unable to teleport pet." + ChatColor.WHITE + args[1]);
                             }
@@ -87,9 +87,9 @@ class CommandTPPets {
                         if (tempPlayer.hasPermission("tppets.teleportother")) {
                             int numPetsTeleported = getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt).size();
                             thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + this.ownerName + "'s " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
-                            tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + ChatColor.BLUE + "'s " + ChatColor.WHITE + pt.toString() + ChatColor.BLUE + "s have been teleported to you");
+                            tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + "'s " + pt.toString() + "s " + ChatColor.BLUE + "have been teleported to you");
                         } else {
-                            tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that.");
+                            tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that!");
                         }
                     }
                 }

@@ -20,15 +20,17 @@ class CommandRename {
             Player playerTemp = (Player) sender;
             if (ArgValidator.validateArgsLength(args,2)) {
                 String someoneElse = ArgValidator.isForSomeoneElse(args[0]);
-                if (someoneElse != null && sender.hasPermission("tppets.renameall") && ArgValidator.validateArgsLength(args, 3)) {
+                if (someoneElse != null && sender.hasPermission("tppets.renameall") && ArgValidator.validateArgsLength(args, 3) && ArgValidator.softValidatePetName(args[1]) && ArgValidator.softValidatePetName(args[2])) {
                     OfflinePlayer offlinePlayerTemp = Bukkit.getOfflinePlayer(someoneElse);
                     if (offlinePlayerTemp != null) {
                         renamePet(playerTemp, offlinePlayerTemp, args[1], args[2]);
                     } else {
-                        playerTemp.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + args[0]);
+                        playerTemp.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + someoneElse);
                     }
-                } else {
+                } else if (ArgValidator.softValidatePetName(args[0]) && ArgValidator.softValidatePetName(args[1])) {
                     renamePet(playerTemp, playerTemp, args[0], args[1]);
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Syntax error. Usage: /tpp rename [old name] [new name]");
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "Syntax error. Usage: /tpp rename [old name] [new name]");
@@ -39,6 +41,11 @@ class CommandRename {
     }
 
     private boolean renamePet(Player pl, OfflinePlayer commandAbout, String oldName, String newName) {
+        String petUUIDByName = thisPlugin.getDatabase().getPetUUIDByName(commandAbout.getUniqueId().toString(), oldName);
+        if (petUUIDByName.equals("") || petUUIDByName == null) {
+            pl.sendMessage(ChatColor.RED + "Can't find pet named " + ChatColor.WHITE + oldName);
+            return false;
+        }
         if (!ArgValidator.validatePetName(thisPlugin.getDatabase(), commandAbout.getUniqueId().toString(), newName)) {
             pl.sendMessage(ChatColor.RED + "Can't rename pet to " + ChatColor.WHITE + newName);
             return false;
