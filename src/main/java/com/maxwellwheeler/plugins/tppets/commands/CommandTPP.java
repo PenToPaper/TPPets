@@ -173,13 +173,16 @@ public class CommandTPP implements CommandExecutor {
      * @param sender The player that the help message should be sent to
      */
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Commands]" + ChatColor.DARK_GRAY + "---------");
-        sender.sendMessage(ChatColor.BLUE + "/tpp dogs     ->    Teleports your dogs to your location");
-        sender.sendMessage(ChatColor.BLUE + "/tpp cats     ->    Teleports your cats to your location");
-        sender.sendMessage(ChatColor.BLUE + "/tpp birds    ->    Teleports your birds to your location");
-        sender.sendMessage(ChatColor.BLUE + "/tpp protected [add, remove, list, relink]    ->    Creates a region where pets will not be allowed");
-        sender.sendMessage(ChatColor.BLUE + "/tpp lost [add, remove, list]    ->    Creates a region where lost pets will be teleported to");
-        sender.sendMessage(ChatColor.DARK_GRAY + "---------------------------");
+        sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[Commands]" + ChatColor.DARK_GRAY + "--------------");
+        sender.sendMessage(ChatColor.WHITE + "/tpp dogs/cats/birds/horses/mules/donkeys/llamas" + ChatColor.BLUE + "  ->  Teleports your dogs to your location");
+        sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
+        sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] f:[username] [pet name]" + ChatColor.BLUE + "  ->  Teleports [username]'s pet named [pet name] to your location");
+        sender.sendMessage(ChatColor.WHITE + "/tpp allow [username] [pet name]" + ChatColor.BLUE + "  ->  Allows [username] to use teleport and mount your pet named [pet name]");
+        sender.sendMessage(ChatColor.WHITE + "/tpp remove [username] [pet name]" + ChatColor.BLUE + "  ->  Disallows [username] to use teleport and mount your pet named [pet name]");
+        sender.sendMessage(ChatColor.WHITE + "/tpp list [pet name]" + ChatColor.BLUE + "  ->  Lists all players who can teleport and mount pet named [pet name]");
+        sender.sendMessage(ChatColor.WHITE + "/tpp protected [add, remove, list, relink]" + ChatColor.BLUE + "  ->  Creates a region where pets will not be allowed");
+        sender.sendMessage(ChatColor.WHITE + "/tpp lost [add, remove, list]" + ChatColor.BLUE + "  ->  Creates a region where lost pets will be teleported to");
+        sender.sendMessage(ChatColor.DARK_GRAY + "-------------------------------------");
     }
     
     /**
