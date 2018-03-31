@@ -97,6 +97,7 @@ public class ProtectedRegion extends Region {
      */
     public void tpToLostRegion(Entity ent) {
         EntityActions.setSitting(ent);
+        EntityActions.removePassenger(ent);
         if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
             ent.teleport(lfReference.getApproxCenter());
             getPlugin().getLogger().info("Teleported pet with UUID " + ent.getUniqueId().toString() +  " away from " + zoneName + " to " + this.getLfReference().zoneName);

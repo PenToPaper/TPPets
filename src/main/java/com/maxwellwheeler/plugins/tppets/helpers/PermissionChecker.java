@@ -30,6 +30,6 @@ public class PermissionChecker {
      */
     public static boolean offlineHasPerms(AnimalTamer at, String permission, World world, TPPets thisPlugin) {
         // Player extends OfflinePlayer
-        return (world != null && thisPlugin.getVaultEnabled() && (at instanceof OfflinePlayer && thisPlugin.getPerms().playerHas(world.getName(), (OfflinePlayer) at, permission)));
+        return (world != null && thisPlugin.getVaultEnabled() && at instanceof OfflinePlayer && thisPlugin.getPerms().playerHas(world.getName(), (OfflinePlayer) at, permission));
     }
 }

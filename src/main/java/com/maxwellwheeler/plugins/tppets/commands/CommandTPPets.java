@@ -8,6 +8,7 @@ import java.util.UUID;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -77,6 +78,11 @@ class CommandTPPets {
                             }
                         } else {
                             // Syntax received: /tpp dog f:OwnerName DogName
+                            ProtectedRegion prWithin = canTpThere(tempPlayer);
+                            if (prWithin != null) {
+                                tempPlayer.sendMessage(prWithin.getEnterMessage());
+                                return;
+                            }
                             if (ArgValidator.softValidatePetName(args[1]) && hasPermissionToTp(tempPlayer, ownerOfflinePlayer, args[1]) && teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
                                 thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them at: " + formatLocation(tempPlayer.getLocation()));
                                 tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + "'s " + ChatColor.BLUE + "pet " + ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been teleported to you.");
@@ -86,6 +92,11 @@ class CommandTPPets {
                         }
                     } else {
                         // Syntax received: /tpp dog f:OwnerName
+                        ProtectedRegion prWithin = canTpThere(tempPlayer);
+                        if (prWithin != null) {
+                            tempPlayer.sendMessage(prWithin.getEnterMessage());
+                            return;
+                        }
                         if (tempPlayer.hasPermission("tppets.teleportother")) {
                             int numPetsTeleported = getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt).size();
                             thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + this.ownerName + "'s " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
@@ -101,6 +112,11 @@ class CommandTPPets {
                     listPets(tempPlayer, tempPlayer, pt);
                 } else {
                     // Syntax received: /tpp dog DogName
+                    ProtectedRegion prWithin = canTpThere(tempPlayer);
+                    if (prWithin != null) {
+                        tempPlayer.sendMessage(prWithin.getEnterMessage());
+                        return;
+                    }
                     if (teleportSpecificPet(tempPlayer, tempPlayer, args[0], pt)) {
                         thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported their " + pt.toString() + ", " + args[0] + ", to their location at: " + formatLocation(tempPlayer.getLocation()));
                         tempPlayer.sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you.");
@@ -111,6 +127,11 @@ class CommandTPPets {
             }
         } else {
             // Syntax received: /tpp dog
+            ProtectedRegion prWithin = canTpThere(tempPlayer);
+            if (prWithin != null) {
+                tempPlayer.sendMessage(prWithin.getEnterMessage());
+                return;
+            }
             int numPetsTeleported = getPetsAndTeleport(tempPlayer, tempPlayer, pt).size();
             thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of their " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
             tempPlayer.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + pt.toString() + "s" + ChatColor.BLUE + " have been teleported to you.");
@@ -239,5 +260,12 @@ class CommandTPPets {
             }
         }
         pl.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
+    }
+
+    private ProtectedRegion canTpThere(Player pl) {
+        if (!pl.hasPermission("tppets.tpanywhere")) {
+            return thisPlugin.getProtectedRegionWithin(pl.getLocation());
+        }
+        return null;
     }
 }

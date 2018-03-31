@@ -17,4 +17,8 @@ public class EntityActions {
             sittableTemp.setSitting(false);
         }
     }
+
+    public static void removePassenger(Entity ent) {
+        ent.eject();
+    }
 }
