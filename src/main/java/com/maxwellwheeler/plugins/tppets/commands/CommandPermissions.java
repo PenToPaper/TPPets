@@ -174,7 +174,7 @@ class CommandPermissions {
         String petUUID = thisPlugin.getDatabase().getPetUUIDByName(petOwner.getUniqueId().toString(), petName);
         if (petUUID != null && !petUUID.equals("")) {
             List<String> playerUUIDs = thisPlugin.getDatabase().getAllowedPlayers(petUUID);
-            reportTo.sendMessage(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  petOwner.getName() + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------");
+            reportTo.sendMessage(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  petOwner.getName() + "'s " + petName + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------");
             for (String playerUUID : playerUUIDs) {
                 String untrimmedUUID = UUIDUtils.unTrimUUID(playerUUID);
                 if (untrimmedUUID != null) {
