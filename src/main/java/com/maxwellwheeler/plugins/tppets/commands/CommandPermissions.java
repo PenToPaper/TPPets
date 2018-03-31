@@ -19,7 +19,7 @@ class CommandPermissions {
         this.thisPlugin = thisPlugin;
     }
 
-    private enum EditResult {SUCCESS, ALREADY_DONE, FAILURE};
+    private enum EditResult {SUCCESS, ALREADY_DONE, FAILURE}
 
     // Desired syntax: /tpp allow from:PlayerName [Allowed Player Name] [Pet Name]
     // Desired syntax: /tpp allow [Allowed Player Name] [Pet Name]
@@ -27,9 +27,13 @@ class CommandPermissions {
     public void allowPlayer(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
             Player tempPlayer = (Player) sender;
-            if (ArgValidator.validateArgsLength(args, 3) && ArgValidator.validateUsername(args[1]) && ArgValidator.softValidatePetName(args[2]) && tempPlayer.hasPermission("tppets.allowother")) {
+            if (ArgValidator.validateArgsLength(args, 3) && ArgValidator.validateUsername(args[1]) && ArgValidator.softValidatePetName(args[2])) {
                 String playerFor = ArgValidator.isForSomeoneElse(args[0]);
                 if (playerFor != null) {
+                    if (!sender.hasPermission("tppets.allowother")) {
+                        sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
+                        return;
+                    }
                     // Syntax received: /tpp allow from:PlayerName [Allowed Player Name] [Pet Name]
                     OfflinePlayer from = Bukkit.getOfflinePlayer(playerFor);
                     if (from != null) {
@@ -43,6 +47,8 @@ class CommandPermissions {
                             tempPlayer.sendMessage(ChatColor.RED + "Can't add player to pet");
                         }
                     }
+                } else {
+                    tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
                 }
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
                 // Syntax received: /tpp allow [Allowed Player Name] [Pet Name]
@@ -91,9 +97,13 @@ class CommandPermissions {
     public void removePlayer(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
             Player tempPlayer = (Player) sender;
-            if (ArgValidator.validateArgsLength(args, 3) && ArgValidator.validateUsername(args[1]) && ArgValidator.softValidatePetName(args[2]) && tempPlayer.hasPermission("tppets.allowother")) {
+            if (ArgValidator.validateArgsLength(args, 3) && ArgValidator.validateUsername(args[1]) && ArgValidator.softValidatePetName(args[2])) {
                 String playerFor = ArgValidator.isForSomeoneElse(args[0]);
                 if (playerFor != null) {
+                    if (!sender.hasPermission("tppets.allowother")) {
+                        sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
+                        return;
+                    }
                     // Syntax received: /tpp remove from:PlayerName [Allowed Player Name] [Pet Name]
                     OfflinePlayer from = Bukkit.getOfflinePlayer(playerFor);
                     if (from != null) {
@@ -107,6 +117,8 @@ class CommandPermissions {
                             tempPlayer.sendMessage(ChatColor.RED + "Can't remove player.");
                         }
                     }
+                } else {
+                    tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
                 }
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
                 // Syntax received: /tpp remove [Allowed Player Name] [Pet Name]
@@ -152,13 +164,19 @@ class CommandPermissions {
     @SuppressWarnings("deprecation")
     public void listPlayers(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
-            if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.softValidatePetName(args[1]) && sender.hasPermission("tppets.allowother")) {
+            if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.softValidatePetName(args[1])) {
                 String petOwnerName = ArgValidator.isForSomeoneElse(args[0]);
                 if (petOwnerName != null) {
+                    if (!sender.hasPermission("tppets.allowother")) {
+                        sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
+                        return;
+                    }
                     OfflinePlayer petOwner = Bukkit.getOfflinePlayer(petOwnerName);
                     if (!listAllowedPlayers((Player) sender, petOwner, args[1])) {
                         sender.sendMessage(ChatColor.RED + "Can't list pets from " + ChatColor.WHITE + petOwnerName);
                     }
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
                 }
             } else if (ArgValidator.validateArgsLength(args, 1) && ArgValidator.softValidatePetName(args[0])) {
                 if (!listAllowedPlayers((Player) sender, (Player) sender, args[0])) {
