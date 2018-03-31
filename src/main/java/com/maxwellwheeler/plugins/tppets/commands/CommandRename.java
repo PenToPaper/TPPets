@@ -20,7 +20,11 @@ class CommandRename {
             Player playerTemp = (Player) sender;
             if (ArgValidator.validateArgsLength(args,2)) {
                 String someoneElse = ArgValidator.isForSomeoneElse(args[0]);
-                if (someoneElse != null && sender.hasPermission("tppets.renameall") && ArgValidator.validateArgsLength(args, 3) && ArgValidator.softValidatePetName(args[1]) && ArgValidator.softValidatePetName(args[2])) {
+                if (someoneElse != null && ArgValidator.validateArgsLength(args, 3) && ArgValidator.softValidatePetName(args[1]) && ArgValidator.softValidatePetName(args[2])) {
+                    if (!sender.hasPermission("tppets.renameall")) {
+                        sender.sendMessage(ChatColor.RED + "You don't have permission to do that!");
+                        return;
+                    }
                     OfflinePlayer offlinePlayerTemp = Bukkit.getOfflinePlayer(someoneElse);
                     if (offlinePlayerTemp != null) {
                         renamePet(playerTemp, offlinePlayerTemp, args[1], args[2]);
