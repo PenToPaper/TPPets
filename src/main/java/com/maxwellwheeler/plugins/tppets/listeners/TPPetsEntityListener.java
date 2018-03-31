@@ -191,9 +191,10 @@ public class TPPetsEntityListener implements Listener {
         // e.getEntity = player
         // e.getMount = mounted mob (horse, etc)
         if (!PetType.getEnumByEntity(e.getMount()).equals(PetType.Pets.UNKNOWN)) {
-            Tameable tameableTemp = (Tameable) e.getMount();
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && e.getEntity() instanceof Player && !isAllowedToMount((Player)e.getEntity(), e.getMount())) {
+            Tameable tempTameable = (Tameable) e.getMount();
+            if (tempTameable.isTamed() && tempTameable.getOwner() != null && e.getEntity() instanceof Player && !isAllowedToMount((Player)e.getEntity(), e.getMount())) {
                 e.setCancelled(true);
+                e.getEntity().sendMessage(ChatColor.RED + "You do not have permission to ride this pet.");
             }
         }
     }
@@ -201,8 +202,7 @@ public class TPPetsEntityListener implements Listener {
     private boolean isAllowedToMount(Player pl, Entity ent) {
         if (ent instanceof Tameable) {
             Tameable tameableTemp = (Tameable) ent;
-            List<String> allowedPlayers = thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(ent.getUniqueId()));
-            return pl.hasPermission("tppets.mountother") || tameableTemp.getOwner().equals(pl) || allowedPlayers.contains(UUIDUtils.trimUUID(pl.getUniqueId()));
+            return pl.hasPermission("tppets.mountother") || (tameableTemp.isTamed() && tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(pl)) || thisPlugin.isAllowedToPet(ent.getUniqueId().toString(), pl.getUniqueId().toString());
         }
         return false;
     }

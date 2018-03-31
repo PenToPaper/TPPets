@@ -34,6 +34,8 @@ class CommandTPPets {
     /**
      * Grabs plugin instance and database instance from Bukkit
      */
+
+    // TODO RETHINK THESE VALUES
     public CommandTPPets() {
         this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
         this.dbConn = this.thisPlugin.getDatabase();
@@ -75,11 +77,11 @@ class CommandTPPets {
                             }
                         } else {
                             // Syntax received: /tpp dog f:OwnerName DogName
-                            if (hasPermissionToTp(tempPlayer, petName) && teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
+                            if (ArgValidator.softValidatePetName(args[1]) && hasPermissionToTp(tempPlayer, ownerOfflinePlayer, args[1]) && teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
                                 thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them at: " + formatLocation(tempPlayer.getLocation()));
                                 tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + "'s " + ChatColor.BLUE + "pet " + ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been teleported to you.");
                             } else {
-                                tempPlayer.sendMessage(ChatColor.RED + "Unable to teleport pet." + ChatColor.WHITE + args[1]);
+                                tempPlayer.sendMessage(ChatColor.RED + "Unable to teleport pet " + ChatColor.WHITE + args[1]);
                             }
                         }
                     } else {
@@ -115,9 +117,9 @@ class CommandTPPets {
         }
     }
 
-    private boolean hasPermissionToTp(Player pl, String petName) {
-        List<String> playersWithPermissionForPet = thisPlugin.getAllowedPlayers().get(thisPlugin.getDatabase().getPetUUIDByName(ownerOfflinePlayer.getUniqueId().toString(), petName));
-        return pl.hasPermission("tppets.teleportother") || (playersWithPermissionForPet != null && playersWithPermissionForPet.contains(UUIDUtils.trimUUID(pl.getUniqueId().toString())));
+    private boolean hasPermissionToTp(Player pl, OfflinePlayer petOwner, String petName) {
+        String petUUID = thisPlugin.getDatabase().getPetUUIDByName(petOwner.getUniqueId().toString(), petName);
+        return petUUID != null && !petUUID.equals("") && (pl.hasPermission("tppets.teleportother") || thisPlugin.isAllowedToPet(petUUID, pl.getUniqueId().toString()));
     }
 
     private void loadApplicableChunks(List<PetStorage> psList) {
