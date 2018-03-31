@@ -253,10 +253,12 @@ class CommandTPPets {
 
     private void listPets(Player pl, OfflinePlayer petsFrom, PetType.Pets pt) {
         pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[" + petsFrom.getName() + "'s " + pt.toString() + " names]" + ChatColor.DARK_GRAY + "---------");
+        int i = 0;
         for (World wld : Bukkit.getServer().getWorlds()) {
             List<PetStorage> tempPs = thisPlugin.getDatabase().getPetsGeneric(petsFrom.getUniqueId().toString(), wld.getName(), pt);
-            for (int i = 0; i < tempPs.size(); i++) {
+            while (i < tempPs.size()) {
                 pl.sendMessage(ChatColor.WHITE + Integer.toString(i+1) + ") " + tempPs.get(i).petName);
+                i++;
             }
         }
         pl.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
