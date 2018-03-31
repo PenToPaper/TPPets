@@ -73,7 +73,11 @@ public class TPPetsPlayerListener implements Listener {
         if (!e.isCancelled()) {
             if (thisPlugin.getAllowUntamingPets() && e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "untame_pets")) {
                 Tameable tameableTemp = (Tameable) e.getRightClicked();
-                if (thisPlugin.getDatabase() != null && tameableTemp.isTamed() && tameableTemp.getOwner() != null && (tameableTemp.getOwner().equals(e.getPlayer()) || e.getPlayer().hasPermission("tppets.untameall"))) {
+                if (thisPlugin.getDatabase() != null && tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
+                    if (!tameableTemp.getOwner().equals(e.getPlayer()) && !e.getPlayer().hasPermission("tppets.untameall")) {
+                        e.getPlayer().sendMessage(ChatColor.RED + "You don't have permission to do that");
+                        return;
+                    }
                     EntityActions.setStanding(e.getRightClicked());
                     thisPlugin.getDatabase().deletePet(e.getRightClicked());
                     tameableTemp.setOwner(null);
