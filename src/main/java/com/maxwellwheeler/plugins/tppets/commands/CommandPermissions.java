@@ -9,6 +9,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +18,8 @@ class CommandPermissions {
     public CommandPermissions(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
+
+    private enum EditResult {SUCCESS, ALREADY_DONE, FAILURE};
 
     // Desired syntax: /tpp allow from:PlayerName [Allowed Player Name] [Pet Name]
     // Desired syntax: /tpp allow [Allowed Player Name] [Pet Name]
@@ -30,17 +33,27 @@ class CommandPermissions {
                     // Syntax received: /tpp allow from:PlayerName [Allowed Player Name] [Pet Name]
                     OfflinePlayer from = Bukkit.getOfflinePlayer(playerFor);
                     if (from != null) {
-                        if (addAllowedPlayer(from, args[1], args[2])) {
+                        EditResult res = addAllowedPlayer(from, args[1], args[2]);
+                        if (res.equals(EditResult.SUCCESS)) {
                             thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
                             tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
+                        } else if (res.equals(EditResult.ALREADY_DONE)) {
+                            tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is already allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet" + ChatColor.WHITE + args[2]);
+                        } else {
+                            tempPlayer.sendMessage(ChatColor.RED + "Can't add player to pet");
                         }
                     }
                 }
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
                 // Syntax received: /tpp allow [Allowed Player Name] [Pet Name]
-                if (addAllowedPlayer(tempPlayer, args[0], args[1])) {
+                EditResult res = addAllowedPlayer(tempPlayer, args[0], args[1]);
+                if (res.equals(EditResult.SUCCESS)) {
                     thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[0] + " to use their pet named " + args[1]);
                     tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been allowed to use your pet " + ChatColor.WHITE + args[1]);
+                } else if (res.equals(EditResult.ALREADY_DONE)) {
+                    tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is already allowed to use " + ChatColor.WHITE + args[1]);
+                } else {
+                    tempPlayer.sendMessage(ChatColor.RED + "Can't add player to pet");
                 }
             } else {
                 tempPlayer.sendMessage(ChatColor.RED + "Syntax error! /tpp allow [username] [animal name]");
@@ -51,17 +64,25 @@ class CommandPermissions {
     }
 
     @SuppressWarnings("deprecation")
-    private boolean addAllowedPlayer(OfflinePlayer from, String addedPlayerName, String petName) {
+    private EditResult addAllowedPlayer(OfflinePlayer from, String addedPlayerName, String petName) {
         OfflinePlayer addedPlayer = Bukkit.getOfflinePlayer(addedPlayerName);
         if (addedPlayer != null) {
             String addedPlayerUUID = UUIDUtils.trimUUID(addedPlayer.getUniqueId());
             String petUUID = thisPlugin.getDatabase().getPetUUIDByName(from.getUniqueId().toString(), petName);
-            if (addedPlayerUUID != null && petUUID != null && !petUUID.equals("") && thisPlugin.getDatabase().insertAllowedPlayer(petUUID, addedPlayerUUID)) {
-                thisPlugin.getAllowedPlayers().get(petUUID).add(addedPlayerUUID);
-                return true;
+            if (addedPlayerUUID != null && petUUID != null && !petUUID.equals("")) {
+                if (thisPlugin.isAllowedToPet(petUUID, addedPlayerUUID)) {
+                    return EditResult.ALREADY_DONE;
+                }
+                if (thisPlugin.getDatabase().insertAllowedPlayer(petUUID, addedPlayerUUID)) {
+                    if (!thisPlugin.getAllowedPlayers().containsKey(petUUID)) {
+                        thisPlugin.getAllowedPlayers().put(petUUID, new ArrayList<>());
+                    }
+                    thisPlugin.getAllowedPlayers().get(petUUID).add(addedPlayerUUID);
+                    return EditResult.SUCCESS;
+                }
             }
         }
-        return false;
+        return EditResult.FAILURE;
     }
 
     // Desired syntax: /tpp remove from:PlayerName [Allowed Player Name] [Pet Name]
@@ -76,17 +97,27 @@ class CommandPermissions {
                     // Syntax received: /tpp remove from:PlayerName [Allowed Player Name] [Pet Name]
                     OfflinePlayer from = Bukkit.getOfflinePlayer(playerFor);
                     if (from != null) {
-                        if (removeAllowedPlayer(from, args[1], args[2])) {
+                        EditResult res = removeAllowedPlayer(from, args[1], args[2]);
+                        if (res.equals(EditResult.SUCCESS)) {
                             thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
                             tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
+                        } else if (res.equals(EditResult.ALREADY_DONE)) {
+                            tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is already not allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
+                        } else {
+                            tempPlayer.sendMessage(ChatColor.RED + "Can't remove player.");
                         }
                     }
                 }
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
                 // Syntax received: /tpp remove [Allowed Player Name] [Pet Name]
-                if (removeAllowedPlayer(tempPlayer, args[0], args[1])) {
+                EditResult res = removeAllowedPlayer(tempPlayer, args[0], args[1]);
+                if (res.equals(EditResult.SUCCESS)) {
                     thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[0] + " to use their pet named " + args[1]);
                     tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + args[1]);
+                } else if (res.equals(EditResult.ALREADY_DONE)) {
+                    tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is already not allowed to use " + ChatColor.WHITE + args[1]);
+                } else {
+                    tempPlayer.sendMessage(ChatColor.RED + "Can't remove player.");
                 }
             } else {
                 tempPlayer.sendMessage(ChatColor.RED + "Syntax error! /tpp remove [username] [animal name]");
@@ -97,17 +128,25 @@ class CommandPermissions {
     }
 
     @SuppressWarnings("deprecation")
-    private boolean removeAllowedPlayer(OfflinePlayer from, String removedPlayerName, String petName) {
+    private EditResult removeAllowedPlayer(OfflinePlayer from, String removedPlayerName, String petName) {
         OfflinePlayer removedPlayer = Bukkit.getOfflinePlayer(removedPlayerName);
         if (removedPlayer != null) {
             String removedPlayerUUID = UUIDUtils.trimUUID(removedPlayer.getUniqueId());
             String petUUID = thisPlugin.getDatabase().getPetUUIDByName(from.getUniqueId().toString(), petName);
-            if (removedPlayerUUID != null && petUUID != null && !petUUID.equals("") && thisPlugin.getDatabase().deleteAllowedPlayer(petUUID, removedPlayerUUID)) {
-                thisPlugin.getAllowedPlayers().get(petUUID).remove(removedPlayerUUID);
-                return true;
+            if (removedPlayerUUID != null && petUUID != null && !petUUID.equals("")) {
+                if (!thisPlugin.isAllowedToPet(petUUID, removedPlayerUUID)) {
+                    return EditResult.ALREADY_DONE;
+                }
+                if (thisPlugin.getDatabase().deleteAllowedPlayer(petUUID, removedPlayerUUID)) {
+                    if (!thisPlugin.getAllowedPlayers().containsKey(petUUID)) {
+                        thisPlugin.getAllowedPlayers().put(petUUID, new ArrayList<>());
+                    }
+                    thisPlugin.getAllowedPlayers().get(petUUID).remove(removedPlayerUUID);
+                    return EditResult.SUCCESS;
+                }
             }
         }
-        return false;
+        return EditResult.FAILURE;
     }
 
     @SuppressWarnings("deprecation")

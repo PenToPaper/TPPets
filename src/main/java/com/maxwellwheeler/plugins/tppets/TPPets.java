@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.ConfigUpdater;
 import com.maxwellwheeler.plugins.tppets.helpers.DBUpdater;
+import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
@@ -343,6 +344,15 @@ public class TPPets extends JavaPlugin implements Listener {
             }
         }
         return false;
+    }
+
+
+
+
+    public boolean isAllowedToPet(String petUUID, String playerUUID) {
+        String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
+        String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
+        return this.getAllowedPlayers().containsKey(trimmedPetUUID) && this.getAllowedPlayers().get(trimmedPetUUID).contains(trimmedPlayerUUID);
     }
     
     /**

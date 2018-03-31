@@ -581,7 +581,7 @@ public class DBWrapper {
                         petID = rs.getString("pet_id");
                         allowedPlayersID = new ArrayList<>();
                     }
-                    allowedPlayersID.add(rs.getString("player_id"));
+                    allowedPlayersID.add(rs.getString("user_id"));
                 }
                 ret.put(petID, allowedPlayersID);
             } catch (SQLException e) {

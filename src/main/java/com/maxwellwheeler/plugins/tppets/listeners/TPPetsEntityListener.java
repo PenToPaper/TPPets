@@ -42,7 +42,7 @@ public class TPPetsEntityListener implements Listener {
      */
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityTeleportEvent(EntityTeleportEvent e) {
-        if (e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
+        if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed() && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", e.getEntity().getLocation().getWorld(), thisPlugin))) {
                 if (thisPlugin.isInProtectedRegion(e.getTo())) {
@@ -64,7 +64,7 @@ public class TPPetsEntityListener implements Listener {
      */
     @EventHandler (priority=EventPriority.MONITOR)
     public void onEntityDeathEvent(EntityDeathEvent e) {
-        if (e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
+        if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
                 if (thisPlugin.getDatabase() != null) {
@@ -83,20 +83,20 @@ public class TPPetsEntityListener implements Listener {
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
         // First three lines determine if this is an entity we care about
-        if (e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
+        if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
                 // If we're supposed to prevent player damage, prevent damage directly from players that don't own the pet, and indirectly through projectiles.
                 if (thisPlugin.getPreventPlayerDamage()) {
                     // Direct damage
-                    if (e.getDamager() instanceof Player && !(e.getDamager().equals(tameableTemp.getOwner())) && !(e.getDamager().hasPermission("tppets.bypassprotection")) && !thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getEntity().getUniqueId())).contains(UUIDUtils.trimUUID(e.getDamager().getUniqueId()))) {
+                    if (e.getDamager() instanceof Player && !(e.getDamager().equals(tameableTemp.getOwner())) && !(e.getDamager().hasPermission("tppets.bypassprotection")) && !thisPlugin.isAllowedToPet(e.getEntity().getUniqueId().toString(), e.getDamager().getUniqueId().toString())) {
                         e.setCancelled(true);
                         thisPlugin.getLogger().info("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                         return;
                     // Indirect damage
                     } else if (e.getDamager() instanceof Projectile) {
                         Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner()) && !(e.getDamager()).hasPermission("tppets.bypassprotection") && !thisPlugin.getAllowedPlayers().get(UUIDUtils.trimUUID(e.getEntity().getUniqueId())).contains(UUIDUtils.trimUUID(e.getDamager().getUniqueId()))) {
+                        if (projTemp.getShooter() instanceof Player && !projTemp.getShooter().equals(tameableTemp.getOwner()) && !(e.getDamager()).hasPermission("tppets.bypassprotection") && !thisPlugin.isAllowedToPet(e.getEntity().getUniqueId().toString(), ((Player) projTemp.getShooter()).getUniqueId().toString())) {
                             e.setCancelled(true);
                             thisPlugin.getLogger().info("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
                             return;
@@ -130,7 +130,7 @@ public class TPPetsEntityListener implements Listener {
      */
     @EventHandler (priority=EventPriority.LOW)
     public void onEntityDamageEvent(EntityDamageEvent e) {
-        if ((thisPlugin.getPreventEnvironmentalDamage()) && e.getEntity() instanceof Tameable && PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
+        if ((thisPlugin.getPreventEnvironmentalDamage()) && e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
             if (tameableTemp.isTamed()) {
                 switch (e.getCause()) {
