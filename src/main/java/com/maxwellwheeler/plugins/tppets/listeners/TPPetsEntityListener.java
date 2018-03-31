@@ -181,7 +181,7 @@ public class TPPetsEntityListener implements Listener {
                 }
             } else {
                 thisPlugin.getDatabase().insertPet(e.getEntity(), e.getOwner().getUniqueId().toString());
-                thisPlugin.getPetIndex().newPetTamed(e.getEntity());
+                thisPlugin.getPetIndex().newPetTamed(e.getOwner().getUniqueId().toString(), e.getEntity().getUniqueId().toString(), pt);
             }
         }
     }

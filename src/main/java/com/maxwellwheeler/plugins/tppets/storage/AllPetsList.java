@@ -325,34 +325,34 @@ public class AllPetsList {
 
     /**
      * Gets the length of the horse set.
-     * @return The length of the bird set.
+     * @return The length of the horse set.
      */
     public int getHorsesLength() {
-        return birds.size();
+        return horses.size();
     }
 
     /**
      * Gets the length of the mule set.
-     * @return The length of the bird set.
+     * @return The length of the mule set.
      */
     public int getMulesLength() {
-        return birds.size();
+        return mules.size();
     }
 
     /**
      * Gets the length of the llama set.
-     * @return The length of the bird set.
+     * @return The length of the llama set.
      */
     public int getLlamasLength() {
-        return birds.size();
+        return llamas.size();
     }
 
     /**
      * Gets the length of the donkey set.
-     * @return The length of the bird set.
+     * @return The length of the donkey set.
      */
     public int getDonkeysLength() {
-        return birds.size();
+        return donkeys.size();
     }
     
     /**
