@@ -33,7 +33,7 @@ public class DBUpdater {
     }
 
     public boolean isUpToDate() {
-        return schemaVersion == updatedVersion;
+        return schemaVersion == updatedVersion || schemaVersion == 0;
     }
 
     private int getSchemaVersionFromDB(DBWrapper dbw) {
@@ -54,6 +54,11 @@ public class DBUpdater {
                             dbConn.close();
                             return returnInt;
                         }
+                    } else {
+                        ResultSet oneTables = dbConn.getMetaData().getTables(null, null, "tpp_protected_regions", null);
+                        boolean oneTablesExists = oneTables.next() && oneTables.getString("TABLE_NAME").equals("tpp_protected_regions");
+                        dbConn.close();
+                        return oneTablesExists ? 1 : 0;
                     }
                     dbConn.close();
                 } else {
@@ -62,7 +67,6 @@ public class DBUpdater {
             } catch (SQLException e) {
                 thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception finding current database version: " + e.getMessage());
             }
-            return 1;
         }
         return -1;
     }
@@ -71,11 +75,14 @@ public class DBUpdater {
         return setCurrentSchemaVersion(dbw, updatedVersion);
     }
 
-    private boolean setCurrentSchemaVersion(DBWrapper dbw, int schemaVersion) {
+    private boolean setCurrentSchemaVersion(DBWrapper dbw, int setSchemaVersion) {
         if (dbw != null) {
-            boolean databaseUpdate = dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_db_version SET version = ?", schemaVersion);
+            if (schemaVersion == 0) {
+                initializeVersion(dbw,2);
+            }
+            boolean databaseUpdate = dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_db_version SET version = ?", setSchemaVersion);
             if (databaseUpdate) {
-                this.schemaVersion = schemaVersion;
+                this.schemaVersion = setSchemaVersion;
             }
             return databaseUpdate;
         }
@@ -99,7 +106,7 @@ public class DBUpdater {
             }
 
             if (createAllowedPlayersTable && createVersionTable) {
-                return oneToTwoInitializeVersion(dbw) && setCurrentSchemaVersion(dbw, 2);
+                return initializeVersion(dbw, 1) && setCurrentSchemaVersion(dbw, 2);
             } else {
                 twoToOne(dbw);
             }
@@ -160,7 +167,7 @@ public class DBUpdater {
         return false;
     }
 
-    private boolean oneToTwoInitializeVersion(DBWrapper dbw) {
-        return dbw != null && dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_db_version (version) VALUES(?)", 1);
+    private boolean initializeVersion(DBWrapper dbw, int version) {
+        return dbw != null && dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_db_version (version) VALUES(?)", version);
     }
 }

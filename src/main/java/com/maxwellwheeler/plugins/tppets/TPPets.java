@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+
 /**
  * The plugin's main class.
  * @author GatheringExp
@@ -105,6 +107,7 @@ public class TPPets extends JavaPlugin implements Listener {
         databaseUpdater = new DBUpdater(this);
         databaseUpdater.update(this.getDatabase());
         if (!databaseUpdater.isUpToDate()) {
+            getLogger().log(Level.SEVERE, "Database is unable to be updated");
             database = null;
         }
     }
