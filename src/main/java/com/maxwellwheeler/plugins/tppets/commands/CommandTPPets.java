@@ -161,7 +161,7 @@ class CommandTPPets {
                 for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                     for (PetStorage ps : psList) {
                         if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
-                            teleportPet(sendTo, ent, !sendTo.equals(sendFrom));
+                            teleportPet(sendTo, ent, !sendTo.equals(sendFrom) && sendTo.hasPermission("tppets.teleportother"));
                             return true;
                         }
                     }
@@ -197,7 +197,7 @@ class CommandTPPets {
             for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                 if (isTeleportablePet(sendFrom, ent, pt)) {
                     if (!alreadyTeleportedPets.contains(ent.getUniqueId())) {
-                        teleportPet(sendTo, ent, !sendTo.equals(sendFrom));
+                        teleportPet(sendTo, ent, !sendTo.equals(sendFrom) && sendTo.hasPermission("tppets.teleportother"));
                         alreadyTeleportedPets.add(ent.getUniqueId());
                     } else {
                         ent.remove();
