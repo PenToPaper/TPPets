@@ -158,6 +158,12 @@ public class DBWrapper {
         return false;
     }
 
+    /**
+     * Generates a unique name for a player's pet. Used for default name creation.
+     * @param ownerUUID The Owner of the pet to generate a name for
+     * @param pt The type of pet to generate a name for
+     * @return A name of the format pt.toString() + an integer
+     */
     public String generateUniqueName(String ownerUUID, PetType.Pets pt) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -258,6 +264,13 @@ public class DBWrapper {
         return false;
     }
 
+    /**
+     * Renames the pet by updating the pet's entry in the database.
+     * @param ownerUUID The owner of the pet's UUID
+     * @param oldName The pet's old name, used for finding the existing pet to update
+     * @param newName The pet's new name
+     * @return True if successful, false if not
+     */
     public boolean renamePet(String ownerUUID, String oldName, String newName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
@@ -270,6 +283,11 @@ public class DBWrapper {
         }
     }
 
+    /**
+     * Gets a list of trimmed uuids of players that are allowed to a given pet
+     * @param entityUUID The pet's UUID
+     * @return A list of trimmed UUID strings of players allowed to the pet
+     */
     public List<String> getAllowedPlayers(String entityUUID) {
         String trimmedEntityUUID = UUIDUtils.trimUUID(entityUUID);
         Connection dbConn = database.getConnection();
@@ -289,6 +307,13 @@ public class DBWrapper {
         return uuidList;
     }
 
+    /**
+     * Gets a list of {@link PetStorage}s representing pets in unloaded chunks. Gets all pets with petName, ownerUUID, and type pt
+     * @param ownerUUID The pet owner's UUID
+     * @param petName The pet's name
+     * @param pt The pet's type
+     * @return A list of {@link PetStorage}s representing pets in unloaded chunks
+     */
     public List<PetStorage> getPetsFromOwnerNamePetType(String ownerUUID, String petName, PetType.Pets pt) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
@@ -305,6 +330,12 @@ public class DBWrapper {
         return null;
     }
 
+    /**
+     * Gets a trimmed version of the pet's UUID based on its owner's UUID and pet name
+     * @param ownerUUID The owner of the pet's UUID represented as a string. Does not need to be trimmed.
+     * @param petName The pet's name
+     * @return A trimmed string version of the pet's UUID. Returns null if the database connection can't be made, returns empty string if can't find pet with that name from that owner
+     */
     // Returns null if connection can't be made, returns "" if no pet by that name exists, returns pet UUID if a pet is found.
     public String getPetUUIDByName(String ownerUUID, String petName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
@@ -323,6 +354,12 @@ public class DBWrapper {
         return null;
     }
 
+    /**
+     * Inserts an allowed player into the tpp_allowed_players table
+     * @param petUUID The pet's UUID
+     * @param playerUUID The player's UUID
+     * @return True if successful, false if not
+     */
     public boolean insertAllowedPlayer(String petUUID, String playerUUID) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
@@ -330,6 +367,12 @@ public class DBWrapper {
         return database.insertPrepStatement(insertAllowedPlayer, trimmedPetUUID, trimmedPlayerUUID);
     }
 
+    /**
+     * Deletes an allowed player from the tpp_allowed_players table
+     * @param petUUID The pet's UUID
+     * @param playerUUID The player's UUID
+     * @return True if successful, false if not
+     */
     public boolean deleteAllowedPlayer(String petUUID, String playerUUID) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
@@ -563,6 +606,10 @@ public class DBWrapper {
         return ret;
     }
 
+    /**
+     * Gets a {@link Hashtable} of <Trimmed Pet UUID, List<Trimmed Player UUID>> representing the players that are allowed to all pets. Used in TPPets initialization process
+     * @return {@link Hashtable} of <Trimmed Pet UUID, List<Trimmed Player UUID>>. It will never be null, but it could be empty
+     */
     public Hashtable<String, List<String>> getAllAllowedPlayers() {
         Hashtable<String, List<String>> ret = new Hashtable<>();
         Connection dbConn = database.getConnection();

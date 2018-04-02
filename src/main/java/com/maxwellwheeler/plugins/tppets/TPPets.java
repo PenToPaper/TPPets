@@ -62,7 +62,7 @@ public class TPPets extends JavaPlugin implements Listener {
     
     /*
      * VARIABLE INITIALIZERS
-     * 
+     *
      */
 
     /**
@@ -104,6 +104,9 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
 
+    /**
+     * Updates the database if it can, otherwise turns database = null, negatively impacting virtually every aspect of this plugin
+     */
     private void updateDBC() {
         databaseUpdater = new DBUpdater(this);
         databaseUpdater.update(this.getDatabase());
@@ -113,12 +116,18 @@ public class TPPets extends JavaPlugin implements Listener {
         }
     }
 
+    /**
+     * Creates the tables if they don't exist, using the DBWrapper
+     */
     private void createTables() {
         if (database != null && !database.initializeTables()) {
             database = null;
         }
     }
 
+    /**
+     * Updates the spigot/bukkit config
+     */
     private void updateConfig() {
         configUpdater = new ConfigUpdater(this);
         configUpdater.update();
@@ -209,6 +218,9 @@ public class TPPets extends JavaPlugin implements Listener {
         return perms != null;
     }
 
+    /**
+     * Initializes allowed players {@link Hashtable}
+     */
     private void initializeAllowedPlayers() {
         if (database != null) {
             allowedPlayers = database.getAllAllowedPlayers();

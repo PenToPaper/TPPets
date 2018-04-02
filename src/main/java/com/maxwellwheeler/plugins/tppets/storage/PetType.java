@@ -59,7 +59,10 @@ public class PetType {
             return Pets.UNKNOWN;
         }
     }
-    
+
+    /**
+     * Translates the enum to an integer for the database
+     */
     private static final Pets[] indexTranslation = new Pets[] {Pets.UNKNOWN, Pets.CAT, Pets.DOG, Pets.PARROT, Pets.MULE, Pets.LLAMA, Pets.DONKEY, Pets.HORSE};
     
     /**
