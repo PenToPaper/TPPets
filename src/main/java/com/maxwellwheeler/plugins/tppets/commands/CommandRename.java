@@ -42,7 +42,7 @@ class CommandRename {
             if (ArgValidator.validateArgsLength(args,2)) {
                 // Checks if command is /tpp rename f:[username] [existing pet name] [new pet name]
                 String someoneElse = ArgValidator.isForSomeoneElse(args[0]);
-                if (someoneElse != null && ArgValidator.validateArgsLength(args, 3) && ArgValidator.softValidatePetName(args[1]) && ArgValidator.softValidatePetName(args[2])) {
+                if (someoneElse != null && ArgValidator.validateUsername(someoneElse) && ArgValidator.validateArgsLength(args, 3) && ArgValidator.softValidatePetName(args[1]) && ArgValidator.softValidatePetName(args[2])) {
                     if (!sender.hasPermission("tppets.renameall")) {
                         sender.sendMessage(ChatColor.RED + "You don't have permission to do that!");
                         return;

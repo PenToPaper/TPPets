@@ -10,16 +10,30 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.logging.Level;
 
+/**
+ * Used to update the database
+ * @author GatheringExp
+ *
+ */
 public class DBUpdater {
     private TPPets thisPlugin;
     private int schemaVersion;
     private final int updatedVersion = 2;
 
+    /**
+     * General constructor, gets schema version from the database
+     * @param thisPlugin TPPets plugin instance
+     */
     public DBUpdater(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
         this.schemaVersion = getSchemaVersionFromDB(thisPlugin.getDatabase());
     }
 
+    /**
+     * Core update method. Updates database schema if necessary
+     * @param dbw The DBWrapper object to apply the changes to
+     * @return True if successful or already up-to-date, false if not
+     */
     public boolean update(DBWrapper dbw) {
         if (dbw != null) {
             if (schemaVersion != updatedVersion) {
@@ -32,18 +46,29 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * If the database is currently up-to-date
+     * @return True if yes (or no database tables made yet, so that the DBWrapper will create them itself), false if not
+     */
     public boolean isUpToDate() {
         return schemaVersion == updatedVersion || schemaVersion == 0;
     }
 
+    /**
+     * Grabs the schema version from the provided {@link DBWrapper} object
+     * @param dbw The {@link DBWrapper} to check
+     * @return -1 if could not get version from database, 0 if no tables present, database schema version otherwise
+     */
     private int getSchemaVersionFromDB(DBWrapper dbw) {
         if (dbw != null) {
             try {
                 Connection dbConn = dbw.getRealDatabase().getConnection();
                 if (dbConn != null) {
+                    // Checks if tpp_db_version exists
                     ResultSet tables = dbConn.getMetaData().getTables(null, null, "tpp_db_version", null);
                     if (tables.next() && tables.getString("TABLE_NAME").equals("tpp_db_version")) {
                         tables.close();
+                        // Grabs version data from tpp_db_version, defaults to 1
                         ResultSet versionData = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT version FROM tpp_db_version");
                         if (versionData == null) {
                             dbConn.close();
@@ -54,6 +79,7 @@ public class DBUpdater {
                             dbConn.close();
                             return returnInt;
                         }
+                    // tpp_db_version exists, checking if any initialized tables exist
                     } else {
                         ResultSet oneTables = dbConn.getMetaData().getTables(null, null, "tpp_protected_regions", null);
                         boolean oneTablesExists = oneTables.next() && oneTables.getString("TABLE_NAME").equals("tpp_protected_regions");
@@ -61,6 +87,7 @@ public class DBUpdater {
                         return oneTablesExists ? 1 : 0;
                     }
                     dbConn.close();
+                // dbConn == null
                 } else {
                     return -1;
                 }
@@ -68,13 +95,25 @@ public class DBUpdater {
                 thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception finding current database version: " + e.getMessage());
             }
         }
+        // DBWrapper == null
         return -1;
     }
 
+    /**
+     * Updates the schema version recorded in the database. Note: Does not actually update the database, just tells the database that it is updated. Use with caution
+     * @param dbw The {@link DBWrapper} to check
+     * @return True if successful, false if not
+     */
     public boolean updateSchemaVersion(DBWrapper dbw) {
         return setCurrentSchemaVersion(dbw, updatedVersion);
     }
 
+    /**
+     * Sets the schema version in memory and in the database. Note: Does not actually update the database, just tells the database that it is updated. Use with extreme caution
+     * @param dbw The {@link DBWrapper} to check
+     * @param setSchemaVersion The schema version to set in memory and database
+     * @return True if successful, false if not
+     */
     private boolean setCurrentSchemaVersion(DBWrapper dbw, int setSchemaVersion) {
         if (dbw != null) {
             if (schemaVersion == 0) {
@@ -89,6 +128,11 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Updates the database schema from version one to version two
+     * @param dbw The {@link DBWrapper} to update
+     * @return True if successful, false if not
+     */
     private boolean oneToTwo(DBWrapper dbw) {
         if (dbw != null) {
             boolean addColumn = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)");
@@ -108,12 +152,18 @@ public class DBUpdater {
             if (createAllowedPlayersTable && createVersionTable) {
                 return initializeVersion(dbw, 1) && setCurrentSchemaVersion(dbw, 2);
             } else {
+                // If some part of this failed, revert to schema version one so that an update can be better attempted next time
                 twoToOne(dbw);
             }
         }
         return false;
     }
 
+    /**
+     * Fills the new petName column with values, so that existing pets will be named by the default naming scheme
+     * @param dbw The {@link DBWrapper} to update
+     * @return True if successful, false if not
+     */
     private boolean oneToTwoFillColumns(DBWrapper dbw) {
         if (dbw != null) {
             try {
@@ -146,6 +196,11 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Reverts the update from version 2 to version 1
+     * @param dbw The {@link DBWrapper} to revert
+     * @return True if successful, false if not
+     */
     private boolean twoToOne(DBWrapper dbw) {
         if (dbw != null) {
             boolean renameTable = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp");
@@ -167,6 +222,12 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Initializes a version row within the tpp_db_version table, so it can be UPDATE'd later to reflect new values, without having to check it is there
+     * @param dbw The {@link DBWrapper} to initialize version on
+     * @param version The version to initialize at
+     * @return True if successful, false if not
+     */
     private boolean initializeVersion(DBWrapper dbw, int version) {
         return dbw != null && dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_db_version (version) VALUES(?)", version);
     }

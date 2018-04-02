@@ -29,6 +29,11 @@ public class UUIDUtils {
         return idString.replace("-", "");
     }
 
+    /**
+     * Untrims a UUID, effectively reversing the opration done in trimUUID
+     * @param idString The UUID string to untrim
+     * @return The untrimmed uuid, or null if the UUID is not of length 32
+     */
     public static String unTrimUUID(String idString) {
         if (idString.length() == 32) {
             return idString.substring(0, 8) + "-" + idString.substring(8, 12) + "-" + idString.substring(12, 16) + "-" + idString.substring(16, 20) + "-" + idString.substring(20);

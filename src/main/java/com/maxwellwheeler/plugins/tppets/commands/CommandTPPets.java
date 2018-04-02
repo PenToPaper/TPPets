@@ -9,6 +9,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.sun.org.apache.xpath.internal.Arg;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -70,7 +71,7 @@ class CommandTPPets {
         Player tempPlayer = (Player) sender;
         if (ArgValidator.validateArgsLength(args, 1)) {
             this.ownerName =  ArgValidator.isForSomeoneElse(args[0]);
-            if (this.ownerName != null) {
+            if (this.ownerName != null && ArgValidator.validateUsername(ownerName)) {
                 ownerOfflinePlayer = Bukkit.getOfflinePlayer(this.ownerName);
                 if (ownerOfflinePlayer != null && ownerOfflinePlayer.hasPlayedBefore()) {
                     if (ArgValidator.validateArgsLength(args, 2)) {

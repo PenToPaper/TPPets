@@ -53,7 +53,7 @@ class CommandPermissions {
             if (ArgValidator.validateArgsLength(args, 3) && ArgValidator.validateUsername(args[1]) && ArgValidator.softValidatePetName(args[2])) {
                 String playerFor = ArgValidator.isForSomeoneElse(args[0]);
                 // Resolving f:[username 1] argument
-                if (playerFor != null) {
+                if (playerFor != null && ArgValidator.validateUsername(playerFor)) {
                     // Checking permission tppets.allowother
                     if (!sender.hasPermission("tppets.allowother")) {
                         sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
@@ -168,7 +168,7 @@ class CommandPermissions {
             // Checking if syntax is /tpp remove f:[username 1] [username 2] [pet name]
             if (ArgValidator.validateArgsLength(args, 3) && ArgValidator.validateUsername(args[1]) && ArgValidator.softValidatePetName(args[2])) {
                 String playerFor = ArgValidator.isForSomeoneElse(args[0]);
-                if (playerFor != null) {
+                if (playerFor != null && ArgValidator.validateUsername(playerFor)) {
                     // Checking permission tppets.allowother
                     if (!sender.hasPermission("tppets.allowother")) {
                         sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
@@ -283,7 +283,7 @@ class CommandPermissions {
             if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.softValidatePetName(args[1])) {
                 String petOwnerName = ArgValidator.isForSomeoneElse(args[0]);
                 // Checking if from:[username] exists and has a valid UUID
-                if (petOwnerName != null) {
+                if (petOwnerName != null && ArgValidator.validateUsername(petOwnerName)) {
                     if (!sender.hasPermission("tppets.allowother")) {
                         sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
                         return;
