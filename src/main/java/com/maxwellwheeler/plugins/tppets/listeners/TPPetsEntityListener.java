@@ -186,6 +186,10 @@ public class TPPetsEntityListener implements Listener {
         }
     }
 
+    /**
+     * Event handler for EntityMountEvent. It checks if the player is allowed to mount that pet, using {@link #isAllowedToMount(Player, Entity)}, and cancels it if they aren't
+     * @param e The EntityMountEvent object to respond to
+     */
     @EventHandler (priority = EventPriority.LOW)
     public void onEntityMountEvent(EntityMountEvent e) {
         // e.getEntity = player
@@ -199,6 +203,12 @@ public class TPPetsEntityListener implements Listener {
         }
     }
 
+    /**
+     * Checks if a player is allowed to mount a given entity
+     * @param pl The player attempting to mount
+     * @param ent The entity the player is attempting to mount
+     * @return True if they're allowed, false if they're not
+     */
     private boolean isAllowedToMount(Player pl, Entity ent) {
         if (ent instanceof Tameable) {
             Tameable tameableTemp = (Tameable) ent;

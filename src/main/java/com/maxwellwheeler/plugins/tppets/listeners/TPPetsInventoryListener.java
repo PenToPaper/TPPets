@@ -11,6 +11,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 
+/**
+ * The event listener that handles inventory events
+ * @author GatheringExp
+ *
+ */
 public class TPPetsInventoryListener implements Listener {
     private TPPets thisPlugin;
 
@@ -22,6 +27,10 @@ public class TPPetsInventoryListener implements Listener {
         this.thisPlugin = thisPlugin;
     }
 
+    /**
+     * Responds to InventoryClickEvent. If a player is already in an inventory of a pet, make absolutely sure they're allowed to edit that before allowing it.
+     * @param e The InventoryClickEvent
+     */
     @EventHandler(priority = EventPriority.LOW)
     public void onInventoryClick(InventoryClickEvent e) {
         if (e.getInventory().getHolder() instanceof Tameable && !PetType.getEnumByEntity((Entity)e.getInventory().getHolder()).equals(PetType.Pets.UNKNOWN)) {
@@ -35,6 +44,10 @@ public class TPPetsInventoryListener implements Listener {
         }
     }
 
+    /**
+     * Responds to InventoryOpenEvent. The most important of mob inventory protections are made here. It prevents players that aren't allowed to a pet from opening its inventory.
+     * @param e The InventoryOpenEvent
+     */
     @EventHandler (priority = EventPriority.LOW)
     public void onInventoryOpen(InventoryOpenEvent e) {
         if (e.getInventory().getHolder() instanceof Tameable && !PetType.getEnumByEntity((Entity)e.getInventory().getHolder()).equals(PetType.Pets.UNKNOWN)) {
