@@ -173,7 +173,7 @@ public class CommandTPP implements CommandExecutor {
      * @param sender The player that the help message should be sent to
      */
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[Commands]" + ChatColor.DARK_GRAY + "--------------");
+        sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[ Commands ]" + ChatColor.DARK_GRAY + "--------------");
         sender.sendMessage(ChatColor.WHITE + "/tpp dogs/cats/birds/horses/mules/donkeys/llamas" + ChatColor.BLUE + "  ->  Teleports your dogs to your location");
         sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
         sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] f:[username] [pet name]" + ChatColor.BLUE + "  ->  Teleports [username]'s pet named [pet name] to your location");

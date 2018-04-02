@@ -6,6 +6,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.DBUpdater;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
+import com.maxwellwheeler.plugins.tppets.listeners.TPPetsInventoryListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -242,6 +243,7 @@ public class TPPets extends JavaPlugin implements Listener {
         getLogger().info("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
+        getServer().getPluginManager().registerEvents(new TPPetsInventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this, customTools), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));

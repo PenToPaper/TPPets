@@ -97,7 +97,7 @@ public class CommandLost extends RegionCommand {
     
     @Override
     protected void listRegions(CommandSender sender, String[] truncatedArgs) {
-        sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Lost and Found Regions]" + ChatColor.DARK_GRAY + "---------");
+        sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ Lost and Found Regions ]" + ChatColor.DARK_GRAY + "---------");
         if (ArgValidator.validateArgsLength(truncatedArgs, 1)) {
             LostAndFoundRegion lfr = thisPlugin.getLostRegion(truncatedArgs[0]);
             if (lfr != null) {

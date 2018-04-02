@@ -1,5 +1,5 @@
 name: TPPets
-version: 1.0.0
+version: 2.0.0
 description: Teleport pets around the map, but not in areas you don't want
 load: POSTWORLD
 author: GatheringExp
@@ -18,6 +18,7 @@ permissions:
     description: Parent node of all tppets permissions.
     default: op
     children:
+      tppets.mountother: true
       tppets.renameall: true
       tppets.teleportother: true
       tppets.untameall: true
@@ -51,7 +52,7 @@ permissions:
   # Admin management permissions
   tppets.mountother:
     default: op
-    description: Allows user to mount pets that do not belong to them.
+    description: Allows user to mount and use inventories of pets that do not belong to them.
   tppets.renameall:
     default: op
     description: Allows user to rename pets that do not belong to them.

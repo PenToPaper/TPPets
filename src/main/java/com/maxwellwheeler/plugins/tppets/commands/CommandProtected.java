@@ -104,7 +104,7 @@ public class CommandProtected extends RegionCommand {
     
     @Override
     protected void listRegions(CommandSender sender, String[] truncatedArgs) {
-        sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[Protected Regions]" + ChatColor.DARK_GRAY + "---------");
+        sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ Protected Regions ]" + ChatColor.DARK_GRAY + "---------");
         if (truncatedArgs.length >= 1 && truncatedArgs[0] != null) {
             ProtectedRegion pr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
             if (pr != null) {
