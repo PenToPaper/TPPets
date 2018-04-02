@@ -21,19 +21,29 @@ import java.util.List;
 public class CommandTPP implements CommandExecutor {
     private final Hashtable<String, List<String>> commandAliases;
     private TPPets thisPlugin;
-    
+
     /**
      * Initializes the core command handler with the commandAliases provided.
      * @param commandAliases Hashtable linking <Real command name, List<Aliases of real command name>>
+     * @param thisPlugin Reference to the TPPets plugin instance
      */
     public CommandTPP(Hashtable<String, List<String>> commandAliases, TPPets thisPlugin) {
         this.commandAliases = commandAliases;
         this.thisPlugin = thisPlugin;
     }
-    
+
+    /**
+     * The core command handler for all /tpp [args] commands
+     * @param sender The sender of the command
+     * @param command The full commant string
+     * @param label First word of the command
+     * @param args Array of arguments for the command
+     * @return True if command was valid, false if not
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (ArgValidator.validateArgsLength(args, 1)) {
+            // Translates the command entered to any of the aliases specified in the config
             String realCommand = "";
             for (String commands : commandAliases.keySet()) {
                 if (commandAliases.get(commands).contains(args[0])) {
@@ -41,6 +51,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 }
             }
+            // Changes behavior based on the command type executed
             switch(realCommand) {
                 case "protected":
                     if (sender.hasPermission("tppets.protected")) {

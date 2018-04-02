@@ -18,10 +18,10 @@ import java.util.Arrays;
 public class CommandProtected extends RegionCommand {
     
     /**
-     * Processes the command passed to it
-     * @param sender The CommandSender object that originally sent the command.
+     * Processes commands of the type /tpp pr [etc]
+     * @param sender The {@link CommandSender} object that originally sent the command.
      * @param args The arguments passed with the command - doesn't include the "tpp protected" in command.
-     * Ex: /tpp protected add PrimaryProtected PrimaryLost You can't do that here, String args[] would have {add PrimaryProtected PrimaryLost You can't do that here}.
+     *             Ex: /tpp protected add PrimaryProtected PrimaryLost You can't do that here, String args[] would have {add PrimaryProtected PrimaryLost You can't do that here}.
      */
     public void processCommand(CommandSender sender, String[] args) {
         if (ArgValidator.validateArgsLength(args, 1)) {
@@ -62,13 +62,22 @@ public class CommandProtected extends RegionCommand {
             sender.sendMessage(ChatColor.RED + "Syntax error: /tpp protected [add/remove/list/relink]");
         }
     }
-    
+
+    /**
+     * Syntax: /tpp pr add [name] [{@link LostAndFoundRegion} name] [Enter message]
+     * Enter message -> The message displayed if a player is denied permission to /tpp [pet type] in the ProtectedRegion
+     * {@link LostAndFoundRegion} name -> The name of the {@link LostAndFoundRegion} linked to this ProtectedRegion. This can be undefined, but the ProtectedRegion will not teleport pets out of it
+     * Adds a new {@link ProtectedRegion} to memory and database
+     * @param sender The {@link CommandSender} that ran the command.
+     * @param truncatedArgs A truncated list of arguments passed to the /tpp pr add [args] command. For command /tpp pr add PrimaryProtected, this includes only PrimaryProtected
+     */
     @Override
     protected void addRegion(CommandSender sender, String[] truncatedArgs) {
         if (sender instanceof Player) {
             Player pl = (Player) sender;
             Location[] lcs = getWePoints(pl);
             if (lcs != null) {
+                // Creates a new ProtectedRegion object, stores it in memory and in the database
                 ProtectedRegion pr = new ProtectedRegion(truncatedArgs[0], truncatedArgs[2], lcs[0].getWorld().getName(), lcs[0].getWorld(), lcs[0], lcs[1], truncatedArgs[1]);
                 if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().insertProtectedRegion(pr)) {
                     thisPlugin.addProtectedRegion(pr);
@@ -85,11 +94,19 @@ public class CommandProtected extends RegionCommand {
         }
         sender.sendMessage(ChatColor.RED + "Can't find WorldEdit selection.");
     }
-    
+
+    /**
+     * Syntax: /tpp pr remove [name]
+     * Removes the pr from memory and database
+     * @param sender The {@link CommandSender} that ran the command.
+     * @param truncatedArgs A truncated list of arguments passed to the /tpp pr remove [args] command. For command /tpp pr remove PrimaryProtected, this includes only PrimaryProtected
+     */
     @Override
     protected void removeRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
+        // If ProtectedRegion with that name exists
         if (tempPr != null) {
+            // Remove it from memory and database
             if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deleteProtectedRegion(tempPr)) {
                 thisPlugin.removeProtectedRegion(truncatedArgs[0]);
                 sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
@@ -101,11 +118,20 @@ public class CommandProtected extends RegionCommand {
             sender.sendMessage(ChatColor.RED + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.RED + " does not exist.");
         }
     }
-    
+
+    /**
+     * Syntax: /tpp pr list
+     * Lists all active protected regions
+     * Alternative Syntax: /tpp pr list [name]
+     * Lists data for protected region with [name]
+     * @param sender The {@link CommandSender} that ran the command.
+     * @param truncatedArgs A truncated list of arguments passed with the addRegion command. For command /tpp pr list PrimaryProtected, it would include PrimaryProtected.
+     */
     @Override
     protected void listRegions(CommandSender sender, String[] truncatedArgs) {
         sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ Protected Regions ]" + ChatColor.DARK_GRAY + "---------");
-        if (truncatedArgs.length >= 1 && truncatedArgs[0] != null) {
+        if (ArgValidator.validateArgsLength(truncatedArgs, 1)) {
+            // Syntax received: /tpp pr list [name]
             ProtectedRegion pr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
             if (pr != null) {
                 displayPrInfo(sender, pr);
@@ -113,6 +139,7 @@ public class CommandProtected extends RegionCommand {
                 sender.sendMessage(ChatColor.RED + "Could not find protected region with name " + ChatColor.WHITE + truncatedArgs[0]);
             }
         } else {
+            // Syntax received: /tpp pr list
             for (String key : thisPlugin.getProtectedRegions().keySet()) {
                 displayPrInfo(sender, thisPlugin.getProtectedRegion(key));
             }
@@ -123,13 +150,18 @@ public class CommandProtected extends RegionCommand {
     /**
      * Relinks given {@link ProtectedRegion} to given {@link LostAndFoundRegion}
      * @param sender The {@link CommandSender} that ran the command to change this.
-     * @param truncatedArgs A truncated list of arguments passded to the relink function. It really only includes [0] The {@link ProtectedRegion}'s name, and [1] The {@link LostAndFoundRegion}'s name
+     * @param truncatedArgs A truncated list of arguments passed to the relink function. It really only includes [0] The {@link ProtectedRegion}'s name, and [1] The {@link LostAndFoundRegion}'s name
+     *                      {@link LostAndFoundRegion} does not have to exist, although the {@link ProtectedRegion} will not teleport pets away
      */
     private void relinkRegion(CommandSender sender, String[] truncatedArgs) {
         ProtectedRegion tempPr = thisPlugin.getProtectedRegion(truncatedArgs[0]);
+        // If ProtectedRegion with this name exists
         if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().updateProtectedRegion(tempPr)) {
+            // Change it's LfName reference
             tempPr.setLfName(truncatedArgs[1]);
+            // Update any object that might point to
             tempPr.updateLFReference();
+            // Report back to the user
             sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Updated!");
             thisPlugin.getLogger().info("Player " + sender.getName() + " relinked protected region " + truncatedArgs[0] + " to " + truncatedArgs[1]);
             if (tempPr.getLfReference() == null) {
