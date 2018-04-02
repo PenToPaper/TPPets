@@ -20,11 +20,16 @@ permissions:
     children:
       tppets.mountother: true
       tppets.renameall: true
+      tppets.allowother: true
       tppets.teleportother: true
       tppets.untameall: true
       tppets.bypassprotection: true
       tppets.bypasslimit: true
       tppets.tpanywhere: true
+      tppets.rename: true
+      tppets.addallow: true
+      tppets.removeallow: true
+      tppets.listallow: true
       tppets.protected: true
       tppets.lost: true
       tppets.dogs: true
@@ -34,8 +39,6 @@ permissions:
       tppets.mules: true
       tppets.llamas: true
       tppets.donkeys: true
-      tppets.rename: true
-      tppets.addallow: true
 
   tppets.teleport:
     description: Parent node of tppets teleporting permissions.
