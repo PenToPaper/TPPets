@@ -66,7 +66,7 @@ class CommandTPPets {
             this.ownerName =  ArgValidator.isForSomeoneElse(args[0]);
             if (this.ownerName != null) {
                 ownerOfflinePlayer = Bukkit.getOfflinePlayer(this.ownerName);
-                if (ownerOfflinePlayer != null) {
+                if (ownerOfflinePlayer != null && ownerOfflinePlayer.hasPlayedBefore()) {
                     if (ArgValidator.validateArgsLength(args, 2)) {
                         if (args[1].equals("list")) {
                             // Syntax received: /tpp dog f:OwnerName list
@@ -105,6 +105,8 @@ class CommandTPPets {
                             tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that!");
                         }
                     }
+                } else {
+                    tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + this.ownerName);
                 }
             } else {
                 if (args[0].equals("list")) {

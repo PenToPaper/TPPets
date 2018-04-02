@@ -19,7 +19,7 @@ class CommandPermissions {
         this.thisPlugin = thisPlugin;
     }
 
-    private enum EditResult {SUCCESS, ALREADY_DONE, FAILURE}
+    private enum EditResult {SUCCESS, ALREADY_DONE, NO_PLAYER, FAILURE}
 
     // Desired syntax: /tpp allow from:PlayerName [Allowed Player Name] [Pet Name]
     // Desired syntax: /tpp allow [Allowed Player Name] [Pet Name]
@@ -37,29 +37,48 @@ class CommandPermissions {
                     // Syntax received: /tpp allow from:PlayerName [Allowed Player Name] [Pet Name]
                     OfflinePlayer from = Bukkit.getOfflinePlayer(playerFor);
                     if (from != null) {
-                        EditResult res = addAllowedPlayer(from, args[1], args[2]);
-                        if (res.equals(EditResult.SUCCESS)) {
-                            thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
-                            tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
-                        } else if (res.equals(EditResult.ALREADY_DONE)) {
-                            tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is already allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet" + ChatColor.WHITE + args[2]);
-                        } else {
-                            tempPlayer.sendMessage(ChatColor.RED + "Can't add player to pet");
+                        if (!from.hasPlayedBefore()) {
+                            tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + playerFor);
+                            return;
                         }
+                        EditResult res = addAllowedPlayer(from, args[1], args[2]);
+                        switch (addAllowedPlayer(from, args[1], args[2])) {
+                            case SUCCESS:
+                                thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
+                                tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
+                                break;
+                            case ALREADY_DONE:
+                                tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is already allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet" + ChatColor.WHITE + args[2]);
+                                break;
+                            case NO_PLAYER:
+                                tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + args[1]);
+                                break;
+                            default:
+                                tempPlayer.sendMessage(ChatColor.RED + "Can't add player to pet");
+                                break;
+                        }
+                    } else {
+                        tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
                     }
                 } else {
                     tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
                 }
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
                 // Syntax received: /tpp allow [Allowed Player Name] [Pet Name]
-                EditResult res = addAllowedPlayer(tempPlayer, args[0], args[1]);
-                if (res.equals(EditResult.SUCCESS)) {
-                    thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[0] + " to use their pet named " + args[1]);
-                    tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been allowed to use your pet " + ChatColor.WHITE + args[1]);
-                } else if (res.equals(EditResult.ALREADY_DONE)) {
-                    tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is already allowed to use " + ChatColor.WHITE + args[1]);
-                } else {
-                    tempPlayer.sendMessage(ChatColor.RED + "Can't add player to pet");
+                switch (addAllowedPlayer(tempPlayer, args[0], args[1])) {
+                    case SUCCESS:
+                        thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[0] + " to use their pet named " + args[1]);
+                        tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been allowed to use your pet " + ChatColor.WHITE + args[1]);
+                        break;
+                    case ALREADY_DONE:
+                        tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is already allowed to use " + ChatColor.WHITE + args[1]);
+                        break;
+                    case NO_PLAYER:
+                        tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + args[0]);
+                        break;
+                    default:
+                        tempPlayer.sendMessage(ChatColor.RED + "Can't add player to pet");
+                        break;
                 }
             } else {
                 tempPlayer.sendMessage(ChatColor.RED + "Syntax error! /tpp allow [username] [animal name]");
@@ -73,6 +92,9 @@ class CommandPermissions {
     private EditResult addAllowedPlayer(OfflinePlayer from, String addedPlayerName, String petName) {
         OfflinePlayer addedPlayer = Bukkit.getOfflinePlayer(addedPlayerName);
         if (addedPlayer != null) {
+            if (!addedPlayer.hasPlayedBefore()) {
+                return EditResult.NO_PLAYER;
+            }
             String addedPlayerUUID = UUIDUtils.trimUUID(addedPlayer.getUniqueId());
             String petUUID = thisPlugin.getDatabase().getPetUUIDByName(from.getUniqueId().toString(), petName);
             if (addedPlayerUUID != null && petUUID != null && !petUUID.equals("")) {
@@ -107,14 +129,24 @@ class CommandPermissions {
                     // Syntax received: /tpp remove from:PlayerName [Allowed Player Name] [Pet Name]
                     OfflinePlayer from = Bukkit.getOfflinePlayer(playerFor);
                     if (from != null) {
-                        EditResult res = removeAllowedPlayer(from, args[1], args[2]);
-                        if (res.equals(EditResult.SUCCESS)) {
-                            thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
-                            tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
-                        } else if (res.equals(EditResult.ALREADY_DONE)) {
-                            tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is already not allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
-                        } else {
-                            tempPlayer.sendMessage(ChatColor.RED + "Can't remove player.");
+                        if (!from.hasPlayedBefore()) {
+                            tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + playerFor);
+                            return;
+                        }
+                        switch (removeAllowedPlayer(from, args[1], args[2])) {
+                            case SUCCESS:
+                                thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
+                                tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
+                                break;
+                            case ALREADY_DONE:
+                                tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is already not allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
+                                break;
+                            case NO_PLAYER:
+                                tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + args[1]);
+                                break;
+                            default:
+                                tempPlayer.sendMessage(ChatColor.RED + "Can't remove player from pet.");
+                                break;
                         }
                     }
                 } else {
@@ -122,14 +154,20 @@ class CommandPermissions {
                 }
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
                 // Syntax received: /tpp remove [Allowed Player Name] [Pet Name]
-                EditResult res = removeAllowedPlayer(tempPlayer, args[0], args[1]);
-                if (res.equals(EditResult.SUCCESS)) {
-                    thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[0] + " to use their pet named " + args[1]);
-                    tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + args[1]);
-                } else if (res.equals(EditResult.ALREADY_DONE)) {
-                    tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is already not allowed to use " + ChatColor.WHITE + args[1]);
-                } else {
-                    tempPlayer.sendMessage(ChatColor.RED + "Can't remove player.");
+                switch (removeAllowedPlayer(tempPlayer, args[0], args[1])) {
+                    case SUCCESS:
+                        thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[0] + " to use their pet named " + args[1]);
+                        tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + args[1]);
+                        break;
+                    case ALREADY_DONE:
+                        tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is already not allowed to use " + ChatColor.WHITE + args[1]);
+                        break;
+                    case NO_PLAYER:
+                        tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + args[0]);
+                        break;
+                    default:
+                        tempPlayer.sendMessage(ChatColor.RED + "Can't remove player from pet.");
+                        break;
                 }
             } else {
                 tempPlayer.sendMessage(ChatColor.RED + "Syntax error! /tpp remove [username] [animal name]");
@@ -143,6 +181,9 @@ class CommandPermissions {
     private EditResult removeAllowedPlayer(OfflinePlayer from, String removedPlayerName, String petName) {
         OfflinePlayer removedPlayer = Bukkit.getOfflinePlayer(removedPlayerName);
         if (removedPlayer != null) {
+            if (!removedPlayer.hasPlayedBefore()) {
+                return EditResult.NO_PLAYER;
+            }
             String removedPlayerUUID = UUIDUtils.trimUUID(removedPlayer.getUniqueId());
             String petUUID = thisPlugin.getDatabase().getPetUUIDByName(from.getUniqueId().toString(), petName);
             if (removedPlayerUUID != null && petUUID != null && !petUUID.equals("")) {
@@ -164,6 +205,7 @@ class CommandPermissions {
     @SuppressWarnings("deprecation")
     public void listPlayers(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
+            Player playerTemp = (Player) sender;
             if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.softValidatePetName(args[1])) {
                 String petOwnerName = ArgValidator.isForSomeoneElse(args[0]);
                 if (petOwnerName != null) {
@@ -172,15 +214,21 @@ class CommandPermissions {
                         return;
                     }
                     OfflinePlayer petOwner = Bukkit.getOfflinePlayer(petOwnerName);
-                    if (!listAllowedPlayers((Player) sender, petOwner, args[1])) {
-                        sender.sendMessage(ChatColor.RED + "Can't list pets from " + ChatColor.WHITE + petOwnerName);
+                    switch (listAllowedPlayers(playerTemp, petOwner, args[1])) {
+                        case NO_PLAYER:
+                            playerTemp.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + petOwnerName);
+                            break;
+                        default:
+                            playerTemp.sendMessage(ChatColor.RED + "Can't list players allowed to pet.");
+                            break;
                     }
                 } else {
                     sender.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
                 }
             } else if (ArgValidator.validateArgsLength(args, 1) && ArgValidator.softValidatePetName(args[0])) {
-                if (!listAllowedPlayers((Player) sender, (Player) sender, args[0])) {
-                    sender.sendMessage(ChatColor.RED + "Can't list pets");
+                if (!listAllowedPlayers(playerTemp, playerTemp, args[0]).equals(EditResult.SUCCESS)) {
+                    playerTemp.sendMessage(ChatColor.RED + "Can't list players allowed to pet.");
+
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "Syntax error! Usage: /tpp list [pet name]");
@@ -188,7 +236,10 @@ class CommandPermissions {
         }
     }
 
-    private boolean listAllowedPlayers(Player reportTo, OfflinePlayer petOwner, String petName) {
+    private EditResult listAllowedPlayers(Player reportTo, OfflinePlayer petOwner, String petName) {
+        if (!petOwner.hasPlayedBefore()) {
+            return EditResult.NO_PLAYER;
+        }
         String petUUID = thisPlugin.getDatabase().getPetUUIDByName(petOwner.getUniqueId().toString(), petName);
         if (petUUID != null && !petUUID.equals("")) {
             List<String> playerUUIDs = thisPlugin.getDatabase().getAllowedPlayers(petUUID);
@@ -197,14 +248,14 @@ class CommandPermissions {
                 String untrimmedUUID = UUIDUtils.unTrimUUID(playerUUID);
                 if (untrimmedUUID != null) {
                     OfflinePlayer offlinePlTemp = Bukkit.getOfflinePlayer(UUID.fromString(untrimmedUUID));
-                    if (offlinePlTemp != null) {
+                    if (offlinePlTemp != null && offlinePlTemp.hasPlayedBefore()) {
                         reportTo.sendMessage(ChatColor.WHITE + offlinePlTemp.getName());
                     }
                 }
             }
             reportTo.sendMessage(ChatColor.GRAY + "-------------------------------------------");
-            return true;
+            return EditResult.SUCCESS;
         }
-        return false;
+        return EditResult.FAILURE;
     }
 }

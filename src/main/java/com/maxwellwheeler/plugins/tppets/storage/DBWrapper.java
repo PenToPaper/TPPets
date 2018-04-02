@@ -81,9 +81,6 @@ public class DBWrapper {
                 + "max_y INT NOT NULL,\n"
                 + "max_z INT NOT NULL,\n"
                 + "world_name VARCHAR(25) NOT NULL);";
-        /*
-         *      TABLES
-         */
         String makeTableUnloadedPets = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
                 + "pet_id CHAR(32) PRIMARY KEY,\n"
                 + "pet_type TINYINT NOT NULL,\n"

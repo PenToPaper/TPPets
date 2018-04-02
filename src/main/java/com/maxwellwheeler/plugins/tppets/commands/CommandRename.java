@@ -26,7 +26,7 @@ class CommandRename {
                         return;
                     }
                     OfflinePlayer offlinePlayerTemp = Bukkit.getOfflinePlayer(someoneElse);
-                    if (offlinePlayerTemp != null) {
+                    if (offlinePlayerTemp != null && offlinePlayerTemp.hasPlayedBefore()) {
                         renamePet(playerTemp, offlinePlayerTemp, args[1], args[2]);
                     } else {
                         playerTemp.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + someoneElse);
