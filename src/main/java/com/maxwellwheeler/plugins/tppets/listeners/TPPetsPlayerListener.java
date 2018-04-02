@@ -34,6 +34,7 @@ public class TPPetsPlayerListener implements Listener {
     /**
      * General constructor, saves reference to TPPets plugin
      * @param thisPlugin The TPPets plugin reference
+     * @param customTools The customTools object that represents the tools used for operations on pets
      */
     public TPPetsPlayerListener(TPPets thisPlugin, Hashtable<String, List<Material>> customTools) {
         this.thisPlugin = thisPlugin;

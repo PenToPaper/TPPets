@@ -111,6 +111,7 @@ public abstract class DBGeneral implements DBFrame {
      * @param prepStatement A string representing the prepared statement.
      * @param args Arguments representing the fillers for the ?s in the prepared statement.
      * @return True if successful, false if not.
+     * @throws SQLException Forwards SQLExceptions to be dealt with by the other functions
      */
     protected int executeUpdate(String prepStatement, Object... args) throws SQLException {
         Connection dbConn = getConnection();
@@ -141,6 +142,7 @@ public abstract class DBGeneral implements DBFrame {
      * @param prepStatement A string representing the prepared statement.
      * @param args Arguments representing the fillers for the ?s in the prepared statement.
      * @return A ResultSet representing the values returned from the database. This requires the connection to remain open, so it takes the dbConn as an argument.
+     * @throws SQLException Forwards SQLExceptions to be dealt with by the other functions
      */
     protected ResultSet executeQuery(Connection dbConn, String prepStatement, Object... args) throws SQLException {
         if (dbConn != null) {

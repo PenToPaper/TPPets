@@ -47,6 +47,10 @@ public class PlayerPetIndex {
      * @param dogLimit The limit of all dogs owned.
      * @param catLimit The limit of all cats owned.
      * @param birdLimit The limit of all birds owned.
+     * @param horseLimit The limit of all horses owned.
+     * @param muleLimit The limit of all mules owned.
+     * @param llamaLimit The limit of all llamas owned.
+     * @param donkeyLimit The limit of all donkeys owned.
      */
     public PlayerPetIndex(TPPets thisPlugin, int totalLimit, int dogLimit, int catLimit, int birdLimit, int horseLimit, int muleLimit, int llamaLimit, int donkeyLimit) {
         this.thisPlugin = thisPlugin;

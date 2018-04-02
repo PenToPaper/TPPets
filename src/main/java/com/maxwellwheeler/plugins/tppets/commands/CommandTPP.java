@@ -24,7 +24,7 @@ public class CommandTPP implements CommandExecutor {
 
     /**
      * Initializes the core command handler with the commandAliases provided.
-     * @param commandAliases Hashtable linking <Real command name, List<Aliases of real command name>>
+     * @param commandAliases Hashtable linking &#60;Real command name, List&#60;Aliases of real command name&#62;&#62;
      * @param thisPlugin Reference to the TPPets plugin instance
      */
     public CommandTPP(Hashtable<String, List<String>> commandAliases, TPPets thisPlugin) {
@@ -169,6 +169,7 @@ public class CommandTPP implements CommandExecutor {
 
     /**
      * Sends appropriate arguments to CommandTPPets constructor
+     * @param sender The original command sender
      * @param args The arguments originally sent to the onCommand method.
      * @return An instance of {@link CommandTPPets}, constructed based on the number of args.
      */

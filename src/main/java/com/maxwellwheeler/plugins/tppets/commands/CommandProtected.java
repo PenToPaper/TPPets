@@ -65,8 +65,8 @@ public class CommandProtected extends RegionCommand {
 
     /**
      * Syntax: /tpp pr add [name] [{@link LostAndFoundRegion} name] [Enter message]
-     * Enter message -> The message displayed if a player is denied permission to /tpp [pet type] in the ProtectedRegion
-     * {@link LostAndFoundRegion} name -> The name of the {@link LostAndFoundRegion} linked to this ProtectedRegion. This can be undefined, but the ProtectedRegion will not teleport pets out of it
+     * Enter message: The message displayed if a player is denied permission to /tpp [pet type] in the ProtectedRegion
+     * {@link LostAndFoundRegion} name: The name of the {@link LostAndFoundRegion} linked to this ProtectedRegion. This can be undefined, but the ProtectedRegion will not teleport pets out of it
      * Adds a new {@link ProtectedRegion} to memory and database
      * @param sender The {@link CommandSender} that ran the command.
      * @param truncatedArgs A truncated list of arguments passed to the /tpp pr add [args] command. For command /tpp pr add PrimaryProtected, this includes only PrimaryProtected

@@ -303,6 +303,7 @@ class CommandTPPets {
      * Teleports the pet to the player
      * @param pl The player the pet is to be teleported to.
      * @param entity The entity to be teleported
+     * @param keepSitting Whether or not the entity should be forced to sit
      */
     private void teleportPet(Player pl, Entity entity, boolean keepSitting) {
         EntityActions.setStanding(entity);

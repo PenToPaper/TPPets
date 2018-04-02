@@ -99,10 +99,16 @@ public class DBWrapper {
                 && thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
     
-    /**
+    /*
      *      UNLOADED_PETS METHODS
      */
 
+    /**
+     * Checks if a name is unique to a player
+     * @param ownerUUID The player to check
+     * @param petName The pet name to check
+     * @return True if it's unique, false if it's not
+     */
     public boolean isNameUnique(String ownerUUID, String petName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
@@ -524,8 +530,8 @@ public class DBWrapper {
     }
     
     /**
-     * Gets the Hashtable used by the plugin internally to store the {@link LostAndFoundRegion} in memory from the database.
-     * @return The hashtable of <LostAndFoundRegion's name, LostAndFoundRegion instance>
+     * Gets the {@link Hashtable} used by the plugin internally to store the {@link LostAndFoundRegion} in memory from the database.
+     * @return The {@link Hashtable} of &#60;LostAndFoundRegion's name, LostAndFoundRegion instance&#62;
      */
     public Hashtable<String, LostAndFoundRegion> getLostRegions() {
         Hashtable<String, LostAndFoundRegion> ret = new Hashtable<>();
@@ -585,8 +591,8 @@ public class DBWrapper {
     }
     
     /**
-     * Gets the Hashtable used by the plugin internally to store the {@link ProtectedRegion} in memory from the database.
-     * @return The hashtable of <ProtectedRegion's name, ProtectedRegion instance>
+     * Gets the {@link Hashtable} used by the plugin internally to store the {@link ProtectedRegion} in memory from the database.
+     * @return The {@link Hashtable} of &#60;ProtectedRegion's name, ProtectedRegion instance&#62;
      */
     public Hashtable<String, ProtectedRegion> getProtectedRegions() {
         Hashtable<String, ProtectedRegion> ret = new Hashtable<>();
@@ -607,8 +613,8 @@ public class DBWrapper {
     }
 
     /**
-     * Gets a {@link Hashtable} of <Trimmed Pet UUID, List<Trimmed Player UUID>> representing the players that are allowed to all pets. Used in TPPets initialization process
-     * @return {@link Hashtable} of <Trimmed Pet UUID, List<Trimmed Player UUID>>. It will never be null, but it could be empty
+     * Gets a {@link Hashtable} of &#60;Trimmed Pet UUID, List&#60;Trimmed Player UUID&#62;&#62; representing the players that are allowed to all pets. Used in TPPets initialization process
+     * @return {@link Hashtable} of &#60;Trimmed Pet UUID, List&#60;Trimmed Player UUID&#62;&#62;. It will never be null, but it could be empty
      */
     public Hashtable<String, List<String>> getAllAllowedPlayers() {
         Hashtable<String, List<String>> ret = new Hashtable<>();

@@ -25,7 +25,9 @@ public class PermissionChecker {
     /**
      * Checks if an offline player has permissions with vault
      * @param at The AnimalTamer that should be an OfflinePlayer
+     * @param world The world in which the player might have the permission
      * @param permission The permission to check
+     * @param thisPlugin a pointer to the {@link TPPets} plugin instance
      * @return Whether or not the player has the permission, or false if vault is disabled
      */
     public static boolean offlineHasPerms(AnimalTamer at, String permission, World world, TPPets thisPlugin) {

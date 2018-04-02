@@ -47,7 +47,7 @@ public class ProtectedRegion extends Region {
     /**
      * General constructor, used to recreate regions from database entries.
      * @param zoneName The name of the Protected Region.
-     * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &[#] color codes.
+     * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &#38;[#] color codes.
      * @param worldName The name of the world the Protected Region is in.
      * @param xOne The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's X location.
      * @param yOne The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's Y location.
@@ -64,7 +64,7 @@ public class ProtectedRegion extends Region {
     /**
      * General constructor, uses Location objects to represent the maximum and minimum of the cube.
      * @param zoneName The name of the Protected Region.
-     * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &[#] color codes.
+     * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &#38;[#] color codes.
      * @param worldName The name of the world the Protected Region is in.
      * @param minLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
      * @param maxLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
@@ -77,7 +77,7 @@ public class ProtectedRegion extends Region {
     /**
      * General constructor, uses Location objects to represent the maximum and minimum of the cube.
      * @param zoneName The name of the Protected Region.
-     * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &[#] color codes.
+     * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &#38;[#] color codes.
      * @param worldName The name of the world the Protected Region is in.
      * @param world A world reference representing the world where the Protected Region is in.
      * @param minLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
