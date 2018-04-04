@@ -280,7 +280,7 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
         if (database.updatePrepStatement(updatePetName, newName, trimmedOwnerUUID, oldName)) {
-            thisPlugin.getLogger().info("Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);
+            thisPlugin.getLogger().info("Player with UUID " + ownerUUID + " has had their pet " + oldName + " renamed to " + newName);
             return true;
         } else {
             thisPlugin.getLogger().info("Unable to execute: Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);

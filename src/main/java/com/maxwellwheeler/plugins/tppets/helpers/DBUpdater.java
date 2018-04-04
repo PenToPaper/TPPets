@@ -5,9 +5,7 @@ import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -18,7 +16,7 @@ import java.util.logging.Level;
 public class DBUpdater {
     private TPPets thisPlugin;
     private int schemaVersion;
-    private final int updatedVersion = 2;
+    private final int updatedVersion = 3;
 
     /**
      * General constructor, gets schema version from the database
@@ -38,7 +36,10 @@ public class DBUpdater {
         if (dbw != null) {
             if (schemaVersion != updatedVersion) {
                 if (schemaVersion == 1) {
-                    return oneToTwo(dbw);
+                    oneToTwo(dbw);
+                }
+                if (schemaVersion == 2) {
+                    return twoToThree(dbw);
                 }
             }
             return true;
@@ -230,5 +231,38 @@ public class DBUpdater {
      */
     private boolean initializeVersion(DBWrapper dbw, int version) {
         return dbw != null && dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_db_version (version) VALUES(?)", version);
+    }
+
+    private boolean twoToThree(DBWrapper dbw) {
+        if (dbw != null) {
+            if(twoToThreeNameValidator(dbw)) {
+                setCurrentSchemaVersion(dbw, 3);
+            }
+        }
+        return false;
+    }
+
+    private boolean twoToThreeNameValidator(DBWrapper dbw) {
+        if (dbw != null) {
+            Connection dbConn = dbw.getRealDatabase().getConnection();
+            List<PetStorage> petStorageList = new ArrayList<>();
+            ResultSet invalidNames = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets WHERE pet_name = \"all\"");
+            try {
+                while (invalidNames.next()) {
+                    petStorageList.add(new PetStorage(invalidNames.getString("pet_id"), invalidNames.getInt("pet_type"), invalidNames.getInt("pet_x"), invalidNames.getInt("pet_y"), invalidNames.getInt("pet_z"), invalidNames.getString("pet_world"), invalidNames.getString("owner_id"), invalidNames.getString("pet_name")));
+                }
+                dbConn.close();
+                for (PetStorage ps : petStorageList) {
+                    String newName = dbw.generateUniqueName(ps.ownerId, ps.petType);
+                    if (newName == null || !dbw.renamePet(ps.ownerId, ps.petName, newName)) {
+                        return false;
+                    }
+                }
+                return true;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQLException updating database to version 3: " + e.getMessage());
+            }
+        }
+        return false;
     }
 }
