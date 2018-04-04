@@ -170,17 +170,20 @@ public class TPPetsEntityListener implements Listener {
      */
     @EventHandler (priority=EventPriority.HIGHEST)
     public void onEntityTameEvent(EntityTameEvent e) {
-        if (!e.isCancelled()) {
+        if (!e.isCancelled() && e.getOwner() instanceof Player) {
             PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
+            Player playerTemp = (Player) e.getOwner();
             PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
             if (!rr.equals(PlayerPetIndex.RuleRestriction.ALLOWED)) {
                 e.setCancelled(true);
                 if (e.getOwner() instanceof Player) {
-                    Player playerTemp = (Player) e.getOwner();
                     playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
                 }
             } else {
-                thisPlugin.getDatabase().insertPet(e.getEntity(), e.getOwner().getUniqueId().toString());
+                String generatedName = thisPlugin.getDatabase().insertPet(e.getEntity(), e.getOwner().getUniqueId().toString());
+                if (generatedName != null) {
+                    playerTemp.sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + generatedName + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + generatedName + ChatColor.BLUE + " [new name]");
+                }
                 thisPlugin.getPetIndex().newPetTamed(e.getOwner().getUniqueId().toString(), e.getEntity().getUniqueId().toString(), pt);
             }
         }

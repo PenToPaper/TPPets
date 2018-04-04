@@ -135,13 +135,13 @@ public class DBWrapper {
         if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) ent;
             if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
-                return insertPet(ent, tameableTemp.getOwner().getUniqueId().toString());
+                return insertPet(ent, tameableTemp.getOwner().getUniqueId().toString()) != null;
             }
         }
         return false;
     }
 
-    public boolean insertPet(Entity ent, String ownerUUID) {
+    public String insertPet(Entity ent, String ownerUUID) {
         if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN)) {
             if (ownerUUID != null) {
                 String trimmedEntUUID = UUIDUtils.trimUUID(ent.getUniqueId());
@@ -154,14 +154,13 @@ public class DBWrapper {
                 String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 if (uniqueName != null && database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID, uniqueName)) {
                     thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
-                    return true;
+                    return uniqueName;
                 } else {
                     thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be added to database.");
-                    return false;
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**
