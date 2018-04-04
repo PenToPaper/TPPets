@@ -1,9 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
@@ -29,125 +26,111 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 class CommandTPPets {
     private TPPets thisPlugin;
     private DBWrapper dbConn;
-    private String petName;
-    private String ownerName;
-    private OfflinePlayer ownerOfflinePlayer;
     
     /**
      * Grabs plugin instance and database instance from Bukkit
      */
 
-    public CommandTPPets() {
-        this.thisPlugin = (TPPets)(Bukkit.getServer().getPluginManager().getPlugin("TPPets"));
+    public CommandTPPets(TPPets thisPlugin) {
+        this.thisPlugin = thisPlugin;
         this.dbConn = this.thisPlugin.getDatabase();
-        this.ownerName = null;
-        this.petName = null;
-        ownerOfflinePlayer = null;
     }
 
     /**
      * The core command handler for /tpp [pet type] [args] commands
-     * Syntax: /tpp [pet type]
+     * Syntax: /tpp [pet type] all
      * Teleports all of sender's [pet type] to them
+     *
      * Alternative Syntax: /tpp [pet type] list
      * Lists all of sender's [pet type] names
+     *
      * Alternative Syntax: /tpp [pet type] [pet name]
      * Teleports sender's [pet type] named [pet name] to them
-     * Alternative Syntax: /tpp [pet type] f:[username]
+     *
+     * Alternative Syntax: /tpp [pet type] f:[username] all
      * Teleports all of [username]'s [pet type] to sender
+     *
      * Alternative Syntax: /tpp [pet type] f:[username] list
      * Lists all of [username]'s [pet type] to sender
+     *
      * Alternative Syntax: /tpp [pet type] f:[username] [pet name]
      * Teleports [username]'s [pet type] named [pet name] to sender. This works if others are allowed to the pet as well
      * @param sender The original sender of the command
      * @param args Truncated arguments for the command, does not include /tpp dogs, the [pet type] argument is specified in PetType.Pets form
      * @param pt The pet type to teleport
      */
-    @SuppressWarnings("deprecation")
     public void processCommand(CommandSender sender, String[] args, PetType.Pets pt) {
         if (!(sender instanceof Player)) {
             return;
         }
-        Player tempPlayer = (Player) sender;
+        Player senderPlayer = (Player) sender;
+        if (ArgValidator.validateArgsLength(args, 2)) {
+            String isForSomeoneElse = ArgValidator.isForSomeoneElse(args[0]);
+            if (isForSomeoneElse != null && ArgValidator.validateUsername(isForSomeoneElse)) {
+                OfflinePlayer commandFor = Bukkit.getOfflinePlayer(isForSomeoneElse);
+                if (commandFor != null && commandFor.hasPlayedBefore()) {
+                    processCommandGeneric(senderPlayer, commandFor, Arrays.copyOfRange(args, 1, args.length), pt);
+                    return;
+                }
+            }
+            senderPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + args[0]);
+        } else {
+            processCommandGeneric(senderPlayer, senderPlayer, args, pt);
+        }
+    }
+
+    /**
+     * The generic command handler for /tpp [pet type] [args] commands. This takes {@link Player} and {@link OfflinePlayer} objects instead of raw strings, so it's used for translating f:[username]-type commands to the actual action
+     * @param commandSender The player that sent the command
+     * @param commandAbout The player that the command is about. This can be .equals(commandSender), because Player extends OfflinePlayer
+     * @param args For a command /tpp dogs f:[username] list, args = [list].
+     *             For a command /tpp dogs list, args = [list].
+     * @param pt The type of pet the command is about.
+     */
+    private void processCommandGeneric(Player commandSender, OfflinePlayer commandAbout, String[] args, PetType.Pets pt) {
         if (ArgValidator.validateArgsLength(args, 1)) {
-            this.ownerName =  ArgValidator.isForSomeoneElse(args[0]);
-            if (this.ownerName != null && ArgValidator.validateUsername(ownerName)) {
-                ownerOfflinePlayer = Bukkit.getOfflinePlayer(this.ownerName);
-                if (ownerOfflinePlayer != null && ownerOfflinePlayer.hasPlayedBefore()) {
-                    if (ArgValidator.validateArgsLength(args, 2)) {
-                        if (args[1].equals("list")) {
-                            // Syntax received: /tpp dog f:OwnerName list
-                            if (tempPlayer.hasPermission("tppets.teleportother")) {
-                                listPets(tempPlayer, ownerOfflinePlayer, pt);
-                            } else {
-                                // Player isn't allowed to teleport the pet, and shouldn't be allowed to check the player's pet names
-                                tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that!");
-                            }
-                        } else {
-                            // Syntax received: /tpp dog f:OwnerName DogName
-                            ProtectedRegion prWithin = canTpThere(tempPlayer);
-                            if (prWithin != null) {
-                                tempPlayer.sendMessage(prWithin.getEnterMessage());
-                                return;
-                            }
-                            // Validates [username] and [dog name] validity
-                            if (ArgValidator.softValidatePetName(args[1]) && hasPermissionToTp(tempPlayer, ownerOfflinePlayer, args[1]) && teleportSpecificPet(tempPlayer, ownerOfflinePlayer, args[1], pt)) {
-                                thisPlugin.getLogger().info(ChatColor.BLUE + "Player " + tempPlayer.getName() + " teleported " + args[1] + ", " + ownerOfflinePlayer.getName() + "'s pet, to them at: " + formatLocation(tempPlayer.getLocation()));
-                                tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + "'s " + ChatColor.BLUE + "pet " + ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been teleported to you.");
-                            } else {
-                                tempPlayer.sendMessage(ChatColor.RED + "Can't find pet with name: " + ChatColor.WHITE + args[0]);
-                            }
-                        }
+            switch (args[0]) {
+                case "list":
+                    if (commandSender.equals(commandAbout) || commandSender.hasPermission("tppets.teleportother")) {
+                        listPets(commandSender, commandAbout, pt);
                     } else {
-                        // Syntax received: /tpp dog f:OwnerName
-                        ProtectedRegion prWithin = canTpThere(tempPlayer);
-                        if (prWithin != null) {
-                            tempPlayer.sendMessage(prWithin.getEnterMessage());
+                        commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that!");
+                    }
+                    break;
+                case "all":
+                    if (canTpThere(commandSender)) {
+                        if ((commandSender.equals(commandAbout) || commandSender.hasPermission("tppets.teleportother"))) {
+                            int numPetsTeleported = getPetsAndTeleport(commandSender, commandAbout, pt).size();
+                            thisPlugin.getLogger().info("Player " + commandSender.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + commandAbout.getName() + "'s " + pt.toString() + "s to their location at: " + formatLocation(commandSender.getLocation()));
+                            commandSender.sendMessage((commandSender.equals(commandAbout) ? ChatColor.BLUE + "Your " : ChatColor.WHITE + commandAbout.getName() + "'s ") + ChatColor.WHITE + pt.toString() + "s " + ChatColor.BLUE + "have been teleported to you");
+                        } else {
+                            commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that");
+                        }
+                    }
+                    break;
+                // Default is assumed that args[0] = dog name
+                default:
+                    if (canTpThere(commandSender)) {
+                        String petUUID = thisPlugin.getDatabase().getPetUUIDByName(commandAbout.getUniqueId().toString(), args[0]);
+                        if (petUUID == null || petUUID.equals("") || !ArgValidator.softValidatePetName(args[0])) {
+                            commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
                             return;
                         }
-                        if (tempPlayer.hasPermission("tppets.teleportother")) {
-                            int numPetsTeleported = getPetsAndTeleport(tempPlayer, ownerOfflinePlayer, pt).size();
-                            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + this.ownerName + "'s " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
-                            tempPlayer.sendMessage(ChatColor.WHITE + ownerOfflinePlayer.getName() + "'s " + pt.toString() + "s " + ChatColor.BLUE + "have been teleported to you");
+                        if (!hasPermissionToTp(commandSender, commandAbout, petUUID)) {
+                            commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that");
+                            return;
+                        }
+                        if (ArgValidator.softValidatePetName(args[0]) && teleportSpecificPet(commandSender, commandAbout, args[0], pt)){
+                            thisPlugin.getLogger().info("Player " + commandSender.getName() + " teleported " + commandAbout.getName() + "'s pet named " + args[0] + " to their location at: " + formatLocation(commandSender.getLocation()));
+                            commandSender.sendMessage((commandSender.equals(commandAbout) ? ChatColor.BLUE + "Your pet " : ChatColor.WHITE + commandAbout.getName() + "'s " + ChatColor.BLUE + "pet ") + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you");
                         } else {
-                            tempPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that!");
+                            commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
                         }
                     }
-                // ownerOfflinePlayer == null || !ownerOfflinePlayer.hasPlayedBefore
-                } else {
-                    tempPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + this.ownerName);
-                }
-            } else {
-                if (args[0].equals("list")) {
-                    // Syntax received: /tpp dog list
-                    listPets(tempPlayer, tempPlayer, pt);
-                } else {
-                    // Syntax received: /tpp dog DogName
-                    ProtectedRegion prWithin = canTpThere(tempPlayer);
-                    if (prWithin != null) {
-                        tempPlayer.sendMessage(prWithin.getEnterMessage());
-                        return;
-                    }
-                    // Try teleporting that specific pet
-                    if (teleportSpecificPet(tempPlayer, tempPlayer, args[0], pt)) {
-                        thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported their " + pt.toString() + ", " + args[0] + ", to their location at: " + formatLocation(tempPlayer.getLocation()));
-                        tempPlayer.sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you.");
-                    } else {
-                        // Could not teleport specific pet
-                        tempPlayer.sendMessage(ChatColor.RED + "Can't find pet with name: " + ChatColor.WHITE + args[0]);
-                    }
-                }
+                    break;
             }
         } else {
-            // Syntax received: /tpp dog
-            ProtectedRegion prWithin = canTpThere(tempPlayer);
-            if (prWithin != null) {
-                tempPlayer.sendMessage(prWithin.getEnterMessage());
-                return;
-            }
-            int numPetsTeleported = getPetsAndTeleport(tempPlayer, tempPlayer, pt).size();
-            thisPlugin.getLogger().info("Player " + tempPlayer.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of their " + pt.toString() + "s to their location at: " + formatLocation(tempPlayer.getLocation()));
-            tempPlayer.sendMessage(ChatColor.BLUE + "Your " + ChatColor.WHITE + pt.toString() + "s" + ChatColor.BLUE + " have been teleported to you.");
+            commandSender.sendMessage(ChatColor.RED + "Syntax error! /tpp dogs [all/list/dog name]");
         }
     }
 
@@ -155,12 +138,11 @@ class CommandTPPets {
      * Checks if pl has permission to teleport petOwner's pet named petName. This works for both the tppets.teleportother permission, and /tpp allow [username] [pet name] allow. Used only when f:[username] syntax is used
      * @param pl The player that ran the command
      * @param petOwner The owner of the pet, could potentially be the same as the player
-     * @param petName The name of the pet
+     * @param petUUID The UUID of the pet
      * @return True if successful, false if not
      */
-    private boolean hasPermissionToTp(Player pl, OfflinePlayer petOwner, String petName) {
-        String petUUID = thisPlugin.getDatabase().getPetUUIDByName(petOwner.getUniqueId().toString(), petName);
-        return petUUID != null && !petUUID.equals("") && (pl.hasPermission("tppets.teleportother") || thisPlugin.isAllowedToPet(petUUID, pl.getUniqueId().toString()));
+    private boolean hasPermissionToTp(Player pl, OfflinePlayer petOwner, String petUUID) {
+        return petUUID != null && !petUUID.equals("") && (pl.equals(petOwner) || pl.hasPermission("tppets.teleportother") || thisPlugin.isAllowedToPet(petUUID, pl.getUniqueId().toString()));
     }
 
     /**
@@ -188,6 +170,9 @@ class CommandTPPets {
     private boolean teleportSpecificPet(Player sendTo, OfflinePlayer sendFrom, String name, PetType.Pets pt) {
         if (dbConn != null && sendFrom != null && name != null) {
             List<PetStorage> psList = dbConn.getPetsFromOwnerNamePetType(sendFrom.getUniqueId().toString(), name, pt);
+            if (psList.size() < 1) {
+                return false;
+            }
             loadApplicableChunks(psList);
             // If you can teleport between worlds, check every world
             if (thisPlugin.getAllowTpBetweenWorlds()) {
@@ -329,7 +314,7 @@ class CommandTPPets {
      * @param pt The type of pets to check for
      */
     private void listPets(Player pl, OfflinePlayer petsFrom, PetType.Pets pt) {
-        pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + petsFrom.getName() + "'s " + pt.toString() + " names ]" + ChatColor.DARK_GRAY + "---------");
+        pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + petsFrom.getName() + "'s " + ChatColor.BLUE + pt.toString() + " names ]" + ChatColor.DARK_GRAY + "---------");
         int i = 0;
         // Loop through all the worlds, pulling pets from the database
         for (World wld : Bukkit.getServer().getWorlds()) {
@@ -343,14 +328,16 @@ class CommandTPPets {
     }
 
     /**
-     * Checks if a player can teleport pets there at all. Checks tppets.tpanywhere permissions and if they are in a ProtectedRegion
+     * Checks if a player can teleport pets there at all. Checks tppets.tpanywhere permissions and if they are in a ProtectedRegion. Sends that ProtectedRegion's EnterMessage when it's determined that the player can't tp there.
      * @param pl The player to check permissions of. The location of the player is checked
-     * @return A ProtectedRegion that they're in, so that callers of the method can tell them the EnterMessage. Null if they are allowed to teleport pets
+     * @return True if they're allowed to, false if they're not allowed to and have been sent a message
      */
-    private ProtectedRegion canTpThere(Player pl) {
-        if (!pl.hasPermission("tppets.tpanywhere")) {
-            return thisPlugin.getProtectedRegionWithin(pl.getLocation());
+    private boolean canTpThere(Player pl) {
+        ProtectedRegion tempPr = thisPlugin.getProtectedRegionWithin(pl.getLocation());
+        boolean ret = pl.hasPermission("tppets.tpanywhere") || tempPr == null;
+        if (!ret) {
+            pl.sendMessage(tempPr.getEnterMessage());
         }
-        return null;
+        return ret;
     }
 }

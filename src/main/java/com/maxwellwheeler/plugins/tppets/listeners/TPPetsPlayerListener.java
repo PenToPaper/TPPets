@@ -87,9 +87,10 @@ public class TPPetsPlayerListener implements Listener {
                     thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId().toString());
                     e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");
                 }
+                e.setCancelled(true);
             } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "get_owner")) {
                 Tameable tameableTemp = (Tameable) e.getRightClicked();
-                if (tameableTemp.getOwner() == null) {
+                if (!tameableTemp.isTamed() && tameableTemp.getOwner() == null) {
                     e.getPlayer().sendMessage(ChatColor.BLUE + "This pet does not belong to anybody.");
                 } else {
                     List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromUUIDs(e.getRightClicked().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString());
@@ -99,6 +100,7 @@ public class TPPetsPlayerListener implements Listener {
                         e.getPlayer().sendMessage(ChatColor.RED + "Error getting pet data.");
                     }
                 }
+                e.setCancelled(true);
             }
         }
     }

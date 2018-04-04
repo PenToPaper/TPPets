@@ -42,7 +42,7 @@ class CommandRename {
             if (ArgValidator.validateArgsLength(args,2)) {
                 // Checks if command is /tpp rename f:[username] [existing pet name] [new pet name]
                 String someoneElse = ArgValidator.isForSomeoneElse(args[0]);
-                if (someoneElse != null && ArgValidator.validateUsername(someoneElse) && ArgValidator.validateArgsLength(args, 3) && ArgValidator.softValidatePetName(args[1]) && ArgValidator.softValidatePetName(args[2])) {
+                if (someoneElse != null && ArgValidator.validateUsername(someoneElse) && ArgValidator.validateArgsLength(args, 3)) {
                     if (!sender.hasPermission("tppets.renameall")) {
                         sender.sendMessage(ChatColor.RED + "You don't have permission to do that!");
                         return;
@@ -55,11 +55,8 @@ class CommandRename {
                         playerTemp.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + someoneElse);
                     }
                 // Checks if syntax is /tpp rename [existing pet name] [new pet name]
-                } else if (ArgValidator.softValidatePetName(args[0]) && ArgValidator.softValidatePetName(args[1])) {
-                    renamePet(playerTemp, playerTemp, args[0], args[1]);
-                // Invalid syntax
                 } else {
-                    sender.sendMessage(ChatColor.RED + "Syntax error. Usage: /tpp rename [old name] [new name]");
+                    renamePet(playerTemp, playerTemp, args[0], args[1]);
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "Syntax error. Usage: /tpp rename [old name] [new name]");
@@ -78,13 +75,21 @@ class CommandRename {
      * @return False if can't find a pet by that name or can't rename the pet, true if successful.
      */
     private boolean renamePet(Player pl, OfflinePlayer commandAbout, String oldName, String newName) {
+        if (!ArgValidator.softValidatePetName(oldName)) {
+            pl.sendMessage(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + oldName);
+            return false;
+        }
         String petUUIDByName = thisPlugin.getDatabase().getPetUUIDByName(commandAbout.getUniqueId().toString(), oldName);
         if (petUUIDByName.equals("") || petUUIDByName == null) {
             pl.sendMessage(ChatColor.RED + "Can't find pet named " + ChatColor.WHITE + oldName);
             return false;
         }
+        if (!ArgValidator.softValidatePetName(newName)) {
+            pl.sendMessage(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + newName);
+            return false;
+        }
         if (!ArgValidator.validatePetName(thisPlugin.getDatabase(), commandAbout.getUniqueId().toString(), newName)) {
-            pl.sendMessage(ChatColor.RED + "Can't rename pet to " + ChatColor.WHITE + newName);
+            pl.sendMessage(ChatColor.RED + "Pet name " + ChatColor.WHITE + newName + " already in use!");
             return false;
         }
         if (thisPlugin.getDatabase().renamePet(commandAbout.getUniqueId().toString(), oldName, newName)) {

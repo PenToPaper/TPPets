@@ -233,6 +233,11 @@ public class DBUpdater {
         return dbw != null && dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_db_version (version) VALUES(?)", version);
     }
 
+    /**
+     * Updates the database schema from version two to version three
+     * @param dbw The {@link DBWrapper} to update
+     * @return True if successful, false if not
+     */
     private boolean twoToThree(DBWrapper dbw) {
         if (dbw != null) {
             if(twoToThreeNameValidator(dbw)) {
@@ -242,6 +247,12 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Performs two steps:
+     * 1) Changes pets named "all" to a default name, as all is a new keyword from v2 to v3
+     * @param dbw The {@link DBWrapper} to update
+     * @return True if successful, false if not
+     */
     private boolean twoToThreeNameValidator(DBWrapper dbw) {
         if (dbw != null) {
             Connection dbConn = dbw.getRealDatabase().getConnection();

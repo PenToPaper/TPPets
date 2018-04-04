@@ -36,7 +36,7 @@ public class ArgValidator {
      */
     public static boolean softValidatePetName(String petName) {
         Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
-        return nameMatcher.find() && !petName.equals("list");
+        return nameMatcher.find() && !petName.equals("list") && !petName.equals("all");
     }
 
     /**

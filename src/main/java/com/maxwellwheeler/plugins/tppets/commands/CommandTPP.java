@@ -71,7 +71,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "dogs":
                     if (sender.hasPermission("tppets.dogs")) {
-                        CommandTPPets dogTPP = getTPPets(sender, args);
+                        CommandTPPets dogTPP = new CommandTPPets(thisPlugin);
                         dogTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DOG);
                     } else {
                         permissionMessage(sender);
@@ -79,7 +79,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "cats":
                     if (sender.hasPermission("tppets.cats")) {
-                        CommandTPPets catTPP = getTPPets(sender, args);
+                        CommandTPPets catTPP = new CommandTPPets(thisPlugin);
                         catTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.CAT);
                     } else {
                         permissionMessage(sender);
@@ -87,7 +87,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "birds":
                     if (sender.hasPermission("tppets.birds")) {
-                        CommandTPPets parrotTPP = getTPPets(sender, args);
+                        CommandTPPets parrotTPP = new CommandTPPets(thisPlugin);
                         parrotTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.PARROT);
                     } else {
                         permissionMessage(sender);
@@ -95,7 +95,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "horses":
                     if (sender.hasPermission("tppets.horses")) {
-                        CommandTPPets horseTPP = getTPPets(sender, args);
+                        CommandTPPets horseTPP = new CommandTPPets(thisPlugin);
                         horseTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.HORSE);
                     } else {
                         permissionMessage(sender);
@@ -103,7 +103,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "mules":
                     if (sender.hasPermission("tppets.mules")) {
-                        CommandTPPets muleTPP = getTPPets(sender, args);
+                        CommandTPPets muleTPP = new CommandTPPets(thisPlugin);
                         muleTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.MULE);
                     } else {
                         permissionMessage(sender);
@@ -111,7 +111,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "llamas":
                     if (sender.hasPermission("tppets.llamas")) {
-                        CommandTPPets llamaTPP = getTPPets(sender, args);
+                        CommandTPPets llamaTPP = new CommandTPPets(thisPlugin);
                         llamaTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.LLAMA);
                     } else {
                         permissionMessage(sender);
@@ -119,7 +119,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "donkeys":
                     if (sender.hasPermission("tppets.donkeys")) {
-                        CommandTPPets donkeyTPP = getTPPets(sender, args);
+                        CommandTPPets donkeyTPP = new CommandTPPets(thisPlugin);
                         donkeyTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DONKEY);
                     } else {
                         permissionMessage(sender);
@@ -165,19 +165,6 @@ public class CommandTPP implements CommandExecutor {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Sends appropriate arguments to CommandTPPets constructor
-     * @param sender The original command sender
-     * @param args The arguments originally sent to the onCommand method.
-     * @return An instance of {@link CommandTPPets}, constructed based on the number of args.
-     */
-    private CommandTPPets getTPPets(CommandSender sender, String[] args) {
-        if (ArgValidator.validateArgsLength(args, 2) && sender.hasPermission("tppets.teleportother")) {
-            return new CommandTPPets();
-        }
-        return new CommandTPPets();
     }
     
     /**
