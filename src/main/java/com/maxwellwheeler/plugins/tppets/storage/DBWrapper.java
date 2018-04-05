@@ -89,7 +89,8 @@ public class DBWrapper {
                 + "pet_z INT NOT NULL,\n"
                 + "pet_world VARCHAR(25) NOT NULL,\n"
                 + "owner_id CHAR(32) NOT NULL,\n"
-                + "pet_name VARCHAR(64)"
+                + "pet_name VARCHAR(64)\n,"
+                + "effective_pet_name VARCHAR(64)"
                 + ");";
         return database.createStatement(makeTableUnloadedPets)
                 && database.createStatement(makeTableLostRegions)
@@ -113,8 +114,8 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
-            String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ?";
-            ResultSet rs = database.selectPrepStatement(dbConn, selectIsNameUnique, trimmedOwnerUUID, petName);
+            String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
+            ResultSet rs = database.selectPrepStatement(dbConn, selectIsNameUnique, trimmedOwnerUUID, petName.toLowerCase());
             try {
                 boolean ret = rs.next();
                 dbConn.close();
@@ -278,7 +279,7 @@ public class DBWrapper {
      */
     public boolean renamePet(String ownerUUID, String oldName, String newName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
-        String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE owner_id = ? AND pet_name = ?";
+        String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE owner_id = ? AND pet_name = ?";
         if (database.updatePrepStatement(updatePetName, newName, trimmedOwnerUUID, oldName)) {
             thisPlugin.getLogger().info("Player with UUID " + ownerUUID + " has had their pet " + oldName + " renamed to " + newName);
             return true;
@@ -323,8 +324,8 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
-            String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? AND pet_type = ?";
-            List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromOwnerNamePetType, trimmedOwnerUUID, petName, PetType.getIndexFromPet(pt)));
+            String selectPetsFromOwnerNamePetType = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ? AND pet_type = ?";
+            List<PetStorage> ret = getPetsList(database.selectPrepStatement(dbConn, selectPetsFromOwnerNamePetType, trimmedOwnerUUID, petName.toLowerCase(), PetType.getIndexFromPet(pt)));
             try {
              dbConn.close();
             } catch (SQLException e) {
@@ -346,7 +347,7 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
-            String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_name = ? LIMIT 1";
+            String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ? LIMIT 1";
             try (ResultSet rs = database.selectPrepStatement(dbConn, selectUUIDFromPet, trimmedOwnerUUID, petName)) {
                 if (rs.next()) {
                     return rs.getString("pet_id");
@@ -481,7 +482,7 @@ public class DBWrapper {
         List<PetStorage> ret = new ArrayList<>();
         try {
             while (rs.next()) {
-                ret.add(new PetStorage(rs.getString("pet_id"), rs.getInt("pet_type"), rs.getInt("pet_x"), rs.getInt("pet_y"), rs.getInt("pet_z"), rs.getString("pet_world"), rs.getString("owner_id"), rs.getString("pet_name")));
+                ret.add(new PetStorage(rs.getString("pet_id"), rs.getInt("pet_type"), rs.getInt("pet_x"), rs.getInt("pet_y"), rs.getInt("pet_z"), rs.getString("pet_world"), rs.getString("owner_id"), rs.getString("pet_name"), rs.getString("effective_pet_name")));
             }
         } catch (SQLException e) {
             thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception generating list from database results", e.getMessage());

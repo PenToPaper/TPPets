@@ -26,7 +26,7 @@ public class PetStorage {
      * @param ownerId A string version of the pet owner's UUID, trimmed.
      * @param petName A string of the pet's name
      */
-    public PetStorage(String petId, int petTypeIndex, int petX, int petY, int petZ, String petWorld, String ownerId, String petName) {
+    public PetStorage(String petId, int petTypeIndex, int petX, int petY, int petZ, String petWorld, String ownerId, String petName, String effectivePetName) {
         this.petId = petId;
         this.petType = PetType.getPetFromIndex(petTypeIndex);
         this.petX = petX;

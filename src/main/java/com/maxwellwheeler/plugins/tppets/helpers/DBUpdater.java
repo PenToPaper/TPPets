@@ -177,7 +177,7 @@ public class DBUpdater {
                     if (!tempPetStorage.containsKey(getPets.getString("owner_id"))) {
                         tempPetStorage.put(getPets.getString("owner_id"), new HashSet<>());
                     }
-                    tempPetStorage.get(getPets.getString("owner_id")).add(new PetStorage(getPets.getString("pet_id"), getPets.getInt("pet_type"), getPets.getInt("pet_x"), getPets.getInt("pet_y"), getPets.getInt("pet_z"), getPets.getString("pet_world"), getPets.getString("owner_id"),null));
+                    tempPetStorage.get(getPets.getString("owner_id")).add(new PetStorage(getPets.getString("pet_id"), getPets.getInt("pet_type"), getPets.getInt("pet_x"), getPets.getInt("pet_y"), getPets.getInt("pet_z"), getPets.getString("pet_world"), getPets.getString("owner_id"),null, null));
                 }
                 conn.close();
 
@@ -240,7 +240,8 @@ public class DBUpdater {
      */
     private boolean twoToThree(DBWrapper dbw) {
         if (dbw != null) {
-            if(twoToThreeNameValidator(dbw)) {
+            boolean addColumn = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets ADD effective_pet_name VARCHAR(64)");
+            if(twoToThreeNameValidator(dbw) && addColumn && twoToThreePopulateColumn(dbw)) {
                 setCurrentSchemaVersion(dbw, 3);
             }
         }
@@ -260,7 +261,7 @@ public class DBUpdater {
             ResultSet invalidNames = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets WHERE pet_name = \"all\"");
             try {
                 while (invalidNames.next()) {
-                    petStorageList.add(new PetStorage(invalidNames.getString("pet_id"), invalidNames.getInt("pet_type"), invalidNames.getInt("pet_x"), invalidNames.getInt("pet_y"), invalidNames.getInt("pet_z"), invalidNames.getString("pet_world"), invalidNames.getString("owner_id"), invalidNames.getString("pet_name")));
+                    petStorageList.add(new PetStorage(invalidNames.getString("pet_id"), invalidNames.getInt("pet_type"), invalidNames.getInt("pet_x"), invalidNames.getInt("pet_y"), invalidNames.getInt("pet_z"), invalidNames.getString("pet_world"), invalidNames.getString("owner_id"), invalidNames.getString("pet_name"), null));
                 }
                 dbConn.close();
                 for (PetStorage ps : petStorageList) {
@@ -275,5 +276,52 @@ public class DBUpdater {
             }
         }
         return false;
+    }
+
+    private boolean twoToThreePopulateColumn(DBWrapper dbw) {
+        if (dbw != null) {
+            Connection dbConn = dbw.getRealDatabase().getConnection();
+            ResultSet allEntries = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets");
+            // <trimmed uuid string, pet name>
+            Hashtable<String, String> tempStorage = new Hashtable<>();
+            try {
+                while (allEntries.next()) {
+                    tempStorage.put(allEntries.getString("pet_id"), allEntries.getString("pet_name"));
+                }
+                for (String tempStorageKey : tempStorage.keySet()) {
+                    dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_unloaded_pets SET effective_pet_name = ? WHERE pet_id = ?", tempStorage.get(tempStorageKey).toLowerCase(), tempStorageKey);
+                }
+                return true;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQLException updating database to version 3: " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
+    private boolean twoToThreeRemoveDuplicates(DBWrapper dbw) {
+        if (dbw != null) {
+            Connection dbConn = dbw.getRealDatabase().getConnection();
+            ResultSet duplicateEntries = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT up.pet_id, up.pet_type, up.pet_x, up.pet_y, up.pet_z, up.pet_world, up.owner_id, up.pet_name, up.effective_pet_name\n" +
+                    "FROM tpp_unloaded_pets up\n" +
+                    "INNER JOIN (\n" +
+                        "SELECT owner_id, effective_pet_name, COUNT(*)\n" +
+                        "FROM tpp_unloaded_pets\n" +
+                        "GROUP BY owner_id, effective_pet_name\n" +
+                        "HAVING COUNT(*) > 1\n" +
+                    ") ups ON up.owner_id = ups.owner_id AND up.effective_pet_name = ups.effective_pet_name;");
+            List<PetStorage> tempDuplicateEntryStorage = new ArrayList<>();
+            try {
+                while (duplicateEntries.next()) {
+                    tempDuplicateEntryStorage.add(new PetStorage(duplicateEntries.getString("pet_id"), duplicateEntries.getInt("pet_type"), duplicateEntries.getInt("pet_x"), duplicateEntries.getInt("pet_y"), duplicateEntries.getInt("pet_z"), duplicateEntries.getString("pet_world"), duplicateEntries.getString("owner_id"), duplicateEntries.getString("pet_name"), duplicateEntries.getString("effective_pet_name")));
+                }
+                dbConn.close();
+                for (PetStorage ps : tempDuplicateEntryStorage) {
+                    dbw.renamePet(ps.ownerId, ps.)
+                }
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQLException updating database to version 3: " + e.getMessage());
+            }
+        }
     }
 }
