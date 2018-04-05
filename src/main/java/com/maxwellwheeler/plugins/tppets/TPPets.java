@@ -16,7 +16,6 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -31,7 +30,7 @@ import java.util.logging.Level;
  * @author GatheringExp
  *
  */
-public class TPPets extends JavaPlugin implements Listener {
+public class TPPets extends JavaPlugin {
     private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<>();
     private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<>();
     private Hashtable<String, List<String>> commandAliases = new Hashtable<>();
