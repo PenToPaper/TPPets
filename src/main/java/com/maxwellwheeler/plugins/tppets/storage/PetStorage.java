@@ -26,6 +26,7 @@ public class PetStorage {
      * @param petWorld The name of the world.
      * @param ownerId A string version of the pet owner's UUID, trimmed.
      * @param petName A string of the pet's name
+     * @param effectivePetName The pet's name that's actually used for comparison and database-related tasks
      */
     public PetStorage(String petId, int petTypeIndex, int petX, int petY, int petZ, String petWorld, String ownerId, String petName, String effectivePetName) {
         this.petId = petId;

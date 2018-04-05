@@ -27,9 +27,9 @@ class CommandTPPets {
     private DBWrapper dbConn;
     
     /**
-     * Grabs plugin instance and database instance from Bukkit
+     * General constructor, takes {@link TPPets} instance
+     * @param thisPlugin The TPPets instance
      */
-
     public CommandTPPets(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
         this.dbConn = this.thisPlugin.getDatabase();
