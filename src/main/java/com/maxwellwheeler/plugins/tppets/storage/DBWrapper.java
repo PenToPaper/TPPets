@@ -152,8 +152,8 @@ public class DBWrapper {
                 /*
                  *      UNLOADED_PETS STATEMENTS
                  */
-                String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                if (uniqueName != null && database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID, uniqueName)) {
+                String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name, effective_pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                if (uniqueName != null && database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID, uniqueName, uniqueName.toLowerCase())) {
                     thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
                     return uniqueName;
                 } else {
@@ -279,8 +279,8 @@ public class DBWrapper {
      */
     public boolean renamePet(String ownerUUID, String oldName, String newName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
-        String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE owner_id = ? AND pet_name = ?";
-        if (database.updatePrepStatement(updatePetName, newName, trimmedOwnerUUID, oldName)) {
+        String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE owner_id = ? AND effective_pet_name = ?";
+        if (database.updatePrepStatement(updatePetName, newName, newName.toLowerCase(), trimmedOwnerUUID, oldName.toLowerCase())) {
             thisPlugin.getLogger().info("Player with UUID " + ownerUUID + " has had their pet " + oldName + " renamed to " + newName);
             return true;
         } else {
@@ -348,7 +348,7 @@ public class DBWrapper {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
             String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ? LIMIT 1";
-            try (ResultSet rs = database.selectPrepStatement(dbConn, selectUUIDFromPet, trimmedOwnerUUID, petName)) {
+            try (ResultSet rs = database.selectPrepStatement(dbConn, selectUUIDFromPet, trimmedOwnerUUID, petName.toLowerCase())) {
                 if (rs.next()) {
                     return rs.getString("pet_id");
                 }

@@ -89,7 +89,7 @@ class CommandRename {
             return false;
         }
         if (!ArgValidator.validatePetName(thisPlugin.getDatabase(), commandAbout.getUniqueId().toString(), newName)) {
-            pl.sendMessage(ChatColor.RED + "Pet name " + ChatColor.WHITE + newName + " already in use!");
+            pl.sendMessage(ChatColor.RED + "Pet name " + ChatColor.WHITE + newName + ChatColor.RED + " already in use!");
             return false;
         }
         if (thisPlugin.getDatabase().renamePet(commandAbout.getUniqueId().toString(), oldName, newName)) {

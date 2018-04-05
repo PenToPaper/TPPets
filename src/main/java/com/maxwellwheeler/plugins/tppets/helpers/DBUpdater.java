@@ -240,9 +240,11 @@ public class DBUpdater {
      */
     private boolean twoToThree(DBWrapper dbw) {
         if (dbw != null) {
-            boolean addColumn = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets ADD effective_pet_name VARCHAR(64)");
-            if(twoToThreeNameValidator(dbw) && addColumn && twoToThreePopulateColumn(dbw)) {
+            boolean addColumn = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets ADD COLUMN effective_pet_name VARCHAR(64)");
+            if(addColumn && twoToThreePopulateColumn(dbw) && twoToThreeNameValidator(dbw) && twoToThreeRemoveDuplicates(dbw)) {
                 setCurrentSchemaVersion(dbw, 3);
+            } else {
+                threeToTwo(dbw);
             }
         }
         return false;
@@ -258,7 +260,7 @@ public class DBUpdater {
         if (dbw != null) {
             Connection dbConn = dbw.getRealDatabase().getConnection();
             List<PetStorage> petStorageList = new ArrayList<>();
-            ResultSet invalidNames = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets WHERE pet_name = \"all\"");
+            ResultSet invalidNames = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets WHERE effective_pet_name = \"all\"");
             try {
                 while (invalidNames.next()) {
                     petStorageList.add(new PetStorage(invalidNames.getString("pet_id"), invalidNames.getInt("pet_type"), invalidNames.getInt("pet_x"), invalidNames.getInt("pet_y"), invalidNames.getInt("pet_z"), invalidNames.getString("pet_world"), invalidNames.getString("owner_id"), invalidNames.getString("pet_name"), null));
@@ -280,21 +282,7 @@ public class DBUpdater {
 
     private boolean twoToThreePopulateColumn(DBWrapper dbw) {
         if (dbw != null) {
-            Connection dbConn = dbw.getRealDatabase().getConnection();
-            ResultSet allEntries = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets");
-            // <trimmed uuid string, pet name>
-            Hashtable<String, String> tempStorage = new Hashtable<>();
-            try {
-                while (allEntries.next()) {
-                    tempStorage.put(allEntries.getString("pet_id"), allEntries.getString("pet_name"));
-                }
-                for (String tempStorageKey : tempStorage.keySet()) {
-                    dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_unloaded_pets SET effective_pet_name = ? WHERE pet_id = ?", tempStorage.get(tempStorageKey).toLowerCase(), tempStorageKey);
-                }
-                return true;
-            } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQLException updating database to version 3: " + e.getMessage());
-            }
+            return dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_unloaded_pets SET effective_pet_name = lower(pet_name)");
         }
         return false;
     }
@@ -315,13 +303,41 @@ public class DBUpdater {
                 while (duplicateEntries.next()) {
                     tempDuplicateEntryStorage.add(new PetStorage(duplicateEntries.getString("pet_id"), duplicateEntries.getInt("pet_type"), duplicateEntries.getInt("pet_x"), duplicateEntries.getInt("pet_y"), duplicateEntries.getInt("pet_z"), duplicateEntries.getString("pet_world"), duplicateEntries.getString("owner_id"), duplicateEntries.getString("pet_name"), duplicateEntries.getString("effective_pet_name")));
                 }
-                dbConn.close();
+                duplicateEntries.close();
                 for (PetStorage ps : tempDuplicateEntryStorage) {
-                    dbw.renamePet(ps.ownerId, ps.)
+                    String uniqueName = dbw.generateUniqueName(ps.ownerId, ps.petType);
+                    if (uniqueName != null) {
+                        dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE pet_id = ?", uniqueName, uniqueName.toLowerCase(), ps.petId);
+
+                    } else {
+                        return false;
+                    }
                 }
+                return true;
             } catch (SQLException e) {
                 thisPlugin.getLogger().log(Level.SEVERE, "SQLException updating database to version 3: " + e.getMessage());
             }
         }
+        return false;
+    }
+
+    private boolean threeToTwo(DBWrapper dbw) {
+        if (dbw != null) {
+            boolean renameTable = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp");
+            boolean createTable = dbw.getRealDatabase().createStatement("CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+                    + "pet_id CHAR(32) PRIMARY KEY,\n"
+                    + "pet_type TINYINT NOT NULL,\n"
+                    + "pet_x INT NOT NULL,\n"
+                    + "pet_y INT NOT NULL,\n"
+                    + "pet_z INT NOT NULL,\n"
+                    + "pet_world VARCHAR(25) NOT NULL,\n"
+                    + "owner_id CHAR(32) NOT NULL,\n"
+                    + "pet_name VARCHAR(64)"
+                    + ");");
+            boolean transferData = dbw.getRealDatabase().insertPrepStatement("INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name FROM tpp_unloaded_pets_temp");
+            boolean dropTempTable = dbw.getRealDatabase().updatePrepStatement("DROP TABLE tpp_unloaded_pets_temp");
+            return renameTable && createTable && transferData && dropTempTable;
+        }
+        return false;
     }
 }

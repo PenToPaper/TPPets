@@ -14,7 +14,8 @@ public class PetStorage {
     public final String petWorld;
     public final String ownerId;
     public final String petName;
-    
+    public final String effectivePetName;
+
     /**
      * General constructor, using data from the database table tpp_unloaded_pets
      * @param petId A string version of the pet's UUID, trimmed.
@@ -35,5 +36,6 @@ public class PetStorage {
         this.petWorld = petWorld;
         this.ownerId = ownerId;
         this.petName = petName;
+        this.effectivePetName = effectivePetName;
     }
 }
