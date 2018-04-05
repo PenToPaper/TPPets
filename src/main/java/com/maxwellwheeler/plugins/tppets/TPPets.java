@@ -172,8 +172,12 @@ public class TPPets extends JavaPlugin {
         Set<String> configKeyList = getConfig().getConfigurationSection("command_aliases").getKeys(false);
         for (String key : configKeyList) {
             List<String> tempAliasList = getConfig().getStringList("command_aliases." + key);
-            tempAliasList.add(key);
-            commandAliases.put(key, tempAliasList);
+            List<String> lowercaseAliasList = new ArrayList<>();
+            for (String alias : tempAliasList) {
+                lowercaseAliasList.add(alias.toLowerCase());
+            }
+            lowercaseAliasList.add(key.toLowerCase());
+            commandAliases.put(key.toLowerCase(), lowercaseAliasList);
         }
     }
     

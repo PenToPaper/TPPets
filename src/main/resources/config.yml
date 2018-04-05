@@ -14,7 +14,7 @@ tools:
   get_owner: [BONE]
 command_aliases:
   protected: [prot, p, pr]
-  lost: [lostandfound, laf, lf, lost, l]
+  lost: [lostandfound, laf, lf, l]
   dogs: [wolves, dog, wolf]
   cats: [cat, ocelot, ocelots]
   birds: [bird, parrots, parrot]

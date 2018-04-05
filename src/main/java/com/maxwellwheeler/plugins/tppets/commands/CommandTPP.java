@@ -46,7 +46,7 @@ public class CommandTPP implements CommandExecutor {
             // Translates the command entered to any of the aliases specified in the config
             String realCommand = "";
             for (String commands : commandAliases.keySet()) {
-                if (commandAliases.get(commands).contains(args[0])) {
+                if (commandAliases.get(commands).contains(args[0].toLowerCase())) {
                     realCommand = commands;
                     break;
                 }
