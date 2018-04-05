@@ -251,8 +251,7 @@ public class DBUpdater {
     }
 
     /**
-     * Performs two steps:
-     * 1) Changes pets named "all" to a default name, as all is a new keyword from v2 to v3
+     * Changes pets named "all" to a default name, as all is a new keyword from v2 to v3
      * @param dbw The {@link DBWrapper} to update
      * @return True if successful, false if not
      */
@@ -280,6 +279,11 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Populates teh column effective_pet_name
+     * @param dbw The database to update
+     * @return true if successful, false if not
+     */
     private boolean twoToThreePopulateColumn(DBWrapper dbw) {
         if (dbw != null) {
             return dbw.getRealDatabase().updatePrepStatement("UPDATE tpp_unloaded_pets SET effective_pet_name = lower(pet_name)");
@@ -287,6 +291,11 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Removes duplicate entries after the new unique effective_pet_name requirement was introduced. Duplicate entries are found and replaced by the default.
+     * @param dbw The database to update.
+     * @return True if successful, false if not
+     */
     private boolean twoToThreeRemoveDuplicates(DBWrapper dbw) {
         if (dbw != null) {
             Connection dbConn = dbw.getRealDatabase().getConnection();
@@ -321,6 +330,11 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Reverts the twoToThree update by removing the column effective_pet_name
+     * @param dbw The database to update
+     * @return True if successful, false if not
+     */
     private boolean threeToTwo(DBWrapper dbw) {
         if (dbw != null) {
             boolean renameTable = dbw.getRealDatabase().updatePrepStatement("ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp");
