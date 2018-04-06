@@ -50,7 +50,7 @@ public class SQLiteFrame extends DBGeneral {
     }
 
     private String getJDBCPath() {
-        return "jdbc:sqlite:" + dbPath + "\\" + dbName + ".db";
+        return "jdbc:sqlite:" + dbPath + File.separator + dbName + ".db";
     }
 
 }
