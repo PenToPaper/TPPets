@@ -23,7 +23,7 @@ public class CommandLost extends RegionCommand {
     public void processCommand(CommandSender sender, String[] args) {
         if (ArgValidator.validateArgsLength(args, 1)) {
             // Changes behavior based on the 3rd index of the original commmand, but first index of the arguments passed to this method.
-            switch (args[0]) {
+            switch (args[0].toLowerCase()) {
                 case "add":
                     if (ArgValidator.validateArgsLength(args, 2)) {
                         addRegion(sender, new String[] {args[1]});

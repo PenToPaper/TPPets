@@ -294,6 +294,8 @@ class CommandPermissions {
                         case NO_PLAYER:
                             playerTemp.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + petOwnerName);
                             break;
+                        case SUCCESS:
+                            break;
                         default:
                             playerTemp.sendMessage(ChatColor.RED + "Can't list players allowed to pet.");
                             break;

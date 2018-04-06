@@ -26,7 +26,7 @@ public class CommandProtected extends RegionCommand {
     public void processCommand(CommandSender sender, String[] args) {
         if (ArgValidator.validateArgsLength(args, 1)) {
             // Changes behavior based on the 3rd index of the original command, but first index of the arguments provided here.
-            switch (args[0]) {
+            switch (args[0].toLowerCase()) {
                 case "add":
                     if (ArgValidator.validateArgsLength(args, 4)) {
                         addRegion(sender, Arrays.copyOfRange(args, 1, args.length));
