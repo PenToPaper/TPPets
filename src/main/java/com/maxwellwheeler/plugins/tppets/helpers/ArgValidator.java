@@ -69,14 +69,17 @@ public class ArgValidator {
      * @return A string representing the username after f:[username], null if argument is not of the type f:[username]/from:[username]
      */
     public static String isForSomeoneElse(String argOne) {
-        // indexOf == 0 WHEN f: leads the string
-        if (argOne.indexOf("f:") == 0) {
-            // f: leads the string
-            return argOne.substring(2);
-        }
-        if (argOne.indexOf("from:") == 0) {
-            // from: leads the string
-            return argOne.substring(5);
+        int indexOfColon = argOne.indexOf(':');
+        if (indexOfColon > 0) {
+            String toEvaluate = argOne.substring(0,indexOfColon).toLowerCase();
+            if (toEvaluate.equals("f")) {
+                // f: leads the string
+                return argOne.substring(indexOfColon+1, argOne.length());
+            }
+            if (toEvaluate.equals("from")) {
+                // from: leads the string
+                return argOne.substring(indexOfColon+1, argOne.length());
+            }
         }
         return null;
     }

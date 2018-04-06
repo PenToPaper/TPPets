@@ -84,10 +84,10 @@ class CommandPermissions {
                                 break;
                         }
                     } else {
-                        tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
+                        tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + ChatColor.WHITE + args[0]);
                     }
                 } else {
-                    tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
+                    tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + ChatColor.WHITE + args[0]);
                 }
             // Checking if syntax is /tpp allow [username] [pet name]
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
@@ -200,7 +200,7 @@ class CommandPermissions {
                         }
                     }
                 } else {
-                    tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
+                    tempPlayer.sendMessage(ChatColor.RED + "Could not find player named " + ChatColor.WHITE + args[0]);
                 }
             // Checking if syntax is /tpp remove [username 1] [pet name]
             } else if (ArgValidator.validateArgsLength(args, 2) && ArgValidator.validateUsername(args[0]) && ArgValidator.softValidatePetName(args[1])) {
@@ -301,7 +301,7 @@ class CommandPermissions {
                             break;
                     }
                 } else {
-                    sender.sendMessage(ChatColor.RED + "Could not find player named " + args[0]);
+                    sender.sendMessage(ChatColor.RED + "Could not find player named " + ChatColor.WHITE + args[0]);
                 }
             // Checking if syntax received was /tpp list [pet name]
             } else if (ArgValidator.validateArgsLength(args, 1) && ArgValidator.softValidatePetName(args[0])) {
