@@ -88,7 +88,7 @@ class CommandTPPets {
      */
     private void processCommandGeneric(Player commandSender, OfflinePlayer commandAbout, String[] args, PetType.Pets pt) {
         if (ArgValidator.validateArgsLength(args, 1)) {
-            switch (args[0]) {
+            switch (args[0].toLowerCase()) {
                 case "list":
                     if (commandSender.equals(commandAbout) || commandSender.hasPermission("tppets.teleportother")) {
                         listPets(commandSender, commandAbout, pt);

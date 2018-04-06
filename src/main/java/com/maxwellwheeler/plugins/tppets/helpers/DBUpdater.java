@@ -259,7 +259,7 @@ public class DBUpdater {
         if (dbw != null) {
             Connection dbConn = dbw.getRealDatabase().getConnection();
             List<PetStorage> petStorageList = new ArrayList<>();
-            ResultSet invalidNames = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets WHERE effective_pet_name = \"all\"");
+            ResultSet invalidNames = dbw.getRealDatabase().selectPrepStatement(dbConn, "SELECT * FROM tpp_unloaded_pets WHERE effective_pet_name = \"all\" OR effective_pet_name = \"list\"");
             try {
                 while (invalidNames.next()) {
                     petStorageList.add(new PetStorage(invalidNames.getString("pet_id"), invalidNames.getInt("pet_type"), invalidNames.getInt("pet_x"), invalidNames.getInt("pet_y"), invalidNames.getInt("pet_z"), invalidNames.getString("pet_world"), invalidNames.getString("owner_id"), invalidNames.getString("pet_name"), null));
