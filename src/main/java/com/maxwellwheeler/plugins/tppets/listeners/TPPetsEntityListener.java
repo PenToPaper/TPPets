@@ -44,7 +44,7 @@ public class TPPetsEntityListener implements Listener {
     public void onEntityTeleportEvent(EntityTeleportEvent e) {
         if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed() && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", e.getEntity().getLocation().getWorld(), thisPlugin))) {
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", e.getEntity().getLocation().getWorld(), thisPlugin))) {
                 if (thisPlugin.isInProtectedRegion(e.getTo())) {
                     EntityActions.setSitting(e.getEntity());
                     e.setCancelled(true);
@@ -66,7 +66,7 @@ public class TPPetsEntityListener implements Listener {
     public void onEntityDeathEvent(EntityDeathEvent e) {
         if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed()) {
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                 if (thisPlugin.getDatabase() != null) {
                     thisPlugin.getDatabase().deletePet(e.getEntity());
                 }
@@ -85,7 +85,7 @@ public class TPPetsEntityListener implements Listener {
         // First three lines determine if this is an entity we care about
         if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed()) {
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                 // If we're supposed to prevent player damage, prevent damage directly from players that don't own the pet, and indirectly through projectiles.
                 if (thisPlugin.getPreventPlayerDamage()) {
                     // Direct damage
@@ -132,7 +132,7 @@ public class TPPetsEntityListener implements Listener {
     public void onEntityDamageEvent(EntityDamageEvent e) {
         if ((thisPlugin.getPreventEnvironmentalDamage()) && e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
             Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed()) {
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                 switch (e.getCause()) {
                     case BLOCK_EXPLOSION:
                     case CONTACT:
@@ -197,11 +197,22 @@ public class TPPetsEntityListener implements Listener {
     public void onEntityMountEvent(EntityMountEvent e) {
         // e.getEntity = player
         // e.getMount = mounted mob (horse, etc)
-        if (!PetType.getEnumByEntity(e.getMount()).equals(PetType.Pets.UNKNOWN)) {
-            Tameable tempTameable = (Tameable) e.getMount();
-            if (tempTameable.isTamed() && tempTameable.getOwner() != null && e.getEntity() instanceof Player && !isAllowedToMount((Player)e.getEntity(), e.getMount())) {
-                e.setCancelled(true);
-                e.getEntity().sendMessage(ChatColor.RED + "You do not have permission to ride this pet.");
+        PetType.Pets pt = PetType.getEnumByEntity(e.getMount());
+        if (!e.isCancelled() && e.getEntity() instanceof Player && e.getMount() instanceof LivingEntity && !pt.equals(PetType.Pets.UNKNOWN)) {
+            Player playerTemp = (Player) e.getEntity();
+            Tameable tameableTemp = (Tameable) e.getMount();
+            if (tameableTemp.isTamed()) {
+                if (tameableTemp.getOwner() != null) {
+                    // Check if that player has permission to ride that pet
+                    if (!isAllowedToMount((Player)e.getEntity(), e.getMount())) {
+                        e.setCancelled(true);
+                        e.getEntity().sendMessage(ChatColor.RED + "You do not have permission to ride this pet.");
+                    }
+                } else if (e.getMount() instanceof ZombieHorse || e.getMount() instanceof SkeletonHorse) {
+                    // Check if the mount is a ZombieHorse or SkeletonHorse, in which case it is set as tamed
+                    tameableTemp.setOwner(playerTemp);
+                    thisPlugin.getServer().getPluginManager().callEvent(new EntityTameEvent((LivingEntity) e.getMount(), playerTemp));
+                }
             }
         }
     }

@@ -9,9 +9,7 @@ import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -52,7 +50,7 @@ public class TPPetsPlayerListener implements Listener {
             for (Entity ent : e.getPlayer().getNearbyEntities(10, 10, 10)) {
                 if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN) && pr.isInZone(ent.getLocation())) {
                     Tameable tameableTemp = (Tameable) ent;
-                    if (tameableTemp.isTamed()) {
+                    if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                         if (thisPlugin.getDatabase() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin)) && pr.getLfReference() != null) {
                             pr.tpToLostRegion(ent);
                             thisPlugin.getDatabase().updateOrInsertPet(ent);
@@ -82,7 +80,9 @@ public class TPPetsPlayerListener implements Listener {
                     EntityActions.setStanding(e.getRightClicked());
                     thisPlugin.getDatabase().deletePet(e.getRightClicked());
                     tameableTemp.setOwner(null);
-                    tameableTemp.setTamed(false);
+                    if (e.getRightClicked() instanceof SkeletonHorse || e.getRightClicked() instanceof ZombieHorse) {
+                        tameableTemp.setTamed(true);
+                    }
                     thisPlugin.getPetIndex().removePetTamed(e.getRightClicked());
                     thisPlugin.getLogger().info("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId().toString());
                     e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");

@@ -129,7 +129,7 @@ class CommandTPPets {
                     break;
             }
         } else {
-            commandSender.sendMessage(ChatColor.RED + "Syntax error! /tpp dogs [all/list/dog name]");
+            commandSender.sendMessage(ChatColor.RED + "Syntax error! /tpp [pet type] [all/list/dog name]");
         }
     }
 

@@ -6,7 +6,7 @@
 
     <groupId>com.maxwellwheeler.plugins.tppets</groupId>
     <artifactId>TPPets</artifactId>
-    <version>2.1.0</version>
+    <version>2.1.1</version>
 
     <name>TPPets</name>
     <description>Teleport pets around the map, but not in areas you don't want.</description>
