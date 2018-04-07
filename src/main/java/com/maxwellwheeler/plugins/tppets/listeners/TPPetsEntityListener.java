@@ -176,6 +176,12 @@ public class TPPetsEntityListener implements Listener {
             PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
             if (!rr.equals(PlayerPetIndex.RuleRestriction.ALLOWED)) {
                 e.setCancelled(true);
+                Tameable tameableTemp = (Tameable) e.getEntity();
+                tameableTemp.setTamed(false);
+                tameableTemp.setOwner(null);
+                if (e.getEntity() instanceof SkeletonHorse || e.getEntity() instanceof ZombieHorse) {
+                    tameableTemp.setTamed(true);
+                }
                 if (e.getOwner() instanceof Player) {
                     playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
                 }
@@ -213,6 +219,20 @@ public class TPPetsEntityListener implements Listener {
                     tameableTemp.setOwner(playerTemp);
                     thisPlugin.getServer().getPluginManager().callEvent(new EntityTameEvent((LivingEntity) e.getMount(), playerTemp));
                 }
+            }
+        }
+    }
+
+    @EventHandler (priority = EventPriority.LOW)
+    public void onEntityBreedEvent(EntityBreedEvent e) {
+        // e.getEntity() = new animal
+        // e.getMother() = one parent
+        // e.getFather() = other parent
+        // e.getBreeder() = entity (mostly player) that initiated the breeding by feeding
+        if (!e.isCancelled() && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
+            Tameable tameableTemp = (Tameable) e.getEntity();
+            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
+                thisPlugin.getServer().getPluginManager().callEvent(new EntityTameEvent(e.getEntity(), tameableTemp.getOwner()));
             }
         }
     }

@@ -79,6 +79,7 @@ public class TPPetsPlayerListener implements Listener {
                     }
                     EntityActions.setStanding(e.getRightClicked());
                     thisPlugin.getDatabase().deletePet(e.getRightClicked());
+                    tameableTemp.setTamed(false);
                     tameableTemp.setOwner(null);
                     if (e.getRightClicked() instanceof SkeletonHorse || e.getRightClicked() instanceof ZombieHorse) {
                         tameableTemp.setTamed(true);
@@ -90,7 +91,7 @@ public class TPPetsPlayerListener implements Listener {
                 e.setCancelled(true);
             } else if (e.getHand().equals(EquipmentSlot.HAND) && isApplicableInteraction(e.getRightClicked(), e.getPlayer(), "get_owner")) {
                 Tameable tameableTemp = (Tameable) e.getRightClicked();
-                if (!tameableTemp.isTamed() && tameableTemp.getOwner() == null) {
+                if (!tameableTemp.isTamed() || tameableTemp.getOwner() == null) {
                     e.getPlayer().sendMessage(ChatColor.BLUE + "This pet does not belong to anybody.");
                 } else {
                     List<PetStorage> psList = thisPlugin.getDatabase().getPetsFromUUIDs(e.getRightClicked().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString());
