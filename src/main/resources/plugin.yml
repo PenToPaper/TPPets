@@ -29,6 +29,8 @@ permissions:
       tppets.rename: true
       tppets.addallow: true
       tppets.removeallow: true
+      tppets.store: true
+      tppets.setdefaultstore: true
       tppets.listallow: true
       tppets.protected: true
       tppets.lost: true
@@ -77,6 +79,9 @@ permissions:
   tppets.tpanywhere:
     default: op
     description: Allows user to teleport pets into, and keep pets inside, protected regions.
+  tppets.setdefaultstore:
+    default: op
+    description: Allows user to set a storage location named "default", which every player on the server can use.
 
   # Player management permissions
   tppets.rename:
@@ -91,6 +96,9 @@ permissions:
   tppets.listallow:
     default: true
     description: Allows user to list players that are allowed to a pet.
+  tppets.store:
+    default: true
+    description: Allows user to store pets outside of the world.
 
   # Region commands
   tppets.protected:

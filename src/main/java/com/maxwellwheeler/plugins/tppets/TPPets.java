@@ -16,6 +16,7 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -57,12 +58,17 @@ public class TPPets extends JavaPlugin {
     private boolean allowUntamingPets;
     
     private PlayerPetIndex petIndex;
+    private int storageLimit;
     
     
     /*
      * VARIABLE INITIALIZERS
      *
      */
+
+    private void initializeStorageLimit() {
+        storageLimit = getConfig().getInt("storage_limit", 5);
+    }
 
     /**
      * Initializes the customTools Hashtable, which is later used to allow servers to configure which tools can be applied to which tasks.
@@ -390,7 +396,16 @@ public class TPPets extends JavaPlugin {
     public void removeLostRegion(LostAndFoundRegion lfr) {
         lostRegions.remove(lfr.getZoneName());
     }
-    
+
+    public boolean canTpThere(Player pl) {
+        ProtectedRegion tempPr = getProtectedRegionWithin(pl.getLocation());
+        boolean ret = pl.hasPermission("tppets.tpanywhere") || tempPr == null;
+        if (!ret) {
+            pl.sendMessage(tempPr.getEnterMessage());
+        }
+        return ret;
+    }
+
     /*
      * GETTERS/SETTERS
      * 
@@ -454,5 +469,9 @@ public class TPPets extends JavaPlugin {
 
     public Hashtable<String, List<String>> getAllowedPlayers() {
         return allowedPlayers;
+    }
+
+    public int getStorageLimit() {
+        return storageLimit;
     }
 }

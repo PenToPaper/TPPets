@@ -4,6 +4,10 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
@@ -92,11 +96,30 @@ public class DBWrapper {
                 + "pet_name VARCHAR(64)\n,"
                 + "effective_pet_name VARCHAR(64)"
                 + ");";
+        String makeTableUserStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_user_storage_locations (\n" +
+                "user_id CHAR(32) NOT NULL, \n" +
+                "storage_name VARCHAR(64) NOT NULL, \n" +
+                "effective_storage_name VARCHAR(64) NOT NULL" +
+                "loc_x INT NOT NULL, \n" +
+                "loc_y INT NOT NULL, \n" +
+                "loc_z INT NOT NULL, \n" +
+                "world_name VARCHAR(25) NOT NULL, \n" +
+                "PRIMARY KEY (user_id, effective_storage_name)";
+        String makeTableDefaultStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_server_storage_locations (\n" +
+                "storage_name VARCHAR(64) NOT NULL, \n" +
+                "effective_storage_name VARCHAR(64) NOT NULL, \n" +
+                "loc_x INT NOT NULL, \n" +
+                "loc_y INT NOT NULL, \n" +
+                "loc_z INT NOT NULL, \n" +
+                "world_name VARCHAR(25) NOT NULL, \n" +
+                "PRIMARY KEY (effective_storage_name, world_name)";
         return database.createStatement(makeTableUnloadedPets)
                 && database.createStatement(makeTableLostRegions)
                 && database.createStatement(makeTableProtectedRegions)
                 && database.createStatement(makeTableDBVersion)
                 && database.createStatement(makeTableAllowedPlayers)
+                && database.createStatement(makeTableUserStorageLocations)
+                && database.createStatement(makeTableDefaultStorageLocations)
                 && thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
     
@@ -343,19 +366,21 @@ public class DBWrapper {
      * @return A trimmed string version of the pet's UUID. Returns null if the database connection can't be made, returns empty string if can't find pet with that name from that owner
      */
     // Returns null if connection can't be made, returns "" if no pet by that name exists, returns pet UUID if a pet is found.
-    public String getPetUUIDByName(String ownerUUID, String petName) {
+    public PetStorage getPetByName(String ownerUUID, String petName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
             String selectUUIDFromPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ? LIMIT 1";
             try (ResultSet rs = database.selectPrepStatement(dbConn, selectUUIDFromPet, trimmedOwnerUUID, petName.toLowerCase())) {
                 if (rs.next()) {
-                    return rs.getString("pet_id");
+                    List<PetStorage> petsList = getPetsList(rs);
+                    if (petsList != null && petsList.size() == 1) {
+                        return petsList.get(1);
+                    }
                 }
             } catch (SQLException e) {
                 thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pet UUID from name: " + e.getMessage());
             }
-            return "";
         }
         return null;
     }
@@ -655,6 +680,132 @@ public class DBWrapper {
             thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be updated in database.");
             return false;
         }
+    }
+
+
+    //        String makeTableStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_storage_locations (\n" +
+    //                "user_id CHAR(32) NOT NULL, \n" +
+    //                "storage_name VARCHAR(64) NOT NULL, \n" +
+    //                "loc_x INT NOT NULL, \n" +
+    //                "loc_y INT NOT NULL, \n" +
+    //                "loc_z INT NOT NULL, \n" +
+    //                "world_name VARCHAR(25) NOT NULL, \n" +
+    //                "PRIMARY KEY (user_id, storage_name)";
+    public boolean addStorageLocation(String playerUUID, String storageName, Location loc) {
+        String insertStorage = "INSERT INTO tpp_user_storage_locations (user_id, storage_name, effective_storage_name, loc_x, loc_y, loc_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
+        return database.insertPrepStatement(insertStorage, trimmedPlayerUUID, storageName, storageName.toLowerCase(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), loc.getWorld().getName());
+    }
+
+    public boolean removeStorageLocation(String playerUUID, String storageName) {
+        String removeStorage = "DELETE FROM tpp_user_storage_locations WHERE user_id = ? AND effective_storage_name = ?";
+        String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
+        return database.deletePrepStatement(removeStorage, trimmedPlayerUUID, storageName.toLowerCase());
+    }
+
+    public StorageLocation getStorageLocation(String playerUUID, String storageName) {
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
+                String getStorage = "SELECT * FROM tpp_user_storage_locations WHERE user_id = ? AND effective_storage_name = ? LIMIT 1";
+                ResultSet rs = database.selectPrepStatement(dbConn, getStorage, trimmedPlayerUUID, storageName.toLowerCase());
+                if (rs.next()) {
+                    Location retLoc = new Location(Bukkit.getServer().getWorld(rs.getString("world_name")), rs.getInt("loc_x"), rs.getInt("loc_y"), rs.getInt("loc_z"));
+                    return new StorageLocation(rs.getString("user_id"), rs.getString("storage_name"), retLoc);
+                }
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    public List<StorageLocation> getStorageLocations(String playerUUID) {
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
+                String getStorage = "SELECT * FROM tpp_user_storage_locations WHERE user_id = ?";
+                ResultSet rs = database.selectPrepStatement(dbConn, getStorage, trimmedPlayerUUID);
+                List<StorageLocation> ret = new ArrayList<>();
+                while (rs.next()) {
+                    Location retLoc = new Location(Bukkit.getServer().getWorld(rs.getString("world_name")), rs.getInt("loc_x"), rs.getInt("loc_y"), rs.getInt("loc_z"));
+                    ret.add(new StorageLocation(rs.getString("user_id"), rs.getString("storage_name"), retLoc));
+                }
+                return ret;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    public boolean addServerStorageLocation(String storageName, Location loc) {
+        String insertStorage = "INSERT INTO tpp_server_storage_locations (storage_name, effective_storage_name, loc_x, loc_y, loc_z, world_name) VALUES (?, ?, ?, ?, ?)";
+        return database.insertPrepStatement(insertStorage, storageName, storageName.toLowerCase(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), loc.getWorld().getName());
+    }
+
+    public boolean removeServerStorageLocation(String storageName, World world) {
+        String removeStorage = "DELETE FROM tpp_server_storage_locations WHERE effective_storage_name = ? AND world_name = ?";
+        return database.deletePrepStatement(removeStorage, storageName.toLowerCase(), world.getName());
+    }
+
+    public StorageLocation getServerStorageLocation(String storageName, World world) {
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                String getStorage = "SELECT * FROM tpp_server_storage_locations WHERE effective_storage_name = ? AND world_name = ? LIMIT 1";
+                ResultSet rs = database.selectPrepStatement(dbConn, getStorage, storageName.toLowerCase(), world.getName());
+                if (rs.next()) {
+                    Location retLoc = new Location(Bukkit.getServer().getWorld(rs.getString("world_name")), rs.getInt("loc_x"), rs.getInt("loc_y"), rs.getInt("loc_z"));
+                    return new StorageLocation("server", rs.getString("storage_name"), retLoc);
+                }
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+    public StorageLocation getDefaultServerStorageLocation(World world) {
+        if (thisPlugin.getAllowTpBetweenWorlds()) {
+            Connection dbConn = database.getConnection();
+            if (dbConn != null) {
+                try {
+                    String getStorage = "SELECT * FROM tpp_server_storage_locations WHERE effective_storage_name = ? LIMIT 1";
+                    ResultSet rs = database.selectPrepStatement(dbConn, getStorage, "default");
+                    if (rs.next()) {
+                        Location retLoc = new Location(Bukkit.getServer().getWorld(rs.getString("world_name")), rs.getInt("loc_x"), rs.getInt("loc_y"), rs.getInt("loc_z"));
+                        return new StorageLocation("server", rs.getString("storage_name"), retLoc);
+                    }
+                } catch (SQLException e) {
+                    thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+                }
+            }
+        } else {
+            return getServerStorageLocation("default", world);
+        }
+        return null;
+    }
+
+    public List<StorageLocation> getServerStorageLocations(World world) {
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                String getStorage = "SELECT * FROM tpp_server_storage_locations WHERE world_name = ?";
+                ResultSet rs = database.selectPrepStatement(dbConn, getStorage, world.getName());
+                List<StorageLocation> ret = new ArrayList<>();
+                while (rs.next()) {
+                    Location retLoc = new Location(Bukkit.getServer().getWorld(rs.getString("world_name")), rs.getInt("loc_x"), rs.getInt("loc_y"), rs.getInt("loc_z"));
+                    ret.add(new StorageLocation(rs.getString("user_id"), rs.getString("storage_name"), retLoc));
+                }
+                return ret;
+            } catch (SQLException e) {
+                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+            }
+        }
+        return null;
     }
     
     /**

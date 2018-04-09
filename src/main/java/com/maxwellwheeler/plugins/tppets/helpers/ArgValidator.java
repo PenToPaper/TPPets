@@ -39,6 +39,15 @@ public class ArgValidator {
         return nameMatcher.find() && !petName.toLowerCase().equals("list") && !petName.toLowerCase().equals("all");
     }
 
+    public static boolean validateStorageName(String storeName) {
+        return validateServerStorageName(storeName) && !storeName.toLowerCase().equals("default");
+    }
+
+    public static boolean validateServerStorageName(String serverStoreName) {
+        Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(serverStoreName);
+        return nameMatcher.find();
+    }
+
     /**
      * Soft validates pet names and checks that pet name is unique.
      * @param dbw The {@link DBWrapper} instance for the database connection

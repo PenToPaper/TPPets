@@ -9,6 +9,7 @@ horse_limit: -1
 mule_limit: -1
 llama_limit: -1
 donkey_limit: -1
+storage_limit: 5
 tools:
   untame_pets: [SHEARS]
   get_owner: [BONE]
@@ -26,6 +27,7 @@ command_aliases:
   allow: [add]
   remove: [take]
   list: [show]
+  store: [keep, stable]
   help: [pls]
 mysql:
   enable: false

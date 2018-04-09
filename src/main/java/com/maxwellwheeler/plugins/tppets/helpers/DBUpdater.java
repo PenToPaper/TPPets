@@ -16,7 +16,7 @@ import java.util.logging.Level;
 public class DBUpdater {
     private TPPets thisPlugin;
     private int schemaVersion;
-    private final int updatedVersion = 3;
+    private final int updatedVersion = 4;
 
     /**
      * General constructor, gets schema version from the database
@@ -39,7 +39,10 @@ public class DBUpdater {
                     oneToTwo(dbw);
                 }
                 if (schemaVersion == 2) {
-                    return twoToThree(dbw);
+                    twoToThree(dbw);
+                }
+                if (schemaVersion == 3) {
+                    return threeToFour(dbw);
                 }
             }
             return true;
@@ -353,5 +356,17 @@ public class DBUpdater {
             return renameTable && createTable && transferData && dropTempTable;
         }
         return false;
+    }
+
+    private boolean threeToFour(DBWrapper dbw) {
+        String makeTableStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_storage_locations (\n" +
+                "user_id CHAR(32) NOT NULL, \n" +
+                "storage_name VARCHAR(64) NOT NULL, \n" +
+                "loc_x INT NOT NULL, \n" +
+                "loc_y INT NOT NULL, \n" +
+                "loc_z INT NOT NULL, \n" +
+                "world_name VARCHAR(25) NOT NUL, \nL" +
+                "PRIMARY KEY (user_id, storage_name)";
+        return dbw.getRealDatabase().createStatement(makeTableStorageLocations) && setCurrentSchemaVersion(dbw, 4);
     }
 }

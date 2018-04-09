@@ -10,7 +10,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 public class ConfigUpdater {
     private TPPets thisPlugin;
     private int schemaVersion;
-    private final int updatedVersion = 2;
+    private final int updatedVersion = 3;
 
     /**
      * General constructor. Gets current schema version from config
@@ -33,9 +33,11 @@ public class ConfigUpdater {
      * Sets the schema version in memory and in the config file
      * @param version The version to set the config to
      */
-    private void setSchemaVersion(int version) {
+    private void setSchemaVersion(int version, boolean save) {
         thisPlugin.getConfig().set("schema_version", version);
-        thisPlugin.saveConfig();
+        if (save) {
+            thisPlugin.saveConfig();
+        }
         schemaVersion = version;
     }
 
@@ -55,8 +57,13 @@ public class ConfigUpdater {
             // Updates are necessary
             if (schemaVersion == 1) {
                 oneToTwo();
-                setSchemaVersion(2);
+                setSchemaVersion(2, false);
             }
+            if (schemaVersion == 2) {
+                twoToThree();
+                setSchemaVersion(3, false);
+            }
+            thisPlugin.saveConfig();
         }
     }
 
@@ -79,6 +86,10 @@ public class ConfigUpdater {
         thisPlugin.getConfig().set("command_aliases.allow", new String[]{"add"});
         thisPlugin.getConfig().set("command_aliases.remove", new String[]{"take"});
         thisPlugin.getConfig().set("command_aliases.list", new String[]{"show"});
-        thisPlugin.saveConfig();
+    }
+
+    private void twoToThree() {
+        thisPlugin.getConfig().set("command_aliases.store", new String[]{"keep", "stable"});
+        thisPlugin.getConfig().set("command_aliases.store", new String[]{"keep", "stable"});
     }
 }
