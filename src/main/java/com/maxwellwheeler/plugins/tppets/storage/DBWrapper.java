@@ -802,7 +802,6 @@ public class DBWrapper {
 
     public List<StorageLocation> getServerStorageLocations(World world) {
         Connection dbConn = database.getConnection();
-        System.out.println(dbConn == null);
         if (dbConn != null) {
             try {
                 String getStorage = "SELECT * FROM tpp_server_storage_locations WHERE world_name = ?";

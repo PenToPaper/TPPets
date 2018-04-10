@@ -1,5 +1,5 @@
 name: TPPets
-version: 2.1.1
+version: 2.2.0
 description: Teleport pets around the map, but not in areas you don't want
 load: POSTWORLD
 author: GatheringExp
@@ -26,12 +26,15 @@ permissions:
       tppets.bypassprotection: true
       tppets.bypasslimit: true
       tppets.tpanywhere: true
+      tppets.setdefaultstorage: true
+      tppets.storageother: true
+      tppets.bypassstoragelimit: true
       tppets.rename: true
       tppets.addallow: true
       tppets.removeallow: true
-      tppets.store: true
-      tppets.setdefaultstore: true
       tppets.listallow: true
+      tppets.store: true
+      tppets.storage: true
       tppets.protected: true
       tppets.lost: true
       tppets.dogs: true
@@ -79,9 +82,15 @@ permissions:
   tppets.tpanywhere:
     default: op
     description: Allows user to teleport pets into, and keep pets inside, protected regions.
-  tppets.setdefaultstore:
+  tppets.setdefaultstorage:
     default: op
     description: Allows user to set a storage location named "default", which every player on the server can use.
+  tppets.storageother:
+    default: op
+    description: Allows user to set a storage location in place of another user.
+  tppets.bypassstoragelimit:
+    default: op
+    description: Allows user to set an unlimited amount of personal storage locations.
 
   # Player management permissions
   tppets.rename:
@@ -99,6 +108,9 @@ permissions:
   tppets.store:
     default: true
     description: Allows user to store pets outside of the world.
+  tppets.storage:
+    default: true
+    description: Allows user to set new storage locations.
 
   # Region commands
   tppets.protected:

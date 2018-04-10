@@ -33,10 +33,14 @@ public class CommandStore extends TeleportCommand {
                 OfflinePlayer commandFor = Bukkit.getOfflinePlayer(isForSomeoneElse);
                 if (commandFor != null && commandFor.hasPlayedBefore() && ArgValidator.validateArgsLength(args, 2)) {
                     processCommandGeneric(playerTemp, commandFor, Arrays.copyOfRange(args, 1, args.length));
+                } else {
+                    sender.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + isForSomeoneElse);
                 }
             } else {
                 processCommandGeneric(playerTemp, playerTemp, args);
             }
+        } else {
+            sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp store [pet name] [location]");
         }
     }
 
@@ -46,11 +50,18 @@ public class CommandStore extends TeleportCommand {
             if (ArgValidator.softValidatePetName(args[0])) {
                 if (ArgValidator.validateStorageName(args[1])) {
                     StorageLocation storageLoc = thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), args[1]);
-                    if (storageLoc != null && storePet(commandFor, args[0], storageLoc)) {
+                    if (storageLoc == null) {
+                        pl.sendMessage(ChatColor.RED + "Can't find storage location named " + ChatColor.WHITE + args[1]);
+                        return;
+                    }
+                    if (storePet(commandFor, args[0], storageLoc)) {
                         thisPlugin.getLogger().info("Player " + pl.getName() + " has teleported their pet " + args[0] + " to location " + storageLoc.getStorageName() + "at " + TeleportCommand.formatLocation(storageLoc.getLoc()));
                         pl.sendMessage((pl.equals(commandFor) ? ChatColor.BLUE + "Your " : ChatColor.WHITE + commandFor.getName() + "'s ") + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to " + ChatColor.WHITE + storageLoc.getStorageName());
                         return;
                     }
+                } else {
+                    pl.sendMessage(ChatColor.RED + "Can't find storage location named " + ChatColor.WHITE + args[1]);
+                    return;
                 }
             }
             pl.sendMessage(ChatColor.RED + "Could not find " + ChatColor.WHITE + args[0]);
@@ -67,6 +78,8 @@ public class CommandStore extends TeleportCommand {
             } else {
                 pl.sendMessage(ChatColor.RED + "Could not find default storage location");
             }
+        } else {
+            pl.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp store [pet name] [location]");
         }
     }
 

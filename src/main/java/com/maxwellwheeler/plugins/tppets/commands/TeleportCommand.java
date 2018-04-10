@@ -42,7 +42,6 @@ public abstract class TeleportCommand {
                 psList = thisPlugin.getDatabase().getPetsFromOwnerNamePetType(petOwner.getUniqueId().toString(), name, pt);
             } else {
                 PetStorage ps = thisPlugin.getDatabase().getPetByName(petOwner.getUniqueId().toString(), name);
-                System.out.println(ps == null);
                 if (ps != null) {
                     psList.add(ps);
                 }
@@ -58,6 +57,7 @@ public abstract class TeleportCommand {
                         for (PetStorage ps : psList) {
                             if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
                                 teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting);
+                                thisPlugin.getDatabase().updateOrInsertPet(ent);
                                 return true;
                             }
                         }
@@ -69,6 +69,7 @@ public abstract class TeleportCommand {
                     for (PetStorage ps : psList) {
                         if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
                             teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting);
+                            thisPlugin.getDatabase().updateOrInsertPet(ent);
                             return true;
                         }
                     }
