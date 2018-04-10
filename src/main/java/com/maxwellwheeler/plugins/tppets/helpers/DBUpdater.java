@@ -44,8 +44,9 @@ public class DBUpdater {
                 if (schemaVersion == 3) {
                     return threeToFour(dbw);
                 }
+            } else {
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -359,14 +360,23 @@ public class DBUpdater {
     }
 
     private boolean threeToFour(DBWrapper dbw) {
-        String makeTableStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_storage_locations (\n" +
+        String makeTableUserStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_user_storage_locations (\n" +
                 "user_id CHAR(32) NOT NULL, \n" +
                 "storage_name VARCHAR(64) NOT NULL, \n" +
+                "effective_storage_name VARCHAR(64) NOT NULL," +
                 "loc_x INT NOT NULL, \n" +
                 "loc_y INT NOT NULL, \n" +
                 "loc_z INT NOT NULL, \n" +
-                "world_name VARCHAR(25) NOT NUL, \nL" +
-                "PRIMARY KEY (user_id, storage_name)";
-        return dbw.getRealDatabase().createStatement(makeTableStorageLocations) && setCurrentSchemaVersion(dbw, 4);
+                "world_name VARCHAR(25) NOT NULL, \n" +
+                "PRIMARY KEY (user_id, effective_storage_name))";
+        String makeTableDefaultStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_server_storage_locations (\n" +
+                "storage_name VARCHAR(64) NOT NULL, \n" +
+                "effective_storage_name VARCHAR(64) NOT NULL, \n" +
+                "loc_x INT NOT NULL, \n" +
+                "loc_y INT NOT NULL, \n" +
+                "loc_z INT NOT NULL, \n" +
+                "world_name VARCHAR(25) NOT NULL, \n" +
+                "PRIMARY KEY (effective_storage_name, world_name))";
+        return dbw.getRealDatabase().createStatement(makeTableUserStorageLocations) && dbw.getRealDatabase().createStatement(makeTableDefaultStorageLocations) && setCurrentSchemaVersion(dbw, 4);
     }
 }

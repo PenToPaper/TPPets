@@ -27,7 +27,8 @@ command_aliases:
   allow: [add]
   remove: [take]
   list: [show]
-  store: [keep, stable]
+  store: [move, stable]
+  storage: [setstable]
   help: [pls]
 mysql:
   enable: false

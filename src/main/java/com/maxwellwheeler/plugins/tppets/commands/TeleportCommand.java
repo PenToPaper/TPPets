@@ -42,6 +42,7 @@ public abstract class TeleportCommand {
                 psList = thisPlugin.getDatabase().getPetsFromOwnerNamePetType(petOwner.getUniqueId().toString(), name, pt);
             } else {
                 PetStorage ps = thisPlugin.getDatabase().getPetByName(petOwner.getUniqueId().toString(), name);
+                System.out.println(ps == null);
                 if (ps != null) {
                     psList.add(ps);
                 }
@@ -53,7 +54,7 @@ public abstract class TeleportCommand {
             // If you can teleport between worlds, check every world
             if (thisPlugin.getAllowTpBetweenWorlds()) {
                 for (World world : Bukkit.getWorlds()) {
-                    for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
+                    for (Entity ent : strictType ? world.getEntitiesByClasses(PetType.getClassTranslate(pt)) : world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)) {
                         for (PetStorage ps : psList) {
                             if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
                                 teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting);

@@ -55,18 +55,18 @@ public class CommandStorage {
                     }
                     if (ArgValidator.validateArgsLength(args, 2)) {
                         if (ArgValidator.validateStorageName(args[1])) {
-                            switch (addStorage(sender, commandFor, args[0])) {
+                            switch (addStorage(sender, commandFor, args[1])) {
                                 case SUCCESS:
-                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have added storage location " + ChatColor.WHITE + args[0]);
+                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have added storage location " + ChatColor.WHITE + args[1]);
                                     break;
                                 case LIMIT_REACHED:
                                     sender.sendMessage(ChatColor.RED + "You can't set any more storage locations!");
                                     break;
                                 case ALREADY_DONE:
                                     if (sender.equals(commandFor)) {
-                                        sender.sendMessage(ChatColor.BLUE + "You have already set a location named " + ChatColor.WHITE + args[0]);
+                                        sender.sendMessage(ChatColor.BLUE + "You have already set a location named " + ChatColor.WHITE + args[1]);
                                     } else {
-                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " already has a location named " + ChatColor.WHITE + args[0]);
+                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " already has a location named " + ChatColor.WHITE + args[1]);
                                     }
                                     break;
                                 case FAILURE:
@@ -77,10 +77,10 @@ public class CommandStorage {
                         } else if (args[1].toLowerCase().equals("default") && sender.hasPermission("tppets.setdefaultstore")) {
                             switch (addServerStorage(sender, args[1])) {
                                 case SUCCESS:
-                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have added server storage location " + ChatColor.WHITE + args[0]);
+                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have added server storage location " + ChatColor.WHITE + args[1]);
                                     break;
                                 case ALREADY_DONE:
-                                    sender.sendMessage(ChatColor.BLUE + "Server already has a location named " + ChatColor.WHITE + args[0] + ChatColor.BLUE + " in this world");
+                                    sender.sendMessage(ChatColor.BLUE + "Server already has a location named " + ChatColor.WHITE + args[1] + ChatColor.BLUE + " in this world");
                                     break;
                                 case FAILURE:
                                 default:
@@ -95,15 +95,15 @@ public class CommandStorage {
                 case "remove":
                     if (ArgValidator.validateArgsLength(args, 2)) {
                         if (ArgValidator.validateStorageName(args[1])) {
-                            switch (removeStorage(sender, commandFor, args[0])) {
+                            switch (removeStorage(sender, commandFor, args[1])) {
                                 case SUCCESS:
-                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have removed storage location " + ChatColor.WHITE + args[0]);
+                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have removed storage location " + ChatColor.WHITE + args[1]);
                                     break;
                                 case ALREADY_DONE:
                                     if (sender.equals(commandFor)) {
                                         sender.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " does not exist");
                                     } else {
-                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " does not have a location named " + ChatColor.WHITE + args[0]);
+                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " does not have a location named " + ChatColor.WHITE + args[1]);
                                     }
                                     break;
                                 case FAILURE:
@@ -114,10 +114,10 @@ public class CommandStorage {
                         } else if (args[1].toLowerCase().equals("default") && sender.hasPermission("tppets.setdefaultstore")) {
                             switch (removeServerStorage(sender, args[1])) {
                                 case SUCCESS:
-                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have removed server storage location " + ChatColor.WHITE + args[0]);
+                                    sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You" : ChatColor.WHITE + commandFor.getName()) + " have removed server storage location " + ChatColor.WHITE + args[1]);
                                     break;
                                 case ALREADY_DONE:
-                                    sender.sendMessage(ChatColor.BLUE + "Server location " + ChatColor.WHITE + args[0] + ChatColor.BLUE + " does not exist");
+                                    sender.sendMessage(ChatColor.BLUE + "Server location " + ChatColor.WHITE + args[1] + ChatColor.BLUE + " does not exist");
                                     break;
                                 case FAILURE:
                                 default:

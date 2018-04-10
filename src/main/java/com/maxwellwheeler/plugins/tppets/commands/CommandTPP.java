@@ -157,6 +157,22 @@ public class CommandTPP implements CommandExecutor {
                         permissionMessage(sender);
                     }
                     break;
+                case "store":
+                    if (sender.hasPermission("tppets.store")) {
+                        CommandStore store = new CommandStore(thisPlugin);
+                        store.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
+                case "storage":
+                    if (sender.hasPermission("tppets.store")) {
+                        CommandStorage storage = new CommandStorage(thisPlugin);
+                        storage.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
                 case "help":
                 default:
                     sendHelp(sender);

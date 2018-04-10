@@ -90,6 +90,6 @@ public class ConfigUpdater {
 
     private void twoToThree() {
         thisPlugin.getConfig().set("command_aliases.store", new String[]{"keep", "stable"});
-        thisPlugin.getConfig().set("command_aliases.store", new String[]{"keep", "stable"});
+        thisPlugin.getConfig().set("command_aliases.storage", new String[]{"setstable"});
     }
 }

@@ -11,8 +11,6 @@ import org.bukkit.entity.Player;
 import java.util.Arrays;
 
 public class CommandStore extends TeleportCommand {
-    private TPPets thisPlugin;
-
     /**
      * Generic constructor, needs to point to plugin for logging.
      * @param thisPlugin The {@link TPPets} instance.

@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -133,18 +134,18 @@ class CommandPermissions {
                 return EditResult.NO_PLAYER;
             }
             String addedPlayerUUID = UUIDUtils.trimUUID(addedPlayer.getUniqueId());
-            String petUUID = thisPlugin.getDatabase().getPetUUIDByName(from.getUniqueId().toString(), petName);
+            PetStorage petByName = thisPlugin.getDatabase().getPetByName(from.getUniqueId().toString(), petName);
             // If we can retrieve values for addedPlayerName's UUID and petName's UUID, process the command
-            if (addedPlayerUUID != null && petUUID != null && !petUUID.equals("")) {
+            if (addedPlayerUUID != null && petByName != null) {
                 // If no action is necessary, return EditResult.ALREADY_DONE
-                if (thisPlugin.isAllowedToPet(petUUID, addedPlayerUUID)) {
+                if (thisPlugin.isAllowedToPet(petByName.petId, addedPlayerUUID)) {
                     return EditResult.ALREADY_DONE;
                 }
-                if (thisPlugin.getDatabase().insertAllowedPlayer(petUUID, addedPlayerUUID)) {
-                    if (!thisPlugin.getAllowedPlayers().containsKey(petUUID)) {
-                        thisPlugin.getAllowedPlayers().put(petUUID, new ArrayList<>());
+                if (thisPlugin.getDatabase().insertAllowedPlayer(petByName.petId, addedPlayerUUID)) {
+                    if (!thisPlugin.getAllowedPlayers().containsKey(petByName.petId)) {
+                        thisPlugin.getAllowedPlayers().put(petByName.petId, new ArrayList<>());
                     }
-                    thisPlugin.getAllowedPlayers().get(petUUID).add(addedPlayerUUID);
+                    thisPlugin.getAllowedPlayers().get(petByName.petId).add(addedPlayerUUID);
                     // Action was necessary, and successful
                     return EditResult.SUCCESS;
                 }
@@ -247,19 +248,19 @@ class CommandPermissions {
                 return EditResult.NO_PLAYER;
             }
             String removedPlayerUUID = UUIDUtils.trimUUID(removedPlayer.getUniqueId());
-            String petUUID = thisPlugin.getDatabase().getPetUUIDByName(from.getUniqueId().toString(), petName);
-            if (removedPlayerUUID != null && petUUID != null && !petUUID.equals("")) {
+            PetStorage petByName = thisPlugin.getDatabase().getPetByName(from.getUniqueId().toString(), petName);
+            if (removedPlayerUUID != null && petByName != null) {
                 // UUIDs have been found, attempting to do the thing
-                if (!thisPlugin.isAllowedToPet(petUUID, removedPlayerUUID)) {
+                if (!thisPlugin.isAllowedToPet(petByName.petId, removedPlayerUUID)) {
                     // Thing not necessary
                     return EditResult.ALREADY_DONE;
                 }
                 // Checking if thing has been done
-                if (thisPlugin.getDatabase().deleteAllowedPlayer(petUUID, removedPlayerUUID)) {
-                    if (!thisPlugin.getAllowedPlayers().containsKey(petUUID)) {
-                        thisPlugin.getAllowedPlayers().put(petUUID, new ArrayList<>());
+                if (thisPlugin.getDatabase().deleteAllowedPlayer(petByName.petId, removedPlayerUUID)) {
+                    if (!thisPlugin.getAllowedPlayers().containsKey(petByName.petId)) {
+                        thisPlugin.getAllowedPlayers().put(petByName.petId, new ArrayList<>());
                     }
-                    thisPlugin.getAllowedPlayers().get(petUUID).remove(removedPlayerUUID);
+                    thisPlugin.getAllowedPlayers().get(petByName.petId).remove(removedPlayerUUID);
                     return EditResult.SUCCESS;
                 }
             }
@@ -308,7 +309,6 @@ class CommandPermissions {
                 // Display appropriate information based on the result of the command
                 if (!listAllowedPlayers(playerTemp, playerTemp, args[0]).equals(EditResult.SUCCESS)) {
                     playerTemp.sendMessage(ChatColor.RED + "Can't list players allowed to pet.");
-
                 }
             } else {
                 sender.sendMessage(ChatColor.RED + "Syntax error! Usage: /tpp list [pet name]");
@@ -321,10 +321,10 @@ class CommandPermissions {
         if (!petOwner.hasPlayedBefore()) {
             return EditResult.NO_PLAYER;
         }
-        String petUUID = thisPlugin.getDatabase().getPetUUIDByName(petOwner.getUniqueId().toString(), petName);
+        PetStorage petByName = thisPlugin.getDatabase().getPetByName(petOwner.getUniqueId().toString(), petName);
         // Finding petName's UUID
-        if (petUUID != null && !petUUID.equals("")) {
-            List<String> playerUUIDs = thisPlugin.getDatabase().getAllowedPlayers(petUUID);
+        if (petByName != null) {
+            List<String> playerUUIDs = thisPlugin.getDatabase().getAllowedPlayers(petByName.petId);
             reportTo.sendMessage(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  petOwner.getName() + "'s " + petName + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------");
             // For each UUID found that's allowed, find the corresponding player name and display it
             for (String playerUUID : playerUUIDs) {

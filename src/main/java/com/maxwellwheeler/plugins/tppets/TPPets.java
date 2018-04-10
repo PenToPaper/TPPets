@@ -67,7 +67,7 @@ public class TPPets extends JavaPlugin {
      */
 
     private void initializeStorageLimit() {
-        storageLimit = getConfig().getInt("storage_limit", 5);
+        storageLimit = getConfig().getInt("storage_limit", 0);
     }
 
     /**
@@ -242,6 +242,7 @@ public class TPPets extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         updateConfig();
+        initializeStorageLimit();
         initializeCommandAliases();
         initializeAllowTP();
         initializeAllowUntamingPets();

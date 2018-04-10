@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
+import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -79,8 +80,8 @@ class CommandRename {
             pl.sendMessage(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + oldName);
             return false;
         }
-        String petUUIDByName = thisPlugin.getDatabase().getPetUUIDByName(commandAbout.getUniqueId().toString(), oldName);
-        if (petUUIDByName.equals("") || petUUIDByName == null) {
+        PetStorage petByName = thisPlugin.getDatabase().getPetByName(commandAbout.getUniqueId().toString(), oldName);
+        if (petByName == null) {
             pl.sendMessage(ChatColor.RED + "Can't find pet named " + ChatColor.WHITE + oldName);
             return false;
         }
