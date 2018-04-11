@@ -1,21 +1,18 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
-import java.util.*;
-
-import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
-import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
-import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import org.bukkit.*;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
-
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Processes commands that actually teleport pets around
@@ -54,6 +51,7 @@ class CommandTPPets extends TeleportCommand {
      * @param args Truncated arguments for the command, does not include /tpp dogs, the [pet type] argument is specified in PetType.Pets form
      * @param pt The pet type to teleport
      */
+    @SuppressWarnings("deprecation")
     public void processCommand(CommandSender sender, String[] args, PetType.Pets pt) {
         if (!(sender instanceof Player)) {
             return;

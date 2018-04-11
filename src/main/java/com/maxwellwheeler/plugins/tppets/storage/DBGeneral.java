@@ -3,7 +3,6 @@ package com.maxwellwheeler.plugins.tppets.storage;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 
 import java.sql.*;
-import java.util.logging.Level;
 
 /**
  * A general class that governs the classes {@link MySQLFrame} and {@link SQLiteFrame}.
