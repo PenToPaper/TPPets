@@ -35,7 +35,7 @@ public abstract class TeleportCommand {
         return new Location(world, x, 64, z).getChunk();
     }
 
-    protected boolean teleportSpecificPet(Location sendTo, OfflinePlayer petOwner, String name, PetType.Pets pt, boolean setSitting, boolean strictType) {
+    protected boolean teleportSpecificPet(Location sendTo, OfflinePlayer petOwner, String name, PetType.Pets pt, boolean setSitting, boolean kickPlayerOff, boolean strictType) {
         if (thisPlugin.getDatabase() != null && petOwner != null && name != null && (!pt.equals(PetType.Pets.UNKNOWN) || !strictType)) {
             List<PetStorage> psList = new ArrayList<>();
             if (strictType) {
@@ -56,9 +56,9 @@ public abstract class TeleportCommand {
                     for (Entity ent : strictType ? world.getEntitiesByClasses(PetType.getClassTranslate(pt)) : world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)) {
                         for (PetStorage ps : psList) {
                             if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
-                                teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting);
+                                boolean tpResult = teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting, kickPlayerOff);
                                 thisPlugin.getDatabase().updateOrInsertPet(ent);
-                                return true;
+                                return tpResult;
                             }
                         }
                     }
@@ -68,9 +68,9 @@ public abstract class TeleportCommand {
                 for (Entity ent : sendTo.getWorld().getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                     for (PetStorage ps : psList) {
                         if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
-                            teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting);
+                            boolean tpResult = teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting, kickPlayerOff);
                             thisPlugin.getDatabase().updateOrInsertPet(ent);
-                            return true;
+                            return tpResult;
                         }
                     }
                 }
@@ -79,13 +79,19 @@ public abstract class TeleportCommand {
         return false;
     }
 
-    protected void teleportPet(Location loc, Entity entity, boolean setSitting) {
+    protected boolean teleportPet(Location loc, Entity entity, boolean setSitting, boolean kickPlayerOff) {
+        if (!kickPlayerOff && (entity.getPassengers() != null && entity.getPassengers().size() != 0)) {
+            return false;
+        }
         EntityActions.setStanding(entity);
-        EntityActions.removePassenger(entity);
+        if (kickPlayerOff) {
+            EntityActions.removePassenger(entity);
+        }
         entity.teleport(loc);
         if (setSitting) {
             EntityActions.setSitting(entity);
         }
+        return true;
     }
 
 
@@ -114,20 +120,20 @@ public abstract class TeleportCommand {
      * @param pt The type of pets to teleport
      * @return A set of UUIDs of the pets that have been teleported
      */
-    protected Set<UUID> getPetsAndTeleport(Location sendTo, OfflinePlayer sendFrom, PetType.Pets pt, boolean setSitting) {
+    protected Set<UUID> getPetsAndTeleport(Location sendTo, OfflinePlayer sendFrom, PetType.Pets pt, boolean setSitting, boolean kickPlayerOff) {
         List<World> worlds = Bukkit.getServer().getWorlds();
         Set<UUID> teleportedEnts = new HashSet<>();
         // If youc an teleport between worlds, check every world
         if (thisPlugin.getAllowTpBetweenWorlds()) {
             for (World world : worlds) {
-                Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, world, pt, teleportedEnts, setSitting);
+                Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, world, pt, teleportedEnts, setSitting, kickPlayerOff);
                 if (teleportedTemp != null) {
                     teleportedEnts.addAll(teleportedTemp);
                 }
             }
         } else {
             // If you can't teleport between worlds, check only the world the player is in
-            Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, sendTo.getWorld(), pt, teleportedEnts, setSitting);
+            Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, sendTo.getWorld(), pt, teleportedEnts, setSitting, kickPlayerOff);
             if (teleportedTemp != null) {
                 teleportedEnts.addAll(teleportedTemp);
             }
@@ -144,14 +150,14 @@ public abstract class TeleportCommand {
      * @param alreadyTeleportedPets A set representing pets that have already been teleported, so that duplicates can't exist
      * @return alreadyTeleportedPets plus the new pets teleported by this command
      */
-    protected Set<UUID> loadAndTp(Location sendTo, OfflinePlayer sendFrom, World world, PetType.Pets pt, Set<UUID> alreadyTeleportedPets, boolean setSitting) {
+    protected Set<UUID> loadAndTp(Location sendTo, OfflinePlayer sendFrom, World world, PetType.Pets pt, Set<UUID> alreadyTeleportedPets, boolean setSitting, boolean kickPlayerOff) {
         if (thisPlugin.getDatabase() != null && sendFrom != null && sendTo != null && world != null) {
             List<PetStorage> unloadedPetsInWorld = thisPlugin.getDatabase().getPetsGeneric(sendFrom.getUniqueId().toString(), world.getName(), pt);
             loadApplicableChunks(unloadedPetsInWorld);
             for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
                 if (isTeleportablePet(sendFrom, ent, pt)) {
                     if (!alreadyTeleportedPets.contains(ent.getUniqueId())) {
-                        teleportPet(sendTo, ent, !sendTo.equals(sendFrom) && setSitting);
+                        teleportPet(sendTo, ent, !sendTo.equals(sendFrom) && setSitting, kickPlayerOff);
                         alreadyTeleportedPets.add(ent.getUniqueId());
                     } else {
                         ent.remove();
