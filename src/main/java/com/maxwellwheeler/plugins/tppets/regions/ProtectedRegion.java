@@ -100,7 +100,7 @@ public class ProtectedRegion extends Region {
         EntityActions.removePassenger(ent);
         if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
             ent.teleport(lfReference.getApproxCenter());
-            getPlugin().getLogger().info("Teleported pet with UUID " + ent.getUniqueId().toString() +  " away from " + zoneName + " to " + this.getLfReference().zoneName);
+            getPlugin().getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + ent.getUniqueId().toString() + " away from " + zoneName + " to " + this.getLfReference().zoneName);
         }
     }
 

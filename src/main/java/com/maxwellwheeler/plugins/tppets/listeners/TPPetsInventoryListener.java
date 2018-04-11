@@ -39,7 +39,7 @@ public class TPPetsInventoryListener implements Listener {
             if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && !e.getWhoClicked().hasPermission("tppets.mountother") && !e.getWhoClicked().equals(tameableTemp.getOwner()) && !thisPlugin.isAllowedToPet(entTemp.getUniqueId().toString(), e.getWhoClicked().getUniqueId().toString())) {
                 e.setCancelled(true);
                 e.getWhoClicked().sendMessage(ChatColor.RED + "You don't have permission to do that.");
-                thisPlugin.getLogger().info("Player with UUID " + e.getWhoClicked().getUniqueId().toString() + " was denied permission to access pet " + entTemp.getUniqueId().toString() + "'s inventory");
+                thisPlugin.getLogWrapper().logUnsuccessfulAction("Player with UUID " + e.getWhoClicked().getUniqueId().toString() + " was denied permission to access pet " + entTemp.getUniqueId().toString() + "'s inventory");
             }
         }
     }
@@ -56,7 +56,7 @@ public class TPPetsInventoryListener implements Listener {
             if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && !e.getPlayer().hasPermission("tppets.mountother") && !e.getPlayer().equals(tameableTemp.getOwner()) && !thisPlugin.isAllowedToPet(entTemp.getUniqueId().toString(), e.getPlayer().getUniqueId().toString())) {
                 e.setCancelled(true);
                 e.getPlayer().sendMessage(ChatColor.RED + "You don't have permission to do that.");
-                thisPlugin.getLogger().info("Player with UUID " + e.getPlayer().getUniqueId().toString() + " was denied permission to access pet " + entTemp.getUniqueId().toString() + "'s inventory");
+                thisPlugin.getLogWrapper().logUnsuccessfulAction("Player with UUID " + e.getPlayer().getUniqueId().toString() + " was denied permission to access pet " + entTemp.getUniqueId().toString() + "'s inventory");
             }
         }
     }

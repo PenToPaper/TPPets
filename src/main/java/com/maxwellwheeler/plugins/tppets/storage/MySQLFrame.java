@@ -5,7 +5,6 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
 
 /**
  * A class that interfaces with the MySQL Server
@@ -44,7 +43,7 @@ public class MySQLFrame extends DBGeneral {
                 return DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false", dbUsername, dbPassword);
             }
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "Can't connect to MySQL database:" + e.getMessage());
+            thisPlugin.getLogWrapper().logErrors("Can't connect to MySQL database:" + e.getMessage());
         }
         return null;
     }

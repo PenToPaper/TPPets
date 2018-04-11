@@ -85,7 +85,7 @@ public class CommandProtected extends RegionCommand {
                     if (pr.getLfReference() == null) {
                         sender.sendMessage(ChatColor.BLUE + "Warning: Lost and found region " + ChatColor.WHITE + truncatedArgs[1] + ChatColor.BLUE + " does not exist.");
                     }
-                    thisPlugin.getLogger().info("Player " + sender.getName() + " added protected region " + truncatedArgs[0]);
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + sender.getName() + " added protected region " + truncatedArgs[0]);
                 } else {
                     sender.sendMessage(ChatColor.RED + "Unable to set protected region " + ChatColor.WHITE + truncatedArgs[0]);
                 }
@@ -110,7 +110,7 @@ public class CommandProtected extends RegionCommand {
             if (thisPlugin.getDatabase() != null && thisPlugin.getDatabase().deleteProtectedRegion(tempPr)) {
                 thisPlugin.removeProtectedRegion(truncatedArgs[0]);
                 sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
-                thisPlugin.getLogger().info("Player " + sender.getName() + " removed protected region " + truncatedArgs[0]);
+                thisPlugin.getLogWrapper().logSuccessfulAction("Player " + sender.getName() + " removed protected region " + truncatedArgs[0]);
             } else {
                 sender.sendMessage(ChatColor.RED + "Unable to remove protected region " + ChatColor.WHITE + truncatedArgs[0]);
             }
@@ -163,7 +163,7 @@ public class CommandProtected extends RegionCommand {
             tempPr.updateLFReference();
             // Report back to the user
             sender.sendMessage(ChatColor.BLUE + "Protected Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Updated!");
-            thisPlugin.getLogger().info("Player " + sender.getName() + " relinked protected region " + truncatedArgs[0] + " to " + truncatedArgs[1]);
+            thisPlugin.getLogWrapper().logSuccessfulAction("Player " + sender.getName() + " relinked protected region " + truncatedArgs[0] + " to " + truncatedArgs[1]);
             if (tempPr.getLfReference() == null) {
                 sender.sendMessage(ChatColor.BLUE + "Warning: Lost and found region " + ChatColor.WHITE + truncatedArgs[1] + ChatColor.BLUE + " does not exist.");
             }

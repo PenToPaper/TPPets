@@ -71,7 +71,7 @@ class CommandPermissions {
                         // Display appropriate results to player depending on the result of the command
                         switch (addAllowedPlayer(from, args[1], args[2])) {
                             case SUCCESS:
-                                thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
+                                thisPlugin.getLogWrapper().logSuccessfulAction(tempPlayer.getName() + " allowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
                                 tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " has been allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
                                 break;
                             case ALREADY_DONE:
@@ -96,7 +96,7 @@ class CommandPermissions {
                 // Display appropriate results to player depending on the result of the command
                 switch (addAllowedPlayer(tempPlayer, args[0], args[1])) {
                     case SUCCESS:
-                        thisPlugin.getLogger().info(tempPlayer.getName() + " allowed " + args[0] + " to use their pet named " + args[1]);
+                        thisPlugin.getLogWrapper().logSuccessfulAction(tempPlayer.getName() + " allowed " + args[0] + " to use their pet named " + args[1]);
                         tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been allowed to use your pet " + ChatColor.WHITE + args[1]);
                         break;
                     case ALREADY_DONE:
@@ -186,7 +186,7 @@ class CommandPermissions {
                         // Display appropriate results to player depending on the result of the command
                         switch (removeAllowedPlayer(from, args[1], args[2])) {
                             case SUCCESS:
-                                thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
+                                thisPlugin.getLogWrapper().logSuccessfulAction(tempPlayer.getName() + " disallowed " + args[1] + " to use " + playerFor + "'s pet named " + args[2]);
                                 tempPlayer.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + playerFor + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + args[2]);
                                 break;
                             case ALREADY_DONE:
@@ -209,7 +209,7 @@ class CommandPermissions {
                 // Display appropriate results to player depending on the result of the command
                 switch (removeAllowedPlayer(tempPlayer, args[0], args[1])) {
                     case SUCCESS:
-                        thisPlugin.getLogger().info(tempPlayer.getName() + " disallowed " + args[0] + " to use their pet named " + args[1]);
+                        thisPlugin.getLogWrapper().logSuccessfulAction(tempPlayer.getName() + " disallowed " + args[0] + " to use their pet named " + args[1]);
                         tempPlayer.sendMessage(ChatColor.WHITE + args[0] + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + args[1]);
                         break;
                     case ALREADY_DONE:

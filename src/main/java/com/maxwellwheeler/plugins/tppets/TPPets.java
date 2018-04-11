@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.ConfigUpdater;
 import com.maxwellwheeler.plugins.tppets.helpers.DBUpdater;
+import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
@@ -44,10 +45,13 @@ public class TPPets extends JavaPlugin {
 
     // Config
     private ConfigUpdater configUpdater;
-    
-    private boolean preventPlayerDamage;
-    private boolean preventEnvironmentalDamage;
-    private boolean preventMobDamage;
+
+    private LogWrapper logWrapper;
+
+    private boolean preventPlayerDamage = false;
+    private boolean preventEnvironmentalDamage = false;
+    private boolean preventMobDamage = false;
+    private boolean preventOwnerDamage = false;
     
     // Vault stuff
     private Permission perms;
@@ -59,12 +63,17 @@ public class TPPets extends JavaPlugin {
     
     private PlayerPetIndex petIndex;
     private int storageLimit;
+
     
     
     /*
      * VARIABLE INITIALIZERS
      *
      */
+
+    private void initializeLogWrapper() {
+        logWrapper = new LogWrapper(this, getConfig().getBoolean("logging.updated_pets", true), getConfig().getBoolean("logging.successful_actions", true), getConfig().getBoolean("logging.unsuccessful_actions", true), getConfig().getBoolean("logging.prevented_damage", true), getConfig().getBoolean("logging.errors", true));
+    }
 
     private void initializeStorageLimit() {
         storageLimit = getConfig().getInt("storage_limit", 0);
@@ -116,7 +125,7 @@ public class TPPets extends JavaPlugin {
         databaseUpdater = new DBUpdater(this);
         databaseUpdater.update(this.getDatabase());
         if (!databaseUpdater.isUpToDate()) {
-            getLogger().log(Level.SEVERE, "Database is unable to be updated");
+            getLogWrapper().logErrors("Database is unable to be updated");
             database = null;
         }
     }
@@ -159,15 +168,19 @@ public class TPPets extends JavaPlugin {
         List<String> configList = getConfig().getStringList("protect_pets_from");
         if (configList.contains("PlayerDamage")) {
             preventPlayerDamage = true;
-            getLogger().info("Preventing player damage...");
+            getLogWrapper().logSuccessfulAction("Preventing player damage...");
         }
         if (configList.contains("EnvironmentalDamage")) {
             preventEnvironmentalDamage = true;
-            getLogger().info("Preventing environmental damage...");
+            getLogWrapper().logSuccessfulAction("Preventing environmental damage...");
         }
         if (configList.contains("MobDamage")) {
             preventMobDamage = true;
-            getLogger().info("Preventing mob damage...");
+            getLogWrapper().logSuccessfulAction("Preventing mob damage...");
+        }
+        if (configList.contains("OwnerDamage")) {
+            preventOwnerDamage = true;
+            getLogWrapper().logSuccessfulAction("Preventing owner damage...");
         }
     }
     
@@ -211,9 +224,9 @@ public class TPPets extends JavaPlugin {
     private void initializeVault() {
         if (vaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault")) {
             initializePermissions();
-            getLogger().info("Vault detected. Permission tppets.tpanywhere will work with online and offline players.");
+            getLogWrapper().logSuccessfulAction("Vault detected. Permission tppets.tpanywhere will work with online and offline players.");
         } else {
-            getLogger().info("Vault not detected on this server. Permission tppets.tpanywhere will only work with online players.");
+            getLogWrapper().logSuccessfulAction("Vault not detected on this server. Permission tppets.tpanywhere will only work with online players.");
         }
     }
     
@@ -242,6 +255,7 @@ public class TPPets extends JavaPlugin {
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
         updateConfig();
+        initializeLogWrapper();
         initializeStorageLimit();
         initializeCommandAliases();
         initializeAllowTP();
@@ -249,20 +263,20 @@ public class TPPets extends JavaPlugin {
         initializeCustomTools();
         
         // Database setup
-        getLogger().info("Setting up database.");
+        getLogWrapper().logSuccessfulAction("Setting up database.");
         initializeDBC();
         updateDBC();
         createTables();
         initializeAllowedPlayers();
 
         // Database pulling
-        getLogger().info("Getting data from database.");
+        getLogWrapper().logSuccessfulAction("Getting data from database.");
         initializeLostRegions();
         initializeProtectedRegions();
         initializePetIndex();
         
         // Register events + commands
-        getLogger().info("Registering commands and events.");
+        getLogWrapper().logSuccessfulAction("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsInventoryListener(this), this);
@@ -435,6 +449,10 @@ public class TPPets extends JavaPlugin {
     public boolean getPreventMobDamage() {
         return preventMobDamage;
     }
+
+    public boolean getPreventOwnerDamage() {
+        return preventOwnerDamage;
+    }
     
     public LostAndFoundRegion getLostRegion(String name) {
         return lostRegions.get(name);
@@ -474,5 +492,9 @@ public class TPPets extends JavaPlugin {
 
     public int getStorageLimit() {
         return storageLimit;
+    }
+
+    public LogWrapper getLogWrapper() {
+        return logWrapper;
     }
 }

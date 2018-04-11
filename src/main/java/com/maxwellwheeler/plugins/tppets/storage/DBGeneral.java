@@ -36,7 +36,7 @@ public abstract class DBGeneral implements DBFrame {
         try {
             return 1 <= executeUpdate(prepStatement, args);
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "Can't execute insert statement: " + e.getMessage());
+            thisPlugin.getLogWrapper().logErrors("Can't execute insert statement: " + e.getMessage());
             return false;
         }
     }
@@ -51,7 +51,7 @@ public abstract class DBGeneral implements DBFrame {
         try {
             return executeQuery(dbConn, prepStatement, args);
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "Can't execute select statement: " + e.getMessage());
+            thisPlugin.getLogWrapper().logErrors("Can't execute select statement: " + e.getMessage());
             return null;
         }
     }
@@ -66,7 +66,7 @@ public abstract class DBGeneral implements DBFrame {
         try {
             return 0 <= executeUpdate(prepStatement, args);
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "Can't execute delete statement: " + e.getMessage());
+            thisPlugin.getLogWrapper().logErrors("Can't execute delete statement: " + e.getMessage());
             return false;
         }
     }
@@ -81,7 +81,7 @@ public abstract class DBGeneral implements DBFrame {
         try {
             return 0 <= executeUpdate(prepStatement, args);
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "Can't execute update statement: " + e.getMessage());
+            thisPlugin.getLogWrapper().logErrors("Can't execute update statement: " + e.getMessage());
             return false;
         }
     }
@@ -100,7 +100,7 @@ public abstract class DBGeneral implements DBFrame {
                 dbConn.close();
                 return 0 == tempInt;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "Can't execute create statement: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("Can't execute create statement: " + e.getMessage());
             }
         }
         return false;

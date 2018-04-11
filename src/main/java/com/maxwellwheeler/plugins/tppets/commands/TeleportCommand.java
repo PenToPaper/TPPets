@@ -81,6 +81,7 @@ public abstract class TeleportCommand {
 
     protected void teleportPet(Location loc, Entity entity, boolean setSitting) {
         EntityActions.setStanding(entity);
+        EntityActions.removePassenger(entity);
         entity.teleport(loc);
         if (setSitting) {
             EntityActions.setSitting(entity);

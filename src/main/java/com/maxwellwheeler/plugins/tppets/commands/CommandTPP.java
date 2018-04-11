@@ -189,16 +189,36 @@ public class CommandTPP implements CommandExecutor {
      */
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[ Commands ]" + ChatColor.DARK_GRAY + "--------------");
-        sender.sendMessage(ChatColor.WHITE + "/tpp dogs/cats/birds/horses/mules/donkeys/llamas" + ChatColor.BLUE + "  ->  Teleports your dogs to your location");
-        sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
-        sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] f:[username] [pet name]" + ChatColor.BLUE + "  ->  Teleports [username]'s pet named [pet name] to your location");
-        sender.sendMessage(ChatColor.WHITE + "/tpp allow [username] [pet name]" + ChatColor.BLUE + "  ->  Allows [username] to use teleport and mount your pet named [pet name]");
-        sender.sendMessage(ChatColor.WHITE + "/tpp remove [username] [pet name]" + ChatColor.BLUE + "  ->  Disallows [username] to use teleport and mount your pet named [pet name]");
-        sender.sendMessage(ChatColor.WHITE + "/tpp storage [add, remove, list] [storage name]" + ChatColor.BLUE + "  ->  Adds a new storage location.");
-        sender.sendMessage(ChatColor.WHITE + "/tpp store [pet name] [storage name]" + ChatColor.BLUE + "  ->  Sends [pet name] to [storage name]");
-        sender.sendMessage(ChatColor.WHITE + "/tpp list [pet name]" + ChatColor.BLUE + "  ->  Lists all players who can teleport and mount pet named [pet name]");
-        sender.sendMessage(ChatColor.WHITE + "/tpp protected [add, remove, list, relink]" + ChatColor.BLUE + "  ->  Creates a region where pets will not be allowed");
-        sender.sendMessage(ChatColor.WHITE + "/tpp lost [add, remove, list]" + ChatColor.BLUE + "  ->  Creates a region where lost pets will be teleported to");
+        if (sender.hasPermission("tppets.dogs") && sender.hasPermission("tppets.cats") && sender.hasPermission("tppets.birds") && sender.hasPermission("tppets.horses") && sender.hasPermission("tppets.mules") && sender.hasPermission("tppets.llamas") && sender.hasPermission("tppets.donkeys")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp dogs/cats/birds/horses/mules/donkeys/llamas all" + ChatColor.BLUE + "  ->  Teleports your dogs to your location");
+            sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
+            sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] f:[username] [pet name]" + ChatColor.BLUE + "  ->  Teleports [username]'s pet named [pet name] to your location");
+        }
+        if (sender.hasPermission("tppets.addallow")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp allow [username] [pet name]" + ChatColor.BLUE + "  ->  Allows [username] to use teleport and mount your pet named [pet name]");
+        }
+        if (sender.hasPermission("tppets.removeallow")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp remove [username] [pet name]" + ChatColor.BLUE + "  ->  Disallows [username] to use teleport and mount your pet named [pet name]");
+        }
+        if (sender.hasPermission("tppets.listallow")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp list [pet name]" + ChatColor.BLUE + "  ->  Lists all players who can teleport and mount pet named [pet name]");
+        }
+        if (sender.hasPermission("tppets.rename")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp rename [old name] [new name]" + ChatColor.BLUE + "  ->  Renames [old name] to [new name].");
+        }
+        if (sender.hasPermission("tppets.storage")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp storage [add, remove, list] [storage name]" + ChatColor.BLUE + "  ->  Adds a new storage location.");
+        }
+        if (sender.hasPermission("tppets.store")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp store [pet name] [storage name]" + ChatColor.BLUE + "  ->  Sends [pet name] to [storage name]");
+        }
+        if (sender.hasPermission("tppets.protected")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp protected [add, remove, list, relink]" + ChatColor.BLUE + "  ->  Creates a region where pets will not be allowed");
+        }
+        if (sender.hasPermission("tppets.lost")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp lost [add, remove, list]" + ChatColor.BLUE + "  ->  Creates a region where lost pets will be teleported to");
+
+        }
         sender.sendMessage(ChatColor.DARK_GRAY + "-------------------------------------");
     }
     

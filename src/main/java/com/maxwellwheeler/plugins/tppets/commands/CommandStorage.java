@@ -163,7 +163,7 @@ public class CommandStorage {
             if (thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), storageName) == null) {
                 if (pl.hasPermission("tppets.bypassstoragelimit") || thisPlugin.getDatabase().getStorageLocations(commandFor.getUniqueId().toString()).size() < thisPlugin.getStorageLimit()) {
                     if (thisPlugin.getDatabase().addStorageLocation(commandFor.getUniqueId().toString(), storageName, pl.getLocation())) {
-                        thisPlugin.getLogger().info("Player " + pl.getUniqueId().toString() + " has added location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()) + " for " + commandFor.getName());
+                        thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getUniqueId().toString() + " has added location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()) + " for " + commandFor.getName());
                         return EditResult.SUCCESS;
                     }
                     return thisPlugin.getDatabase().addStorageLocation(commandFor.getUniqueId().toString(), storageName, pl.getLocation()) ? EditResult.SUCCESS : EditResult.FAILURE;
@@ -181,7 +181,7 @@ public class CommandStorage {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), storageName) != null) {
                 if (thisPlugin.getDatabase().removeStorageLocation(commandFor.getUniqueId().toString(), storageName)) {
-                    thisPlugin.getLogger().info("Player " + pl.getUniqueId().toString() + " has added location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()) + " for " + commandFor.getName());
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getUniqueId().toString() + " has added location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()) + " for " + commandFor.getName());
                     return EditResult.SUCCESS;
                 }
             } else {
@@ -208,7 +208,7 @@ public class CommandStorage {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getServerStorageLocation(storageName, pl.getWorld()) == null) {
                 if (thisPlugin.getDatabase().addServerStorageLocation(storageName, pl.getLocation())) {
-                    thisPlugin.getLogger().info("Player " + pl.getUniqueId().toString() + " has added server location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()));
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getUniqueId().toString() + " has added server location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()));
                     return EditResult.SUCCESS;
                 }
             } else {
@@ -222,7 +222,7 @@ public class CommandStorage {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getServerStorageLocation(storageName, pl.getWorld()) != null) {
                 if (thisPlugin.getDatabase().removeServerStorageLocation(storageName, pl.getWorld())) {
-                    thisPlugin.getLogger().info("Player " + pl.getUniqueId().toString() + " has removed server location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()));
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getUniqueId().toString() + " has removed server location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()));
                     return EditResult.SUCCESS;
                 }
             } else {

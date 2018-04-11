@@ -38,13 +38,13 @@ public class SQLiteFrame extends DBGeneral {
             try {
                 dbDir.mkdir();
             } catch (SecurityException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "Security Exception creating database" + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("Security Exception creating database" + e.getMessage());
             }
         }
         try {
             return DriverManager.getConnection(getJDBCPath());
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception creating database" + e.getMessage());
+            thisPlugin.getLogWrapper().logErrors("SQL Exception creating database" + e.getMessage());
         }
         return null;
     }

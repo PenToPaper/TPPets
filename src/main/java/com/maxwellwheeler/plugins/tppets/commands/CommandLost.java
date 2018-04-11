@@ -71,7 +71,7 @@ public class CommandLost extends RegionCommand {
                     thisPlugin.addLostRegion(lfr);
                     thisPlugin.updateLFReference(lfr.getZoneName());
                     sender.sendMessage(ChatColor.BLUE + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Set!");
-                    thisPlugin.getLogger().info("Player " + sender.getName() + " added lost and found region " + truncatedArgs[0]);
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + sender.getName() + " added lost and found region " + truncatedArgs[0]);
                 } else {
                     sender.sendMessage(ChatColor.RED + "Unable to add lost and found region  " + ChatColor.WHITE + truncatedArgs[0]);
                 }
@@ -98,7 +98,7 @@ public class CommandLost extends RegionCommand {
                 thisPlugin.removeLFReference(tempLfr.getZoneName());
                 thisPlugin.removeLostRegion(tempLfr);
                 sender.sendMessage(ChatColor.BLUE + "Lost and Found Region " + ChatColor.WHITE + truncatedArgs[0] + ChatColor.BLUE + " Removed!");
-                thisPlugin.getLogger().info("Player " + sender.getName() + " removed lost and found region " + truncatedArgs[0]);
+                thisPlugin.getLogWrapper().logSuccessfulAction("Player " + sender.getName() + " removed lost and found region " + truncatedArgs[0]);
             } else {
                 sender.sendMessage(ChatColor.RED + "Unable to remove lost and found region  " + ChatColor.WHITE + truncatedArgs[0]);
             }

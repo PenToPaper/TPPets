@@ -97,7 +97,7 @@ public class DBUpdater {
                     return -1;
                 }
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception finding current database version: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception finding current database version: " + e.getMessage());
             }
         }
         // DBWrapper == null
@@ -195,7 +195,7 @@ public class DBUpdater {
                 }
                 return true;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception updating database from version one to version two: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception updating database from version one to version two: " + e.getMessage());
             }
         }
         return false;
@@ -277,7 +277,7 @@ public class DBUpdater {
                 }
                 return true;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQLException updating database to version 3: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQLException updating database to version 3: " + e.getMessage());
             }
         }
         return false;
@@ -328,7 +328,7 @@ public class DBUpdater {
                 }
                 return true;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQLException updating database to version 3: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQLException updating database to version 3: " + e.getMessage());
             }
         }
         return false;

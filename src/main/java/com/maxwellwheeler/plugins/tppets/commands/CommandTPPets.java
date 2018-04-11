@@ -96,7 +96,7 @@ class CommandTPPets extends TeleportCommand {
                     if (thisPlugin.canTpThere(commandSender)) {
                         if ((commandSender.equals(commandAbout) || commandSender.hasPermission("tppets.teleportother"))) {
                             int numPetsTeleported = getPetsAndTeleport(commandSender.getLocation(), commandAbout, pt, shouldKeepSitting(commandSender, commandAbout)).size();
-                            thisPlugin.getLogger().info("Player " + commandSender.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + commandAbout.getName() + "'s " + pt.toString() + "s to their location at: " + formatLocation(commandSender.getLocation()));
+                            thisPlugin.getLogWrapper().logSuccessfulAction("Player " + commandSender.getName() + " teleported " + Integer.toString(numPetsTeleported) + " of " + commandAbout.getName() + "'s " + pt.toString() + "s to their location at: " + formatLocation(commandSender.getLocation()));
                             commandSender.sendMessage((commandSender.equals(commandAbout) ? ChatColor.BLUE + "Your " : ChatColor.WHITE + commandAbout.getName() + "'s ") + ChatColor.WHITE + pt.toString() + "s " + ChatColor.BLUE + "have been teleported to you");
                         } else {
                             commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that");
@@ -116,7 +116,7 @@ class CommandTPPets extends TeleportCommand {
                             return;
                         }
                         if (ArgValidator.softValidatePetName(args[0]) && teleportSpecificPet(commandSender.getLocation(), commandAbout, args[0], pt, shouldKeepSitting(commandSender, commandAbout), true)){
-                            thisPlugin.getLogger().info("Player " + commandSender.getName() + " teleported " + commandAbout.getName() + "'s pet named " + args[0] + " to their location at: " + formatLocation(commandSender.getLocation()));
+                            thisPlugin.getLogWrapper().logSuccessfulAction("Player " + commandSender.getName() + " teleported " + commandAbout.getName() + "'s pet named " + args[0] + " to their location at: " + formatLocation(commandSender.getLocation()));
                             commandSender.sendMessage((commandSender.equals(commandAbout) ? ChatColor.BLUE + "Your pet " : ChatColor.WHITE + commandAbout.getName() + "'s " + ChatColor.BLUE + "pet ") + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you");
                         } else {
                             commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);

@@ -55,7 +55,7 @@ public class CommandStore extends TeleportCommand {
                         return;
                     }
                     if (storePet(commandFor, args[0], storageLoc)) {
-                        thisPlugin.getLogger().info("Player " + pl.getName() + " has teleported their pet " + args[0] + " to location " + storageLoc.getStorageName() + "at " + TeleportCommand.formatLocation(storageLoc.getLoc()));
+                        thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getName() + " has teleported their pet " + args[0] + " to location " + storageLoc.getStorageName() + "at " + TeleportCommand.formatLocation(storageLoc.getLoc()));
                         pl.sendMessage((pl.equals(commandFor) ? ChatColor.BLUE + "Your " : ChatColor.WHITE + commandFor.getName() + "'s ") + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to " + ChatColor.WHITE + storageLoc.getStorageName());
                         return;
                     }
@@ -70,7 +70,7 @@ public class CommandStore extends TeleportCommand {
             StorageLocation storageLoc = thisPlugin.getDatabase().getDefaultServerStorageLocation(pl.getWorld());
             if (storageLoc != null) {
                 if (storePet(commandFor, args[0], storageLoc)) {
-                    thisPlugin.getLogger().info("Player " + pl.getName() + " has teleported their pet " + args[0] + " to server location" + storageLoc.getStorageName() + "at " + TeleportCommand.formatLocation(storageLoc.getLoc()));
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getName() + " has teleported their pet " + args[0] + " to server location" + storageLoc.getStorageName() + "at " + TeleportCommand.formatLocation(storageLoc.getLoc()));
                     pl.sendMessage((pl.equals(commandFor) ? ChatColor.BLUE + "Your " : ChatColor.WHITE + commandFor.getName() + "'s ") + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to " + ChatColor.WHITE + storageLoc.getStorageName());
                     return;
                 }

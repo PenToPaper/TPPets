@@ -1,4 +1,4 @@
-protect_pets_from: [PlayerDamage, EnvironmentalDamage, MobDamage]
+protect_pets_from: [PlayerDamage, OwnerDamage, EnvironmentalDamage, MobDamage]
 tp_pets_between_worlds: true
 allow_untaming_pets: true
 total_pet_limit: -1
@@ -37,4 +37,10 @@ mysql:
   database: minecraft
   username: 'mcpluginuser'
   password: 'password'
-schema_version: 2
+logging:
+  updated_pets: true
+  successful_actions: true
+  unsuccessful_actions: true
+  prevented_damage: true
+  errors: true
+schema_version: 3

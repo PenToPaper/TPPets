@@ -144,7 +144,7 @@ public class DBWrapper {
                 dbConn.close();
                 return !ret;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception checking if pet name is unique: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception checking if pet name is unique: " + e.getMessage());
             }
         }
         return false;
@@ -177,10 +177,10 @@ public class DBWrapper {
                  */
                 String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name, effective_pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 if (uniqueName != null && database.insertPrepStatement(insertPet, trimmedEntUUID, petTypeIndex, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getWorld().getName(), trimmedPlayerUUID, uniqueName, uniqueName.toLowerCase())) {
-                    thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " added to database.");
+                    thisPlugin.getLogWrapper().logUpdatedPet("Pet with UUID " + trimmedEntUUID + " added to database.");
                     return uniqueName;
                 } else {
-                    thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be added to database.");
+                    thisPlugin.getLogWrapper().logUnsuccessfulAction("Pet with UUID " + trimmedEntUUID + " can't be added to database.");
                 }
             }
         }
@@ -206,7 +206,7 @@ public class DBWrapper {
             try {
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception generating name: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception generating name: " + e.getMessage());
             }
             return ret;
         }
@@ -225,10 +225,10 @@ public class DBWrapper {
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
             String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ? AND owner_id = ?";
             if (database.deletePrepStatement(deletePet, trimmedEntUUID, trimmedPlayerUUID)) {
-                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " removed from database.");
+                thisPlugin.getLogWrapper().logSuccessfulAction("Pet with UUID " + trimmedEntUUID + " removed from database.");
                 return true;
             } else {
-                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be removed from database.");
+                thisPlugin.getLogWrapper().logUnsuccessfulAction("Pet with UUID " + trimmedEntUUID + " can't be removed from database.");
                 return false;
             }
         }
@@ -247,10 +247,10 @@ public class DBWrapper {
             String trimmedPlayerUUID = UUIDUtils.trimUUID(tameableTemp.getOwner().getUniqueId());
             String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
             if (database.updatePrepStatement(updatePetLocation, ent.getLocation().getBlockX(), ent.getLocation().getBlockY(), ent.getLocation().getBlockZ(), ent.getLocation().getWorld().getName(), trimmedEntUUID, trimmedPlayerUUID)) {
-                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " updated in database.");
+                thisPlugin.getLogWrapper().logUpdatedPet("Pet with UUID " + trimmedEntUUID + " updated in database.");
                 return true;
             } else {
-                thisPlugin.getLogger().info("Pet with UUID " + trimmedEntUUID + " can't be updated in database.");
+                thisPlugin.getLogWrapper().logUnsuccessfulAction("Pet with UUID " + trimmedEntUUID + " can't be updated in database.");
                 return false;
             }
         }
@@ -287,7 +287,7 @@ public class DBWrapper {
                 dbConn.close();
                 return ret;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception selecting pet from table: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception selecting pet from table: " + e.getMessage());
             }
         }
         return false;
@@ -304,10 +304,10 @@ public class DBWrapper {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE owner_id = ? AND effective_pet_name = ?";
         if (database.updatePrepStatement(updatePetName, newName, newName.toLowerCase(), trimmedOwnerUUID, oldName.toLowerCase())) {
-            thisPlugin.getLogger().info("Player with UUID " + ownerUUID + " has had their pet " + oldName + " renamed to " + newName);
+            thisPlugin.getLogWrapper().logSuccessfulAction("Player with UUID " + ownerUUID + " has had their pet " + oldName + " renamed to " + newName);
             return true;
         } else {
-            thisPlugin.getLogger().info("Unable to execute: Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Unable to execute: Player with UUID " + ownerUUID + " renamed pet with name " + oldName + " to " + newName);
             return false;
         }
     }
@@ -331,7 +331,7 @@ public class DBWrapper {
                 dbConn.close();
                 return uuidList;
             } catch (SQLException e) {
-                thisPlugin.getLogger().info("SQL Exception getting allowed players from table");
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting allowed players from table: " + e.getMessage());
             }
         }
         return uuidList;
@@ -353,7 +353,7 @@ public class DBWrapper {
             try {
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from owner and name: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting pets from owner and name: " + e.getMessage());
             }
             return ret;
         }
@@ -379,7 +379,7 @@ public class DBWrapper {
                     return petsList.get(0);
                 }
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pet UUID from name: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting pet UUID from name: " + e.getMessage());
             }
         }
         return null;
@@ -425,7 +425,7 @@ public class DBWrapper {
             try {
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from owner: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting pets from owner: " + e.getMessage());
             }
             return ret;
         }
@@ -448,7 +448,7 @@ public class DBWrapper {
             try {
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from UUIDs: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting pets from UUIDs: " + e.getMessage());
             }
             return ret;
         }
@@ -471,7 +471,7 @@ public class DBWrapper {
             try {
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting pets: " + e.getMessage());
             }
             return ret;
         }
@@ -491,7 +491,7 @@ public class DBWrapper {
             try {
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting pets from world: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting pets from world: " + e.getMessage());
             }
             return ret;
         }
@@ -510,7 +510,7 @@ public class DBWrapper {
                 ret.add(new PetStorage(rs.getString("pet_id"), rs.getInt("pet_type"), rs.getInt("pet_x"), rs.getInt("pet_y"), rs.getInt("pet_z"), rs.getString("pet_world"), rs.getString("owner_id"), rs.getString("pet_name"), rs.getString("effective_pet_name")));
             }
         } catch (SQLException e) {
-            thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception generating list from database results", e.getMessage());
+            thisPlugin.getLogWrapper().logErrors("SQL Exception generating list from database results" + e.getMessage());
         }
         return ret;
     }
@@ -530,10 +530,10 @@ public class DBWrapper {
          */
         String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         if (database.insertPrepStatement(insertLost, lfr.getZoneName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName())) {
-            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " added to database.");
+            thisPlugin.getLogWrapper().logSuccessfulAction("Lost and found region " + lfr.getZoneName() + " added to database.");
             return true;
         } else {
-            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " can't be added to database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Lost and found region " + lfr.getZoneName() + " can't be added to database.");
             return false;
         }
     }
@@ -546,10 +546,10 @@ public class DBWrapper {
     public boolean deleteLostRegion(LostAndFoundRegion lfr) {
         String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
         if (database.deletePrepStatement(deleteLost, lfr.getZoneName())) {
-            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " removed from database.");
+            thisPlugin.getLogWrapper().logSuccessfulAction("Lost and found region " + lfr.getZoneName() + " removed from database.");
             return true;
         } else {
-            thisPlugin.getLogger().info("Lost and found region " + lfr.getZoneName() + " can't be removed from database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Lost and found region " + lfr.getZoneName() + " can't be removed from database.");
             return false;
         }
     }
@@ -570,7 +570,7 @@ public class DBWrapper {
                 }
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting lost and found regions: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting lost and found regions: " + e.getMessage());
             }
         }
         return ret;
@@ -591,10 +591,10 @@ public class DBWrapper {
          */
         String insertProtected = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         if (database.insertPrepStatement(insertProtected, pr.getZoneName(), pr.getEnterMessage(), pr.getMinLoc().getBlockX(), pr.getMinLoc().getBlockY(), pr.getMinLoc().getBlockZ(), pr.getMaxLoc().getBlockX(), pr.getMaxLoc().getBlockY(), pr.getMaxLoc().getBlockZ(), pr.getWorldName(), pr.getLfName())) {
-            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " added to database.");
+            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getZoneName() + " added to database.");
             return true;
         } else {
-            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be added to database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getZoneName() + " can't be added to database.");
             return false;
         }
     }
@@ -607,10 +607,10 @@ public class DBWrapper {
     public boolean deleteProtectedRegion(ProtectedRegion pr) {
         String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
         if (database.deletePrepStatement(deleteProtected, pr.getZoneName())) {
-            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " removed from database.");
+            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getZoneName() + " removed from database.");
             return true;
         } else {
-            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be removed from database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getZoneName() + " can't be removed from database.");
             return false;
         }
     }
@@ -631,7 +631,7 @@ public class DBWrapper {
                 }
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting protected regions: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting protected regions: " + e.getMessage());
             }
         }
         return ret;
@@ -661,7 +661,7 @@ public class DBWrapper {
                 ret.put(petID, allowedPlayersID);
                 dbConn.close();
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQL Exception getting allowed players: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQL Exception getting allowed players: " + e.getMessage());
             }
         }
         return ret;
@@ -675,10 +675,10 @@ public class DBWrapper {
     public boolean updateProtectedRegion(ProtectedRegion pr) {
         String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
         if (database.updatePrepStatement(updateProtected, pr.getLfName(), pr.getZoneName())) {
-            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " updated in database.");
+            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getZoneName() + " updated in database.");
             return true;
         } else {
-            thisPlugin.getLogger().info("Protected region " + pr.getZoneName() + " can't be updated in database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getZoneName() + " can't be updated in database.");
             return false;
         }
     }
@@ -719,7 +719,7 @@ public class DBWrapper {
                 dbConn.close();
                 return ret;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQLException getting storage data: " + e.getMessage());
             }
         }
         return null;
@@ -740,7 +740,7 @@ public class DBWrapper {
                 dbConn.close();
                 return ret;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQLException getting storage data: " + e.getMessage());
             }
         }
         return null;
@@ -770,7 +770,7 @@ public class DBWrapper {
                 dbConn.close();
                 return ret;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQLException getting storage data: " + e.getMessage());
             }
         }
         return null;
@@ -791,7 +791,7 @@ public class DBWrapper {
                     }
                     dbConn.close();
                 } catch (SQLException e) {
-                    thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+                    thisPlugin.getLogWrapper().logErrors("SQLException getting storage data: " + e.getMessage());
                 }
             }
         } else {
@@ -814,7 +814,7 @@ public class DBWrapper {
                 dbConn.close();
                 return ret;
             } catch (SQLException e) {
-                thisPlugin.getLogger().log(Level.SEVERE, "SQLException getting storage data: " + e.getMessage());
+                thisPlugin.getLogWrapper().logErrors("SQLException getting storage data: " + e.getMessage());
             }
         }
         return null;

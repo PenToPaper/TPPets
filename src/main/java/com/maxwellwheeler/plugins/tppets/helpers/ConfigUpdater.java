@@ -89,7 +89,13 @@ public class ConfigUpdater {
     }
 
     private void twoToThree() {
-        thisPlugin.getConfig().set("command_aliases.store", new String[]{"keep", "stable"});
+        thisPlugin.getConfig().set("storage_limit", 5);
+        thisPlugin.getConfig().set("command_aliases.store", new String[]{"move", "stable"});
         thisPlugin.getConfig().set("command_aliases.storage", new String[]{"setstable"});
+        thisPlugin.getConfig().set("logging.updated_pets", true);
+        thisPlugin.getConfig().set("logging.successful_actions", true);
+        thisPlugin.getConfig().set("logging.unsuccessful_actions", true);
+        thisPlugin.getConfig().set("logging.prevented_damage", true);
+        thisPlugin.getConfig().set("logging.errors", true);
     }
 }
