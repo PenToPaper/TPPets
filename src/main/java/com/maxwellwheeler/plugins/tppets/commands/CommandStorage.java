@@ -164,7 +164,7 @@ public class CommandStorage {
     public EditResult addStorage(Player pl, OfflinePlayer commandFor, String storageName) {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), storageName) == null) {
-                if (pl.hasPermission("tppets.bypassstoragelimit") || thisPlugin.getDatabase().getStorageLocations(commandFor.getUniqueId().toString()).size() < thisPlugin.getStorageLimit()) {
+                if (pl.hasPermission("tppets.bypassstoragelimit") || thisPlugin.getStorageLimit() < 0 || thisPlugin.getDatabase().getStorageLocations(commandFor.getUniqueId().toString()).size() < thisPlugin.getStorageLimit()) {
                     if (thisPlugin.getDatabase().addStorageLocation(commandFor.getUniqueId().toString(), storageName, pl.getLocation())) {
                         thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getUniqueId().toString() + " has added location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()) + " for " + commandFor.getName());
                         return EditResult.SUCCESS;
