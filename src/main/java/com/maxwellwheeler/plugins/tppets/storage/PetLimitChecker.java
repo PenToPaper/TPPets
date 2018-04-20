@@ -125,7 +125,7 @@ public class PetLimitChecker {
      * @return The ruling. It can be allowed, disallowed because of X, or unknown
      */
     public RuleRestriction allowTame(AnimalTamer at, Location loc, PetType.Pets pt) {
-        if (PermissionChecker.onlineHasPerms(at, "tppets.bypasslimit") || PermissionChecker.offlineHasPerms(at, "tppets.bypasslimit", loc.getWorld(), thisPlugin)) {
+        if (PermissionChecker.onlineHasPerms(at, "tppets.bypasslimit") || PermissionChecker.offlineHasPerms(at, "tppets.bypasslimit", loc.getWorld(), thisPlugin) || (getSpecificLimit(pt) == -1 && totalLimit == -1)) {
             return RuleRestriction.ALLOWED;
         }
         int numPetsByType = thisPlugin.getDatabase().getNumPetsByPT(at.getUniqueId().toString(), pt);
