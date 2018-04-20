@@ -4,10 +4,6 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import org.bukkit.Location;
 import org.bukkit.entity.AnimalTamer;
-
-// TODO SET THIS INSTANCE = NULL WHEN ALL LIMITS ARE -1
-// TODO ALWAYS QUERY DATABASE ON TAME
-
 /**
  * An index of how many pets each player owns. Used for the limiting of tamed pets.
  * @author GatheringExp

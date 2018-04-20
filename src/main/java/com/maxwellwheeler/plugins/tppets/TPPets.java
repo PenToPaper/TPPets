@@ -386,9 +386,6 @@ public class TPPets extends JavaPlugin {
         return false;
     }
 
-
-
-
     public boolean isAllowedToPet(String petUUID, String playerUUID) {
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
