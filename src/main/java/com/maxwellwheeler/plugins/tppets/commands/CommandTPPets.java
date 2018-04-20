@@ -139,13 +139,15 @@ class CommandTPPets extends TeleportCommand {
      */
     private void listPets(Player pl, OfflinePlayer petsFrom, PetType.Pets pt) {
         pl.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + petsFrom.getName() + "'s " + ChatColor.BLUE + pt.toString() + " names ]" + ChatColor.DARK_GRAY + "---------");
-        int i = 0;
+        int numPetsListed = 0;
         // Loop through all the worlds, pulling pets from the database
         for (World wld : Bukkit.getServer().getWorlds()) {
             List<PetStorage> tempPs = thisPlugin.getDatabase().getPetsGeneric(petsFrom.getUniqueId().toString(), wld.getName(), pt);
-            while (i < tempPs.size()) {
-                pl.sendMessage(ChatColor.WHITE + Integer.toString(i+1) + ") " + tempPs.get(i).petName);
-                i++;
+            if (tempPs != null && tempPs.size() > 0) {
+                for (PetStorage ps : tempPs) {
+                    pl.sendMessage(ChatColor.WHITE + "  " + Integer.toString(numPetsListed+1) + ") " + ps.petName);
+                    numPetsListed++;
+                }
             }
         }
         pl.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
