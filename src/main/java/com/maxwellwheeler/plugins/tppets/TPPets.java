@@ -12,7 +12,7 @@ import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
+import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -60,7 +60,7 @@ public class TPPets extends JavaPlugin {
     private boolean allowTpBetweenWorlds;
     private boolean allowUntamingPets;
     
-    private PlayerPetIndex petIndex;
+    private PetLimitChecker petIndex;
     private int storageLimit;
 
     
@@ -93,10 +93,10 @@ public class TPPets extends JavaPlugin {
     }
 
     /**
-     * Initializes the {@link PlayerPetIndex} based on total_pet_limit, dog_limit, cat_limit, and bird_limit integers in the config.
+     * Initializes the {@link PetLimitChecker} based on total_pet_limit, dog_limit, cat_limit, and bird_limit integers in the config.
      */
     private void initializePetIndex() {
-        petIndex = new PlayerPetIndex(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
+        petIndex = new PetLimitChecker(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
     }
     
     /**
@@ -473,7 +473,7 @@ public class TPPets extends JavaPlugin {
         return allowUntamingPets;
     }
     
-    public PlayerPetIndex getPetIndex() {
+    public PetLimitChecker getPetIndex() {
         return petIndex;
     }
 

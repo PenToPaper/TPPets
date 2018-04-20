@@ -14,9 +14,7 @@ import org.bukkit.entity.Tameable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 /**
  * A wrapper class that abstracts away the specific database being used.
@@ -817,6 +815,44 @@ public class DBWrapper {
             }
         }
         return null;
+    }
+
+    public int getNumPetsByPT(String ownerUUID, PetType.Pets pt) {
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
+                ResultSet rs = database.selectPrepStatement(dbConn, getNumPets, UUIDUtils.trimUUID(ownerUUID), PetType.getIndexFromPet(pt));
+                int ret = -1;
+                if (rs.next()) {
+                    ret = rs.getInt("count");
+                }
+                dbConn.close();
+                return ret;
+            } catch (SQLException e) {
+                thisPlugin.getLogWrapper().logErrors("SQLException getting number of pets: " + e.getMessage());
+            }
+        }
+        return -1;
+    }
+
+    public int getNumPets(String ownerUUID) {
+        Connection dbConn = database.getConnection();
+        if (dbConn != null) {
+            try {
+                String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ?";
+                ResultSet rs = database.selectPrepStatement(dbConn, getNumPets, UUIDUtils.trimUUID(ownerUUID));
+                int ret = -1;
+                if (rs.next()) {
+                    ret = rs.getInt("count");
+                }
+                dbConn.close();
+                return ret;
+            } catch (SQLException e) {
+                thisPlugin.getLogWrapper().logErrors("SQLException getting number of pets: " + e.getMessage());
+            }
+        }
+        return -1;
     }
     
     /**

@@ -36,7 +36,6 @@ public class TPPetsChunkListener implements Listener {
                Tameable tameableTemp = (Tameable) ent;
                if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && thisPlugin.getDatabase() != null) {
                    thisPlugin.getDatabase().updateOrInsertPet(ent);
-                   thisPlugin.getPetIndex().newPetTamed(ent);
                }
            }
         }

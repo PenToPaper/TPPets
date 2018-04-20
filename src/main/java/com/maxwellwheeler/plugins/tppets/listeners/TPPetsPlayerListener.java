@@ -84,7 +84,6 @@ public class TPPetsPlayerListener implements Listener {
                     if (e.getRightClicked() instanceof SkeletonHorse || e.getRightClicked() instanceof ZombieHorse) {
                         tameableTemp.setTamed(true);
                     }
-                    thisPlugin.getPetIndex().removePetTamed(e.getRightClicked());
                     thisPlugin.getLogWrapper().logSuccessfulAction("Player " + e.getPlayer().getName() + " untamed entity with UUID " + e.getRightClicked().getUniqueId().toString());
                     e.getPlayer().sendMessage(ChatColor.BLUE + "Un-tamed pet.");
                 }

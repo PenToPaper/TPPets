@@ -5,8 +5,8 @@ import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
-import com.maxwellwheeler.plugins.tppets.storage.PlayerPetIndex;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -67,7 +67,6 @@ public class TPPetsEntityListener implements Listener {
                 if (thisPlugin.getDatabase() != null) {
                     thisPlugin.getDatabase().deletePet(e.getEntity());
                 }
-                thisPlugin.getPetIndex().removePetTamed(e.getEntity().getUniqueId().toString(), tameableTemp.getOwner().getUniqueId().toString(), PetType.getEnumByEntity(e.getEntity()));
             }
         }
     }
@@ -162,7 +161,7 @@ public class TPPetsEntityListener implements Listener {
     }
     
     /**
-     * Event handler for EntityTameEvent. It checks if the tamed entity should be allowed to be tamed based on the pet limits. If it can, it adds that to the {@link PlayerPetIndex}
+     * Event handler for EntityTameEvent. It checks if the tamed entity should be allowed to be tamed based on the pet limits. If it can, it adds that to the {@link PetLimitChecker}
      * @param e The EntityTameEvent object to respond to
      */
     @EventHandler (priority=EventPriority.HIGHEST)
@@ -170,8 +169,8 @@ public class TPPetsEntityListener implements Listener {
         if (!e.isCancelled() && e.getOwner() instanceof Player) {
             PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
             Player playerTemp = (Player) e.getOwner();
-            PlayerPetIndex.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
-            if (!rr.equals(PlayerPetIndex.RuleRestriction.ALLOWED)) {
+            PetLimitChecker.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
+            if (!rr.equals(PetLimitChecker.RuleRestriction.ALLOWED)) {
                 e.setCancelled(true);
                 Tameable tameableTemp = (Tameable) e.getEntity();
                 tameableTemp.setTamed(false);
@@ -187,7 +186,6 @@ public class TPPetsEntityListener implements Listener {
                 if (generatedName != null) {
                     playerTemp.sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + generatedName + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + generatedName + ChatColor.BLUE + " [new name]");
                 }
-                thisPlugin.getPetIndex().newPetTamed(e.getOwner().getUniqueId().toString(), e.getEntity().getUniqueId().toString(), pt);
             }
         }
     }
