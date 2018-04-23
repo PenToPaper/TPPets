@@ -218,6 +218,10 @@ public class TPPetsEntityListener implements Listener {
         }
     }
 
+    /**
+     * Event handler for EntityBreedEvent. It checks if the player should own the offspring, based on pet limits
+     * @param e The EntityBreedEvent to respond to
+     */
     @EventHandler (priority = EventPriority.LOW)
     public void onEntityBreedEvent(EntityBreedEvent e) {
         // e.getEntity() = new animal

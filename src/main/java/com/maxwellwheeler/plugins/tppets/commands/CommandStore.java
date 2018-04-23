@@ -12,6 +12,10 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
+/**
+ * Object used for store commands
+ * @author GatheringExp
+ */
 public class CommandStore extends TeleportCommand {
     /**
      * Generic constructor, needs to point to plugin for logging.
@@ -21,6 +25,11 @@ public class CommandStore extends TeleportCommand {
         super(thisPlugin);
     }
 
+    /**
+     * Processes all /tpp store commands. Separates the command into who ran the command and who the command is about, and passes this information to processCommandGeneric
+     * @param sender The sender of the command
+     * @param args The arguments passed to the command, excluding /tpp storage
+     */
     // Desired Syntax: /tpp store [pet name] [storage location]
     // Desired Syntax: /tpp store [pet name] [storage location defaults to "default"]
     // Desired Syntax: /tpp store f:[username] [pet name] [storage location]
@@ -46,6 +55,12 @@ public class CommandStore extends TeleportCommand {
         }
     }
 
+    /**
+     * The generic processor for /tpp store [] commands, that takes into account who ran the command and whom the command is about. Analyzes arguments, passes to proper methods, and reports results back to user.
+     * @param pl The command sender
+     * @param commandFor Who the command is about
+     * @param args The arguments passed to /tpp storage, not including /tpp storage
+     */
     public void processCommandGeneric(Player pl, OfflinePlayer commandFor, String[] args) {
         if (ArgValidator.validateArgsLength(args, 2)) {
             // Syntax received: /tpp store [pet name] [storage location]
@@ -85,6 +100,14 @@ public class CommandStore extends TeleportCommand {
         }
     }
 
+    /**
+     * Does the teleporting that is storing.
+     * @param petOwner The owner of the pet
+     * @param petName The pet's name
+     * @param storageLoc The storagelocation object to teleport the pet to
+     * @param kickPlayerOff Whether or not any players riding the pet should be teleported as well
+     * @return True if successful, false if not
+     */
     public boolean storePet(OfflinePlayer petOwner, String petName, StorageLocation storageLoc, boolean kickPlayerOff) {
         return teleportSpecificPet(storageLoc.getLoc(), petOwner, petName, PetType.Pets.UNKNOWN, true, kickPlayerOff, false);
     }

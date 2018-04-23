@@ -360,6 +360,11 @@ public class DBUpdater {
         return false;
     }
 
+    /**
+     * Updates the database from version 3 to version 4
+     * @param dbw The database to update
+     * @return True if successful, false if not
+     */
     private boolean threeToFour(DBWrapper dbw) {
         String makeTableUserStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_user_storage_locations (\n" +
                 "user_id CHAR(32) NOT NULL, \n" +

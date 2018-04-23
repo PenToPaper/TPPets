@@ -316,6 +316,13 @@ class CommandPermissions {
         }
     }
 
+    /**
+     * Generic processor for /tpp list [pet name]-type commands.
+     * @param reportTo The player to list the pets to
+     * @param petOwner The owner of the pets, can be equal to reportTo
+     * @param petName The name of the pet
+     * @return Representation of the result of the action
+     */
     private EditResult listAllowedPlayers(Player reportTo, OfflinePlayer petOwner, String petName) {
         // Checking if petOwner exists and has a valid UUID
         if (!petOwner.hasPlayedBefore()) {

@@ -13,6 +13,10 @@ import org.bukkit.entity.Player;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Object used for storage commands
+ * @author GatheringExp
+ */
 public class CommandStorage {
     private TPPets thisPlugin;
 
@@ -24,6 +28,11 @@ public class CommandStorage {
         this.thisPlugin = thisPlugin;
     }
 
+    /**
+     * Processes all /tpp storage commands. Separates the command into who ran the command and who the command is about, and passes this information to processCommandGeneric
+     * @param sender The sender of the command
+     * @param args The arguments passed to the command, excluding /tpp storage
+     */
     // Desired Syntax: /tpp storage add [storage name]
     // Desired Syntax: /tpp storage remove [storage name]
     // Desired Syntax: /tpp storage list
@@ -53,6 +62,12 @@ public class CommandStorage {
         }
     }
 
+    /**
+     * The generic processor for /tpp storage [] commands, that takes into account who ran the command and whom the command is about. Analyzes arguments, passes to proper methods, and reports results back to user.
+     * @param sender The command sender
+     * @param commandFor Who the command is about
+     * @param args The arguments passed to /tpp storage, not including /tpp storage
+     */
     public void processCommandGeneric(Player sender, OfflinePlayer commandFor, String[] args) {
         if (ArgValidator.validateArgsLength(args, 1)) {
             switch (args[0].toLowerCase()) {
@@ -161,6 +176,13 @@ public class CommandStorage {
      */
     private enum EditResult {SUCCESS, ALREADY_DONE, NO_PLAYER, LIMIT_REACHED, FAILURE}
 
+    /**
+     * Generic processor for adding storage locations.
+     * @param pl The player that ran the command
+     * @param commandFor The player to whom the storage location will be added.
+     * @param storageName The name of the storage location
+     * @return Representation of the result of the edit
+     */
     public EditResult addStorage(Player pl, OfflinePlayer commandFor, String storageName) {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), storageName) == null) {
@@ -180,6 +202,13 @@ public class CommandStorage {
         return EditResult.FAILURE;
     }
 
+    /**
+     * Generic processor for removing storage locations.
+     * @param pl The player that ran the command
+     * @param commandFor The player from whom the storage location will be removed.
+     * @param storageName The name of the storage location
+     * @return Representation of the result of the edit
+     */
     public EditResult removeStorage(Player pl, OfflinePlayer commandFor, String storageName) {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), storageName) != null) {
@@ -194,6 +223,11 @@ public class CommandStorage {
         return EditResult.FAILURE;
     }
 
+    /**
+     * Lists the storage unit commandFor has to pl
+     * @param pl The player that ran the command
+     * @param commandFor The player whose storage location information is to be displayed
+     */
     public void listStorage(Player pl, OfflinePlayer commandFor) {
         if (thisPlugin.getDatabase() != null) {
             pl.sendMessage(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + commandFor.getName() + "'s Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------");
@@ -207,6 +241,12 @@ public class CommandStorage {
         }
     }
 
+    /**
+     * Generic processor for adding server storage locations.
+     * @param pl The player that ran the command
+     * @param storageName The name of the storage location
+     * @return Representation of the result of the edit
+     */
     public EditResult addServerStorage(Player pl, String storageName) {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getServerStorageLocation(storageName, pl.getWorld()) == null) {
@@ -221,6 +261,12 @@ public class CommandStorage {
         return EditResult.FAILURE;
     }
 
+    /**
+     * Generic processor for removing server storage locations.
+     * @param pl The player that ran the command
+     * @param storageName The name of the storage location
+     * @return Representation of the result of the edit
+     */
     public EditResult removeServerStorage(Player pl, String storageName) {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getServerStorageLocation(storageName, pl.getWorld()) != null) {
@@ -235,6 +281,10 @@ public class CommandStorage {
         return EditResult.FAILURE;
     }
 
+    /**
+     * Generic processor for listing server storage locations.
+     * @param pl The player that ran the command
+     */
     public void listServerStorage(Player pl) {
         if (thisPlugin.getDatabase() != null) {
             pl.sendMessage(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE +  "Server's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------");
@@ -251,6 +301,11 @@ public class CommandStorage {
         }
     }
 
+    /**
+     * Displays data from an individual storage location to a player.
+     * @param pl The player to display the data to.
+     * @param storageLoc The storage location data to display.
+     */
     private void listIndividualStorage (Player pl, StorageLocation storageLoc) {
         if (storageLoc != null) {
             pl.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + storageLoc.getStorageName());

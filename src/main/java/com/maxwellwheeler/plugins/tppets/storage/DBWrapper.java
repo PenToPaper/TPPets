@@ -681,26 +681,37 @@ public class DBWrapper {
     }
 
 
-    //        String makeTableStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_storage_locations (\n" +
-    //                "user_id CHAR(32) NOT NULL, \n" +
-    //                "storage_name VARCHAR(64) NOT NULL, \n" +
-    //                "loc_x INT NOT NULL, \n" +
-    //                "loc_y INT NOT NULL, \n" +
-    //                "loc_z INT NOT NULL, \n" +
-    //                "world_name VARCHAR(25) NOT NULL, \n" +
-    //                "PRIMARY KEY (user_id, storage_name)";
+    /**
+     * Adds a storage location to the player storage database.
+     * @param playerUUID The UUID of the player to add the storage for.
+     * @param storageName The name of the storage.
+     * @param loc The location of the storage.
+     * @return True if successful, false if not.
+     */
     public boolean addStorageLocation(String playerUUID, String storageName, Location loc) {
         String insertStorage = "INSERT INTO tpp_user_storage_locations (user_id, storage_name, effective_storage_name, loc_x, loc_y, loc_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         return database.insertPrepStatement(insertStorage, trimmedPlayerUUID, storageName, storageName.toLowerCase(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), loc.getWorld().getName());
     }
 
+    /**
+     * Removes a storage location from the payer storage database.
+     * @param playerUUID The UUID of the player to remove the storage from.
+     * @param storageName The name of the storage.
+     * @return True if successful, false if not.
+     */
     public boolean removeStorageLocation(String playerUUID, String storageName) {
         String removeStorage = "DELETE FROM tpp_user_storage_locations WHERE user_id = ? AND effective_storage_name = ?";
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         return database.deletePrepStatement(removeStorage, trimmedPlayerUUID, storageName.toLowerCase());
     }
 
+    /**
+     * Gets storage locations from a particular player and name.
+     * @param playerUUID The player to retrieve storage locations from.
+     * @param storageName The name of the storage location.
+     * @return The {@link StorageLocation} specified, null otherwise.
+     */
     public StorageLocation getStorageLocation(String playerUUID, String storageName) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -722,6 +733,11 @@ public class DBWrapper {
         return null;
     }
 
+    /**
+     * Gets all storage locations of a particular player
+     * @param playerUUID The player to get the storage locations from.
+     * @return A list of storage locations that the player owns. If there was an error connecting with the database, this is null.
+     */
     public List<StorageLocation> getStorageLocations(String playerUUID) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -743,16 +759,34 @@ public class DBWrapper {
         return null;
     }
 
+    /**
+     * Adds a server-wide storage location.
+     * @param storageName The name of the location.
+     * @param loc The location of the storage.
+     * @return True if successful, false if not.
+     */
     public boolean addServerStorageLocation(String storageName, Location loc) {
         String insertStorage = "INSERT INTO tpp_server_storage_locations (storage_name, effective_storage_name, loc_x, loc_y, loc_z, world_name) VALUES (?, ?, ?, ?, ?, ?)";
         return database.insertPrepStatement(insertStorage, storageName, storageName.toLowerCase(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), loc.getWorld().getName());
     }
 
+    /**
+     * Removes a server-wide storage location.
+     * @param storageName The name of the location to remove.
+     * @param world The world from which to remove the location.
+     * @return True if successful, false if not.
+     */
     public boolean removeServerStorageLocation(String storageName, World world) {
         String removeStorage = "DELETE FROM tpp_server_storage_locations WHERE effective_storage_name = ? AND world_name = ?";
         return database.deletePrepStatement(removeStorage, storageName.toLowerCase(), world.getName());
     }
 
+    /**
+     * Gets a specific server storage location from its name and world.
+     * @param storageName Name of the storage location
+     * @param world The world the storage location is in
+     * @return Object representing the storage location
+     */
     public StorageLocation getServerStorageLocation(String storageName, World world) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -773,6 +807,11 @@ public class DBWrapper {
         return null;
     }
 
+    /**
+     * Gets the default server storage location from the world. It selects the first database entry found if allowTpBetweenWorlds has been set. If not, it takes the storage location specific to the world.
+     * @param world The world to get the default storage location from
+     * @return The default storage location if found, null if can't be found.
+     */
     public StorageLocation getDefaultServerStorageLocation(World world) {
         if (thisPlugin.getAllowTpBetweenWorlds()) {
             Connection dbConn = database.getConnection();
@@ -797,6 +836,11 @@ public class DBWrapper {
         return null;
     }
 
+    /**
+     * Gets all server storage locations in a world, used for listing existing server storage locations.
+     * @param world The world to find storage locations in.
+     * @return A list of storage locations.
+     */
     public List<StorageLocation> getServerStorageLocations(World world) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -817,6 +861,12 @@ public class DBWrapper {
         return null;
     }
 
+    /**
+     * Gets the number of pets a player owns by the owner's UUID and pet type
+     * @param ownerUUID The owner's UUID
+     * @param pt The pet's type
+     * @return Number of pets a player owns of that type
+     */
     public int getNumPetsByPT(String ownerUUID, PetType.Pets pt) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -836,6 +886,11 @@ public class DBWrapper {
         return -1;
     }
 
+    /**
+     * Gets the number of pets a player owns by the owner's UUID
+     * @param ownerUUID The owner's UUID
+     * @return Number of pets a player owns
+     */
     public int getNumPets(String ownerUUID) {
         Connection dbConn = database.getConnection();
         if (dbConn != null) {

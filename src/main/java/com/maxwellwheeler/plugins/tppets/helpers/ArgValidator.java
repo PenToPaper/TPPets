@@ -39,10 +39,22 @@ public class ArgValidator {
         return nameMatcher.find() && !petName.toLowerCase().equals("list") && !petName.toLowerCase().equals("all");
     }
 
+    /**
+     * Checks if the storage name is valid
+     * NOTE: Does not check for uniqueness
+     * @param storeName The storage name to check
+     * @return If the storage name is valid
+     */
     public static boolean validateStorageName(String storeName) {
         return validateServerStorageName(storeName) && !storeName.toLowerCase().equals("default");
     }
 
+    /**
+     * Checks if the server storage name is valid
+     * NOTE: Does not check for uniqueness
+     * @param serverStoreName The storage name to check
+     * @return If the storage name is valid
+     */
     public static boolean validateServerStorageName(String serverStoreName) {
         Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(serverStoreName);
         return nameMatcher.find();

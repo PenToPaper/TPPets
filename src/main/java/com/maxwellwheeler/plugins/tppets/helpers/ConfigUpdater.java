@@ -32,6 +32,7 @@ public class ConfigUpdater {
     /**
      * Sets the schema version in memory and in the config file
      * @param version The version to set the config to
+     * @param save Whether or not the config should be immediately saved
      */
     private void setSchemaVersion(int version, boolean save) {
         thisPlugin.getConfig().set("schema_version", version);
@@ -88,6 +89,9 @@ public class ConfigUpdater {
         thisPlugin.getConfig().set("command_aliases.list", new String[]{"show"});
     }
 
+    /**
+     * Updates the schema from two to three
+     */
     private void twoToThree() {
         thisPlugin.getConfig().set("storage_limit", 5);
         thisPlugin.getConfig().set("command_aliases.store", new String[]{"move", "stable"});
