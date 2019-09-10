@@ -13,7 +13,7 @@ import java.util.Hashtable;
 public class PetType {
     /*
      * Enum representing a pet type.
-     * CAT = ocelot
+     * CAT = cat
      * DOG = wolf
      * PARROT = parrot
      * UNKNOWN = a pet not of the above three types
@@ -26,7 +26,7 @@ public class PetType {
     
     static {
         classTranslate = new Hashtable<>();
-        classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Ocelot.class});
+        classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Cat.class});
         classTranslate.put(Pets.DOG, new Class<?>[]{org.bukkit.entity.Wolf.class});
         classTranslate.put(Pets.PARROT, new Class<?>[]{org.bukkit.entity.Parrot.class});
         classTranslate.put(Pets.MULE, new Class<?>[]{org.bukkit.entity.Mule.class});
@@ -43,7 +43,7 @@ public class PetType {
     public static Pets getEnumByEntity(Entity ent) {
         if (ent instanceof Wolf) {
             return Pets.DOG;
-        } else if (ent instanceof Ocelot) {
+        } else if (ent instanceof Cat) {
             return Pets.CAT;
         } else if (ent instanceof Parrot) {
             return Pets.PARROT;
