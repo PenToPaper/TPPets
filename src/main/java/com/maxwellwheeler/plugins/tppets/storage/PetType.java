@@ -13,7 +13,7 @@ import java.util.Hashtable;
 public class PetType {
     /*
      * Enum representing a pet type.
-     * CAT = ocelot
+     * CAT = cat
      * DOG = wolf
      * PARROT = parrot
      * UNKNOWN = a pet not of the above three types
@@ -21,12 +21,12 @@ public class PetType {
     public enum Pets {
         CAT, DOG, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
     }
-    
+
     private static final Hashtable<Pets, Class<?>[]> classTranslate;
-    
+
     static {
         classTranslate = new Hashtable<>();
-        classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Ocelot.class});
+        classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Cat.class});
         classTranslate.put(Pets.DOG, new Class<?>[]{org.bukkit.entity.Wolf.class});
         classTranslate.put(Pets.PARROT, new Class<?>[]{org.bukkit.entity.Parrot.class});
         classTranslate.put(Pets.MULE, new Class<?>[]{org.bukkit.entity.Mule.class});
@@ -43,7 +43,7 @@ public class PetType {
     public static Pets getEnumByEntity(Entity ent) {
         if (ent instanceof Wolf) {
             return Pets.DOG;
-        } else if (ent instanceof Ocelot) {
+        } else if (ent instanceof Cat) {
             return Pets.CAT;
         } else if (ent instanceof Parrot) {
             return Pets.PARROT;
@@ -64,7 +64,7 @@ public class PetType {
      * Translates the enum to an integer for the database
      */
     private static final Pets[] indexTranslation = new Pets[] {Pets.UNKNOWN, Pets.CAT, Pets.DOG, Pets.PARROT, Pets.MULE, Pets.LLAMA, Pets.DONKEY, Pets.HORSE};
-    
+
     /**
      * Gets a numeric index based on the pet type, used in the database storage of the pet. While MySQL supports enums directly, SQLite does not, so this plugin uses integers to store this data.
      * @param pt The type of the pet
@@ -73,7 +73,7 @@ public class PetType {
     public static int getIndexFromPet(Pets pt) {
         return Arrays.asList(indexTranslation).indexOf(pt);
     }
-    
+
     /**
      * Gets the {@link Pets} enum value from the integer, used when pulling pets from database storage.
      * @param i The index of the pet, consistent with the getIndexFromPet(Pets pt) method.
@@ -82,7 +82,7 @@ public class PetType {
     public static Pets getPetFromIndex(int i) {
         return indexTranslation[i];
     }
-    
+
     /**
      * Returns a reference to the class type of the pet, primarily for the world.getEntitiesByClasses-type methods.
      * @param pt The type of pets to get the class reference of
