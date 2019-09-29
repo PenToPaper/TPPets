@@ -53,10 +53,10 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>
-            <version>6.1.7.3</version>
+            <version>7.0.1</version>
             <scope>system</scope>
             <type>jar</type>
-            <systemPath>${basedir}/lib/worldedit-bukkit-6.1.7.3.jar</systemPath>
+            <systemPath>${basedir}/lib/worldedit-bukkit-7.0.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>net.milkbowl.vault</groupId>

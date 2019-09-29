@@ -2,11 +2,14 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
-import com.sk89q.worldedit.bukkit.selections.Selection;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -33,12 +36,25 @@ abstract class RegionCommand {
      * @return An array of length 2 containing the minimum point, maximum point data for a player if they have a CuboidSelection. Null otherwise.
      */
     protected Location[] getWePoints(Player pl) {
-        Selection playerSelection = we.getSelection(pl);
         Location[] ret = null;
-        if (playerSelection instanceof CuboidSelection) {
-            ret = new Location[] {playerSelection.getMinimumPoint(), playerSelection.getMaximumPoint()};
-        }
+        try {
+            World bukkitWorld = Bukkit.getWorld(we.getSession(pl).getSelectionWorld().getName());
+            Region region = we.getSession(pl).getSelection(we.getSession(pl).getSelectionWorld());
+            if (region instanceof CuboidRegion) {
+                ret = new Location[] {this.weVectorToLocation(bukkitWorld, region.getMinimumPoint()), this.weVectorToLocation(bukkitWorld, region.getMaximumPoint())};
+            }
+        } catch (IncompleteRegionException e) {}
         return ret;
+    }
+
+    /**
+     * Generates a spigot Location object from a WorldEdit BlockVector3 object
+     * @param world The Spigot-defined world the selection is in
+     * @param blockVector3 The WorldEdit vector to convert
+     * @return A spigot-defined Location object with points from blockVector3
+     */
+    protected Location weVectorToLocation(World world, BlockVector3 blockVector3) {
+        return new Location(world, blockVector3.getX(), blockVector3.getY(), blockVector3.getZ());
     }
     
     /**
