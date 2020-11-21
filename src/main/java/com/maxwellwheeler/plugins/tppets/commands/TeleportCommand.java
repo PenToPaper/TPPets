@@ -58,7 +58,7 @@ public abstract class TeleportCommand {
      * @return The found chunk, could be null
      */
     protected Chunk getChunkFromCoords(World world, int x, int z) {
-        return new Location(world, x, 64, z).getChunk();
+        return world.getChunkAt(x, z);
     }
 
     /**
