@@ -1,4 +1,5 @@
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -37,14 +38,14 @@ class ToOwnerTeleportTest {
             worlds.add(world);
 
             //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld(anyString())).thenReturn(world);
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(world);
             bukkit.when(Bukkit::getWorlds).thenReturn(worlds);
 
             // Chunk + Location the correct pet is in
             Chunk chunk = mock(Chunk.class);
             Location location = mock(Location.class);
             when(location.getChunk()).thenReturn(chunk);
-            when(world.getChunkAt(anyInt(), anyInt())).thenReturn(chunk);
+            when(world.getChunkAt(100, 100)).thenReturn(chunk);
 
             // The correct pet Entity instance
             // TODO: MAKE ENTITY IMPLEMENT SITTABLE TO TEST SETSITTING METHOD
@@ -66,17 +67,17 @@ class ToOwnerTeleportTest {
             List<Entity> entityList = new ArrayList<>();
             entityList.add(correctPet);
             entityList.add(incorrectPet);
-            when(world.getEntitiesByClasses(any())).thenReturn(entityList);
+            when(world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
             List<PetStorage> petList = new ArrayList<>();
             petList.add(pet);
 
             // Plugin database wrapper instance
             DBWrapper dbWrapper = mock(DBWrapper.class);
-            when(dbWrapper.getPetByName(any(), any())).thenReturn(pet);
-            when(dbWrapper.getPetsFromOwnerNamePetType(any(), any(), any())).thenReturn(petList);
+            when(dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Plugin log wrapper instance
             LogWrapper logWrapper = mock(LogWrapper.class);
@@ -111,7 +112,8 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission(anyString())).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.horses")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
