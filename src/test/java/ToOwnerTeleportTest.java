@@ -111,7 +111,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.horses")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -223,7 +223,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.horses")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -335,7 +335,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.horses")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -447,7 +447,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.dogs")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -560,7 +560,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.cats")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -673,7 +673,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.birds")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -786,7 +786,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.mules")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -898,7 +898,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.llamas")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");
@@ -1010,7 +1010,7 @@ class ToOwnerTeleportTest {
             when(senderUUID.toString()).thenReturn("MockPlayerId");
             when(sender.getLocation()).thenReturn(sendTo);
             when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
             when(sender.hasPermission("tppets.donkeys")).thenReturn(true);
             when(sender.getWorld()).thenReturn(world);
             when(sender.getName()).thenReturn("MockPlayerName");

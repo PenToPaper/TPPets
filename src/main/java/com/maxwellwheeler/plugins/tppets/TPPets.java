@@ -63,8 +63,8 @@ public class TPPets extends JavaPlugin {
     private PetLimitChecker petIndex;
     private int storageLimit;
 
-    
-    
+
+
     /*
      * VARIABLE INITIALIZERS
      *
@@ -408,6 +408,7 @@ public class TPPets extends JavaPlugin {
         lostRegions.remove(lfr.getZoneName());
     }
 
+    // TODO: ADD JAVADOC
     public boolean canTpThere(Player pl) {
         ProtectedRegion tempPr = getProtectedRegionWithin(pl.getLocation());
         boolean ret = pl.hasPermission("tppets.tpanywhere") || tempPr == null;
