@@ -177,7 +177,7 @@ public abstract class TeleportCommand {
     protected Set<UUID> getPetsAndTeleport(Location sendTo, OfflinePlayer sendFrom, PetType.Pets pt, boolean setSitting, boolean kickPlayerOff) {
         List<World> worlds = Bukkit.getServer().getWorlds();
         Set<UUID> teleportedEnts = new HashSet<>();
-        // If youc an teleport between worlds, check every world
+        // If you can teleport between worlds, check every world
         if (thisPlugin.getAllowTpBetweenWorlds()) {
             for (World world : worlds) {
                 Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, world, pt, teleportedEnts, setSitting, kickPlayerOff);

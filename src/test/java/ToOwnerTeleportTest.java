@@ -1,10 +1,6 @@
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.ChatColor;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.Assert.*;
@@ -102,12 +98,14 @@ class ToOwnerTeleportTest {
 
             verify(chunk, times(1)).load();
             verify(correctPet, times(1)).eject();
-            verify(correctPet).teleport(correctPetCaptor.capture());
             if (correctPet instanceof Sittable) {
                 verify((Sittable)correctPet, times(1)).setSitting(false);
             }
+            verify(correctPet).teleport(correctPetCaptor.capture());
             Location capturedPetLocation = correctPetCaptor.getValue();
             assertEquals( sendTo.getX(), capturedPetLocation.getX(), 0.5);
+            assertEquals( sendTo.getY(), capturedPetLocation.getY(), 0.5);
+            assertEquals( sendTo.getZ(), capturedPetLocation.getZ(), 0.5);
             verify(logWrapper).logSuccessfulAction(logWrapperCaptor.capture());
             String capturedLogOutput = logWrapperCaptor.getValue();
             assertEquals("Player MockPlayerName teleported MockPlayerName's pet named " + petName + " to their location at: x: 1000, y: 100, z: 1000", capturedLogOutput);
@@ -116,6 +114,135 @@ class ToOwnerTeleportTest {
             assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + petName + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
             verify(incorrectPet, times(0)).teleport(any(Location.class));
 
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("teleportsPetsProvider")
+    void teleportsAllValidPets(String commandString, PetType.Pets petType, Class<? extends Entity> className) {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // World instance
+            World world = mock(World.class);
+            when(world.getName()).thenReturn("MockWorld");
+            List<World> worlds = new ArrayList<>();
+            worlds.add(world);
+
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(world);
+            bukkit.when(Bukkit::getWorlds).thenReturn(worlds);
+
+            // Server
+            Server server = mock(Server.class);
+            when(server.getWorlds()).thenReturn(worlds);
+            bukkit.when(Bukkit::getServer).thenReturn(server);
+
+            // Chunk + Location the correct pet is in
+            Chunk chunkOne = mock(Chunk.class);
+            Location locationOne = mock(Location.class);
+            when(locationOne.getChunk()).thenReturn(chunkOne);
+            Chunk chunkTwo = mock(Chunk.class);
+            Location locationTwo = mock(Location.class);
+            when(locationTwo.getChunk()).thenReturn(chunkTwo);
+            when(world.getChunkAt(100, 100)).thenReturn(chunkOne);
+            when(world.getChunkAt(200, 200)).thenReturn(chunkTwo);
+
+            // Location to send the pet to
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets." + commandString});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // The 1st correct pet Entity instance
+            Tameable correctPetOne = (Tameable) TeleportMocksFactory.getMockEntity("MockPetOneId", className);
+            when(correctPetOne.isTamed()).thenReturn(true);
+            when(correctPetOne.getOwner()).thenReturn(sender);
+            ArgumentCaptor<Location> correctPetCaptorOne = ArgumentCaptor.forClass(Location.class);
+
+            // The 2nd correct pet Entity instance
+            Tameable correctPetTwo = (Tameable) TeleportMocksFactory.getMockEntity("MockPetTwoId", className);
+            when(correctPetTwo.isTamed()).thenReturn(true);
+            when(correctPetTwo.getOwner()).thenReturn(sender);
+            ArgumentCaptor<Location> correctPetCaptorTwo = ArgumentCaptor.forClass(Location.class);
+
+            // The incorrect pet Entity instance
+            Tameable incorrectPetOne = (Tameable) TeleportMocksFactory.getMockEntity("MockIncorrectId", className);
+            when(incorrectPetOne.isTamed()).thenReturn(false);
+
+            // The incorrect pet Entity instance
+            Tameable incorrectPetTwo = (Tameable) TeleportMocksFactory.getMockEntity("MockIncorrectId", className);
+            when(incorrectPetTwo.isTamed()).thenReturn(true);
+            when(incorrectPetTwo.getOwner()).thenReturn(null);
+
+            // A list of both entities
+            List<Entity> entityList = new ArrayList<>();
+            entityList.add(correctPetOne);
+            entityList.add(correctPetTwo);
+            entityList.add(incorrectPetOne);
+            entityList.add(incorrectPetTwo);
+            when(world.getEntitiesByClasses(PetType.getClassTranslate(petType))).thenReturn(entityList);
+
+            // PetStorage
+            PetStorage petOne = new PetStorage("MockPetOneId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "MockPetOneName", "MockPetOneName");
+            PetStorage petTwo = new PetStorage("MockPetTwoId", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "MockPetTwoName", "MockPetTwoName");
+            List<PetStorage> petList = new ArrayList<>();
+            petList.add(petOne);
+            petList.add(petTwo);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", petType)).thenReturn(petList);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+            ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add(commandString);
+            aliases.put(commandString, altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {commandString, "all"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(chunkOne, times(1)).load();
+            verify(chunkTwo, times(1)).load();
+            verify(correctPetOne, times(1)).eject();
+            if (correctPetOne instanceof Sittable) {
+                verify((Sittable)correctPetOne, times(1)).setSitting(false);
+            }
+            verify(correctPetTwo, times(1)).eject();
+            if (correctPetTwo instanceof Sittable) {
+                verify((Sittable)correctPetTwo, times(1)).setSitting(false);
+            }
+            verify(correctPetOne).teleport(correctPetCaptorOne.capture());
+            Location capturedPetLocationOne = correctPetCaptorOne.getValue();
+            assertEquals( sendTo.getX(), capturedPetLocationOne.getX(), 0.5);
+            assertEquals( sendTo.getY(), capturedPetLocationOne.getY(), 0.5);
+            assertEquals( sendTo.getZ(), capturedPetLocationOne.getZ(), 0.5);
+
+            verify(correctPetTwo).teleport(correctPetCaptorTwo.capture());
+            Location capturedPetLocationTwo = correctPetCaptorTwo.getValue();
+            assertEquals( sendTo.getX(), capturedPetLocationTwo.getX(), 0.5);
+            assertEquals( sendTo.getY(), capturedPetLocationTwo.getY(), 0.5);
+            assertEquals( sendTo.getZ(), capturedPetLocationTwo.getZ(), 0.5);
+
+            verify(logWrapper).logSuccessfulAction(logWrapperCaptor.capture());
+            String capturedLogOutput = logWrapperCaptor.getValue();
+            assertEquals("Player MockPlayerName teleported 2 of MockPlayerName's " + petType.toString() + "s to their location at: x: 1000, y: 100, z: 1000", capturedLogOutput);
+            verify(sender).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "Your " + ChatColor.WHITE + petType.toString() + "s " + ChatColor.BLUE + "have been teleported to you", capturedMessageOutput);
+
+            verify(incorrectPetOne, times(0)).teleport(any(Location.class));
+            verify(incorrectPetTwo, times(0)).teleport(any(Location.class));
         }
     }
 
@@ -132,5 +259,4 @@ class ToOwnerTeleportTest {
                 Arguments.of("cats", PetType.Pets.CAT, org.bukkit.entity.Cat.class)
         );
     }
-
 }
