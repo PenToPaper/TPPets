@@ -43,18 +43,10 @@ class LackPermissionsTeleportTest {
             when(world.getChunkAt(100, 100)).thenReturn(chunk);
 
             // The correct pet Entity instance
-            Horse correctPet = mock(Horse.class);
-            UUID correctUUID = mock(UUID.class);
-            when(correctUUID.toString()).thenReturn("MockPetId");
-            when(correctPet.getUniqueId()).thenReturn(correctUUID);
-            when(correctPet.getPassengers()).thenReturn(null);
+            Horse correctPet = (Horse) TeleportMocksFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // The incorrect pet Entity instance
-            Entity incorrectPet = mock(Entity.class);
-            UUID incorrectUUID = mock(UUID.class);
-            when(incorrectUUID.toString()).thenReturn("MockIncorrectPetId");
-            when(incorrectPet.getUniqueId()).thenReturn(incorrectUUID);
-            when(incorrectPet.getPassengers()).thenReturn(null);
+            Horse incorrectPet = (Horse) TeleportMocksFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
             List<Entity> entityList = new ArrayList<>();
@@ -76,11 +68,7 @@ class LackPermissionsTeleportTest {
             LogWrapper logWrapper = mock(LogWrapper.class);
 
             // Plugin instance
-            TPPets tpPets = mock(TPPets.class);
-            when(tpPets.getDatabase()).thenReturn(dbWrapper);
-            when(tpPets.canTpThere(any())).thenReturn(false);
-            when(tpPets.getAllowTpBetweenWorlds()).thenReturn(false);
-            when(tpPets.getLogWrapper()).thenReturn(logWrapper);
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, false, false, true);
 
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -89,25 +77,10 @@ class LackPermissionsTeleportTest {
             aliases.put("horses", altAlias);
 
             // Location to send the pet to
-            Location sendTo = mock(Location.class);
-            when(sendTo.getX()).thenReturn(1000d);
-            when(sendTo.getY()).thenReturn(100d);
-            when(sendTo.getZ()).thenReturn(1000d);
-            when(sendTo.getWorld()).thenReturn(world);
-            when(sendTo.getBlockX()).thenReturn(1000);
-            when(sendTo.getBlockY()).thenReturn(100);
-            when(sendTo.getBlockZ()).thenReturn(1000);
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = mock(Player.class);
-            UUID senderUUID = mock(UUID.class);
-            when(senderUUID.toString()).thenReturn("MockPlayerId");
-            when(sender.getLocation()).thenReturn(sendTo);
-            when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
-            when(sender.hasPermission("tppets.horses")).thenReturn(true);
-            when(sender.getWorld()).thenReturn(world);
-            when(sender.getName()).thenReturn("MockPlayerName");
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses", "tppets.teleportother"});
 
             // Command object
             Command command = mock(Command.class);
@@ -143,18 +116,10 @@ class LackPermissionsTeleportTest {
             when(world.getChunkAt(100, 100)).thenReturn(chunk);
 
             // The correct pet Entity instance
-            Horse correctPet = mock(Horse.class);
-            UUID correctUUID = mock(UUID.class);
-            when(correctUUID.toString()).thenReturn("MockPetId");
-            when(correctPet.getUniqueId()).thenReturn(correctUUID);
-            when(correctPet.getPassengers()).thenReturn(null);
+            Horse correctPet = (Horse) TeleportMocksFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // The incorrect pet Entity instance
-            Entity incorrectPet = mock(Entity.class);
-            UUID incorrectUUID = mock(UUID.class);
-            when(incorrectUUID.toString()).thenReturn("MockIncorrectPetId");
-            when(incorrectPet.getUniqueId()).thenReturn(incorrectUUID);
-            when(incorrectPet.getPassengers()).thenReturn(null);
+            Horse incorrectPet = (Horse) TeleportMocksFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
             List<Entity> entityList = new ArrayList<>();
@@ -176,11 +141,7 @@ class LackPermissionsTeleportTest {
             LogWrapper logWrapper = mock(LogWrapper.class);
 
             // Plugin instance
-            TPPets tpPets = mock(TPPets.class);
-            when(tpPets.getDatabase()).thenReturn(dbWrapper);
-            when(tpPets.canTpThere(any())).thenReturn(true);
-            when(tpPets.getAllowTpBetweenWorlds()).thenReturn(false);
-            when(tpPets.getLogWrapper()).thenReturn(logWrapper);
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
 
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -189,25 +150,10 @@ class LackPermissionsTeleportTest {
             aliases.put("horses", altAlias);
 
             // Location to send the pet to
-            Location sendTo = mock(Location.class);
-            when(sendTo.getX()).thenReturn(1000d);
-            when(sendTo.getY()).thenReturn(100d);
-            when(sendTo.getZ()).thenReturn(1000d);
-            when(sendTo.getWorld()).thenReturn(world);
-            when(sendTo.getBlockX()).thenReturn(1000);
-            when(sendTo.getBlockY()).thenReturn(100);
-            when(sendTo.getBlockZ()).thenReturn(1000);
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = mock(Player.class);
-            UUID senderUUID = mock(UUID.class);
-            when(senderUUID.toString()).thenReturn("MockPlayerId");
-            when(sender.getLocation()).thenReturn(sendTo);
-            when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
-            when(sender.hasPermission("tppets.horses")).thenReturn(false);
-            when(sender.getWorld()).thenReturn(world);
-            when(sender.getName()).thenReturn("MockPlayerName");
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{});
 
             // Command object
             Command command = mock(Command.class);
@@ -242,19 +188,10 @@ class LackPermissionsTeleportTest {
             when(world.getChunkAt(100, 100)).thenReturn(chunk);
 
             // The correct pet Entity instance
-            Horse correctPet = mock(Horse.class);
-            ArgumentCaptor<Location> correctPetCaptor = ArgumentCaptor.forClass(Location.class);
-            UUID correctUUID = mock(UUID.class);
-            when(correctUUID.toString()).thenReturn("MockPetId");
-            when(correctPet.getUniqueId()).thenReturn(correctUUID);
-            when(correctPet.getPassengers()).thenReturn(null);
+            Horse correctPet = (Horse) TeleportMocksFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // The incorrect pet Entity instance
-            Entity incorrectPet = mock(Entity.class);
-            UUID incorrectUUID = mock(UUID.class);
-            when(incorrectUUID.toString()).thenReturn("MockIncorrectPetId");
-            when(incorrectPet.getUniqueId()).thenReturn(incorrectUUID);
-            when(incorrectPet.getPassengers()).thenReturn(null);
+            Horse incorrectPet = (Horse) TeleportMocksFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
             List<Entity> entityList = new ArrayList<>();
@@ -276,11 +213,7 @@ class LackPermissionsTeleportTest {
             LogWrapper logWrapper = mock(LogWrapper.class);
 
             // Plugin instance
-            TPPets tpPets = mock(TPPets.class);
-            when(tpPets.getDatabase()).thenReturn(dbWrapper);
-            when(tpPets.canTpThere(any())).thenReturn(true);
-            when(tpPets.getAllowTpBetweenWorlds()).thenReturn(false);
-            when(tpPets.getLogWrapper()).thenReturn(logWrapper);
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
 
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -289,25 +222,10 @@ class LackPermissionsTeleportTest {
             aliases.put("horses", altAlias);
 
             // Location to send the pet to
-            Location sendTo = mock(Location.class);
-            when(sendTo.getX()).thenReturn(1000d);
-            when(sendTo.getY()).thenReturn(100d);
-            when(sendTo.getZ()).thenReturn(1000d);
-            when(sendTo.getWorld()).thenReturn(world);
-            when(sendTo.getBlockX()).thenReturn(1000);
-            when(sendTo.getBlockY()).thenReturn(100);
-            when(sendTo.getBlockZ()).thenReturn(1000);
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = mock(Player.class);
-            UUID senderUUID = mock(UUID.class);
-            when(senderUUID.toString()).thenReturn("MockPlayerId");
-            when(sender.getLocation()).thenReturn(sendTo);
-            when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
-            when(sender.hasPermission("tppets.horses")).thenReturn(true);
-            when(sender.getWorld()).thenReturn(world);
-            when(sender.getName()).thenReturn("MockPlayerName");
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Command object
@@ -347,19 +265,10 @@ class LackPermissionsTeleportTest {
             when(world.getChunkAt(100, 100)).thenReturn(chunk);
 
             // The correct pet Entity instance
-            Horse correctPet = mock(Horse.class);
-            ArgumentCaptor<Location> correctPetCaptor = ArgumentCaptor.forClass(Location.class);
-            UUID correctUUID = mock(UUID.class);
-            when(correctUUID.toString()).thenReturn("MockPetId");
-            when(correctPet.getUniqueId()).thenReturn(correctUUID);
-            when(correctPet.getPassengers()).thenReturn(null);
+            Horse correctPet = (Horse) TeleportMocksFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // The incorrect pet Entity instance
-            Entity incorrectPet = mock(Entity.class);
-            UUID incorrectUUID = mock(UUID.class);
-            when(incorrectUUID.toString()).thenReturn("MockIncorrectPetId");
-            when(incorrectPet.getUniqueId()).thenReturn(incorrectUUID);
-            when(incorrectPet.getPassengers()).thenReturn(null);
+            Horse incorrectPet = (Horse) TeleportMocksFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
             List<Entity> entityList = new ArrayList<>();
@@ -379,15 +288,9 @@ class LackPermissionsTeleportTest {
 
             // Plugin log wrapper instance
             LogWrapper logWrapper = mock(LogWrapper.class);
-            ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
 
             // Plugin instance
-            TPPets tpPets = mock(TPPets.class);
-            when(tpPets.getDatabase()).thenReturn(dbWrapper);
-            when(tpPets.canTpThere(any())).thenReturn(true);
-            when(tpPets.getAllowTpBetweenWorlds()).thenReturn(false);
-            when(tpPets.getLogWrapper()).thenReturn(logWrapper);
-            when(tpPets.isAllowedToPet(anyString(), anyString())).thenReturn(false);
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, false);
 
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -396,34 +299,15 @@ class LackPermissionsTeleportTest {
             aliases.put("horses", altAlias);
 
             // Location to send the pet to
-            Location sendTo = mock(Location.class);
-            when(sendTo.getX()).thenReturn(1000d);
-            when(sendTo.getY()).thenReturn(100d);
-            when(sendTo.getZ()).thenReturn(1000d);
-            when(sendTo.getWorld()).thenReturn(world);
-            when(sendTo.getBlockX()).thenReturn(1000);
-            when(sendTo.getBlockY()).thenReturn(100);
-            when(sendTo.getBlockZ()).thenReturn(1000);
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
+
 
             // Player who sent the command
-            Player sender = mock(Player.class);
-            UUID senderUUID = mock(UUID.class);
-            when(senderUUID.toString()).thenReturn("MockPlayerId");
-            when(sender.getLocation()).thenReturn(sendTo);
-            when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
-            when(sender.hasPermission("tppets.horses")).thenReturn(true);
-            when(sender.getWorld()).thenReturn(world);
-            when(sender.getName()).thenReturn("MockPlayerName");
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Player who owns the pet
-            OfflinePlayer owner = mock(OfflinePlayer.class);
-            when(owner.hasPlayedBefore()).thenReturn(true);
-            UUID ownerUUID = mock(UUID.class);
-            when(ownerUUID.toString()).thenReturn("MockOwnerId");
-            when(owner.getName()).thenReturn("MockOwnerName");
-            when(owner.getUniqueId()).thenReturn(ownerUUID);
+            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
 
             // Command object

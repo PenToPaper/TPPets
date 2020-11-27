@@ -27,13 +27,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-// TODO: REFACTOR SO NOT REPEATING AS MUCH
 @DisplayName("Teleporting owned pets to players")
 class ToOwnerTeleportTest {
 
     @ParameterizedTest
     @MethodSource("teleportsPetsProvider")
-    void teleportsValidPets(String commandString, PetType.Pets petType, Class<Entity> className) {
+    void teleportsValidPets(String commandString, PetType.Pets petType, Class<? extends Entity> className) {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             String petName = commandString.toUpperCase() + "0";
 
@@ -53,19 +52,11 @@ class ToOwnerTeleportTest {
             when(world.getChunkAt(100, 100)).thenReturn(chunk);
 
             // The correct pet Entity instance
-            Entity correctPet = mock(className);
+            Entity correctPet = TeleportMocksFactory.getMockEntity("MockPetId", className);
             ArgumentCaptor<Location> correctPetCaptor = ArgumentCaptor.forClass(Location.class);
-            UUID correctUUID = mock(UUID.class);
-            when(correctUUID.toString()).thenReturn("MockPetId");
-            when(correctPet.getUniqueId()).thenReturn(correctUUID);
-            when(correctPet.getPassengers()).thenReturn(null);
 
             // The incorrect pet Entity instance
-            Entity incorrectPet = mock(Entity.class);
-            UUID incorrectUUID = mock(UUID.class);
-            when(incorrectUUID.toString()).thenReturn("MockIncorrectPetId");
-            when(incorrectPet.getUniqueId()).thenReturn(incorrectUUID);
-            when(incorrectPet.getPassengers()).thenReturn(null);
+            Entity incorrectPet = TeleportMocksFactory.getMockEntity("MockIncorrectPetId", className);
 
             // A list of both entities
             List<Entity> entityList = new ArrayList<>();
@@ -88,11 +79,7 @@ class ToOwnerTeleportTest {
             ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
 
             // Plugin instance
-            TPPets tpPets = mock(TPPets.class);
-            when(tpPets.getDatabase()).thenReturn(dbWrapper);
-            when(tpPets.canTpThere(any())).thenReturn(true);
-            when(tpPets.getAllowTpBetweenWorlds()).thenReturn(false);
-            when(tpPets.getLogWrapper()).thenReturn(logWrapper);
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
 
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -101,25 +88,10 @@ class ToOwnerTeleportTest {
             aliases.put(commandString, altAlias);
 
             // Location to send the pet to
-            Location sendTo = mock(Location.class);
-            when(sendTo.getX()).thenReturn(1000d);
-            when(sendTo.getY()).thenReturn(100d);
-            when(sendTo.getZ()).thenReturn(1000d);
-            when(sendTo.getWorld()).thenReturn(world);
-            when(sendTo.getBlockX()).thenReturn(1000);
-            when(sendTo.getBlockY()).thenReturn(100);
-            when(sendTo.getBlockZ()).thenReturn(1000);
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = mock(Player.class);
-            UUID senderUUID = mock(UUID.class);
-            when(senderUUID.toString()).thenReturn("MockPlayerId");
-            when(sender.getLocation()).thenReturn(sendTo);
-            when(sender.getUniqueId()).thenReturn(senderUUID);
-            when(sender.hasPermission("tppets.teleportother")).thenReturn(false);
-            when(sender.hasPermission("tppets." + commandString)).thenReturn(true);
-            when(sender.getWorld()).thenReturn(world);
-            when(sender.getName()).thenReturn("MockPlayerName");
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets." + commandString});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Command object
