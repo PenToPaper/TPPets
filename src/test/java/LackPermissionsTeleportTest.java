@@ -441,4 +441,65 @@ class LackPermissionsTeleportTest {
             assertEquals(ChatColor.RED + "You don't have permission to do that", capturedMessageOutput);
         }
     }
+
+    @Test
+    @DisplayName("Denies listing all pets when player does not have tppets.teleportother")
+    void listsAllOwnedPets() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // World instance
+            World world = mock(World.class);
+            when(world.getName()).thenReturn("MockWorld");
+            List<World> worlds = new ArrayList<>();
+            worlds.add(world);
+
+            // Server
+            Server server = mock(Server.class);
+            when(server.getWorlds()).thenReturn(worlds);
+            bukkit.when(Bukkit::getServer).thenReturn(server);
+
+            // Player who owns the pet
+            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
+
+            // Location of sender
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // PetStorage
+            PetStorage petOne = new PetStorage("MockPetOneId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPetOneName", "MockPetOneName");
+            PetStorage petTwo = new PetStorage("MockPetTwoId", 7, 200, 200, 200, "MockWorld", "MockOwnerId", "MockPetTwoName", "MockPetTwoName");
+            List<PetStorage> petList = new ArrayList<>();
+            petList.add(petOne);
+            petList.add(petTwo);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetsGeneric("MockOwnerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("horses");
+            aliases.put("horses", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"horses", "f:MockOwnerName", "list"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.RED + "You don't have permission to do that!", capturedMessageOutput);
+        }
+    }
 }

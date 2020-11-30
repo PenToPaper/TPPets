@@ -246,6 +246,67 @@ class ToOwnerTeleportTest {
         }
     }
 
+
+    @ParameterizedTest
+    @MethodSource("teleportsPetsProvider")
+    void listsAllOwnedPets(String commandString, PetType.Pets petType, Class<? extends Entity> className) {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // World instance
+            World world = mock(World.class);
+            when(world.getName()).thenReturn("MockWorld");
+            List<World> worlds = new ArrayList<>();
+            worlds.add(world);
+
+            // Server
+            Server server = mock(Server.class);
+            when(server.getWorlds()).thenReturn(worlds);
+            bukkit.when(Bukkit::getServer).thenReturn(server);
+
+            // Location of sender
+            Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets." + commandString});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // PetStorage
+            PetStorage petOne = new PetStorage("MockPetOneId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "MockPetOneName", "MockPetOneName");
+            PetStorage petTwo = new PetStorage("MockPetTwoId", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "MockPetTwoName", "MockPetTwoName");
+            List<PetStorage> petList = new ArrayList<>();
+            petList.add(petOne);
+            petList.add(petTwo);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", petType)).thenReturn(petList);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add(commandString);
+            aliases.put(commandString, altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {commandString, "list"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(sender, times(4)).sendMessage(playerMessageCaptor.capture());
+            List<String> messages = playerMessageCaptor.getAllValues();
+            assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's " + ChatColor.BLUE + petType.toString() + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
+            assertEquals(ChatColor.WHITE + "  1) MockPetOneName", messages.get(1));
+            assertEquals(ChatColor.WHITE + "  2) MockPetTwoName", messages.get(2));
+            assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(3));
+        }
+    }
+
     private static Stream<Arguments> teleportsPetsProvider() {
         return Stream.of(
                 Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.Horse.class),
