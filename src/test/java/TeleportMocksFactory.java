@@ -55,8 +55,12 @@ public class TeleportMocksFactory {
         UUID playerUUID = mock(UUID.class);
         when(playerUUID.toString()).thenReturn(playerID);
         when(player.getUniqueId()).thenReturn(playerUUID);
-        when(player.getLocation()).thenReturn(playerLocation);
-        when(player.getWorld()).thenReturn(playerWorld);
+        if (playerLocation != null) {
+            when(player.getLocation()).thenReturn(playerLocation);
+        }
+        if (playerWorld != null) {
+            when(player.getWorld()).thenReturn(playerWorld);
+        }
         when(player.getName()).thenReturn(playerName);
 
         when(player.hasPermission(anyString())).thenReturn(false);

@@ -3,14 +3,15 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import static org.junit.Assert.*;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import org.bukkit.command.Command;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
@@ -20,14 +21,18 @@ import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Stream;
 
-@DisplayName("Teleporting unowned pets to valid players with permission")
-class ToDifferentPersonTeleportTest {
+@DisplayName("Teleporting owned pets to players")
+class OwnerPetManagementTest {
 
-    @Test
-    @DisplayName("Teleports unowned horses to players that have been explicitly granted permission by the owner")
-    void teleportsValidUnownedHorse() {
+    @ParameterizedTest
+    @MethodSource("teleportsPetsProvider")
+    void teleportsValidPets(String commandString, PetType.Pets petType, Class<? extends Entity> className) {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            String petName = commandString.toUpperCase() + "0";
+
             // World instance
             World world = mock(World.class);
             List<World> worlds = new ArrayList<>();
@@ -44,27 +49,27 @@ class ToDifferentPersonTeleportTest {
             when(world.getChunkAt(100, 100)).thenReturn(chunk);
 
             // The correct pet Entity instance
-            Horse correctPet = (Horse) TeleportMocksFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Entity correctPet = TeleportMocksFactory.getMockEntity("MockPetId", className);
             ArgumentCaptor<Location> correctPetCaptor = ArgumentCaptor.forClass(Location.class);
 
             // The incorrect pet Entity instance
-            Horse incorrectPet = (Horse) TeleportMocksFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
+            Entity incorrectPet = TeleportMocksFactory.getMockEntity("MockIncorrectPetId", className);
 
             // A list of both entities
             List<Entity> entityList = new ArrayList<>();
             entityList.add(correctPet);
             entityList.add(incorrectPet);
-            when(world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(world.getEntitiesByClasses(PetType.getClassTranslate(petType))).thenReturn(entityList);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", petName, petName);
             List<PetStorage> petList = new ArrayList<>();
             petList.add(pet);
 
             // Plugin database wrapper instance
             DBWrapper dbWrapper = mock(DBWrapper.class);
-            when(dbWrapper.getPetByName("MockOwnerId", "HORSE0")).thenReturn(pet);
-            when(dbWrapper.getPetsFromOwnerNamePetType("MockOwnerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(dbWrapper.getPetByName("MockPlayerId", petName)).thenReturn(pet);
+            when(dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", petName, petType)).thenReturn(petList);
 
             // Plugin log wrapper instance
             LogWrapper logWrapper = mock(LogWrapper.class);
@@ -76,44 +81,46 @@ class ToDifferentPersonTeleportTest {
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
             List<String> altAlias = new ArrayList<>();
-            altAlias.add("horses");
-            aliases.put("horses", altAlias);
+            altAlias.add(commandString);
+            aliases.put(commandString, altAlias);
 
             // Location to send the pet to
             Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets." + commandString});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
-
-            // Player who owns the pet
-            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
-            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
 
             // Command object
             Command command = mock(Command.class);
-            String[] args = {"horses", "f:MockOwnerName", "HORSE0"};
+            String[] args = {commandString, petName};
             CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
             commandTPP.onCommand(sender, command, "", args);
 
             verify(chunk, times(1)).load();
+            verify(correctPet, times(1)).eject();
+            if (correctPet instanceof Sittable) {
+                verify((Sittable)correctPet, times(1)).setSitting(false);
+            }
             verify(correctPet).teleport(correctPetCaptor.capture());
             Location capturedPetLocation = correctPetCaptor.getValue();
             assertEquals( sendTo.getX(), capturedPetLocation.getX(), 0.5);
+            assertEquals( sendTo.getY(), capturedPetLocation.getY(), 0.5);
+            assertEquals( sendTo.getZ(), capturedPetLocation.getZ(), 0.5);
             verify(logWrapper).logSuccessfulAction(logWrapperCaptor.capture());
             String capturedLogOutput = logWrapperCaptor.getValue();
-            assertEquals("Player MockPlayerName teleported MockOwnerName's pet named HORSE0 to their location at: x: 1000, y: 100, z: 1000", capturedLogOutput);
+            assertEquals("Player MockPlayerName teleported MockPlayerName's pet named " + petName + " to their location at: x: 1000, y: 100, z: 1000", capturedLogOutput);
             verify(sender).sendMessage(playerMessageCaptor.capture());
             String capturedMessageOutput = playerMessageCaptor.getValue();
-            assertEquals(ChatColor.WHITE + "MockOwnerName's " + ChatColor.BLUE + "pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
+            assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + petName + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
             verify(incorrectPet, times(0)).teleport(any(Location.class));
 
         }
     }
 
-    @Test
-    @DisplayName("Teleports all unowned horses to players that have tppets.teleportother")
-    void teleportsValidAllUnownedHorses() {
+    @ParameterizedTest
+    @MethodSource("teleportsPetsProvider")
+    void teleportsAllValidPets(String commandString, PetType.Pets petType, Class<? extends Entity> className) {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             // World instance
             World world = mock(World.class);
@@ -144,31 +151,27 @@ class ToDifferentPersonTeleportTest {
             Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses", "tppets.teleportother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets." + commandString});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
-            // Player who owns the pet
-            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
-            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
-
             // The 1st correct pet Entity instance
-            Tameable correctPetOne = (Tameable) TeleportMocksFactory.getMockEntity("MockPetOneId", org.bukkit.entity.Horse.class);
+            Tameable correctPetOne = (Tameable) TeleportMocksFactory.getMockEntity("MockPetOneId", className);
             when(correctPetOne.isTamed()).thenReturn(true);
-            when(correctPetOne.getOwner()).thenReturn(owner);
+            when(correctPetOne.getOwner()).thenReturn(sender);
             ArgumentCaptor<Location> correctPetCaptorOne = ArgumentCaptor.forClass(Location.class);
 
             // The 2nd correct pet Entity instance
-            Tameable correctPetTwo = (Tameable) TeleportMocksFactory.getMockEntity("MockPetTwoId", org.bukkit.entity.Horse.class);
+            Tameable correctPetTwo = (Tameable) TeleportMocksFactory.getMockEntity("MockPetTwoId", className);
             when(correctPetTwo.isTamed()).thenReturn(true);
-            when(correctPetTwo.getOwner()).thenReturn(owner);
+            when(correctPetTwo.getOwner()).thenReturn(sender);
             ArgumentCaptor<Location> correctPetCaptorTwo = ArgumentCaptor.forClass(Location.class);
 
             // The incorrect pet Entity instance
-            Tameable incorrectPetOne = (Tameable) TeleportMocksFactory.getMockEntity("MockIncorrectId", org.bukkit.entity.Horse.class);
+            Tameable incorrectPetOne = (Tameable) TeleportMocksFactory.getMockEntity("MockIncorrectId", className);
             when(incorrectPetOne.isTamed()).thenReturn(false);
 
             // The incorrect pet Entity instance
-            Tameable incorrectPetTwo = (Tameable) TeleportMocksFactory.getMockEntity("MockIncorrectId", org.bukkit.entity.Horse.class);
+            Tameable incorrectPetTwo = (Tameable) TeleportMocksFactory.getMockEntity("MockIncorrectId", className);
             when(incorrectPetTwo.isTamed()).thenReturn(true);
             when(incorrectPetTwo.getOwner()).thenReturn(null);
 
@@ -178,7 +181,7 @@ class ToDifferentPersonTeleportTest {
             entityList.add(correctPetTwo);
             entityList.add(incorrectPetOne);
             entityList.add(incorrectPetTwo);
-            when(world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(world.getEntitiesByClasses(PetType.getClassTranslate(petType))).thenReturn(entityList);
 
             // PetStorage
             PetStorage petOne = new PetStorage("MockPetOneId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "MockPetOneName", "MockPetOneName");
@@ -189,7 +192,7 @@ class ToDifferentPersonTeleportTest {
 
             // Plugin database wrapper instance
             DBWrapper dbWrapper = mock(DBWrapper.class);
-            when(dbWrapper.getPetsGeneric("MockOwnerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", petType)).thenReturn(petList);
 
             // Plugin log wrapper instance
             LogWrapper logWrapper = mock(LogWrapper.class);
@@ -201,20 +204,25 @@ class ToDifferentPersonTeleportTest {
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
             List<String> altAlias = new ArrayList<>();
-            altAlias.add("horses");
-            aliases.put("horses", altAlias);
+            altAlias.add(commandString);
+            aliases.put(commandString, altAlias);
 
             // Command object
             Command command = mock(Command.class);
-            String[] args = {"horses", "f:MockOwnerName", "all"};
+            String[] args = {commandString, "all"};
             CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
             commandTPP.onCommand(sender, command, "", args);
 
             verify(chunkOne, times(1)).load();
             verify(chunkTwo, times(1)).load();
             verify(correctPetOne, times(1)).eject();
+            if (correctPetOne instanceof Sittable) {
+                verify((Sittable)correctPetOne, times(1)).setSitting(false);
+            }
             verify(correctPetTwo, times(1)).eject();
-
+            if (correctPetTwo instanceof Sittable) {
+                verify((Sittable)correctPetTwo, times(1)).setSitting(false);
+            }
             verify(correctPetOne).teleport(correctPetCaptorOne.capture());
             Location capturedPetLocationOne = correctPetCaptorOne.getValue();
             assertEquals( sendTo.getX(), capturedPetLocationOne.getX(), 0.5);
@@ -229,19 +237,20 @@ class ToDifferentPersonTeleportTest {
 
             verify(logWrapper).logSuccessfulAction(logWrapperCaptor.capture());
             String capturedLogOutput = logWrapperCaptor.getValue();
-            assertEquals("Player MockPlayerName teleported 2 of MockOwnerName's HORSEs to their location at: x: 1000, y: 100, z: 1000", capturedLogOutput);
+            assertEquals("Player MockPlayerName teleported 2 of MockPlayerName's " + petType.toString() + "s to their location at: x: 1000, y: 100, z: 1000", capturedLogOutput);
             verify(sender).sendMessage(playerMessageCaptor.capture());
             String capturedMessageOutput = playerMessageCaptor.getValue();
-            assertEquals(ChatColor.WHITE + "MockOwnerName's " + ChatColor.WHITE + "HORSEs " + ChatColor.BLUE + "have been teleported to you", capturedMessageOutput);
+            assertEquals(ChatColor.BLUE + "Your " + ChatColor.WHITE + petType.toString() + "s " + ChatColor.BLUE + "have been teleported to you", capturedMessageOutput);
 
             verify(incorrectPetOne, times(0)).teleport(any(Location.class));
             verify(incorrectPetTwo, times(0)).teleport(any(Location.class));
         }
     }
 
-    @Test
-    @DisplayName("Lists all owned horses of other players to players that have tppets.teleportother")
-    void listsAllOwnedPets() {
+
+    @ParameterizedTest
+    @MethodSource("teleportsPetsProvider")
+    void listsAllOwnedPets(String commandString, PetType.Pets petType, Class<? extends Entity> className) {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             // World instance
             World world = mock(World.class);
@@ -254,27 +263,23 @@ class ToDifferentPersonTeleportTest {
             when(server.getWorlds()).thenReturn(worlds);
             bukkit.when(Bukkit::getServer).thenReturn(server);
 
-            // Player who owns the pet
-            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
-            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
-
             // Location of sender
             Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses", "tppets.teleportother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets." + commandString});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // PetStorage
-            PetStorage petOne = new PetStorage("MockPetOneId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPetOneName", "MockPetOneName");
-            PetStorage petTwo = new PetStorage("MockPetTwoId", 7, 200, 200, 200, "MockWorld", "MockOwnerId", "MockPetTwoName", "MockPetTwoName");
+            PetStorage petOne = new PetStorage("MockPetOneId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "MockPetOneName", "MockPetOneName");
+            PetStorage petTwo = new PetStorage("MockPetTwoId", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "MockPetTwoName", "MockPetTwoName");
             List<PetStorage> petList = new ArrayList<>();
             petList.add(petOne);
             petList.add(petTwo);
 
             // Plugin database wrapper instance
             DBWrapper dbWrapper = mock(DBWrapper.class);
-            when(dbWrapper.getPetsGeneric("MockOwnerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", petType)).thenReturn(petList);
 
             // Plugin log wrapper instance
             LogWrapper logWrapper = mock(LogWrapper.class);
@@ -285,21 +290,98 @@ class ToDifferentPersonTeleportTest {
             // Command aliases
             Hashtable<String, List<String>> aliases = new Hashtable<>();
             List<String> altAlias = new ArrayList<>();
-            altAlias.add("horses");
-            aliases.put("horses", altAlias);
+            altAlias.add(commandString);
+            aliases.put(commandString, altAlias);
 
             // Command object
             Command command = mock(Command.class);
-            String[] args = {"horses", "f:MockOwnerName", "list"};
+            String[] args = {commandString, "list"};
             CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
             commandTPP.onCommand(sender, command, "", args);
 
             verify(sender, times(4)).sendMessage(playerMessageCaptor.capture());
             List<String> messages = playerMessageCaptor.getAllValues();
-            assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockOwnerName's " + ChatColor.BLUE + "HORSE names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
+            assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's " + ChatColor.BLUE + petType.toString() + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
             assertEquals(ChatColor.WHITE + "  1) MockPetOneName", messages.get(1));
             assertEquals(ChatColor.WHITE + "  2) MockPetTwoName", messages.get(2));
             assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(3));
         }
+    }
+
+
+    @Test
+    @DisplayName("Allows specific players to pets and registers the association in database")
+    void listsAllOwnedPets() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPet", "MockPet");
+
+            // Player who's being allowed to the pet
+            OfflinePlayer guest = TeleportMocksFactory.getMockOfflinePlayer("MockGuestId", "MockGuestName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(guest);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockOwnerId", null, null,"MockOwnerName", new String[]{"tppets.addallow"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetByName("MockOwnerId", "MockPetName")).thenReturn(pet);
+            when(dbWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+            ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Allowed players hashtable instance
+            List<String> allowedPlayersList = new ArrayList<>();
+            Hashtable <String, List<String>> allowedPlayersTable = mock(Hashtable.class);
+            when(allowedPlayersTable.containsKey("MockPetId")).thenReturn(false);
+            when(allowedPlayersTable.get("MockPetId")).thenReturn(allowedPlayersList);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+            when(tpPets.isAllowedToPet("MockPetId", "MockGuestId")).thenReturn(false);
+            when(tpPets.getAllowedPlayers()).thenReturn(allowedPlayersTable);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("allow");
+            aliases.put("allow", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"allow", "MockGuestName", "MockPetName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(dbWrapper, times(1)).insertAllowedPlayer("MockPetId", "MockGuestId");
+            verify(allowedPlayersTable, times(1)).put(any(), any());
+            assertEquals("MockGuestId", allowedPlayersList.get(0));
+
+            verify(logWrapper, times(1)).logSuccessfulAction(logWrapperCaptor.capture());
+            String capturedLogOutput = logWrapperCaptor.getValue();
+            assertEquals("MockOwnerName allowed MockGuestName to use their pet named MockPetName", capturedLogOutput);
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.WHITE + "MockGuestName" + ChatColor.BLUE + " has been allowed to use your pet " + ChatColor.WHITE + "MockPetName", capturedMessageOutput);
+        }
+    }
+
+
+    private static Stream<Arguments> teleportsPetsProvider() {
+        return Stream.of(
+                Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.Horse.class),
+                Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.SkeletonHorse.class),
+                Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.ZombieHorse.class),
+                Arguments.of("donkeys", PetType.Pets.DONKEY, org.bukkit.entity.Donkey.class),
+                Arguments.of("llamas", PetType.Pets.LLAMA, org.bukkit.entity.Llama.class),
+                Arguments.of("mules", PetType.Pets.MULE, org.bukkit.entity.Mule.class),
+                Arguments.of("birds", PetType.Pets.PARROT, org.bukkit.entity.Parrot.class),
+                Arguments.of("dogs", PetType.Pets.DOG, org.bukkit.entity.Wolf.class),
+                Arguments.of("cats", PetType.Pets.CAT, org.bukkit.entity.Cat.class)
+        );
     }
 }
