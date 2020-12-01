@@ -505,7 +505,7 @@ class InvalidCommandPetManagementTest {
 
 
     @Test
-    @DisplayName("Allows specific players to other players' pets and registers the association in database")
+    @DisplayName("Does not allow specific players to other players' pets and registers the association in database without permission")
     void doesNotAllowOfflinePlayersWithoutPermission() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             // PetStorage
@@ -562,5 +562,66 @@ class InvalidCommandPetManagementTest {
             String capturedMessageOutput = playerMessageCaptor.getValue();
             assertEquals(ChatColor.RED + "You don't have permission to do this.", capturedMessageOutput);
         }
+    }
+
+    @Test
+    @DisplayName("Does not remove specific players from other players' pets and registers the association in database without permission")
+    void doesNotRemoveOfflinePlayersWithoutPermission() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPet", "MockPet");
+
+            // Player who's being allowed to the pet
+            OfflinePlayer guest = TeleportMocksFactory.getMockOfflinePlayer("MockGuestId", "MockGuestName");
+            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(guest);
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", null, null,"MockAdminName", new String[]{"tppets.removeallow"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Allowed players hashtable instance
+            List<String> allowedPlayersList = new ArrayList<>();
+            allowedPlayersList.add("MockGuestId");
+            Hashtable <String, List<String>> allowedPlayersTable = mock(Hashtable.class);
+            when(allowedPlayersTable.containsKey("MockPetId")).thenReturn(false);
+            when(allowedPlayersTable.get("MockPetId")).thenReturn(allowedPlayersList);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetByName("MockOwnerId", "MockPetName")).thenReturn(pet);
+            when(dbWrapper.deleteAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+            when(tpPets.getDatabase()).thenReturn(dbWrapper);
+            when(tpPets.isAllowedToPet("MockPetId", "MockGuestId")).thenReturn(true);
+            when(tpPets.getAllowedPlayers()).thenReturn(allowedPlayersTable);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("remove");
+            aliases.put("remove", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"remove", "f:MockOwnerName", "MockGuestName", "MockPetName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(allowedPlayersTable, never()).put(any(), any());
+            assertEquals(1, allowedPlayersList.size());
+
+            verify(logWrapper, never()).logSuccessfulAction(anyString());
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.RED + "You don't have permission to do this.", capturedMessageOutput);        }
     }
 }

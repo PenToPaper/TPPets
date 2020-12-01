@@ -366,4 +366,70 @@ class NotOwnerPetManagementTest {
             assertEquals(ChatColor.WHITE + "MockGuestName" + ChatColor.BLUE + " has been allowed to use " + ChatColor.WHITE + "MockOwnerName" + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + "MockPetName", capturedMessageOutput);
         }
     }
+
+
+    @Test
+    @DisplayName("Removes specific players' access to other players' pets and removes restiration from database")
+    void allowsOfflinePlayerRemovePermissions() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPet", "MockPet");
+
+            // Player who's being allowed to the pet
+            OfflinePlayer guest = TeleportMocksFactory.getMockOfflinePlayer("MockGuestId", "MockGuestName");
+            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(guest);
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", null, null,"MockAdminName", new String[]{"tppets.removeallow", "tppets.allowother"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Allowed players hashtable instance
+            List<String> allowedPlayersList = new ArrayList<>();
+            allowedPlayersList.add("MockGuestId");
+            Hashtable <String, List<String>> allowedPlayersTable = mock(Hashtable.class);
+            when(allowedPlayersTable.containsKey("MockPetId")).thenReturn(false);
+            when(allowedPlayersTable.get("MockPetId")).thenReturn(allowedPlayersList);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetByName("MockOwnerId", "MockPetName")).thenReturn(pet);
+            when(dbWrapper.deleteAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+            ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+            when(tpPets.getDatabase()).thenReturn(dbWrapper);
+            when(tpPets.isAllowedToPet("MockPetId", "MockGuestId")).thenReturn(true);
+            when(tpPets.getAllowedPlayers()).thenReturn(allowedPlayersTable);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("remove");
+            aliases.put("remove", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"remove", "f:MockOwnerName", "MockGuestName", "MockPetName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(dbWrapper, times(1)).deleteAllowedPlayer("MockPetId", "MockGuestId");
+            verify(allowedPlayersTable, times(1)).put(any(), any());
+            assertEquals(0, allowedPlayersList.size());
+
+            verify(logWrapper, times(1)).logSuccessfulAction(logWrapperCaptor.capture());
+            String capturedLogOutput = logWrapperCaptor.getValue();
+            assertEquals("MockAdminName disallowed MockGuestName to use MockOwnerName's pet named MockPetName", capturedLogOutput);
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.WHITE + "MockGuestName" + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + "MockOwnerName" + ChatColor.BLUE + "'s pet " + ChatColor.WHITE + "MockPetName", capturedMessageOutput);
+        }
+    }
 }

@@ -311,7 +311,7 @@ class OwnerPetManagementTest {
 
     @Test
     @DisplayName("Allows specific players to pets and registers the association in database")
-    void listsAllOwnedPets() {
+    void allowsPlayersToOwnedPets() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPet", "MockPet");
@@ -367,6 +367,70 @@ class OwnerPetManagementTest {
             verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
             String capturedMessageOutput = playerMessageCaptor.getValue();
             assertEquals(ChatColor.WHITE + "MockGuestName" + ChatColor.BLUE + " has been allowed to use your pet " + ChatColor.WHITE + "MockPetName", capturedMessageOutput);
+        }
+    }
+
+
+    @Test
+    @DisplayName("Removes players' access to other players' pets and removes restiration from database")
+    void removesPlayersFromOwnedPets() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPet", "MockPet");
+
+            // Allowed players hashtable instance
+            List<String> allowedPlayersList = new ArrayList<>();
+            allowedPlayersList.add("MockGuestId");
+            Hashtable <String, List<String>> allowedPlayersTable = mock(Hashtable.class);
+            when(allowedPlayersTable.containsKey("MockPetId")).thenReturn(false);
+            when(allowedPlayersTable.get("MockPetId")).thenReturn(allowedPlayersList);
+
+            // Player who's being allowed to the pet
+            OfflinePlayer guest = TeleportMocksFactory.getMockOfflinePlayer("MockGuestId", "MockGuestName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(guest);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockOwnerId", null, null,"MockOwnerName", new String[]{"tppets.removeallow"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetByName("MockOwnerId", "MockPetName")).thenReturn(pet);
+            when(dbWrapper.deleteAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+            ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+            when(tpPets.getDatabase()).thenReturn(dbWrapper);
+            when(tpPets.isAllowedToPet("MockPetId", "MockGuestId")).thenReturn(true);
+            when(tpPets.getAllowedPlayers()).thenReturn(allowedPlayersTable);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("remove");
+            aliases.put("remove", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"remove", "MockGuestName", "MockPetName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(dbWrapper, times(1)).deleteAllowedPlayer("MockPetId", "MockGuestId");
+            verify(allowedPlayersTable, times(1)).put(any(), any());
+            assertEquals(0, allowedPlayersList.size());
+
+            verify(logWrapper, times(1)).logSuccessfulAction(logWrapperCaptor.capture());
+            String capturedLogOutput = logWrapperCaptor.getValue();
+            assertEquals("MockOwnerName disallowed MockGuestName to use their pet named MockPetName", capturedLogOutput);
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.WHITE + "MockGuestName" + ChatColor.BLUE + " is no longer allowed to use " + ChatColor.WHITE + "MockPetName", capturedMessageOutput);
         }
     }
 
