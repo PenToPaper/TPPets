@@ -624,4 +624,73 @@ class InvalidCommandPetManagementTest {
             String capturedMessageOutput = playerMessageCaptor.getValue();
             assertEquals(ChatColor.RED + "You don't have permission to do this.", capturedMessageOutput);        }
     }
+
+
+    @Test
+    @DisplayName("Does not list other players' access to other players' pets without permission")
+    void listsPlayersWithAccessToOwnedPets() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // Owner of the pet
+            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
+
+            // Mock UUIDs allowed to pet, 32 digit UUIDs
+            List<String> allowed = new ArrayList<>();
+            allowed.add("00000000000000000000000000000000");
+            allowed.add("11111111111111111111111111111111");
+            allowed.add("22222222222222222222222222222222");
+            allowed.add("33333333333333333333333333333333");
+
+            List<UUID> allowedUUID = new ArrayList<>();
+            allowedUUID.add(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            allowedUUID.add(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+            allowedUUID.add(UUID.fromString("22222222-2222-2222-2222-222222222222"));
+            allowedUUID.add(UUID.fromString("33333333-3333-3333-3333-333333333333"));
+
+            List<OfflinePlayer> allowedPlayers = new ArrayList<>();
+            allowedPlayers.add(TeleportMocksFactory.getMockOfflinePlayer(allowed.get(0), "MockGuestName0"));
+            allowedPlayers.add(TeleportMocksFactory.getMockOfflinePlayer(allowed.get(1), "MockGuestName1"));
+            allowedPlayers.add(TeleportMocksFactory.getMockOfflinePlayer(allowed.get(2), "MockGuestName2"));
+            allowedPlayers.add(TeleportMocksFactory.getMockOfflinePlayer(allowed.get(3), "MockGuestName3"));
+
+            bukkit.when(() ->Bukkit.getOfflinePlayer(allowedUUID.get(0))).thenReturn(allowedPlayers.get(0));
+            bukkit.when(() ->Bukkit.getOfflinePlayer(allowedUUID.get(1))).thenReturn(allowedPlayers.get(1));
+            bukkit.when(() ->Bukkit.getOfflinePlayer(allowedUUID.get(2))).thenReturn(allowedPlayers.get(2));
+            bukkit.when(() ->Bukkit.getOfflinePlayer(allowedUUID.get(3))).thenReturn(allowedPlayers.get(3));
+
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockOwnerId", "MockPet", "MockPet");
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getPetByName("MockOwnerId", "MockPetName")).thenReturn(pet);
+            when(dbWrapper.getAllowedPlayers("MockPetId")).thenReturn(allowed);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", null, null,"MockAdminName", new String[]{"tppets.listallow"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("list");
+            aliases.put("list", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"list", "f:MockOwnerName", "MockPetName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String message = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.RED + "You don't have permission to do this.", message);
+        }
+    }
 }

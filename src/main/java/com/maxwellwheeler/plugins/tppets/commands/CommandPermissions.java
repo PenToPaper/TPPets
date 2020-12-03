@@ -323,6 +323,7 @@ class CommandPermissions {
      * @param petName The name of the pet
      * @return Representation of the result of the action
      */
+    // TODO: MAKE OUTPUT MORE CONSISTENT WITH REST OF PROJECT
     private EditResult listAllowedPlayers(Player reportTo, OfflinePlayer petOwner, String petName) {
         // Checking if petOwner exists and has a valid UUID
         if (!petOwner.hasPlayedBefore()) {
