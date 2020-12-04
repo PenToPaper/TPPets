@@ -132,7 +132,7 @@ public class CommandStorage {
                                     if (sender.equals(commandFor)) {
                                         sender.sendMessage(ChatColor.WHITE + args[1] + ChatColor.BLUE + " does not exist");
                                     } else {
-                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " does not have a location named " + ChatColor.WHITE + args[1]);
+                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " does not have a storage location named " + ChatColor.WHITE + args[1]);
                                     }
                                     break;
                                 case FAILURE:
@@ -217,7 +217,7 @@ public class CommandStorage {
         if (thisPlugin.getDatabase() != null) {
             if (thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), storageName) != null) {
                 if (thisPlugin.getDatabase().removeStorageLocation(commandFor.getUniqueId().toString(), storageName)) {
-                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getUniqueId().toString() + " has added location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()) + " for " + commandFor.getName());
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getName() + " has removed location " + storageName + " from " + commandFor.getName());
                     return EditResult.SUCCESS;
                 }
             } else {

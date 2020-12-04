@@ -6,7 +6,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
 
 import java.util.UUID;
 
@@ -50,7 +49,7 @@ public class TeleportMocksFactory {
         return tpPets;
     }
 
-    public static Player getMockPlayer(String playerID, Location playerLocation, World playerWorld, String playerName, String[] permissions) {
+    public static Player getMockPlayer(String playerID, String playerName, World playerWorld, Location playerLocation, String[] permissions) {
         Player player = mock(Player.class);
         UUID playerUUID = mock(UUID.class);
         when(playerUUID.toString()).thenReturn(playerID);

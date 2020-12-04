@@ -10,8 +10,6 @@ import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import org.bukkit.command.Command;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
@@ -84,7 +82,7 @@ class NotOwnerPetManagementTest {
             Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, sendTo, new String[]{"tppets.horses"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Player who owns the pet
@@ -145,7 +143,7 @@ class NotOwnerPetManagementTest {
             Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses", "tppets.teleportother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, sendTo, new String[]{"tppets.horses", "tppets.teleportother"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Player who owns the pet
@@ -263,7 +261,7 @@ class NotOwnerPetManagementTest {
             Location sendTo = TeleportMocksFactory.getMockLocation(world, 1000, 100, 1000);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", sendTo, world,"MockPlayerName", new String[]{"tppets.horses", "tppets.teleportother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, sendTo, new String[]{"tppets.horses", "tppets.teleportother"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // PetStorage
@@ -319,7 +317,7 @@ class NotOwnerPetManagementTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", null, null,"MockAdminName", new String[]{"tppets.addallow", "tppets.allowother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.addallow", "tppets.allowother"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Plugin database wrapper instance
@@ -383,7 +381,7 @@ class NotOwnerPetManagementTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", null, null,"MockAdminName", new String[]{"tppets.removeallow", "tppets.allowother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.removeallow", "tppets.allowother"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Allowed players hashtable instance
@@ -481,7 +479,7 @@ class NotOwnerPetManagementTest {
             TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", null, null,"MockAdminName", new String[]{"tppets.listallow", "tppets.allowother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.listallow", "tppets.allowother"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Command aliases
@@ -522,7 +520,7 @@ class NotOwnerPetManagementTest {
             Location playerLoc = TeleportMocksFactory.getMockLocation(world, 100, 200, 300);
 
             // Player who sent the command
-            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", playerLoc, world,"MockAdminName", new String[]{"tppets.storage", "tppets.storageother"});
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", "MockAdminName", world, playerLoc, new String[]{"tppets.storage", "tppets.storageother"});
             ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
 
             // Plugin database wrapper instance
