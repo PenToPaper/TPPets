@@ -47,12 +47,16 @@ public class CommandStorage {
         if (sender instanceof Player && ArgValidator.validateArgsLength(args, 1)) {
             Player playerTemp = (Player) sender;
             String isForSomeoneElse = ArgValidator.isForSomeoneElse(args[0]);
-            if (isForSomeoneElse != null && ArgValidator.validateUsername(isForSomeoneElse) && sender.hasPermission("tppets.storageother")) {
-                OfflinePlayer commandFor = Bukkit.getOfflinePlayer(isForSomeoneElse);
-                if (commandFor != null && commandFor.hasPlayedBefore() && ArgValidator.validateArgsLength(args, 2)) {
-                    processCommandGeneric(playerTemp, commandFor, Arrays.copyOfRange(args, 1, args.length));
+            if (isForSomeoneElse != null && ArgValidator.validateUsername(isForSomeoneElse)) {
+                if (sender.hasPermission("tppets.storageother")) {
+                    OfflinePlayer commandFor = Bukkit.getOfflinePlayer(isForSomeoneElse);
+                    if (commandFor != null && commandFor.hasPlayedBefore() && ArgValidator.validateArgsLength(args, 2)) {
+                        processCommandGeneric(playerTemp, commandFor, Arrays.copyOfRange(args, 1, args.length));
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + isForSomeoneElse);
+                    }
                 } else {
-                    sender.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + isForSomeoneElse);
+                    sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
                 }
             } else {
                 processCommandGeneric(playerTemp, playerTemp, args);

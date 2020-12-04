@@ -628,7 +628,7 @@ class InvalidCommandPetManagementTest {
 
     @Test
     @DisplayName("Does not list other players' access to other players' pets without permission")
-    void listsPlayersWithAccessToOwnedPets() {
+    void doesNotListPlayersAccessWithoutPerms() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             // Owner of the pet
             OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
@@ -691,6 +691,58 @@ class InvalidCommandPetManagementTest {
             verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
             String message = playerMessageCaptor.getValue();
             assertEquals(ChatColor.RED + "You don't have permission to do this.", message);
+        }
+    }
+
+
+    @Test
+    @DisplayName("Does not add new storage locations for other players without permission")
+    void doesNotAddStorageLocationForOthersWithoutAccess() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
+
+            // Player's world
+            World world = mock(World.class);
+
+            // Player's location
+            Location playerLoc = TeleportMocksFactory.getMockLocation(world, 100, 200, 300);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", playerLoc, world,"MockAdminName", new String[]{"tppets.storage"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getStorageLocation("MockOwnerId", "StorageName")).thenReturn(null);
+            when(dbWrapper.getStorageLocations("MockOwnerId")).thenReturn(new ArrayList<>());
+            when(dbWrapper.addStorageLocation("MockOwnerId", "StorageName", playerLoc)).thenReturn(true);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+            when(tpPets.getStorageLimit()).thenReturn(1);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("storage");
+            aliases.put("storage", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"storage", "f:MockOwnerName", "add", "StorageName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+
+            verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.RED + "You don't have permission to do this.", capturedMessageOutput);
         }
     }
 }

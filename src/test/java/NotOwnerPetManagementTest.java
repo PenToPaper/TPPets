@@ -506,4 +506,61 @@ class NotOwnerPetManagementTest {
             assertEquals(ChatColor.GRAY + "-------------------------------------------", messages.get(5));
         }
     }
+
+
+    @Test
+    @DisplayName("Adds new storage locations for other players to the database")
+    void addStorageLocationForOthers() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            OfflinePlayer owner = TeleportMocksFactory.getMockOfflinePlayer("MockOwnerId", "MockOwnerName");
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(owner);
+
+            // Player's world
+            World world = mock(World.class);
+
+            // Player's location
+            Location playerLoc = TeleportMocksFactory.getMockLocation(world, 100, 200, 300);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockAdminId", playerLoc, world,"MockAdminName", new String[]{"tppets.storage", "tppets.storageother"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getStorageLocation("MockOwnerId", "StorageName")).thenReturn(null);
+            when(dbWrapper.getStorageLocations("MockOwnerId")).thenReturn(new ArrayList<>());
+            when(dbWrapper.addStorageLocation("MockOwnerId", "StorageName", playerLoc)).thenReturn(true);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+            ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+            when(tpPets.getStorageLimit()).thenReturn(1);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("storage");
+            aliases.put("storage", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"storage", "f:MockOwnerName", "add", "StorageName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+
+            verify(dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+
+            verify(logWrapper, times(1)).logSuccessfulAction(logWrapperCaptor.capture());
+            String capturedLogOutput = logWrapperCaptor.getValue();
+            assertEquals("Player MockAdminId has added location StorageName x: 100, y: 200, z: 300 for MockOwnerName", capturedLogOutput);
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.WHITE + "MockOwnerName" + ChatColor.BLUE + " has added storage location " + ChatColor.WHITE + "StorageName", capturedMessageOutput);
+        }
+    }
 }

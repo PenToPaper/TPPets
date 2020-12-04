@@ -506,6 +506,60 @@ class OwnerPetManagementTest {
     }
 
 
+    @Test
+    @DisplayName("Adds new storage locations to the database")
+    void addStorageLocation() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            // Player's world
+            World world = mock(World.class);
+
+            // Player's location
+            Location playerLoc = TeleportMocksFactory.getMockLocation(world, 100, 200, 300);
+
+            // Player who sent the command
+            Player sender = TeleportMocksFactory.getMockPlayer("MockOwnerId", playerLoc, world,"MockOwnerName", new String[]{"tppets.storage"});
+            ArgumentCaptor<String> playerMessageCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin database wrapper instance
+            DBWrapper dbWrapper = mock(DBWrapper.class);
+            when(dbWrapper.getStorageLocation("MockOwnerId", "StorageName")).thenReturn(null);
+            when(dbWrapper.getStorageLocations("MockOwnerId")).thenReturn(new ArrayList<>());
+            when(dbWrapper.addStorageLocation("MockOwnerId", "StorageName", playerLoc)).thenReturn(true);
+
+            // Plugin log wrapper instance
+            LogWrapper logWrapper = mock(LogWrapper.class);
+            ArgumentCaptor<String> logWrapperCaptor = ArgumentCaptor.forClass(String.class);
+
+            // Plugin instance
+            TPPets tpPets = TeleportMocksFactory.getMockPlugin(dbWrapper, logWrapper, true, false, true);
+            when(tpPets.getStorageLimit()).thenReturn(1);
+
+            // Command aliases
+            Hashtable<String, List<String>> aliases = new Hashtable<>();
+            List<String> altAlias = new ArrayList<>();
+            altAlias.add("storage");
+            aliases.put("storage", altAlias);
+
+            // Command object
+            Command command = mock(Command.class);
+            String[] args = {"storage", "add", "StorageName"};
+            CommandTPP commandTPP = new CommandTPP(aliases, tpPets);
+            commandTPP.onCommand(sender, command, "", args);
+
+
+            verify(dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+
+            verify(logWrapper, times(1)).logSuccessfulAction(logWrapperCaptor.capture());
+            String capturedLogOutput = logWrapperCaptor.getValue();
+            assertEquals("Player MockOwnerId has added location StorageName x: 100, y: 200, z: 300 for MockOwnerName", capturedLogOutput);
+
+            verify(sender, times(1)).sendMessage(playerMessageCaptor.capture());
+            String capturedMessageOutput = playerMessageCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "You have added storage location " + ChatColor.WHITE + "StorageName", capturedMessageOutput);
+        }
+    }
+
+
     private static Stream<Arguments> teleportsPetsProvider() {
         return Stream.of(
                 Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.Horse.class),
