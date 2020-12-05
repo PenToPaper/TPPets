@@ -3,10 +3,7 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -86,13 +83,13 @@ public class CommandStorage {
                                     sender.sendMessage((sender.equals(commandFor) ? ChatColor.BLUE + "You have" : ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " has") + " added storage location " + ChatColor.WHITE + args[1]);
                                     break;
                                 case LIMIT_REACHED:
-                                    sender.sendMessage(ChatColor.RED + "You can't set any more storage locations!");
+                                    sender.sendMessage(ChatColor.RED + "You can't set any more than " + ChatColor.WHITE + this.thisPlugin.getStorageLimit() + ChatColor.RED + " storage locations.");
                                     break;
                                 case ALREADY_DONE:
                                     if (sender.equals(commandFor)) {
-                                        sender.sendMessage(ChatColor.BLUE + "You have already set a location named " + ChatColor.WHITE + args[1]);
+                                        sender.sendMessage(ChatColor.RED + "You have already set a location named " + ChatColor.WHITE + args[1]);
                                     } else {
-                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.BLUE + " already has a location named " + ChatColor.WHITE + args[1]);
+                                        sender.sendMessage(ChatColor.WHITE + commandFor.getName() + ChatColor.RED + " already has a location named " + ChatColor.WHITE + args[1]);
                                     }
                                     break;
                                 case FAILURE:
@@ -194,8 +191,9 @@ public class CommandStorage {
                     if (thisPlugin.getDatabase().addStorageLocation(commandFor.getUniqueId().toString(), storageName, pl.getLocation())) {
                         thisPlugin.getLogWrapper().logSuccessfulAction("Player " + pl.getUniqueId().toString() + " has added location " + storageName + " " + TeleportCommand.formatLocation(pl.getLocation()) + " for " + commandFor.getName());
                         return EditResult.SUCCESS;
+                    } else {
+                        return EditResult.FAILURE;
                     }
-                    return thisPlugin.getDatabase().addStorageLocation(commandFor.getUniqueId().toString(), storageName, pl.getLocation()) ? EditResult.SUCCESS : EditResult.FAILURE;
                 } else {
                     return EditResult.LIMIT_REACHED;
                 }
