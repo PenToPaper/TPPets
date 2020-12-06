@@ -1,5 +1,6 @@
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
+import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -79,5 +80,17 @@ public class TeleportMocksFactory {
         when(player.getName()).thenReturn(playerName);
 
         return player;
+    }
+
+    public static StorageLocation getStorageLocation(String locationName, int x, int y, int z, World world) {
+        StorageLocation storage = mock(StorageLocation.class);
+        Location location = mock(Location.class);
+        when(storage.getStorageName()).thenReturn(locationName);
+        when(storage.getLoc()).thenReturn(location);
+        when(location.getBlockX()).thenReturn(x);
+        when(location.getBlockY()).thenReturn(y);
+        when(location.getBlockZ()).thenReturn(z);
+        when(location.getWorld()).thenReturn(world);
+        return storage;
     }
 }

@@ -93,13 +93,9 @@ public class ArgValidator {
         int indexOfColon = argOne.indexOf(':');
         if (indexOfColon > 0) {
             String toEvaluate = argOne.substring(0,indexOfColon).toLowerCase();
-            if (toEvaluate.equals("f")) {
-                // f: leads the string
-                return argOne.substring(indexOfColon+1, argOne.length());
-            }
-            if (toEvaluate.equals("from")) {
-                // from: leads the string
-                return argOne.substring(indexOfColon+1, argOne.length());
+            // f: or from: lead the string
+            if (toEvaluate.equals("f") || toEvaluate.equals("from")) {
+                return argOne.substring(indexOfColon+1);
             }
         }
         return null;

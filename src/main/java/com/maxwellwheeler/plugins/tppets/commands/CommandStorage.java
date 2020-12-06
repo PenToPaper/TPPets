@@ -44,22 +44,30 @@ public class CommandStorage {
         if (sender instanceof Player && ArgValidator.validateArgsLength(args, 1)) {
             Player playerTemp = (Player) sender;
             String isForSomeoneElse = ArgValidator.isForSomeoneElse(args[0]);
-            if (isForSomeoneElse != null && ArgValidator.validateUsername(isForSomeoneElse)) {
-                if (sender.hasPermission("tppets.storageother")) {
-                    OfflinePlayer commandFor = Bukkit.getOfflinePlayer(isForSomeoneElse);
-                    if (commandFor != null && commandFor.hasPlayedBefore() && ArgValidator.validateArgsLength(args, 2)) {
-                        processCommandGeneric(playerTemp, commandFor, Arrays.copyOfRange(args, 1, args.length));
+            if (isForSomeoneElse != null) {
+                if (ArgValidator.validateUsername(isForSomeoneElse)) {
+                    if (sender.hasPermission("tppets.storageother")) {
+                        OfflinePlayer commandFor = Bukkit.getOfflinePlayer(isForSomeoneElse);
+                        if (commandFor != null && commandFor.hasPlayedBefore()) {
+                            if (ArgValidator.validateArgsLength(args, 2)) {
+                                processCommandGeneric(playerTemp, commandFor, Arrays.copyOfRange(args, 1, args.length));
+                            } else {
+                                sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add, remove, list] [storage name]");
+                            }
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + isForSomeoneElse);
+                        }
                     } else {
-                        sender.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + isForSomeoneElse);
+                        sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
                     }
                 } else {
-                    sender.sendMessage(ChatColor.RED + "You don't have permission to do this.");
+                    sender.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + isForSomeoneElse);
                 }
             } else {
                 processCommandGeneric(playerTemp, playerTemp, args);
             }
         } else {
-            sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add, remove, list] [storage name]");
+            sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add, remove, list]");
         }
     }
 
@@ -311,6 +319,7 @@ public class CommandStorage {
     private void listIndividualStorage (Player pl, StorageLocation storageLoc) {
         if (storageLoc != null) {
             pl.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + storageLoc.getStorageName());
+            // TODO REFACTOR TeleportCommand.formatLocation and put it in here
             pl.sendMessage(ChatColor.BLUE + "    location: " + ChatColor.WHITE + Integer.toString(storageLoc.getLoc().getBlockX()) + ", " + Integer.toString(storageLoc.getLoc().getBlockY()) + ", " + Integer.toString(storageLoc.getLoc().getBlockZ()) + ", " + storageLoc.getLoc().getWorld().getName());
         }
     }
