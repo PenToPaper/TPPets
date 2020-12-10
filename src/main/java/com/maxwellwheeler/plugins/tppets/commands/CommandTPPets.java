@@ -59,14 +59,17 @@ class CommandTPPets extends TeleportCommand {
         Player senderPlayer = (Player) sender;
         if (ArgValidator.validateArgsLength(args, 2)) {
             String isForSomeoneElse = ArgValidator.isForSomeoneElse(args[0]);
-            if (isForSomeoneElse != null && ArgValidator.validateUsername(isForSomeoneElse)) {
+            if (isForSomeoneElse == null) {
+                processCommandGeneric(senderPlayer, senderPlayer, args, pt);
+                return;
+            } else if (ArgValidator.validateUsername(isForSomeoneElse)){
                 OfflinePlayer commandFor = Bukkit.getOfflinePlayer(isForSomeoneElse);
                 if (commandFor != null && commandFor.hasPlayedBefore()) {
                     processCommandGeneric(senderPlayer, commandFor, Arrays.copyOfRange(args, 1, args.length), pt);
                     return;
                 }
             }
-            senderPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + args[0]);
+            senderPlayer.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + isForSomeoneElse);
         } else {
             processCommandGeneric(senderPlayer, senderPlayer, args, pt);
         }
@@ -104,8 +107,12 @@ class CommandTPPets extends TeleportCommand {
                 // Default is assumed that args[0] = dog name
                 default:
                     if (thisPlugin.canTpThere(commandSender)) {
+                        if (!ArgValidator.softValidatePetName(args[0])) {
+                            commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
+                            return;
+                        }
                         PetStorage pet = thisPlugin.getDatabase().getPetByName(commandAbout.getUniqueId().toString(), args[0]);
-                        if (pet == null || !ArgValidator.softValidatePetName(args[0])) {
+                        if (pet == null) {
                             commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
                             return;
                         }
@@ -113,16 +120,13 @@ class CommandTPPets extends TeleportCommand {
                             commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that");
                             return;
                         }
-                        if (ArgValidator.softValidatePetName(args[0])){
-                            if (teleportSpecificPet(commandSender.getLocation(), commandAbout, args[0], pt, shouldKeepSitting(commandSender, commandAbout), commandSender.equals(commandAbout) || commandSender.hasPermission("tppets.teleportother"), true)) {
-                                thisPlugin.getLogWrapper().logSuccessfulAction("Player " + commandSender.getName() + " teleported " + commandAbout.getName() + "'s pet named " + args[0] + " to their location at: " + formatLocation(commandSender.getLocation()));
-                                commandSender.sendMessage((commandSender.equals(commandAbout) ? ChatColor.BLUE + "Your pet " : ChatColor.WHITE + commandAbout.getName() + "'s " + ChatColor.BLUE + "pet ") + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you");
-                            } else {
-                                commandSender.sendMessage(ChatColor.RED + "Can't teleport " + ChatColor.WHITE + args[0]);
-                            }
+                        if (teleportSpecificPet(commandSender.getLocation(), commandAbout, args[0], pt, shouldKeepSitting(commandSender, commandAbout), commandSender.equals(commandAbout) || commandSender.hasPermission("tppets.teleportother"), true)) {
+                            thisPlugin.getLogWrapper().logSuccessfulAction("Player " + commandSender.getName() + " teleported " + commandAbout.getName() + "'s pet named " + args[0] + " to their location at: " + formatLocation(commandSender.getLocation()));
+                            commandSender.sendMessage((commandSender.equals(commandAbout) ? ChatColor.BLUE + "Your pet " : ChatColor.WHITE + commandAbout.getName() + "'s " + ChatColor.BLUE + "pet ") + ChatColor.WHITE + args[0] + ChatColor.BLUE + " has been teleported to you");
                         } else {
-                            commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
+                            commandSender.sendMessage(ChatColor.RED + "Can't teleport " + ChatColor.WHITE + args[0]);
                         }
+
                     }
                     break;
             }

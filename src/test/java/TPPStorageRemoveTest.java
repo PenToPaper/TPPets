@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class TPPStorageRemoveTest {
@@ -33,14 +33,14 @@ public class TPPStorageRemoveTest {
 
     @BeforeEach
     public void beforeEach(){
-        this.player = TeleportMocksFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.storage"});
-        this.admin = TeleportMocksFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.storageother"});
+        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.storage"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.storageother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.storageLocation = mock(StorageLocation.class);
         this.dbWrapper = mock(DBWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        TPPets tpPets = TeleportMocksFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
@@ -56,7 +56,7 @@ public class TPPStorageRemoveTest {
         when(this.dbWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(true);
 
         String[] args = {"storage", "remove", "StorageName"};
-        this.commandTPP.onCommand(this.player, command, "", args);
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.dbWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
@@ -79,7 +79,7 @@ public class TPPStorageRemoveTest {
             when(this.dbWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(true);
 
             String[] args = {"storage", "f:MockPlayerName", "remove", "StorageName"};
-            this.commandTPP.onCommand(this.admin, command, "", args);
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
@@ -99,7 +99,7 @@ public class TPPStorageRemoveTest {
         when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
 
         String[] args = {"storage", "remove", "StorageName"};
-        this.commandTPP.onCommand(this.player, command, "", args);
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
 
@@ -117,7 +117,7 @@ public class TPPStorageRemoveTest {
             when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
 
             String[] args = {"storage", "f:MockPlayerName", "remove", "StorageName"};
-            this.commandTPP.onCommand(this.admin, command, "", args);
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
 
@@ -134,7 +134,7 @@ public class TPPStorageRemoveTest {
         when(this.dbWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(false);
 
         String[] args = {"storage", "remove", "StorageName"};
-        this.commandTPP.onCommand(this.player, command, "", args);
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.dbWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 

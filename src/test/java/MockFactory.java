@@ -8,6 +8,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -15,7 +17,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TeleportMocksFactory {
+public class MockFactory {
     public static Entity getMockEntity(String petID, Class<? extends Entity> entityClass) {
         Entity mockEntity = mock(entityClass);
         UUID entityUUID = mock(UUID.class);

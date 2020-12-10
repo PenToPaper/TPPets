@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -35,14 +35,14 @@ public class TPPStorageTest {
     @BeforeEach
     public void beforeEach(){
         // Players
-        this.player = TeleportMocksFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.storage"});
-        this.admin = TeleportMocksFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.storageother", "tppets.bypassstoragelimit"});
+        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.storage"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.storageother", "tppets.bypassstoragelimit"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
 
         // Plugin
         this.dbWrapper = mock(DBWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = TeleportMocksFactory.getMockPlugin(this.dbWrapper, logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, true, false, true);
 
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -55,8 +55,8 @@ public class TPPStorageTest {
         // Database
         World world = mock(World.class);
         when(world.getName()).thenReturn("MockWorld");
-        StorageLocation locationOne = TeleportMocksFactory.getStorageLocation("StorageOne", 100, 200, 300, world);
-        StorageLocation locationTwo = TeleportMocksFactory.getStorageLocation("StorageTwo", 400, 500, 600, world);
+        StorageLocation locationOne = MockFactory.getStorageLocation("StorageOne", 100, 200, 300, world);
+        StorageLocation locationTwo = MockFactory.getStorageLocation("StorageTwo", 400, 500, 600, world);
         this.storageLocations = new ArrayList<>();
         this.storageLocations.add(locationOne);
         this.storageLocations.add(locationTwo);
@@ -70,7 +70,7 @@ public class TPPStorageTest {
         when(this.admin.hasPermission("tppets.storageother")).thenReturn(false);
 
         String[] args = {"storage", "f:MockPlayerName", "list"};
-        this.commandTPP.onCommand(this.admin, command, "", args);
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         verify(this.dbWrapper, never()).getStorageLocations(anyString());
 
@@ -90,7 +90,7 @@ public class TPPStorageTest {
             when(this.dbWrapper.getStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
 
             String[] args = {"storage", "f:MockPlayerName", "list"};
-            this.commandTPP.onCommand(this.admin, command, "", args);
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, never()).getStorageLocations(anyString());
 
@@ -110,7 +110,7 @@ public class TPPStorageTest {
             when(this.dbWrapper.getStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
 
             String[] args = {"storage", "f:MockPlayerName;", "list"};
-            this.commandTPP.onCommand(this.admin, command, "", args);
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, never()).getStorageLocations(anyString());
 
@@ -130,7 +130,7 @@ public class TPPStorageTest {
             when(this.dbWrapper.getStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
 
             String[] args = {"storage", "f:MockPlayerName"};
-            this.commandTPP.onCommand(this.admin, command, "", args);
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, never()).getStorageLocations(anyString());
 
@@ -145,7 +145,7 @@ public class TPPStorageTest {
     @DisplayName("No action with command")
     void playerNoAction() {
         String[] args = {"storage"};
-        this.commandTPP.onCommand(this.player, command, "", args);
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
@@ -157,7 +157,7 @@ public class TPPStorageTest {
     @DisplayName("Invalid action with command")
     void playerInvalidAction() {
         String[] args = {"storage", "invalid"};
-        this.commandTPP.onCommand(this.player, command, "", args);
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
