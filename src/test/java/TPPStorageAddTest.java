@@ -106,6 +106,54 @@ public class TPPStorageAddTest {
     }
 
     @Test
+    @DisplayName("Can't add storage locations without valid storage name")
+    void cannotAddStorageLocationInvalidName() {
+        when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
+        when(this.dbWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+
+        when(this.tpPets.getStorageLimit()).thenReturn(1);
+
+        String[] args = {"storage", "add", "StorageName;"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Invalid storage location name: " + ChatColor.WHITE + "StorageName;", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Can't add storage locations without any storage name")
+    void cannotAddStorageLocationNoName() {
+        when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
+        when(this.dbWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+
+        when(this.tpPets.getStorageLimit()).thenReturn(1);
+
+        String[] args = {"storage", "add"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage add [storage name]", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Can't add storage locations when you can't teleport pets there")
+    void cannotAddStorageLocationCantTpThere() {
+        when(this.tpPets.canTpThere(this.player)).thenReturn(false);
+
+        String[] args = {"storage", "add", "StorageName"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.player, never()).sendMessage(anyString());
+    }
+
+    @Test
     @DisplayName("Can't add storage locations when over storage limit")
     void cannotAddStorageLocationOverLimit() {
         when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
@@ -120,7 +168,7 @@ public class TPPStorageAddTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "You can't set any more than " + ChatColor.WHITE + "0" + ChatColor.RED + " storage locations.", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "You can't set any more than " + ChatColor.WHITE + "0" + ChatColor.RED + " storage locations", capturedMessageOutput);
     }
 
     @Test
@@ -168,7 +216,7 @@ public class TPPStorageAddTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "You have already set a location named " + ChatColor.WHITE + "StorageName", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Storage location " + ChatColor.WHITE + "StorageName" + ChatColor.RED + " already exists", capturedMessageOutput);
     }
 
     @Test
@@ -192,13 +240,13 @@ public class TPPStorageAddTest {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.WHITE + "MockPlayerName" + ChatColor.RED + " already has a location named " + ChatColor.WHITE + "StorageName", capturedMessageOutput);
+            assertEquals(ChatColor.WHITE + "MockPlayerName's" + ChatColor.RED + " storage location " + ChatColor.WHITE + "StorageName" + ChatColor.RED + " already exists", capturedMessageOutput);
         }
     }
 
     @Test
-    @DisplayName("Reports database failure to user")
-    void reportsDatabaseFailure() {
+    @DisplayName("Reports database failure to add storage to user")
+    void reportsDatabaseFailureToAdd() {
         when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
         when(this.dbWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
         when(this.dbWrapper.addStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(false);
@@ -212,6 +260,21 @@ public class TPPStorageAddTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Unable to set location.", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Could not add storage location", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Reports failure to find database to user")
+    void reportsDatabaseFailureToFindDb() {
+        when(this.tpPets.getDatabase()).thenReturn(null);
+
+        String[] args = {"storage", "add", "StorageName"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not add storage location", capturedMessageOutput);
     }
 }

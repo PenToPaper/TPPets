@@ -46,7 +46,7 @@ public class ArgValidator {
      * @return If the storage name is valid
      */
     public static boolean validateStorageName(String storeName) {
-        return validateServerStorageName(storeName) && !storeName.toLowerCase().equals("default");
+        return validateServerStorageName(storeName) && !storeName.equalsIgnoreCase("default");
     }
 
     /**

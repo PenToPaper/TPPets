@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,22 +63,35 @@ public class TPPStorageTest {
         this.storageLocations.add(locationTwo);
     }
 
-    // TODO: ADD TEST TO THIS FOR INSUFFICIENT PERMISSIONS
+    @Test
+    @DisplayName("Non-player sending command denies action silently")
+    void nonPlayerSendingCommand() {
+        CommandSender sender = mock(CommandSender.class);
+        when(this.admin.hasPermission("tppets.storageother")).thenReturn(false);
+
+        String[] args = {"storage", "f:MockPlayerName", "list"};
+        this.commandTPP.onCommand(sender, this.command, "", args);
+
+        verify(this.dbWrapper, never()).getStorageLocations(anyString());
+    }
 
     @Test
     @DisplayName("Admin insufficient permissions username with f:[username] syntax")
     void adminInsufficientPermissions() {
-        when(this.admin.hasPermission("tppets.storageother")).thenReturn(false);
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
+            when(this.admin.hasPermission("tppets.storageother")).thenReturn(false);
 
-        String[] args = {"storage", "f:MockPlayerName", "list"};
-        this.commandTPP.onCommand(this.admin, this.command, "", args);
+            String[] args = {"storage", "f:MockPlayerName", "list"};
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getStorageLocations(anyString());
+            verify(this.dbWrapper, never()).getStorageLocations(anyString());
 
-        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
-        String message = this.messageCaptor.getValue();
+            verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+            String message = this.messageCaptor.getValue();
 
-        assertEquals(ChatColor.RED + "You don't have permission to do this.", message);
+            assertEquals(ChatColor.RED + "You don't have permission to do that", message);
+        }
     }
 
     @Test
@@ -97,7 +111,7 @@ public class TPPStorageTest {
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
 
-            assertEquals(ChatColor.RED + "Can't find player " + ChatColor.WHITE + "MockPlayerName", message);
+            assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName", message);
         }
     }
 
@@ -117,7 +131,7 @@ public class TPPStorageTest {
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
 
-            assertEquals(ChatColor.RED + "Can't find player " + ChatColor.WHITE + "MockPlayerName;", message);
+            assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName;", message);
         }
     }
 
@@ -137,7 +151,7 @@ public class TPPStorageTest {
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
 
-            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add, remove, list] [storage name]", message);
+            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list]", message);
         }
     }
 
@@ -150,7 +164,7 @@ public class TPPStorageTest {
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
 
-        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add, remove, list]", message);
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list]", message);
     }
 
     @Test
@@ -162,6 +176,6 @@ public class TPPStorageTest {
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
 
-        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add, remove, list]", message);
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list]", message);
     }
 }

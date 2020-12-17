@@ -31,6 +31,7 @@ public class TPPStorageListTest {
     private Command command;
     private CommandTPP commandTPP;
     private List<StorageLocation> storageLocations;
+    private TPPets tpPets;
 
     @BeforeEach
     public void beforeEach(){
@@ -42,7 +43,7 @@ public class TPPStorageListTest {
         // Plugin
         this.dbWrapper = mock(DBWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, true, false, true);
 
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -50,7 +51,7 @@ public class TPPStorageListTest {
         altAlias.add("storage");
         aliases.put("storage", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, tpPets);
+        this.commandTPP = new CommandTPP(aliases, this.tpPets);
 
         // Database
         World world = mock(World.class);
@@ -120,5 +121,35 @@ public class TPPStorageListTest {
         List<String> messages = this.messageCaptor.getAllValues();
         assertEquals(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------", messages.get(0));
         assertEquals(ChatColor.GRAY + "----------------------------------------", messages.get(1));
+    }
+
+    @Test
+    @DisplayName("Displays inability to find storage locations to user")
+    void cantDisplayStorageLocationsDatabaseFailure() {
+        when(this.dbWrapper.getStorageLocations("MockPlayerId")).thenReturn(null);
+
+        String[] args = {"storage", "list"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.dbWrapper, times(1)).getStorageLocations(anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not find storage locations", message);
+    }
+
+    @Test
+    @DisplayName("Displays inability to find database to user")
+    void cantDisplayStorageLocationsDatabaseNotFound() {
+        when(this.tpPets.getDatabase()).thenReturn(null);
+
+        String[] args = {"storage", "list"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.dbWrapper, never()).getStorageLocations(anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not find storage locations", message);
     }
 }

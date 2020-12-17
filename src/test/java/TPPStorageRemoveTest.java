@@ -30,6 +30,7 @@ public class TPPStorageRemoveTest {
     private ArgumentCaptor<String> logCaptor;
     private Command command;
     private CommandTPP commandTPP;
+    private TPPets tpPets;
 
     @BeforeEach
     public void beforeEach(){
@@ -40,13 +41,13 @@ public class TPPStorageRemoveTest {
         this.dbWrapper = mock(DBWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
         aliases.put("storage", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, tpPets);
+        this.commandTPP = new CommandTPP(aliases, this.tpPets);
     }
 
     @Test
@@ -66,7 +67,7 @@ public class TPPStorageRemoveTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.BLUE + "You have removed storage location " + ChatColor.WHITE + "StorageName", capturedMessageOutput);
+        assertEquals(ChatColor.BLUE + "Storage location " + ChatColor.WHITE + "StorageName" + ChatColor.BLUE + " has been removed", capturedMessageOutput);
     }
 
     @Test
@@ -89,7 +90,7 @@ public class TPPStorageRemoveTest {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.WHITE + "MockPlayerName" + ChatColor.BLUE + " has removed storage location " + ChatColor.WHITE + "StorageName", capturedMessageOutput);
+            assertEquals(ChatColor.WHITE + "MockPlayerName's" + ChatColor.BLUE + " location " + ChatColor.WHITE + "StorageName" + ChatColor.BLUE + " has been removed", capturedMessageOutput);
         }
     }
 
@@ -105,7 +106,20 @@ public class TPPStorageRemoveTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.WHITE + "StorageName" + ChatColor.BLUE + " does not exist", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Storage location " + ChatColor.WHITE + "StorageName" + ChatColor.RED + " already does not exist", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Cannot remove storage location without argument provided")
+    void cannotRemoveNonProvidedStorage() {
+        String[] args = {"storage", "remove"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage remove [storage name]", capturedMessageOutput);
     }
 
     @Test
@@ -123,13 +137,13 @@ public class TPPStorageRemoveTest {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.WHITE + "MockPlayerName" + ChatColor.BLUE + " does not have a storage location named " + ChatColor.WHITE + "StorageName", capturedMessageOutput);
+            assertEquals(ChatColor.WHITE + "MockPlayerName's" + ChatColor.RED + " storage location " + ChatColor.WHITE + "StorageName" + ChatColor.RED + " already does not exist", capturedMessageOutput);
         }
     }
 
     @Test
-    @DisplayName("Reports database failure to user")
-    void reportsDatabaseFailure() {
+    @DisplayName("Reports database failure to remove storage to user")
+    void reportsDatabaseFailureToRemove() {
         when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
         when(this.dbWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(false);
 
@@ -140,6 +154,21 @@ public class TPPStorageRemoveTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Unable to remove location.", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Could not remove storage location", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Reports failure to find database to user")
+    void reportsDatabaseFailureToFindDb() {
+        when(this.tpPets.getDatabase()).thenReturn(null);
+
+        String[] args = {"storage", "remove", "StorageName"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not remove storage location", capturedMessageOutput);
     }
 }
