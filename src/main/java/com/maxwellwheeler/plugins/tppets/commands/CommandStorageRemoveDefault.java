@@ -21,7 +21,7 @@ public class CommandStorageRemoveDefault implements Command {
 
     @Override
     public void processCommand() {
-        if (!ArgValidator.validateArgsLength(this.args, 2)) {
+        if (!ArgValidator.validateArgsLength(this.args, 1)) {
             this.commandStatus = CommandStatus.SYNTAX_ERROR;
             return;
         }
@@ -31,13 +31,13 @@ public class CommandStorageRemoveDefault implements Command {
             return;
         }
 
-        if (this.tpPets.getDatabase().getServerStorageLocation("default", this.sender.getWorld()) == null) {
+        if (this.tpPets.getDatabase().getServerStorageLocation(this.args[0], this.sender.getWorld()) == null) {
             this.commandStatus = CommandStatus.ALREADY_DONE;
             return;
         }
 
-        if (this.tpPets.getDatabase().removeServerStorageLocation("default", this.sender.getWorld())) {
-            this.tpPets.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed default server location in world " + this.sender.getWorld());
+        if (this.tpPets.getDatabase().removeServerStorageLocation(this.args[0], this.sender.getWorld())) {
+            this.tpPets.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed " + this.args[0] + " server location in world " + this.sender.getWorld().getName());
             this.commandStatus = CommandStatus.SUCCESS;
             return;
         }
@@ -50,16 +50,16 @@ public class CommandStorageRemoveDefault implements Command {
         // SUCCESS, DB_FAIL, ALREADY_DONE, SYNTAX_ERROR
         switch (this.commandStatus) {
             case DB_FAIL:
-                this.sender.sendMessage(ChatColor.RED + "Could not remove sever storage location");
+                this.sender.sendMessage(ChatColor.RED + "Could not remove sever storage location" + ChatColor.WHITE + this.args[0]);
                 break;
             case ALREADY_DONE:
-                this.sender.sendMessage(ChatColor.RED + "Server storage default in" + ChatColor.WHITE + this.sender.getWorld() + ChatColor.RED + " already does not exist");
+                this.sender.sendMessage(ChatColor.RED + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " in" + ChatColor.WHITE + this.sender.getWorld().getName() + ChatColor.RED + " already does not exist");
                 break;
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage remove default");
                 break;
             case SUCCESS:
-                this.sender.sendMessage(ChatColor.BLUE + "Server default storage in " + ChatColor.WHITE + this.sender.getWorld() + ChatColor.BLUE + " has been removed");
+                this.sender.sendMessage(ChatColor.BLUE + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " in " + ChatColor.WHITE + this.sender.getWorld().getName() + ChatColor.BLUE + " has been removed");
                 break;
         }
     }

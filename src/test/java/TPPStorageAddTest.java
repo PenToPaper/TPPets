@@ -67,9 +67,9 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
 
-        verify(logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
+        verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
         assertEquals("Player MockPlayerId has added location StorageName x: 100, y: 200, z: 300 for MockPlayerName", capturedLogOutput);
 
@@ -93,9 +93,9 @@ public class TPPStorageAddTest {
             String[] args = {"storage", "f:MockPlayerName", "add", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+            verify(this.dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
 
-            verify(logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
+            verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
             assertEquals("Player MockAdminId has added location StorageName x: 400, y: 500, z: 600 for MockPlayerName", capturedLogOutput);
 
@@ -116,7 +116,7 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add", "StorageName;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -134,7 +134,7 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -149,7 +149,7 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
         verify(this.player, never()).sendMessage(anyString());
     }
 
@@ -164,7 +164,7 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -186,9 +186,9 @@ public class TPPStorageAddTest {
             String[] args = {"storage", "f:MockPlayerName", "add", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+            verify(this.dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
 
-            verify(logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
+            verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
             assertEquals("Player MockAdminId has added location StorageName x: 400, y: 500, z: 600 for MockPlayerName", capturedLogOutput);
 
@@ -212,7 +212,7 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -236,7 +236,7 @@ public class TPPStorageAddTest {
             String[] args = {"storage", "f:MockPlayerName", "add", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+            verify(this.dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -256,7 +256,7 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -271,7 +271,7 @@ public class TPPStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.dbWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();

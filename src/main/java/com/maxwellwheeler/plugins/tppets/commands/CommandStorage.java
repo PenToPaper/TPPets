@@ -2,13 +2,10 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Object used for storage commands
@@ -17,6 +14,7 @@ import java.util.List;
 // TODO: JAVADOC
 public class CommandStorage extends BaseCommand {
 
+    private boolean isDefaultCommand;
     private CommandStatus commandStatus;
     private enum CommandStatus{SUCCESS, INVALID_SENDER, NO_PLAYER, SYNTAX_ERROR, INSUFFICIENT_PERMISSIONS}
 
@@ -103,64 +101,74 @@ public class CommandStorage extends BaseCommand {
 
     }
 
-    private boolean isDefaultCommand() {
+    private void determineIsDefaultCommand() {
+        // TODO: Can change this not to static "default" in the future
         if (ArgValidator.validateArgsLength(this.args, 2) && this.args[1].equalsIgnoreCase("default")) {
-            if (this.sender.hasPermission("tppets.setdefaultstorage")) {
-                return true;
+            if (this.hasDefaultStoragePermissions()) {
+                this.isDefaultCommand = true;
+                return;
             } else {
                 this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
             }
         }
-        return false;
+        this.isDefaultCommand = false;
     }
 
-    public void processCommandAdd() {
-        Command command;
-        if (this.isDefaultCommand()) {
-            command = new CommandStorageAddDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
-        } else {
-            command = new CommandStorageAdd(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
-        }
-        command.processCommand();
-        command.displayStatus();
+    private boolean hasDefaultStoragePermissions() {
+        return this.sender.hasPermission("tppets.setdefaultstorage");
     }
 
-    public void processCommandRemove() {
-        Command command;
-        if (this.isDefaultCommand()) {
-            command = new CommandStorageRemoveDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
+    public Command getCommandAdd() {
+        if (this.isDefaultCommand) {
+            return new CommandStorageAddDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
         } else {
-            command = new CommandStorageRemove(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
+            return new CommandStorageAdd(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
         }
-        command.processCommand();
-        command.displayStatus();
     }
 
-    public void processCommandList() {
-        Command command;
-        if (this.isDefaultCommand()) {
-            command = new CommandStorageListDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
+    public Command getCommandRemove() {
+        if (this.isDefaultCommand) {
+            return new CommandStorageRemoveDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
         } else {
-            command = new CommandStorageList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
+            return new CommandStorageRemove(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
         }
-        command.processCommand();
-        command.displayStatus();
+    }
+
+    public Command getCommandList() {
+        if (this.isDefaultCommand) {
+            return new CommandStorageListDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
+        } else {
+            return new CommandStorageList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
+        }
     }
 
     public void processCommandGeneric() {
+        // Determine if the command is of type /tpp storage list default, add default, remove default
+        determineIsDefaultCommand();
+        if (this.commandStatus != CommandStatus.SUCCESS) {
+            return;
+        }
+
+        Command commandToRun = null;
+
         switch(this.args[0].toLowerCase()) {
             case "add":
-                processCommandAdd();
+                commandToRun = getCommandAdd();
                 break;
             case "remove":
-                processCommandRemove();
+                commandToRun = getCommandRemove();
                 break;
             case "list":
-                processCommandList();
+                commandToRun = getCommandList();
                 break;
             default:
                 this.commandStatus = CommandStatus.SYNTAX_ERROR;
                 break;
+        }
+        
+        if (commandToRun != null) {
+            commandToRun.processCommand();
+            commandToRun.displayStatus();
         }
     }
 

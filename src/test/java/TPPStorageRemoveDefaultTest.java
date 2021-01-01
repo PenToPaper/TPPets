@@ -1,0 +1,122 @@
+import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
+import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
+import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import org.bukkit.ChatColor;
+import org.bukkit.World;
+import org.bukkit.command.Command;
+import org.bukkit.entity.Player;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+public class TPPStorageRemoveDefaultTest {
+    private Player admin;
+    private ArgumentCaptor<String> messageCaptor;
+    private DBWrapper dbWrapper;
+    private LogWrapper logWrapper;
+    private ArgumentCaptor<String> logCaptor;
+    private TPPets tpPets;
+    private Command command;
+    private CommandTPP commandTPP;
+    private World world;
+
+    @BeforeEach
+    public void beforeEach() {
+        this.world = mock(World.class);
+        when(this.world.getName()).thenReturn("MockWorld");
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.storage", "tppets.setdefaultstorage"});
+        this.messageCaptor = ArgumentCaptor.forClass(String.class);
+        this.dbWrapper = mock(DBWrapper.class);
+        this.logWrapper = mock(LogWrapper.class);
+        this.logCaptor = ArgumentCaptor.forClass(String.class);
+        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        Hashtable<String, List<String>> aliases = new Hashtable<>();
+        List<String> altAlias = new ArrayList<>();
+        altAlias.add("storage");
+        aliases.put("storage", altAlias);
+        this.command = mock(Command.class);
+        this.commandTPP = new CommandTPP(aliases, tpPets);
+    }
+
+    @Test
+    @DisplayName("Removes default storage locations from the database")
+    void removeStorageLocation() {
+        StorageLocation storageLocation = mock(StorageLocation.class);
+        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
+        when(this.dbWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
+
+        String[] args = {"storage", "remove", "default"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.dbWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
+
+        verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
+        String capturedLogOutput = this.logCaptor.getValue();
+        assertEquals("Player MockAdminName has removed default server location in world MockWorld", capturedLogOutput);
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.BLUE + "Server storage " + ChatColor.WHITE + "default" + ChatColor.BLUE + " in " + ChatColor.WHITE + "MockWorld" + ChatColor.BLUE + " has been removed", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Reports database failure when database not found")
+    void cannotRemoveStorageLocationNoDatabase() {
+        when(this.tpPets.getDatabase()).thenReturn(null);
+
+        String[] args = {"storage", "remove", "default"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.dbWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not remove sever storage location" + ChatColor.WHITE + "default", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Reports database failure when database cannot remove entry")
+    void cannotRemoveStorageLocationNoDatabaseRemoval() {
+        StorageLocation storageLocation = mock(StorageLocation.class);
+        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
+        when(this.dbWrapper.removeServerStorageLocation("default", this.world)).thenReturn(false);
+
+        String[] args = {"storage", "remove", "default"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.dbWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not remove sever storage location" + ChatColor.WHITE + "default", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Does not add server storage location if it already does not exist")
+    void cannotRemoveStorageLocationAlreadyDoesNotExist() {
+        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
+
+        String[] args = {"storage", "remove", "default"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.dbWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Server storage " + ChatColor.WHITE + "default" + ChatColor.BLUE + " in" + ChatColor.WHITE + "MockWorld" + ChatColor.RED + " already does not exist", capturedMessageOutput);
+    }
+}

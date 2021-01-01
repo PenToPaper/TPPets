@@ -67,7 +67,17 @@ public class TPPStorageTest {
     @DisplayName("Non-player sending command denies action silently")
     void nonPlayerSendingCommand() {
         CommandSender sender = mock(CommandSender.class);
-        when(this.admin.hasPermission("tppets.storageother")).thenReturn(false);
+
+        String[] args = {"storage", "list"};
+        this.commandTPP.onCommand(sender, this.command, "", args);
+
+        verify(this.dbWrapper, never()).getStorageLocations(anyString());
+    }
+
+    @Test
+    @DisplayName("Non-player sending command for another player denies action silently")
+    void nonPlayerSendingCommandForAnother() {
+        CommandSender sender = mock(CommandSender.class);
 
         String[] args = {"storage", "f:MockPlayerName", "list"};
         this.commandTPP.onCommand(sender, this.command, "", args);
@@ -77,7 +87,7 @@ public class TPPStorageTest {
 
     @Test
     @DisplayName("Admin insufficient permissions username with f:[username] syntax")
-    void adminInsufficientPermissions() {
+    void adminInsufficientForOthersPermissions() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
             when(this.admin.hasPermission("tppets.storageother")).thenReturn(false);
@@ -177,5 +187,21 @@ public class TPPStorageTest {
         String message = this.messageCaptor.getValue();
 
         assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list]", message);
+    }
+
+    @Test
+    @DisplayName("Player insufficient permissions for /tpp list default syntax")
+    void adminInsufficientDefaultStoragePermissions() {
+        when(this.admin.hasPermission("tppets.setdefaultstorage")).thenReturn(false);
+
+        String[] args = {"storage", "list", "default"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.dbWrapper, never()).getDefaultServerStorageLocation(any(World.class));
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+
+        assertEquals(ChatColor.RED + "You don't have permission to do that", message);
     }
 }
