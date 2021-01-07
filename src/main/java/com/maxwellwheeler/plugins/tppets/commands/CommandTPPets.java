@@ -24,8 +24,8 @@ class CommandTPPets extends TeleportCommand {
      * General constructor, takes {@link TPPets} instance
      * @param thisPlugin The TPPets instance
      */
-    public CommandTPPets(TPPets thisPlugin) {
-        super(thisPlugin);
+    public CommandTPPets(TPPets thisPlugin, CommandSender sender, String[] args) {
+        super(thisPlugin, sender, args);
     }
 
     /**
@@ -157,7 +157,6 @@ class CommandTPPets extends TeleportCommand {
         pl.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
     }
 
-    @Override
     protected boolean hasPermissionToTp(Player pl, OfflinePlayer petOwner, String petUUID) {
         return petUUID != null && !petUUID.equals("") && (pl.equals(petOwner) || pl.hasPermission("tppets.teleportother") || thisPlugin.isAllowedToPet(petUUID, pl.getUniqueId().toString()));
     }

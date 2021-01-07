@@ -17,7 +17,7 @@ public class BaseCommand {
     public String[] args;
     public TPPets thisPlugin;
 
-    BaseCommand(TPPets thisPlugin, CommandSender sender, String[] args) {
+    public BaseCommand(TPPets thisPlugin, CommandSender sender, String[] args) {
         this.thisPlugin = thisPlugin;
         this.sender = null;
         this.commandFor = null;

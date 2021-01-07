@@ -6,6 +6,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.*;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
@@ -16,25 +17,23 @@ import java.util.*;
  * Object used for store commands
  * @author GatheringExp
  */
-public abstract class TeleportCommand {
-    protected TPPets thisPlugin;
-
+public abstract class TeleportCommand extends BaseCommand {
     /**
      * Generic constructor, takes TPPets plugin instance.
      * @param thisPlugin The TPPets plugin instance.
      */
-    public TeleportCommand(TPPets thisPlugin) {
-        this.thisPlugin = thisPlugin;
+    public TeleportCommand(TPPets thisPlugin, CommandSender sender, String[] args) {
+        super(thisPlugin, sender, args);
     }
 
-    /**
-     * Whether or not the player has permission to teleport the pet
-     * @param pl The player to check the permissions of
-     * @param petOwner The owner of the pet
-     * @param petUUID The UUID of the pet
-     * @return If the player has permission to tp
-     */
-    abstract protected boolean hasPermissionToTp(Player pl, OfflinePlayer petOwner, String petUUID);
+//    /**
+//     * Whether or not the player has permission to teleport the pet
+//     * @param pl The player to check the permissions of
+//     * @param petOwner The owner of the pet
+//     * @param petUUID The UUID of the pet
+//     * @return If the player has permission to tp
+//     */
+//    abstract protected boolean hasPermissionToTp(Player pl, OfflinePlayer petOwner, String petUUID);
 
     /**
      * Loads the chunks needed to teleport pets from psList
@@ -102,7 +101,7 @@ public abstract class TeleportCommand {
                 }
             } else {
                 // If you can't teleport between worlds, check only the world the player is in.
-                for (Entity ent : sendTo.getWorld().getEntitiesByClasses(PetType.getClassTranslate(pt))) {
+                for (Entity ent : strictType ? sendTo.getWorld().getEntitiesByClasses(PetType.getClassTranslate(pt)) : sendTo.getWorld().getEntitiesByClasses(org.bukkit.entity.Tameable.class)) {
                     for (PetStorage ps : psList) {
                         if (UUIDUtils.trimUUID(ent.getUniqueId()).equals(ps.petId)) {
                             boolean tpResult = teleportPet(sendTo, ent, !sendTo.equals(petOwner) && setSitting, kickPlayerOff);

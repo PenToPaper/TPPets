@@ -46,19 +46,13 @@ public class CommandStorage extends BaseCommand {
             return false;
         }
 
-        // 4) Check if the player the command is for is equal to the sender
-        if (this.commandFor.equals(this.sender)) {
-            this.commandStatus = CommandStatus.NO_PLAYER;
-            return false;
-        }
-
-        // 5) Check if there's enough arguments to make a valid command
+        // 4) Check if there's enough arguments to make a valid command
         if (!ArgValidator.validateArgsLength(this.args, 1)) {
             this.commandStatus = CommandStatus.SYNTAX_ERROR;
             return false;
         }
 
-        // 6) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
+        // 5) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
         this.commandStatus = CommandStatus.SUCCESS;
         return true;
     }

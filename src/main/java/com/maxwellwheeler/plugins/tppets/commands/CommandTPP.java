@@ -71,7 +71,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "dogs":
                     if (sender.hasPermission("tppets.dogs")) {
-                        CommandTPPets dogTPP = new CommandTPPets(thisPlugin);
+                        CommandTPPets dogTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         dogTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DOG);
                     } else {
                         permissionMessage(sender);
@@ -79,7 +79,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "cats":
                     if (sender.hasPermission("tppets.cats")) {
-                        CommandTPPets catTPP = new CommandTPPets(thisPlugin);
+                        CommandTPPets catTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         catTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.CAT);
                     } else {
                         permissionMessage(sender);
@@ -87,7 +87,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "birds":
                     if (sender.hasPermission("tppets.birds")) {
-                        CommandTPPets parrotTPP = new CommandTPPets(thisPlugin);
+                        CommandTPPets parrotTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         parrotTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.PARROT);
                     } else {
                         permissionMessage(sender);
@@ -95,7 +95,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "horses":
                     if (sender.hasPermission("tppets.horses")) {
-                        CommandTPPets horseTPP = new CommandTPPets(thisPlugin);
+                        CommandTPPets horseTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         horseTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.HORSE);
                     } else {
                         permissionMessage(sender);
@@ -103,7 +103,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "mules":
                     if (sender.hasPermission("tppets.mules")) {
-                        CommandTPPets muleTPP = new CommandTPPets(thisPlugin);
+                        CommandTPPets muleTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         muleTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.MULE);
                     } else {
                         permissionMessage(sender);
@@ -111,7 +111,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "llamas":
                     if (sender.hasPermission("tppets.llamas")) {
-                        CommandTPPets llamaTPP = new CommandTPPets(thisPlugin);
+                        CommandTPPets llamaTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         llamaTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.LLAMA);
                     } else {
                         permissionMessage(sender);
@@ -119,7 +119,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "donkeys":
                     if (sender.hasPermission("tppets.donkeys")) {
-                        CommandTPPets donkeyTPP = new CommandTPPets(thisPlugin);
+                        CommandTPPets donkeyTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         donkeyTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DONKEY);
                     } else {
                         permissionMessage(sender);
@@ -159,8 +159,8 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "store":
                     if (sender.hasPermission("tppets.store")) {
-                        CommandStore store = new CommandStore(thisPlugin);
-                        store.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandStore store = new CommandStore(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        store.processCommand();
                     } else {
                         permissionMessage(sender);
                     }
