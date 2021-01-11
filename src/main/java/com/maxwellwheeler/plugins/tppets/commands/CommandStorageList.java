@@ -56,7 +56,7 @@ public class CommandStorageList implements Command {
 
     @Override
     public void displayStatus() {
-        // SUCCESS, DB_FAIL, LIMIT_REACHED, INVALID_NAME, ALREADY_DONE, SYNTAX_ERROR
+        // SUCCESS, DB_FAIL
         if (this.commandStatus == CommandStatus.DB_FAIL) {
             this.sender.sendMessage(ChatColor.RED + "Could not find storage locations");
         }

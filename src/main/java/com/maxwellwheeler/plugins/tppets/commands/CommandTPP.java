@@ -135,24 +135,24 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "allow":
                     if (sender.hasPermission("tppets.addallow")) {
-                        CommandPermissions allowPlayer = new CommandPermissions(thisPlugin);
-                        allowPlayer.allowPlayer(sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandAllowAdd allowPlayer = new CommandAllowAdd(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        allowPlayer.processCommand();
                     } else {
                         permissionMessage(sender);
                     }
                     break;
                 case "remove":
                     if (sender.hasPermission("tppets.removeallow")) {
-                        CommandPermissions removePlayer = new CommandPermissions(thisPlugin);
-                        removePlayer.removePlayer(sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandAllowRemove removePlayer = new CommandAllowRemove(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        removePlayer.processCommand();
                     } else {
                         permissionMessage(sender);
                     }
                     break;
                 case "list":
                     if (sender.hasPermission("tppets.listallow")) {
-                        CommandPermissions listPlayer = new CommandPermissions(thisPlugin);
-                        listPlayer.listPlayers(sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandAllowList listAllow = new CommandAllowList(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        listAllow.processCommand();
                     } else {
                         permissionMessage(sender);
                     }

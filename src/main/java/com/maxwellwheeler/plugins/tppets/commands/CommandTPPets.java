@@ -111,12 +111,16 @@ class CommandTPPets extends TeleportCommand {
                             commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
                             return;
                         }
-                        PetStorage pet = thisPlugin.getDatabase().getPetByName(commandAbout.getUniqueId().toString(), args[0]);
+                        List<PetStorage> pet = thisPlugin.getDatabase().getPetByName(commandAbout.getUniqueId().toString(), args[0]);
                         if (pet == null) {
                             commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
                             return;
                         }
-                        if (!hasPermissionToTp(commandSender, commandAbout, pet.petId)) {
+                        if (pet.size() == 0) {
+                            commandSender.sendMessage(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + args[0]);
+                            return;
+                        }
+                        if (!hasPermissionToTp(commandSender, commandAbout, pet.get(0).petId)) {
                             commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that");
                             return;
                         }

@@ -80,7 +80,7 @@ public class TPPStoreTest {
             when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.dbWrapper.getDefaultServerStorageLocation(this.world)).thenReturn(this.storageLocation);
-            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(this.pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
 
             String[] args = {"store", "PetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -116,7 +116,7 @@ public class TPPStoreTest {
             when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.dbWrapper.getDefaultServerStorageLocation(this.world)).thenReturn(this.storageLocation);
-            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(this.pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
 
             String[] args = {"store", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -151,7 +151,7 @@ public class TPPStoreTest {
             when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(this.pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
 
             String[] args = {"store", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -187,7 +187,7 @@ public class TPPStoreTest {
             when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(this.pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
 
             String[] args = {"store", "f:MockPlayerName", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);

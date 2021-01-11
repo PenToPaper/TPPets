@@ -9,6 +9,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 /**
  * Object that processes tpp pet rename commands:
  * /tpp rename [existing pet name] [new pet name]
@@ -80,7 +82,7 @@ class CommandRename {
             pl.sendMessage(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + oldName);
             return false;
         }
-        PetStorage petByName = thisPlugin.getDatabase().getPetByName(commandAbout.getUniqueId().toString(), oldName);
+        List<PetStorage> petByName = thisPlugin.getDatabase().getPetByName(commandAbout.getUniqueId().toString(), oldName);
         if (petByName == null) {
             pl.sendMessage(ChatColor.RED + "Can't find pet named " + ChatColor.WHITE + oldName);
             return false;

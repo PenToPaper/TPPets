@@ -96,7 +96,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", petName)).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", petName)).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", petName, petType)).thenReturn(petList);
 
             this.setAliases(commandString);
@@ -161,7 +161,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Permissions modifications
@@ -202,7 +202,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Permissions modifications
@@ -245,7 +245,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases("horses");
@@ -285,7 +285,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases("horses");
@@ -335,7 +335,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases("horses");
@@ -416,7 +416,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
@@ -467,7 +467,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
@@ -511,7 +511,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
@@ -551,7 +551,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
@@ -599,7 +599,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
@@ -654,7 +654,7 @@ public class TPPTeleportTest {
             List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(pet);
+            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases

@@ -77,9 +77,9 @@ public abstract class TeleportCommand extends BaseCommand {
             if (strictType) {
                 psList = thisPlugin.getDatabase().getPetsFromOwnerNamePetType(petOwner.getUniqueId().toString(), name, pt);
             } else {
-                PetStorage ps = thisPlugin.getDatabase().getPetByName(petOwner.getUniqueId().toString(), name);
-                if (ps != null) {
-                    psList.add(ps);
+                psList = thisPlugin.getDatabase().getPetByName(petOwner.getUniqueId().toString(), name);
+                if (psList == null) {
+                    return false;
                 }
             }
             if (psList.size() < 1) {

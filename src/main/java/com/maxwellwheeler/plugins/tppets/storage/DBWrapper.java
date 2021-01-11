@@ -364,7 +364,7 @@ public class DBWrapper {
      * @return A trimmed string version of the pet's UUID. Returns null if the database connection can't be made, returns empty string if can't find pet with that name from that owner
      */
     // Returns null if connection can't be made, returns "" if no pet by that name exists, returns pet UUID if a pet is found.
-    public PetStorage getPetByName(String ownerUUID, String petName) {
+    public List<PetStorage> getPetByName(String ownerUUID, String petName) {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         Connection dbConn = database.getConnection();
         if (dbConn != null) {
@@ -372,8 +372,8 @@ public class DBWrapper {
             try (ResultSet rs = database.selectPrepStatement(dbConn, selectPetFromName, trimmedOwnerUUID, petName.toLowerCase())) {
                 List<PetStorage> petsList = getPetsList(rs);
                 dbConn.close();
-                if (petsList != null && petsList.size() == 1) {
-                    return petsList.get(0);
+                if (petsList.size() == 1) {
+                    return petsList;
                 }
             } catch (SQLException e) {
                 thisPlugin.getLogWrapper().logErrors("SQL Exception getting pet UUID from name: " + e.getMessage());
@@ -401,7 +401,7 @@ public class DBWrapper {
      * @param playerUUID The player's UUID
      * @return True if successful, false if not
      */
-    public boolean deleteAllowedPlayer(String petUUID, String playerUUID) {
+    public boolean removeAllowedPlayer(String petUUID, String playerUUID) {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
         String deleteAllowedPlayer = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
