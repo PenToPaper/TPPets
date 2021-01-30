@@ -30,9 +30,7 @@ permissions:
       tppets.storageother: true
       tppets.bypassstoragelimit: true
       tppets.rename: true
-      tppets.addallow: true
-      tppets.removeallow: true
-      tppets.listallow: true
+      tppets.allowguests: true
       tppets.store: true
       tppets.storage: true
       tppets.protected: true

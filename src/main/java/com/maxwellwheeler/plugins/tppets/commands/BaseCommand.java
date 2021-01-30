@@ -45,6 +45,10 @@ public class BaseCommand {
         this.commandFor = this.sender;
     }
 
+    public boolean isForSelf() {
+        return this.sender.equals(this.commandFor);
+    }
+
     @SuppressWarnings("deprecation")
     public OfflinePlayer getOfflinePlayer(String username) {
         if (ArgValidator.validateUsername(username)) {

@@ -46,7 +46,9 @@ public class MockFactory {
         when(tpPets.getDatabase()).thenReturn(dbWrapper);
         when(tpPets.canTpThere(any())).thenReturn(canTpThere);
         when(tpPets.getAllowTpBetweenWorlds()).thenReturn(allowTpBetweenWorlds);
-        when(tpPets.getLogWrapper()).thenReturn(logWrapper);
+        if (logWrapper != null) {
+            when(tpPets.getLogWrapper()).thenReturn(logWrapper);
+        }
         when(tpPets.isAllowedToPet(anyString(), anyString())).thenReturn(isAllowedToPet);
 
         return tpPets;

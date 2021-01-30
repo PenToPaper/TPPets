@@ -134,7 +134,7 @@ public class CommandTPP implements CommandExecutor {
                     }
                     break;
                 case "allow":
-                    if (sender.hasPermission("tppets.addallow")) {
+                    if (sender.hasPermission("tppets.allowguests")) {
                         CommandAllowAdd allowPlayer = new CommandAllowAdd(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         allowPlayer.processCommand();
                     } else {
@@ -142,7 +142,8 @@ public class CommandTPP implements CommandExecutor {
                     }
                     break;
                 case "remove":
-                    if (sender.hasPermission("tppets.removeallow")) {
+                    // TODO: DOCUMENT THIS PERMISSION NAME CHANGE
+                    if (sender.hasPermission("tppets.allowguests")) {
                         CommandAllowRemove removePlayer = new CommandAllowRemove(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         removePlayer.processCommand();
                     } else {
@@ -150,7 +151,7 @@ public class CommandTPP implements CommandExecutor {
                     }
                     break;
                 case "list":
-                    if (sender.hasPermission("tppets.listallow")) {
+                    if (sender.hasPermission("tppets.allowguests")) {
                         CommandAllowList listAllow = new CommandAllowList(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         listAllow.processCommand();
                     } else {
@@ -189,18 +190,14 @@ public class CommandTPP implements CommandExecutor {
      */
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[ Commands ]" + ChatColor.DARK_GRAY + "--------------");
-        if (sender.hasPermission("tppets.dogs") && sender.hasPermission("tppets.cats") && sender.hasPermission("tppets.birds") && sender.hasPermission("tppets.horses") && sender.hasPermission("tppets.mules") && sender.hasPermission("tppets.llamas") && sender.hasPermission("tppets.donkeys")) {
+        if (sender.hasPermission("tppets.dogs") || sender.hasPermission("tppets.cats") || sender.hasPermission("tppets.birds") || sender.hasPermission("tppets.horses") || sender.hasPermission("tppets.mules") || sender.hasPermission("tppets.llamas") || sender.hasPermission("tppets.donkeys")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp dogs/cats/birds/horses/mules/donkeys/llamas all" + ChatColor.BLUE + "  ->  Teleports your dogs to your location");
             sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
             sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] f:[username] [pet name]" + ChatColor.BLUE + "  ->  Teleports [username]'s pet named [pet name] to your location");
         }
-        if (sender.hasPermission("tppets.addallow")) {
+        if (sender.hasPermission("tppets.allowguests")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp allow [username] [pet name]" + ChatColor.BLUE + "  ->  Allows [username] to use teleport and mount your pet named [pet name]");
-        }
-        if (sender.hasPermission("tppets.removeallow")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp remove [username] [pet name]" + ChatColor.BLUE + "  ->  Disallows [username] to use teleport and mount your pet named [pet name]");
-        }
-        if (sender.hasPermission("tppets.listallow")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp list [pet name]" + ChatColor.BLUE + "  ->  Lists all players who can teleport and mount pet named [pet name]");
         }
         if (sender.hasPermission("tppets.rename")) {

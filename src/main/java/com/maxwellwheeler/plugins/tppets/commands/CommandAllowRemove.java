@@ -14,7 +14,7 @@ import java.util.List;
 public class CommandAllowRemove extends BaseCommand {
     private CommandStatus commandStatus;
 
-    private enum CommandStatus {SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL}
+    private enum CommandStatus {SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL, ALREADY_DONE}
 
     public CommandAllowRemove(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
@@ -102,8 +102,15 @@ public class CommandAllowRemove extends BaseCommand {
             return;
         }
 
-        if (this.removePlayer(petList.get(0).petId, UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString()))) {
-            this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " allowed " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
+        String trimmedPlayerId = UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString());
+
+        if (!this.thisPlugin.getAllowedPlayers().containsKey(petList.get(0).petId) || !this.thisPlugin.getAllowedPlayers().get(petList.get(0).petId).contains(trimmedPlayerId)) {
+            this.commandStatus = CommandStatus.ALREADY_DONE;
+            return;
+        }
+
+        if (this.removePlayer(petList.get(0).petId, trimmedPlayerId)) {
+            this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " removed permission from " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
             this.commandStatus = CommandStatus.SUCCESS;
         } else {
             this.commandStatus = CommandStatus.DB_FAIL;
@@ -140,10 +147,16 @@ public class CommandAllowRemove extends BaseCommand {
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp remove [player name] [pet name]");
                 break;
             case NO_PET:
-                this.sender.sendMessage(ChatColor.RED + "Could not find pet: " + ChatColor.WHITE +  this.args[1]);
+                this.sender.sendMessage(ChatColor.RED + "Can't find pet: " + ChatColor.WHITE +  this.args[1]);
                 break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not allow user to pet");
+                break;
+            case ALREADY_DONE:
+                this.sender.sendMessage(ChatColor.WHITE + this.args[0] + ChatColor.RED + " is already not allowed to " + (this.isForSelf() ? "" : ChatColor.WHITE + this.commandFor.getName() + "'s ") + ChatColor.WHITE + this.args[1]);
+                break;
+            case SUCCESS:
+                this.sender.sendMessage(ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " is no longer allowed to " + (this.isForSelf() ? "" : ChatColor.WHITE + this.commandFor.getName() + "'s ") + ChatColor.WHITE + this.args[1]);
                 break;
         }
     }

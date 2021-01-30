@@ -3,16 +3,9 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import java.util.Arrays;
 
 /**
  * Object used for store commands
@@ -31,10 +24,6 @@ class CommandStore extends TeleportCommand {
     public CommandStore(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
         this.commandStatus = CommandStatus.SUCCESS;
-    }
-
-    public boolean isForSelf() {
-        return this.sender.equals(this.commandFor);
     }
 
     private boolean correctForOtherPlayerSyntax() {

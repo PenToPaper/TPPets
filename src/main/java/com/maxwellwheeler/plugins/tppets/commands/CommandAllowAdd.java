@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CommandAllowAdd extends BaseCommand {
     private CommandStatus commandStatus;
-    private enum CommandStatus {SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL}
+    private enum CommandStatus {SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL, ALREADY_DONE}
 
     public CommandAllowAdd(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
@@ -101,7 +101,14 @@ public class CommandAllowAdd extends BaseCommand {
             return;
         }
 
-        if (this.allowPlayer(petList.get(0).petId, UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString()))) {
+        String trimmedPlayerId = UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString());
+
+        if (this.thisPlugin.getAllowedPlayers().containsKey(petList.get(0).petId) && this.thisPlugin.getAllowedPlayers().get(petList.get(0).petId).contains(trimmedPlayerId)) {
+            this.commandStatus = CommandStatus.ALREADY_DONE;
+            return;
+        }
+
+        if (this.allowPlayer(petList.get(0).petId, trimmedPlayerId)) {
             this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " allowed " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
             this.commandStatus = CommandStatus.SUCCESS;
         } else {
@@ -124,7 +131,7 @@ public class CommandAllowAdd extends BaseCommand {
     }
 
     private void displayStatus() {
-        // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL
+        // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL, ALREADY_DONE
         switch (this.commandStatus) {
             case INSUFFICIENT_PERMISSIONS:
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
@@ -143,6 +150,12 @@ public class CommandAllowAdd extends BaseCommand {
                 break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not allow user to pet");
+                break;
+            case ALREADY_DONE:
+                this.sender.sendMessage(ChatColor.WHITE + this.args[0] + ChatColor.RED + " is already allowed to " + (this.isForSelf() ? "" : ChatColor.WHITE + this.commandFor.getName() + "'s ") + ChatColor.WHITE + this.args[1]);
+                break;
+            case SUCCESS:
+                this.sender.sendMessage(ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " is now allowed to " + (this.isForSelf() ? "" : ChatColor.WHITE + this.commandFor.getName() + "'s ") + ChatColor.WHITE + this.args[1]);
                 break;
         }
     }

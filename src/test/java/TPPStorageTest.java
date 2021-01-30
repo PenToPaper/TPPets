@@ -67,22 +67,30 @@ public class TPPStorageTest {
     @DisplayName("Non-player sending command denies action silently")
     void nonPlayerSendingCommand() {
         CommandSender sender = mock(CommandSender.class);
+        when(sender.hasPermission("tppets.storage")).thenReturn(true);
 
         String[] args = {"storage", "list"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
         verify(this.dbWrapper, never()).getStorageLocations(anyString());
+        verify(sender, never()).sendMessage(anyString());
     }
 
     @Test
     @DisplayName("Non-player sending command for another player denies action silently")
     void nonPlayerSendingCommandForAnother() {
-        CommandSender sender = mock(CommandSender.class);
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-        String[] args = {"storage", "f:MockPlayerName", "list"};
-        this.commandTPP.onCommand(sender, this.command, "", args);
+            CommandSender sender = mock(CommandSender.class);
+            when(sender.hasPermission("tppets.storage")).thenReturn(true);
 
-        verify(this.dbWrapper, never()).getStorageLocations(anyString());
+            String[] args = {"storage", "f:MockPlayerName", "list"};
+            this.commandTPP.onCommand(sender, this.command, "", args);
+
+            verify(this.dbWrapper, never()).getStorageLocations(anyString());
+            verify(sender, never()).sendMessage(anyString());
+        }
     }
 
     @Test

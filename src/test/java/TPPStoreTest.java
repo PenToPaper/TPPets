@@ -217,9 +217,10 @@ public class TPPStoreTest {
     @DisplayName("Fails silently when admin sending is not a player")
     void cannotAdminTeleportUsersPetsNotPlayer() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
+            bukkit.when(() ->Bukkit.getOfflinePlayer("PlayerName")).thenReturn(this.player);
 
             CommandSender sender = mock(CommandSender.class);
+            when(sender.hasPermission("tppets.store")).thenReturn(true);
 
             String[] args = {"store", "f:PlayerName", "PetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
@@ -228,6 +229,7 @@ public class TPPStoreTest {
             verify(this.chunk, never()).load();
             verify(this.horse, never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+            verify(sender, never()).sendMessage(anyString());
         }
     }
 
@@ -302,6 +304,7 @@ public class TPPStoreTest {
     @DisplayName("Cannot teleport user's pets with a non-player sender")
     void cannotTeleportUsersPetsNotPlayer() {
         CommandSender sender = mock(CommandSender.class);
+        when(sender.hasPermission("tppets.store")).thenReturn(true);
 
         String[] args = {"store", "PetName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
@@ -310,7 +313,7 @@ public class TPPStoreTest {
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.player, never()).sendMessage(anyString());
+        verify(sender, never()).sendMessage(anyString());
     }
 
 
