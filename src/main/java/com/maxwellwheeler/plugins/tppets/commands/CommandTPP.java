@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class CommandTPP implements CommandExecutor {
     private final Hashtable<String, List<String>> commandAliases;
-    private TPPets thisPlugin;
+    private final TPPets thisPlugin;
 
     /**
      * Initializes the core command handler with the commandAliases provided.
@@ -53,6 +53,22 @@ public class CommandTPP implements CommandExecutor {
             }
             // Changes behavior based on the command type executed
             switch(realCommand) {
+                case "tp":
+                    // Permission check done within object, since the object needs to determine which pet type is being used
+                    // TODO: MAKE ALL AND LIST NO LONGER PROTECTED
+                    CommandTeleportPet commandTeleportPet = new CommandTeleportPet(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                    commandTeleportPet.processCommand();
+                    break;
+                case "list":
+                    // Permission check done within object, since the object needs to determine which pet type is being used
+                    CommandTeleportList commandTeleportList = new CommandTeleportList(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                    commandTeleportList.processCommand();
+                    break;
+                case "all":
+                    // Permission check done within object, since the object needs to determine which pet type is being used
+                    CommandTeleportAll commandTeleportAll = new CommandTeleportAll(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                    commandTeleportAll.processCommand();
+                    break;
                 case "protected":
                     if (sender.hasPermission("tppets.protected")) {
                         CommandProtected cr = new CommandProtected();
@@ -65,62 +81,6 @@ public class CommandTPP implements CommandExecutor {
                     if (sender.hasPermission("tppets.lost")) {
                         CommandLost cl = new CommandLost();
                         cl.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
-                    } else {
-                        permissionMessage(sender);
-                    }
-                    break;
-                case "dogs":
-                    if (sender.hasPermission("tppets.dogs")) {
-                        CommandTPPets dogTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
-                        dogTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DOG);
-                    } else {
-                        permissionMessage(sender);
-                    }
-                    break;
-                case "cats":
-                    if (sender.hasPermission("tppets.cats")) {
-                        CommandTPPets catTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
-                        catTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.CAT);
-                    } else {
-                        permissionMessage(sender);
-                    }
-                    break;
-                case "birds":
-                    if (sender.hasPermission("tppets.birds")) {
-                        CommandTPPets parrotTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
-                        parrotTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.PARROT);
-                    } else {
-                        permissionMessage(sender);
-                    }
-                    break;
-                case "horses":
-                    if (sender.hasPermission("tppets.horses")) {
-                        CommandTPPets horseTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
-                        horseTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.HORSE);
-                    } else {
-                        permissionMessage(sender);
-                    }
-                    break;
-                case "mules":
-                    if (sender.hasPermission("tppets.mules")) {
-                        CommandTPPets muleTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
-                        muleTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.MULE);
-                    } else {
-                        permissionMessage(sender);
-                    }
-                    break;
-                case "llamas":
-                    if (sender.hasPermission("tppets.llamas")) {
-                        CommandTPPets llamaTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
-                        llamaTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.LLAMA);
-                    } else {
-                        permissionMessage(sender);
-                    }
-                    break;
-                case "donkeys":
-                    if (sender.hasPermission("tppets.donkeys")) {
-                        CommandTPPets donkeyTPP = new CommandTPPets(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
-                        donkeyTPP.processCommand(sender, Arrays.copyOfRange(args, 1, args.length), PetType.Pets.DONKEY);
                     } else {
                         permissionMessage(sender);
                     }
@@ -150,7 +110,7 @@ public class CommandTPP implements CommandExecutor {
                         permissionMessage(sender);
                     }
                     break;
-                case "list":
+                case "allowed":
                     if (sender.hasPermission("tppets.allowguests")) {
                         CommandAllowList listAllow = new CommandAllowList(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         listAllow.processCommand();

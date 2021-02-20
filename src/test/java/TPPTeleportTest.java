@@ -10,7 +10,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sittable;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +19,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -64,20 +66,20 @@ public class TPPTeleportTest {
         this.command = mock(Command.class);
     }
 
-    void setAliases(String alias) {
+    void setAliases() {
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
-        altAlias.add(alias);
-        aliases.put(alias, altAlias);
+        altAlias.add("tp");
+        aliases.put("tp", altAlias);
 
         this.commandTPP = new CommandTPP(aliases, this.tpPets);
     }
 
     @ParameterizedTest
     @MethodSource("teleportsPetsProvider")
-    void teleportsValidPets(String commandString, PetType.Pets petType, Class<? extends Entity> className) {
+    void teleportsValidPets(PetType.Pets petType, Class<? extends Entity> className) {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            String petName = commandString.toUpperCase() + "0";
+            String petName = petType.toString().toUpperCase() + "0";
 
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -88,8 +90,7 @@ public class TPPTeleportTest {
             Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", className);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(PetType.getClassTranslate(petType))).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", petName, petName);
@@ -99,10 +100,10 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetByName("MockPlayerId", petName)).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", petName, petType)).thenReturn(petList);
 
-            this.setAliases(commandString);
+            this.setAliases();
 
             // Command object
-            String[] args = {commandString, petName};
+            String[] args = {"tp", petName};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
 
@@ -116,9 +117,6 @@ public class TPPTeleportTest {
             assertEquals(100, capturedPetLocation.getX(), 0.5);
             assertEquals(200, capturedPetLocation.getY(), 0.5);
             assertEquals(300, capturedPetLocation.getZ(), 0.5);
-            verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
-            String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockPlayerName teleported MockPlayerName's pet named " + petName + " to their location at: x: 100, y: 200, z: 300", capturedLogOutput);
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + petName + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
@@ -128,15 +126,15 @@ public class TPPTeleportTest {
 
     private static Stream<Arguments> teleportsPetsProvider() {
         return Stream.of(
-                Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.Horse.class),
-                Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.SkeletonHorse.class),
-                Arguments.of("horses", PetType.Pets.HORSE, org.bukkit.entity.ZombieHorse.class),
-                Arguments.of("donkeys", PetType.Pets.DONKEY, org.bukkit.entity.Donkey.class),
-                Arguments.of("llamas", PetType.Pets.LLAMA, org.bukkit.entity.Llama.class),
-                Arguments.of("mules", PetType.Pets.MULE, org.bukkit.entity.Mule.class),
-                Arguments.of("birds", PetType.Pets.PARROT, org.bukkit.entity.Parrot.class),
-                Arguments.of("dogs", PetType.Pets.DOG, org.bukkit.entity.Wolf.class),
-                Arguments.of("cats", PetType.Pets.CAT, org.bukkit.entity.Cat.class)
+                Arguments.of(PetType.Pets.HORSE, org.bukkit.entity.Horse.class),
+                Arguments.of(PetType.Pets.HORSE, org.bukkit.entity.SkeletonHorse.class),
+                Arguments.of(PetType.Pets.HORSE, org.bukkit.entity.ZombieHorse.class),
+                Arguments.of(PetType.Pets.DONKEY, org.bukkit.entity.Donkey.class),
+                Arguments.of(PetType.Pets.LLAMA, org.bukkit.entity.Llama.class),
+                Arguments.of(PetType.Pets.MULE, org.bukkit.entity.Mule.class),
+                Arguments.of(PetType.Pets.PARROT, org.bukkit.entity.Parrot.class),
+                Arguments.of(PetType.Pets.DOG, org.bukkit.entity.Wolf.class),
+                Arguments.of(PetType.Pets.CAT, org.bukkit.entity.Cat.class)
         );
     }
 
@@ -153,8 +151,7 @@ public class TPPTeleportTest {
             Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(PetType.getClassTranslate(PetType.Pets.HORSE))).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -165,12 +162,12 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Permissions modifications
-            when(tpPets.canTpThere(any())).thenReturn(false);
+            when(this.tpPets.canTpThere(any())).thenReturn(false);
 
-            this.setAliases("horses");
+            this.setAliases();
 
             // Command object with no second argument
-            String[] args = {"horses", "HORSE0"};
+            String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -194,8 +191,7 @@ public class TPPTeleportTest {
             Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(PetType.getClassTranslate(PetType.Pets.HORSE))).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -208,10 +204,10 @@ public class TPPTeleportTest {
             // Permissions modifications
             when(this.player.hasPermission("tppets.horses")).thenReturn(false);
 
-            this.setAliases("horses");
+            this.setAliases();
 
             // Command object with no second argument
-            String[] args = {"horses", "HORSE0"};
+            String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -220,7 +216,7 @@ public class TPPTeleportTest {
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "You do not have permission to use that command.", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "You don't have permission to do that", capturedMessageOutput);
         }
     }
 
@@ -237,8 +233,7 @@ public class TPPTeleportTest {
             Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(PetType.getClassTranslate(PetType.Pets.HORSE))).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -248,10 +243,10 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
-            this.setAliases("horses");
+            this.setAliases();
 
             // Command object with no second argument
-            String[] args = {"horses"};
+            String[] args = {"tp"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -260,7 +255,7 @@ public class TPPTeleportTest {
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Syntax error! /tpp [pet type] [all/list/dog name]", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp tp [pet name]", capturedMessageOutput);
         }
     }
 
@@ -277,8 +272,7 @@ public class TPPTeleportTest {
             Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(PetType.getClassTranslate(PetType.Pets.HORSE))).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -288,10 +282,10 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
-            this.setAliases("horses");
+            this.setAliases();
 
             // Command object
-            String[] args = {"horses", "HORSE0", "spare argument"};
+            String[] args = {"tp", "HORSE0", "spare argument"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
 
@@ -305,9 +299,6 @@ public class TPPTeleportTest {
             assertEquals(100, capturedPetLocation.getX(), 0.5);
             assertEquals(200, capturedPetLocation.getY(), 0.5);
             assertEquals(300, capturedPetLocation.getZ(), 0.5);
-            verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
-            String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockPlayerName teleported MockPlayerName's pet named HORSE0 to their location at: x: 100, y: 200, z: 300", capturedLogOutput);
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
@@ -327,8 +318,7 @@ public class TPPTeleportTest {
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Collections.singletonList(correctPet);
-            when(this.world.getEntitiesByClasses(PetType.getClassTranslate(PetType.Pets.HORSE))).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -338,10 +328,10 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
-            this.setAliases("horses");
+            this.setAliases();
 
             // Command object with no second argument
-            String[] args = {"horses", "HORSE0;"};
+            String[] args = {"tp", "HORSE0;"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -350,7 +340,7 @@ public class TPPTeleportTest {
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + "HORSE0;", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "Could not find pet: " + ChatColor.WHITE + "HORSE0;", capturedMessageOutput);
         }
     }
 
@@ -366,8 +356,7 @@ public class TPPTeleportTest {
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Collections.singletonList(correctPet);
-            when(this.world.getEntitiesByClasses(PetType.getClassTranslate(PetType.Pets.HORSE))).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -377,10 +366,10 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(null);
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
-            this.setAliases("horses");
+            this.setAliases();
 
             // Command object with no second argument
-            String[] args = {"horses", "HORSE0"};
+            String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -389,7 +378,7 @@ public class TPPTeleportTest {
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Can't find pet with name " + ChatColor.WHITE + "HORSE0", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "Could not find pet to teleport", capturedMessageOutput);
         }
     }
 
@@ -408,8 +397,7 @@ public class TPPTeleportTest {
             Horse incorrectPet = (Horse) MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -420,13 +408,13 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
-            this.setAliases("horses");
+            this.setAliases();
 
             // Player who owns the pet
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(this.player);
 
             // Command object
-            String[] args = {"horses", "f:MockOwnerName", "HORSE0"};
+            String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.chunk, times(1)).load();
@@ -436,9 +424,6 @@ public class TPPTeleportTest {
             assertEquals(400, capturedPetLocation.getX(), 0.5);
             assertEquals(500, capturedPetLocation.getY(), 0.5);
             assertEquals(600, capturedPetLocation.getZ(), 0.5);
-            verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
-            String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminName teleported MockPlayerName's pet named HORSE0 to their location at: x: 400, y: 500, z: 600", capturedLogOutput);
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.WHITE + "MockPlayerName's " + ChatColor.BLUE + "pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
@@ -459,8 +444,7 @@ public class TPPTeleportTest {
             Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Collections.singletonList(correctPet);
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -471,14 +455,14 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
-            this.setAliases("horses");
+            this.setAliases();
 
             // Player who owns the pet
             when(this.player.hasPlayedBefore()).thenReturn(false);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(this.player);
 
             // Command object
-            String[] args = {"horses", "f:MockOwnerName", "HORSE0"};
+            String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -487,7 +471,7 @@ public class TPPTeleportTest {
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Can't find player " + ChatColor.WHITE + "MockOwnerName", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockOwnerName", capturedMessageOutput);
         }
     }
 
@@ -503,8 +487,7 @@ public class TPPTeleportTest {
             Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Collections.singletonList(correctPet);
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -515,10 +498,10 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
-            this.setAliases("horses");
+            this.setAliases();
 
             // Command object
-            String[] args = {"horses", "f:MockOwnerName;", "HORSE0"};
+            String[] args = {"tp", "f:MockOwnerName;", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -527,7 +510,7 @@ public class TPPTeleportTest {
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Can't find player " + ChatColor.WHITE + "MockOwnerName;", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockOwnerName;", capturedMessageOutput);
         }
     }
 
@@ -543,8 +526,7 @@ public class TPPTeleportTest {
             Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Collections.singletonList(correctPet);
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -555,7 +537,7 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
-            this.setAliases("horses");
+            this.setAliases();
 
             // Permissions adjustments
             when(this.tpPets.isAllowedToPet(anyString(), anyString())).thenReturn(false);
@@ -563,7 +545,7 @@ public class TPPTeleportTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(this.player);
 
             // Command object
-            String[] args = {"horses", "f:MockOwnerName", "HORSE0"};
+            String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.chunk, never()).load();
@@ -591,8 +573,7 @@ public class TPPTeleportTest {
             Horse incorrectPet = (Horse) MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -603,14 +584,14 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
-            this.setAliases("horses");
+            this.setAliases();
 
             // Permissions adjustments
             when(this.admin.hasPermission("tppets.teleportother")).thenReturn(false);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(this.player);
 
             // Command object
-            String[] args = {"horses", "f:MockOwnerName", "HORSE0"};
+            String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.chunk, times(1)).load();
@@ -621,9 +602,6 @@ public class TPPTeleportTest {
             assertEquals(400, capturedPetLocation.getX(), 0.5);
             assertEquals(500, capturedPetLocation.getY(), 0.5);
             assertEquals(600, capturedPetLocation.getZ(), 0.5);
-            verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
-            String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminName teleported MockPlayerName's pet named HORSE0 to their location at: x: 400, y: 500, z: 600", capturedLogOutput);
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.WHITE + "MockPlayerName's " + ChatColor.BLUE + "pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
@@ -646,8 +624,7 @@ public class TPPTeleportTest {
             Horse incorrectPet = (Horse) MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
-            List<Entity> entityList = Arrays.asList(correctPet, incorrectPet);
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class)).thenReturn(entityList);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
@@ -658,17 +635,17 @@ public class TPPTeleportTest {
             when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
 
             // Command aliases
-            this.setAliases("horses");
+            this.setAliases();
 
             // Permissions adjustments
             when(this.admin.hasPermission("tppets.teleportother")).thenReturn(false);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(this.player);
 
             // Passenger adjustments. Entity list does not have size = 0
-            when(correctPet.getPassengers()).thenReturn(entityList);
+            when(correctPet.getPassengers()).thenReturn(Collections.singletonList(correctPet));
 
             // Command object
-            String[] args = {"horses", "f:MockOwnerName", "HORSE0"};
+            String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.chunk, times(1)).load();
@@ -677,7 +654,7 @@ public class TPPTeleportTest {
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Can't teleport " + ChatColor.WHITE + "HORSE0", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "Could not teleport pet", capturedMessageOutput);
         }
     }
 }

@@ -44,6 +44,7 @@ public abstract class TeleportCommand extends BaseCommand {
             World world = Bukkit.getWorld(ps.petWorld);
             if (world != null) {
                 Chunk tempLoadedChunk = getChunkFromCoords(world, ps.petX, ps.petZ);
+                tempLoadedChunk.getEntities();
                 tempLoadedChunk.load();
             }
         }
@@ -71,6 +72,33 @@ public abstract class TeleportCommand extends BaseCommand {
      * @param strictType Whether or not the pet should strictly be of the pt type
      * @return True if the pet was found and teleported, false otherwise
      */
+
+    protected boolean teleportPetsFromStorage(Location sendTo, List<PetStorage> petStorageList, boolean setSitting, boolean kickPlayerOff) {
+        boolean teleportResult = false;
+        for (PetStorage petStorage : petStorageList) {
+            World world = Bukkit.getWorld(petStorage.petWorld);
+            if (world != null && (thisPlugin.getAllowTpBetweenWorlds() || world.equals(sendTo.getWorld()))) {
+                Chunk petChunk = getChunkFromCoords(world, petStorage.petX, petStorage.petZ);
+                petChunk.load();
+                Entity entity = getEntityInChunk(petChunk, petStorage);
+                if (entity != null && teleportPet(sendTo, entity, setSitting, kickPlayerOff)) {
+                    thisPlugin.getDatabase().updateOrInsertPet(entity);
+                    teleportResult = true;
+                }
+            }
+        }
+        return teleportResult;
+    }
+
+    protected Entity getEntityInChunk(Chunk chunk, PetStorage petStorage) {
+        for (Entity entity : chunk.getEntities()) {
+            if (UUIDUtils.trimUUID(entity.getUniqueId()).equals(petStorage.petId)) {
+                return entity;
+            }
+        }
+        return null;
+    }
+
     protected boolean teleportSpecificPet(Location sendTo, OfflinePlayer petOwner, String name, PetType.Pets pt, boolean setSitting, boolean kickPlayerOff, boolean strictType) {
         if (thisPlugin.getDatabase() != null && petOwner != null && name != null && (!pt.equals(PetType.Pets.UNKNOWN) || !strictType)) {
             List<PetStorage> psList = new ArrayList<>();

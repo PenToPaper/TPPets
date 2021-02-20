@@ -23,7 +23,7 @@ public class PetType {
     }
 
     private static final Hashtable<Pets, Class<?>[]> classTranslate;
-
+    
     static {
         classTranslate = new Hashtable<>();
         classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Cat.class});

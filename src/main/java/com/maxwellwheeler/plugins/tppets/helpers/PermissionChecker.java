@@ -1,9 +1,11 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.AnimalTamer;
+import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 
 /**
@@ -33,5 +35,10 @@ public class PermissionChecker {
     public static boolean offlineHasPerms(AnimalTamer at, String permission, World world, TPPets thisPlugin) {
         // Player extends OfflinePlayer
         return (world != null && thisPlugin.getVaultEnabled() && at instanceof OfflinePlayer && thisPlugin.getPerms().playerHas(world.getName(), (OfflinePlayer) at, permission));
+    }
+
+    public static boolean hasPermissionToTeleportType(PetType.Pets petType, Player player) {
+        String test = "tppets." + petType.toString().toLowerCase() + "s";
+        return player.hasPermission(test);
     }
 }

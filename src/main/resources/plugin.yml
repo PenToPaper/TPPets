@@ -37,7 +37,7 @@ permissions:
       tppets.lost: true
       tppets.dogs: true
       tppets.cats: true
-      tppets.birds: true
+      tppets.parrots: true
       tppets.horses: true
       tppets.mules: true
       tppets.llamas: true
@@ -49,7 +49,7 @@ permissions:
     children:
       tppets.dogs: true
       tppets.cats: true
-      tppets.birds: true
+      tppets.parrots: true
       tppets.horses: true
       tppets.mules: true
       tppets.llamas: true
@@ -125,7 +125,7 @@ permissions:
   tppets.cats:
     default: true
     description: Allows user to teleport their cats to them.
-  tppets.birds:
+  tppets.parrots:
     default: true
     description: Allows user to teleport their birds to them.
   tppets.horses:
