@@ -11,10 +11,6 @@ public class CommandStorageAdd extends Command {
         super(thisPlugin, sender, commandFor, args);
     }
 
-    public boolean isForSelf() {
-        return this.sender.equals(this.commandFor);
-    }
-
     @Override
     public void processCommand() {
         addStorage();
