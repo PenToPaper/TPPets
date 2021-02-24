@@ -13,68 +13,21 @@ import java.util.List;
 import java.util.UUID;
 
 public class CommandAllowList extends BaseCommand{
-    private CommandStatus commandStatus;
-    private enum CommandStatus{SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL}
-
     public CommandAllowList(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
-    private boolean correctForOtherPlayerSyntax() {
-        // 1) Check that the command sender exists and is a player
-        if (this.sender == null) {
-            this.commandStatus = CommandStatus.INVALID_SENDER;
-            return false;
-        }
-
-        // 2) Check that the player has permission to execute this type of command
-        if (!this.sender.hasPermission("tppets.allowother")) {
-            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-            return false;
-        }
-
-        // 3) Check if a player with that name was found
-        if (this.commandFor == null) {
-            this.commandStatus = CommandStatus.NO_PLAYER;
-            return false;
-        }
-
-        // 4) Check if there's enough arguments to make a valid command
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return false;
-        }
-
-        // 5) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
-        this.commandStatus = CommandStatus.SUCCESS;
-        return true;
-    }
-
-    private boolean correctForSelfSyntax() {
-        // 1) Check that the command sender exists and is a player
-        if (this.sender == null) {
-            this.commandStatus = CommandStatus.INVALID_SENDER;
-            return false;
-        }
-
-        // 2) Check if there's enough arguments to make a valid command
-        if (!ArgValidator.validateArgsLength(args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return false;
-        }
-
-        // 3) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
-        this.commandStatus = CommandStatus.SUCCESS;
-        return true;
-    }
-
     public void processCommand() {
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
-        if ((this.isIntendedForSomeoneElse && correctForOtherPlayerSyntax()) || (!this.isIntendedForSomeoneElse && correctForSelfSyntax())) {
+        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
             processCommandGeneric();
         }
 
         displayStatus();
+    }
+
+    private boolean isValidSyntax() {
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.allowother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
     private void processCommandGeneric() {
@@ -119,6 +72,8 @@ public class CommandAllowList extends BaseCommand{
 
     private void displayStatus() {
         switch (this.commandStatus) {
+            case SUCCESS:
+                break;
             case INSUFFICIENT_PERMISSIONS:
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
                 break;
@@ -133,6 +88,9 @@ public class CommandAllowList extends BaseCommand{
                 break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not find allowed users");
+                break;
+            default:
+                this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
         }
     }

@@ -167,7 +167,6 @@ public abstract class TeleportCommand extends BaseCommand {
     }
 
 
-
     /**
      * Formats the location in a readable way
      * @param lc Location to format
@@ -175,91 +174,6 @@ public abstract class TeleportCommand extends BaseCommand {
      */
     static String formatLocation(Location lc) {
         return "x: " + Integer.toString(lc.getBlockX()) + ", " + "y: " + Integer.toString(lc.getBlockY()) + ", " + "z: " + Integer.toString(lc.getBlockZ());
-    }
-
-    /**
-     * Checks if a given pet is of the right type and owned by the supposed owner
-     * @param sendFrom The player that owns the pet
-     * @param ent The entity to be checked
-     * @param pt The pet type to check
-     * @return True if teleportable, false if not
-     */
-    protected boolean isTeleportablePet(OfflinePlayer sendFrom, Entity ent, PetType.Pets pt) {
-        if (ent instanceof Tameable) {
-            Tameable tameableTemp = (Tameable) ent;
-            return tameableTemp.isTamed() && tameableTemp.getOwner() != null && tameableTemp.getOwner().equals(sendFrom) && PetType.getEnumByEntity(ent).equals(pt);
-        }
-        return false;
-    }
-
-    /**
-     * Teleports all pets owned by sendFrom of type pt to sendTo
-     * @param sendTo The player to send the pets to
-     * @param sendFrom The player who owns the pets
-     * @param pt The type of pets to teleport
-     * @param setSitting Whether or not the pet should be set sitting after teleporting
-     * @param kickPlayerOff Whether or not any players mounting the pet should be kicked off before teleporting
-     * @return A set of UUIDs of the pets that have been teleported
-     */
-    protected Set<UUID> getPetsAndTeleport(Location sendTo, OfflinePlayer sendFrom, PetType.Pets pt, boolean setSitting, boolean kickPlayerOff) {
-        List<World> worlds = Bukkit.getServer().getWorlds();
-        Set<UUID> teleportedEnts = new HashSet<>();
-        // If you can teleport between worlds, check every world
-        if (thisPlugin.getAllowTpBetweenWorlds()) {
-            for (World world : worlds) {
-                Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, world, pt, teleportedEnts, setSitting, kickPlayerOff);
-                if (teleportedTemp != null) {
-                    teleportedEnts.addAll(teleportedTemp);
-                }
-            }
-        } else {
-            // If you can't teleport between worlds, check only the world the player is in
-            Set<UUID> teleportedTemp = loadAndTp(sendTo, sendFrom, sendTo.getWorld(), pt, teleportedEnts, setSitting, kickPlayerOff);
-            if (teleportedTemp != null) {
-                teleportedEnts.addAll(teleportedTemp);
-            }
-        }
-        return teleportedEnts;
-    }
-
-    /**
-     * Teleports all pets owned by sendFrom of type pt in world world not already in set alreadyTeleportedPets to sendTo
-     * @param sendTo The player to send the pets to
-     * @param sendFrom The player who owns the pets
-     * @param world The world to check
-     * @param pt The type of pets to teleport
-     * @param alreadyTeleportedPets A set representing pets that have already been teleported, so that duplicates can't exist
-     * @param setSitting Whether or not the pet should be set sitting after teleporting
-     * @param kickPlayerOff Whether or not any players mounting the pet should be kicked off before teleporting
-     * @return alreadyTeleportedPets plus the new pets teleported by this command
-     */
-    protected Set<UUID> loadAndTp(Location sendTo, OfflinePlayer sendFrom, World world, PetType.Pets pt, Set<UUID> alreadyTeleportedPets, boolean setSitting, boolean kickPlayerOff) {
-        if (thisPlugin.getDatabase() != null && sendFrom != null && sendTo != null && world != null) {
-            List<PetStorage> unloadedPetsInWorld = thisPlugin.getDatabase().getPetsGeneric(sendFrom.getUniqueId().toString(), world.getName(), pt);
-            loadApplicableChunks(unloadedPetsInWorld);
-            for (Entity ent : world.getEntitiesByClasses(PetType.getClassTranslate(pt))) {
-                if (isTeleportablePet(sendFrom, ent, pt)) {
-                    if (!alreadyTeleportedPets.contains(ent.getUniqueId())) {
-                        teleportPet(sendTo, ent, !sendTo.equals(sendFrom) && setSitting, kickPlayerOff);
-                        alreadyTeleportedPets.add(ent.getUniqueId());
-                    } else {
-                        ent.remove();
-                    }
-                }
-            }
-            return alreadyTeleportedPets;
-        }
-        return null;
-    }
-
-    /**
-     * Checks if conditions are met where the pet should be set to sit
-     * @param sender The sender of the command
-     * @param petOwner The owner of the pet
-     * @return True if pet should sit, false if not
-     */
-    protected boolean shouldKeepSitting(Player sender, OfflinePlayer petOwner) {
-        return !sender.equals(petOwner) && sender.hasPermission("tppets.teleportother");
     }
 
 }

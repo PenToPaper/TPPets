@@ -6,6 +6,7 @@ import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.sk89q.worldedit.bukkit.fastutil.Hash;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -13,53 +14,53 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-public class CommandStorageListDefault implements Command {
-    private final TPPets tpPets;
-    private final Player sender;
-    private final String[] args;
-    private CommandStatus commandStatus;
-    private enum CommandStatus{SUCCESS, DB_FAIL}
-
-    CommandStorageListDefault(TPPets tpPets, Player sender, String[] args) {
-        this.tpPets = tpPets;
-        this.sender = sender;
-        this.args = args;
-        this.commandStatus = CommandStatus.SUCCESS;
+public class CommandStorageListDefault extends Command {
+    CommandStorageListDefault(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
+        super(thisPlugin, sender, commandFor, args);
     }
 
     @Override
     public void processCommand() {
-        if (this.tpPets.getDatabase() == null) {
+        listDefaultStorages();
+        displayStatus();
+    }
+
+    private void listDefaultStorages() {
+        if (this.thisPlugin.getDatabase() == null) {
             this.commandStatus = CommandStatus.DB_FAIL;
             return;
         }
 
         // Checks all worlds and stores their storage locations. Doing this first checks for database failures\
-        Hashtable<String, List<StorageLocation>> allStorageLocations = new Hashtable<>();
+        List<StorageLocation> allStorageLocations = new ArrayList<>();
 
         for (World world : Bukkit.getWorlds()) {
-            List<StorageLocation> storageLocations = this.tpPets.getDatabase().getServerStorageLocations(world);
+            List<StorageLocation> storageLocations = this.thisPlugin.getDatabase().getServerStorageLocations(world);
+
             if (storageLocations == null) {
                 this.commandStatus = CommandStatus.DB_FAIL;
                 return;
             }
-            allStorageLocations.put(world.getName(), storageLocations);
+
+            allStorageLocations.addAll(storageLocations);
         }
 
+        listAllStorages(this.sender, allStorageLocations);
+    }
+
+    private void listAllStorages(Player pl, List<StorageLocation> storageLocations) {
         // Loops through the stored storage locations if there's been no failure. Lists them to the user.
         this.sender.sendMessage(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE +  "Server's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------");
 
-        for (String worldName : allStorageLocations.keySet()) {
-            for (StorageLocation storageLocation: allStorageLocations.get(worldName)) {
-                listIndividualStorage(this.sender, storageLocation);
-            }
+        for (StorageLocation storageLocation: storageLocations) {
+            listIndividualStorage(pl, storageLocation);
         }
 
         this.sender.sendMessage(ChatColor.GRAY + "----------------------------------------");
 
     }
 
-    private void listIndividualStorage (Player pl, StorageLocation storageLoc) {
+    private void listIndividualStorage(Player pl, StorageLocation storageLoc) {
         if (storageLoc != null && storageLoc.getLoc().getWorld() != null) {
             pl.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + storageLoc.getStorageName());
             // TODO REFACTOR TeleportCommand.formatLocation and put it in here
@@ -67,11 +68,17 @@ public class CommandStorageListDefault implements Command {
         }
     }
 
-    @Override
-    public void displayStatus() {
-        // SUCCESS, DB_FAIL, LIMIT_REACHED, INVALID_NAME, ALREADY_DONE, SYNTAX_ERROR
-        if (this.commandStatus == CommandStatus.DB_FAIL) {
-            this.sender.sendMessage(ChatColor.RED + "Could not find storage locations");
+    private void displayStatus() {
+        switch (this.commandStatus) {
+            case SUCCESS:
+            case INVALID_SENDER:
+                break;
+            case DB_FAIL:
+                this.sender.sendMessage(ChatColor.RED + "Could not find storage locations");
+                break;
+            default:
+                this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
+                break;
         }
     }
 }

@@ -2,31 +2,15 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 
-public class BaseCommand {
+public abstract class BaseCommand extends Command {
     protected boolean isIntendedForSomeoneElse;
-    public OfflinePlayer commandFor;
-    public Player sender;
-    public String[] args;
-    public TPPets thisPlugin;
-    public enum CommandStatus {SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, SYNTAX_ERROR, NO_PET, NO_PET_TYPE, DB_FAIL, CANT_TELEPORT, CANT_TELEPORT_IN_PR}
-    protected CommandStatus commandStatus = CommandStatus.SUCCESS;
 
     public BaseCommand(TPPets thisPlugin, CommandSender sender, String[] args) {
-        this.thisPlugin = thisPlugin;
-        this.sender = null;
-        this.commandFor = null;
-        if (sender instanceof Player) {
-            this.sender = (Player) sender;
-        }
-        this.args = args;
+        super(thisPlugin, sender, args);
         initializeCommandFor();
     }
 
@@ -88,24 +72,5 @@ public class BaseCommand {
         }
         this.isIntendedForSomeoneElse = false;
         this.commandFor = this.sender;
-    }
-
-    public boolean isForSelf() {
-        return this.sender.equals(this.commandFor);
-    }
-
-    @SuppressWarnings("deprecation")
-    public OfflinePlayer getOfflinePlayer(String username) {
-        if (ArgValidator.validateUsername(username)) {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(username);
-            if (player.hasPlayedBefore()) {
-                return player;
-            }
-        }
-        return null;
-    }
-
-    public CommandStatus getCommandStatus() {
-        return this.commandStatus;
     }
 }

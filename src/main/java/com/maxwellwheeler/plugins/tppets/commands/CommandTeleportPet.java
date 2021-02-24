@@ -131,6 +131,7 @@ public class CommandTeleportPet extends TeleportCommand {
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
+                break;
         }
     }
 }

@@ -13,10 +13,7 @@ import java.util.Arrays;
  */
 // TODO: JAVADOC
 public class CommandStorage extends BaseCommand {
-
     private boolean isDefaultCommand;
-    private CommandStatus commandStatus;
-    private enum CommandStatus{SUCCESS, INVALID_SENDER, NO_PLAYER, SYNTAX_ERROR, INSUFFICIENT_PERMISSIONS}
 
     /**
      * Generic constructor, needs to point to plugin for logging.
@@ -24,55 +21,6 @@ public class CommandStorage extends BaseCommand {
      */
     public CommandStorage(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
-        this.commandStatus = CommandStatus.SUCCESS;
-    }
-
-    private boolean correctForOtherPlayerSyntax() {
-        // 1) Check that the command sender exists and is a player
-        if (this.sender == null) {
-            this.commandStatus = CommandStatus.INVALID_SENDER;
-            return false;
-        }
-
-        // 2) Check that the player has permission to execute this type of command
-        if (!this.sender.hasPermission("tppets.storageother")) {
-            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-            return false;
-        }
-
-        // 3) Check if a player with that name was found
-        if (this.commandFor == null) {
-            this.commandStatus = CommandStatus.NO_PLAYER;
-            return false;
-        }
-
-        // 4) Check if there's enough arguments to make a valid command
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return false;
-        }
-
-        // 5) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
-        this.commandStatus = CommandStatus.SUCCESS;
-        return true;
-    }
-
-    private boolean correctForSelfSyntax() {
-        // 1) Check that the command sender exists and is a player
-        if (this.sender == null) {
-            this.commandStatus = CommandStatus.INVALID_SENDER;
-            return false;
-        }
-
-        // 2) Check if there's enough arguments to make a valid command
-        if (!ArgValidator.validateArgsLength(args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return false;
-        }
-
-        // 3) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
-        this.commandStatus = CommandStatus.SUCCESS;
-        return true;
     }
 
     // Desired Syntax: /tpp storage add [storage name]
@@ -85,14 +33,16 @@ public class CommandStorage extends BaseCommand {
     // Storage Name: \w{1,64}
     // Storage Name: default
     public void processCommand() {
-
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
-        if ((this.isIntendedForSomeoneElse && correctForOtherPlayerSyntax()) || (!this.isIntendedForSomeoneElse && correctForSelfSyntax())) {
+        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
             processCommandGeneric();
         }
 
         displayErrors();
+    }
 
+    private boolean isValidSyntax() {
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.storageother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
     private void determineIsDefaultCommand() {
@@ -114,7 +64,7 @@ public class CommandStorage extends BaseCommand {
 
     public Command getCommandAdd() {
         if (this.isDefaultCommand) {
-            return new CommandStorageAddDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
+            return new CommandStorageAddDefault(this.thisPlugin, this.sender, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
         } else {
             return new CommandStorageAdd(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
         }
@@ -122,7 +72,7 @@ public class CommandStorage extends BaseCommand {
 
     public Command getCommandRemove() {
         if (this.isDefaultCommand) {
-            return new CommandStorageRemoveDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
+            return new CommandStorageRemoveDefault(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
         } else {
             return new CommandStorageRemove(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
         }
@@ -130,7 +80,7 @@ public class CommandStorage extends BaseCommand {
 
     public Command getCommandList() {
         if (this.isDefaultCommand) {
-            return new CommandStorageListDefault(this.thisPlugin, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
+            return new CommandStorageListDefault(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
         } else {
             return new CommandStorageList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
         }
@@ -162,12 +112,14 @@ public class CommandStorage extends BaseCommand {
         
         if (commandToRun != null) {
             commandToRun.processCommand();
-            commandToRun.displayStatus();
         }
     }
 
     private void displayErrors() {
         switch(this.commandStatus) {
+            case SUCCESS:
+            case INVALID_SENDER:
+                break;
             case NO_PLAYER:
                 this.sender.sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + ArgValidator.isForSomeoneElse(this.args[0]));
                 break;
@@ -176,6 +128,9 @@ public class CommandStorage extends BaseCommand {
                 break;
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list]");
+                break;
+            default:
+                this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
         }
     }

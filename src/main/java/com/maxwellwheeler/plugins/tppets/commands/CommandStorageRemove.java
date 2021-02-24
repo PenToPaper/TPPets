@@ -6,56 +6,49 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-public class CommandStorageRemove implements Command {
-    private final TPPets tpPets;
-    private final Player sender;
-    private final OfflinePlayer commandFor;
-    private final String[] args;
-    private CommandStatus commandStatus;
-    private enum CommandStatus{SUCCESS, SYNTAX_ERROR, DB_FAIL, ALREADY_DONE}
-
-    CommandStorageRemove(TPPets tpPets, Player sender, OfflinePlayer commandFor, String[] args) {
-        this.tpPets = tpPets;
-        this.sender = sender;
-        this.commandFor = commandFor;
-        this.args = args;
-        this.commandStatus = CommandStatus.SUCCESS;
-    }
-
-    public boolean isForSelf() {
-        return this.sender.equals(this.commandFor);
+public class CommandStorageRemove extends Command {
+    CommandStorageRemove(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
+        super(thisPlugin, sender, commandFor, args);
     }
 
     @Override
     public void processCommand() {
+        removeStorage();
+        displayStatus();
+    }
+
+    private void removeStorage() {
         if (!ArgValidator.validateArgsLength(this.args, 1)) {
             this.commandStatus = CommandStatus.SYNTAX_ERROR;
             return;
         }
 
-        if (this.tpPets.getDatabase() == null) {
+        if (this.thisPlugin.getDatabase() == null) {
             this.commandStatus = CommandStatus.DB_FAIL;
             return;
         }
 
-        if (!ArgValidator.validateStorageName(this.args[0]) || this.tpPets.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), this.args[0]) == null) {
+        if (!ArgValidator.validateStorageName(this.args[0]) || this.thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), this.args[0]) == null) {
             this.commandStatus = CommandStatus.ALREADY_DONE;
             return;
         }
 
-        if (this.tpPets.getDatabase().removeStorageLocation(commandFor.getUniqueId().toString(), this.args[0])) {
-            this.tpPets.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed location " + this.args[0] + " from " + commandFor.getName());
-            this.commandStatus = CommandStatus.SUCCESS;
+        if (!this.thisPlugin.getDatabase().removeStorageLocation(commandFor.getUniqueId().toString(), this.args[0])) {
+            this.commandStatus = CommandStatus.DB_FAIL;
             return;
         }
 
-        this.commandStatus = CommandStatus.DB_FAIL;
+        this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed location " + this.args[0] + " from " + commandFor.getName());
     }
 
-    @Override
-    public void displayStatus() {
+    private void displayStatus() {
         // SUCCESS, SYNTAX_ERROR, DB_FAIL, ALREADY_DONE
         switch(this.commandStatus) {
+            case INVALID_SENDER:
+                break;
+            case SUCCESS:
+                this.sender.sendMessage((this.isForSelf() ? ChatColor.BLUE + "Storage" : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE) + " location " + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " has been removed");
+                break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not remove storage location");
                 break;
@@ -65,8 +58,8 @@ public class CommandStorageRemove implements Command {
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage remove [storage name]");
                 break;
-            case SUCCESS:
-                this.sender.sendMessage((this.isForSelf() ? ChatColor.BLUE + "Storage" : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE) + " location " + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " has been removed");
+            default:
+                this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
         }
     }

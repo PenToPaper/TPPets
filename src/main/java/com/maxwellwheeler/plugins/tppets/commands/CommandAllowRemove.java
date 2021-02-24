@@ -12,69 +12,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandAllowRemove extends BaseCommand {
-    private CommandStatus commandStatus;
-
-    private enum CommandStatus {SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL, ALREADY_DONE}
-
     public CommandAllowRemove(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
-    private boolean correctForOtherPlayerSyntax() {
-        // 1) Check that the command sender exists and is a player
-        if (this.sender == null) {
-            this.commandStatus = CommandStatus.INVALID_SENDER;
-            return false;
-        }
-
-        // 2) Check that the player has permission to execute this type of command
-        if (!this.sender.hasPermission("tppets.allowother")) {
-            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-            return false;
-        }
-
-        // 3) Check if a player with that name was found
-        if (this.commandFor == null) {
-            this.commandStatus = CommandStatus.NO_PLAYER;
-            return false;
-        }
-
-        // 4) Check if there's enough arguments to make a valid command
-        if (!ArgValidator.validateArgsLength(this.args, 2)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return false;
-        }
-
-        // 5) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
-        this.commandStatus = CommandStatus.SUCCESS;
-        return true;
-    }
-
-    private boolean correctForSelfSyntax() {
-        // 1) Check that the command sender exists and is a player
-        if (this.sender == null) {
-            this.commandStatus = CommandStatus.INVALID_SENDER;
-            return false;
-        }
-
-        // 2) Check if there's enough arguments to make a valid command
-        if (!ArgValidator.validateArgsLength(args, 2)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return false;
-        }
-
-        // 3) All clear for now. Set commandStatus to SUCCESS to override any earlier calls to similar methods
-        this.commandStatus = CommandStatus.SUCCESS;
-        return true;
-    }
-
     public void processCommand() {
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
-        if ((this.isIntendedForSomeoneElse && correctForOtherPlayerSyntax()) || (!this.isIntendedForSomeoneElse && correctForSelfSyntax())) {
+        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
             processCommandGeneric();
         }
 
         displayStatus();
+    }
+
+    private boolean isValidSyntax() {
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.allowother", 2)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(2));
     }
 
     private void processCommandGeneric() {
@@ -157,6 +109,9 @@ public class CommandAllowRemove extends BaseCommand {
                 break;
             case SUCCESS:
                 this.sender.sendMessage(ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " is no longer allowed to " + (this.isForSelf() ? "" : ChatColor.WHITE + this.commandFor.getName() + "'s ") + ChatColor.WHITE + this.args[1]);
+                break;
+            default:
+                this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
         }
     }
