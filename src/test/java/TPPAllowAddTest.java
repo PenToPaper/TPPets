@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TPPAllowAdd {
+public class TPPAllowAddTest {
     private OfflinePlayer guest;
     private Player player;
     private Player admin;
@@ -181,7 +181,7 @@ public class TPPAllowAdd {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "You don't have permission to do that", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName", capturedMessageOutput);
         }
     }
 

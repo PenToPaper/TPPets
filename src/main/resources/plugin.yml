@@ -59,7 +59,7 @@ permissions:
   tppets.mountother:
     default: op
     description: Allows user to mount and use inventories of pets that do not belong to them.
-  tppets.renameall:
+  tppets.renameother:
     default: op
     description: Allows user to rename pets that do not belong to them.
   tppets.allowother:
@@ -68,7 +68,7 @@ permissions:
   tppets.teleportother:
     default: op
     description: Allows user to teleport pets owned by someone else to their location.
-  tppets.untameall:
+  tppets.untameother:
     default: op
     description: Allows user to untame pets that they don't own.
   tppets.bypassprotection:

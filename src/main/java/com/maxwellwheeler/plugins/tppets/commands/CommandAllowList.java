@@ -73,6 +73,7 @@ public class CommandAllowList extends BaseCommand{
     private void displayStatus() {
         switch (this.commandStatus) {
             case SUCCESS:
+            case INVALID_SENDER:
                 break;
             case INSUFFICIENT_PERMISSIONS:
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");

@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TPPAllowRemove {
+public class TPPAllowRemoveTest {
     private OfflinePlayer guest;
     private Player player;
     private Player admin;

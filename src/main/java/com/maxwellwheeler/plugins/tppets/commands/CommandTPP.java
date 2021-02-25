@@ -2,7 +2,6 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
-import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -87,8 +86,8 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "rename":
                     if (sender.hasPermission("tppets.rename")) {
-                        CommandRename renamePet = new CommandRename(thisPlugin);
-                        renamePet.processCommand(sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandRename renamePet = new CommandRename(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        renamePet.processCommand();
                     } else {
                         permissionMessage(sender);
                     }

@@ -86,6 +86,8 @@ public class CommandAllowAdd extends BaseCommand {
     private void displayStatus() {
         // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL, ALREADY_DONE
         switch (this.commandStatus) {
+            case INVALID_SENDER:
+                break;
             case INSUFFICIENT_PERMISSIONS:
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
                 break;

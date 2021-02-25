@@ -3,103 +3,98 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
-/**
- * Object that processes tpp pet rename commands:
- * /tpp rename [existing pet name] [new pet name]
- * /tpp rename f:[username] [existing pet name] [new pet name]
- * @author GatheringExp
- *
- */
-class CommandRename {
-    private TPPets thisPlugin;
-
-    /**
-     * Generic constructor, supplies reference to TPPets plugin instance.
-     * @param thisPlugin The TPPets plugin instance
-     */
-    public CommandRename(TPPets thisPlugin) {
-        this.thisPlugin = thisPlugin;
+public class CommandRename extends BaseCommand {
+    public CommandRename(TPPets thisPlugin, CommandSender sender, String[] args) {
+        super(thisPlugin, sender, args);
     }
 
-    /**
-     * Syntax: /tpp rename [existing pet name] [new pet name]
-     * Renames sender's [existing pet name] to [new pet name]
-     * Alternative Syntax: /tpp rename f:[username] [existing pet name] [new pet name]
-     * Renames [username]'s [existing pet name] to [new pet name]
-     * @param sender The {@link CommandSender} object that originally sent the command.
-     * @param args The arguments passed with the command - doesn't include the "tpp rename" in command. Ex: /tpp rename OldName NewName, String args[] would have {OldName, NewName}.
-     */
-    @SuppressWarnings("deprecation")
-    public void processCommand(CommandSender sender, String[] args) {
-        if (sender instanceof Player) {
-            Player playerTemp = (Player) sender;
-            // Checks if command meets basic syntax requirements
-            if (ArgValidator.validateArgsLength(args,2)) {
-                // Checks if command is /tpp rename f:[username] [existing pet name] [new pet name]
-                String someoneElse = ArgValidator.isForSomeoneElse(args[0]);
-                if (someoneElse != null && ArgValidator.validateUsername(someoneElse) && ArgValidator.validateArgsLength(args, 3)) {
-                    if (!sender.hasPermission("tppets.renameall")) {
-                        sender.sendMessage(ChatColor.RED + "You don't have permission to do that!");
-                        return;
-                    }
-                    // Checks if f:[usrename] has a valid UUID, if it does, it runs that command
-                    OfflinePlayer offlinePlayerTemp = Bukkit.getOfflinePlayer(someoneElse);
-                    if (offlinePlayerTemp != null && offlinePlayerTemp.hasPlayedBefore()) {
-                        renamePet(playerTemp, offlinePlayerTemp, args[1], args[2]);
-                    } else {
-                        playerTemp.sendMessage(ChatColor.RED + "Can't find player " + ChatColor.WHITE + someoneElse);
-                    }
-                // Checks if syntax is /tpp rename [existing pet name] [new pet name]
-                } else {
-                    renamePet(playerTemp, playerTemp, args[0], args[1]);
-                }
-            } else {
-                sender.sendMessage(ChatColor.RED + "Syntax error. Usage: /tpp rename [old name] [new name]");
-            }
-        } else {
-            sender.sendMessage(ChatColor.RED + "Error: Sender is not a player.");
+    @Override
+    public void processCommand() {
+        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
+        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
+            processCommandGeneric();
         }
+
+        displayStatus();
     }
 
-    /**
-     * Generic processor for the /tpp rename [args] commands
-     * @param pl The player that is sending the command
-     * @param commandAbout The player that the command is about, presumably from the f:[username] argument
-     * @param oldName The old pet name
-     * @param newName The new pet name
-     * @return False if can't find a pet by that name or can't rename the pet, true if successful.
-     */
-    private boolean renamePet(Player pl, OfflinePlayer commandAbout, String oldName, String newName) {
-        if (!ArgValidator.softValidatePetName(oldName)) {
-            pl.sendMessage(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + oldName);
-            return false;
+    private boolean isValidSyntax() {
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.renameother", 2)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(2));
+    }
+
+    private void processCommandGeneric() {
+        if (!ArgValidator.softValidatePetName(this.args[0])) {
+            this.commandStatus = CommandStatus.NO_TARGET_PET;
+            return;
         }
-        List<PetStorage> petByName = thisPlugin.getDatabase().getPetByName(commandAbout.getUniqueId().toString(), oldName);
-        if (petByName == null) {
-            pl.sendMessage(ChatColor.RED + "Can't find pet named " + ChatColor.WHITE + oldName);
-            return false;
+
+        if (!ArgValidator.softValidatePetName(this.args[1])) {
+            this.commandStatus = CommandStatus.INVALID_NAME;
+            return;
         }
-        if (!ArgValidator.softValidatePetName(newName)) {
-            pl.sendMessage(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + newName);
-            return false;
+
+        List<PetStorage> pet = this.thisPlugin.getDatabase().getPetByName(this.commandFor.getUniqueId().toString(), this.args[0]);
+
+        if (pet == null) {
+            this.commandStatus = CommandStatus.DB_FAIL;
+            return;
         }
-        if (!ArgValidator.validatePetName(thisPlugin.getDatabase(), commandAbout.getUniqueId().toString(), newName)) {
-            pl.sendMessage(ChatColor.RED + "Pet name " + ChatColor.WHITE + newName + ChatColor.RED + " already in use!");
-            return false;
+
+        if (pet.size() == 0) {
+            this.commandStatus = CommandStatus.NO_TARGET_PET;
+            return;
         }
-        if (thisPlugin.getDatabase().renamePet(commandAbout.getUniqueId().toString(), oldName, newName)) {
-            pl.sendMessage(ChatColor.BLUE + "Renamed pet " + ChatColor.WHITE + oldName + ChatColor.BLUE + " to " + ChatColor.WHITE + newName);
-            return true;
+
+        if (!ArgValidator.validatePetName(this.thisPlugin.getDatabase(), this.commandFor.getUniqueId().toString(), this.args[1])) {
+            this.commandStatus = CommandStatus.PET_NAME_ALREADY_IN_USE;
+            return;
         }
-        pl.sendMessage(ChatColor.RED + "Unable to rename pet");
-        return false;
+
+        if (!this.thisPlugin.getDatabase().renamePet(this.commandFor.getUniqueId().toString(), this.args[0], this.args[1])) {
+            this.commandStatus = CommandStatus.DB_FAIL;
+            return;
+        }
+
+        this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " has changed " + this.commandFor.getName() + "'s pet named " + this.args[0] + " to " + this.args[1]);
+    }
+
+    private void displayStatus() {
+        // NO_TARGET_PET, INVALID_NAME, PET_NAME_ALREADY_IN_USE
+        switch(this.commandStatus) {
+            case INVALID_SENDER:
+                break;
+            case SUCCESS:
+                this.sender.sendMessage((this.isForSelf() ? ChatColor.BLUE + "Your pet " : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE + " pet ") + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " has been renamed to " + ChatColor.WHITE + this.args[1]);
+                break;
+            case INSUFFICIENT_PERMISSIONS:
+                this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
+                break;
+            case DB_FAIL:
+                this.sender.sendMessage(ChatColor.RED + "Could not rename pet");
+                break;
+            case NO_PLAYER:
+                this.sender.sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + ArgValidator.isForSomeoneElse(this.args[0]));
+                break;
+            case NO_TARGET_PET:
+                this.sender.sendMessage(ChatColor.RED + "Could not find pet named " + ChatColor.WHITE + this.args[0]);
+                break;
+            case INVALID_NAME:
+                this.sender.sendMessage(ChatColor.WHITE + this.args[1] + ChatColor.RED + " is an invalid name");
+                break;
+            case PET_NAME_ALREADY_IN_USE:
+                this.sender.sendMessage(ChatColor.RED + "Pet name " + ChatColor.WHITE + this.args[1] + ChatColor.RED + " is already in use");
+                break;
+            case SYNTAX_ERROR:
+                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp rename [old name] [new name]");
+                break;
+            default:
+                this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
+                break;
+        }
     }
 }

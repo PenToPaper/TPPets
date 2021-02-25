@@ -25,7 +25,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TPPAllowList {
+public class TPPAllowListTest {
     private OfflinePlayer guest;
     private Player player;
     private Player admin;
@@ -48,8 +48,8 @@ public class TPPAllowList {
         this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, null, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
-        altAlias.add("list");
-        aliases.put("list", altAlias);
+        altAlias.add("allowed");
+        aliases.put("allowed", altAlias);
         this.petStorageList = Collections.singletonList(new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName"));
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
@@ -67,7 +67,7 @@ public class TPPAllowList {
             when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
-            String[] args = {"list", "MockPetName"};
+            String[] args = {"allowed", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             verify(this.dbWrapper, times(1)).getPetByName(anyString(), anyString());
@@ -90,7 +90,7 @@ public class TPPAllowList {
             when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
-            String[] args = {"list", "f:MockPlayerName", "MockPetName"};
+            String[] args = {"allowed", "f:MockPlayerName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, times(1)).getPetByName(anyString(), anyString());
@@ -112,7 +112,7 @@ public class TPPAllowList {
             CommandSender commandSender = mock(CommandSender.class);
             when(commandSender.hasPermission("tppets.allowguests")).thenReturn(true);
 
-            String[] args = {"list", "f:MockPlayerName", "MockPetName"};
+            String[] args = {"allowed", "f:MockPlayerName", "MockPetName"};
             this.commandTPP.onCommand(commandSender, this.command, "", args);
 
             verify(this.dbWrapper, never()).getPetByName(anyString(), anyString());
@@ -124,17 +124,17 @@ public class TPPAllowList {
     @DisplayName("Fails to list allowed players when admin has insufficient permissions")
     void cannotAdminListsAllowedToPetInsufficientPermissions() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            when(this.admin.hasPermission("tppets.allowother")).thenReturn(true);
+            when(this.admin.hasPermission("tppets.allowother")).thenReturn(false);
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            String[] args = {"list", "f:MockPlayerName", "MockPetName"};
+            String[] args = {"allowed", "f:MockPlayerName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, times(1)).getPetByName(anyString(), anyString());
+            verify(this.dbWrapper, never()).getPetByName(anyString(), anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
-            assertEquals(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  "MockPlayerName's MockPetName" + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------", capturedMessageOutput);
+            assertEquals(ChatColor.RED + "You don't have permission to do that", capturedMessageOutput);
         }
     }
 
@@ -146,7 +146,7 @@ public class TPPAllowList {
 
             when(this.player.hasPlayedBefore()).thenReturn(false);
 
-            String[] args = {"list", "f:MockPlayerName", "MockPetName"};
+            String[] args = {"allowed", "f:MockPlayerName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, never()).getPetByName(anyString(), anyString());
@@ -163,7 +163,7 @@ public class TPPAllowList {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            String[] args = {"list", "f:MockPlayerName"};
+            String[] args = {"allowed", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.dbWrapper, never()).getPetByName(anyString(), anyString());
@@ -180,7 +180,7 @@ public class TPPAllowList {
         CommandSender commandSender = mock(CommandSender.class);
         when(commandSender.hasPermission("tppets.allowguests")).thenReturn(true);
 
-        String[] args = {"list", "MockPetName"};
+        String[] args = {"allowed", "MockPetName"};
         this.commandTPP.onCommand(commandSender, this.command, "", args);
 
         verify(this.dbWrapper, never()).getPetByName(anyString(), anyString());
@@ -190,7 +190,7 @@ public class TPPAllowList {
     @Test
     @DisplayName("Fails to list players when no pet name specified")
     void cannotListAllowedToPetNoPetName() {
-        String[] args = {"list"};
+        String[] args = {"allowed"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         verify(this.dbWrapper, never()).getPetByName(anyString(), anyString());
@@ -203,7 +203,7 @@ public class TPPAllowList {
     @Test
     @DisplayName("Fails to list players when invalid pet name specified")
     void cannotListAllowedToPetInvalidPetName() {
-        String[] args = {"list", "MockPetName;"};
+        String[] args = {"allowed", "MockPetName;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.dbWrapper, never()).getPetByName(anyString(), anyString());
@@ -218,7 +218,7 @@ public class TPPAllowList {
     void cannotListAllowedToPetDbSearchFail() {
         when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(null);
 
-        String[] args = {"list", "MockPetName"};
+        String[] args = {"allowed", "MockPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.dbWrapper, times(1)).getPetByName(anyString(), anyString());
@@ -233,7 +233,7 @@ public class TPPAllowList {
     void cannotListAllowedToPetDbSearchNoResults() {
         when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(new ArrayList<>());
 
-        String[] args = {"list", "MockPetName"};
+        String[] args = {"allowed", "MockPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verify(this.dbWrapper, times(1)).getPetByName(anyString(), anyString());
