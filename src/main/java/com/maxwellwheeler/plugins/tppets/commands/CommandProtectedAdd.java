@@ -2,24 +2,17 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
-import com.maxwellwheeler.plugins.tppets.helpers.WorldEditHelper;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import org.bukkit.Bukkit;
+import com.maxwellwheeler.plugins.tppets.regions.SelectionSession;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
-import java.util.Objects;
 
 public class CommandProtectedAdd extends Command {
-    private final WorldEditPlugin worldEditPlugin;
-
     CommandProtectedAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
-        this.worldEditPlugin = (WorldEditPlugin) this.thisPlugin.getServer().getPluginManager().getPlugin("WorldEdit");
     }
 
     @Override
@@ -49,9 +42,9 @@ public class CommandProtectedAdd extends Command {
             return;
         }
 
-        Location[] locations = WorldEditHelper.getWePoints(this.worldEditPlugin, this.sender);
+        SelectionSession selectionSession = this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender);
 
-        if (locations == null) {
+        if (selectionSession == null || !selectionSession.isCompleteSelection()) {
             this.commandStatus = CommandStatus.NO_REGION;
             return;
         }
@@ -71,7 +64,7 @@ public class CommandProtectedAdd extends Command {
         }
 
         try {
-            ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], Objects.requireNonNull(locations[0].getWorld()).getName(), locations[0], locations[1], this.args[1]);
+            ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1]);
             if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
                 this.thisPlugin.addProtectedRegion(protectedRegion);
                 this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added protected region " + protectedRegion.getLfName());

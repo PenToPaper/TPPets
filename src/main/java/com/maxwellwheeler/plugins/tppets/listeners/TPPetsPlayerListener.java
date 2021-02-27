@@ -8,17 +8,21 @@ import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The event listener that handles player events
@@ -102,6 +106,20 @@ public class TPPetsPlayerListener implements Listener {
                 }
                 e.setCancelled(true);
             }
+        }
+    }
+
+    @EventHandler (priority=EventPriority.LOW)
+    public void onPlayerInteract(PlayerInteractEvent e) {
+        if (ToolsChecker.isInList(customTools, "select_region", e.getMaterial())) {
+            try {
+                Location getBlockLocation = Objects.requireNonNull(e.getClickedBlock()).getLocation();
+                if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
+                    this.thisPlugin.getRegionSelectionManager().setStartLocation(e.getPlayer(), getBlockLocation);
+                } else if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+                    this.thisPlugin.getRegionSelectionManager().setEndLocation(e.getPlayer(), getBlockLocation);
+                }
+            } catch (NullPointerException ignored){}
         }
     }
     

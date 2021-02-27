@@ -11,6 +11,7 @@ import com.maxwellwheeler.plugins.tppets.listeners.TPPetsInventoryListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import net.milkbowl.vault.permission.Permission;
@@ -38,6 +39,8 @@ public class TPPets extends JavaPlugin {
     private Hashtable<String, List<String>> commandAliases = new Hashtable<>();
     private Hashtable<String, List<Material>> customTools = new Hashtable<>();
     private Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
+
+    private RegionSelectionManager regionSelectionManager = new RegionSelectionManager();
 
     // Database
     private DBWrapper database;
@@ -423,7 +426,10 @@ public class TPPets extends JavaPlugin {
      * GETTERS/SETTERS
      * 
      */
-    
+    public RegionSelectionManager getRegionSelectionManager() {
+        return regionSelectionManager;
+    }
+
     public DBWrapper getDatabase() {
         return database;
     }

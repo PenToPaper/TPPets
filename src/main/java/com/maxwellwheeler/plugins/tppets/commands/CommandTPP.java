@@ -132,6 +132,20 @@ public class CommandTPP implements CommandExecutor {
                         permissionMessage(sender);
                     }
                     break;
+                case "position1":
+                    if (sender.hasPermission("tppets.protected") || sender.hasPermission("tppets.lost")) {
+                        CommandPosition1 position1 = new CommandPosition1(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        position1.processCommand();
+                    } else {
+                        permissionMessage(sender);
+                    }
+                case "position2":
+                    if (sender.hasPermission("tppets.protected") || sender.hasPermission("tppets.lost")) {
+                        CommandPosition2 position2 = new CommandPosition2(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        position2.processCommand();
+                    } else {
+                        permissionMessage(sender);
+                    }
                 case "help":
                 default:
                     sendHelp(sender);

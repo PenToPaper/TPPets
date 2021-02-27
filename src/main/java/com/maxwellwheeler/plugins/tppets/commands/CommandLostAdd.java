@@ -2,24 +2,17 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
-import com.maxwellwheeler.plugins.tppets.helpers.WorldEditHelper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import org.bukkit.Bukkit;
+import com.maxwellwheeler.plugins.tppets.regions.SelectionSession;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
-import java.util.Objects;
 
 public class CommandLostAdd extends Command {
-    private final WorldEditPlugin worldEditPlugin;
-
     CommandLostAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
-        this.worldEditPlugin = (WorldEditPlugin) this.thisPlugin.getServer().getPluginManager().getPlugin("WorldEdit");
     }
 
     @Override
@@ -39,9 +32,9 @@ public class CommandLostAdd extends Command {
             return;
         }
 
-        Location[] locations = WorldEditHelper.getWePoints(this.worldEditPlugin, this.sender);
+        SelectionSession selectionSession = this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender);
 
-        if (locations == null) {
+        if (selectionSession == null || !selectionSession.isCompleteSelection()) {
             this.commandStatus = CommandStatus.NO_REGION;
             return;
         }
@@ -61,7 +54,7 @@ public class CommandLostAdd extends Command {
         }
 
         try {
-            LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion(this.args[0], Objects.requireNonNull(locations[0].getWorld()).getName(), locations[0], locations[1]);
+            LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion(this.args[0], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation());
             if (this.thisPlugin.getDatabase().insertLostRegion(lostAndFoundRegion)) {
                 this.thisPlugin.addLostRegion(lostAndFoundRegion);
                 this.thisPlugin.updateLFReference(lostAndFoundRegion.getRegionName());

@@ -7,6 +7,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
  * @author GatheringExp
  *
  */
+// TODO: UPDATE WHEN DONE
 public class ConfigUpdater {
     private TPPets thisPlugin;
     private int schemaVersion;

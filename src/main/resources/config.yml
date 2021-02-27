@@ -13,6 +13,7 @@ storage_limit: 5
 tools:
   untame_pets: [SHEARS]
   get_owner: [BONE]
+  select_region: [BLAZE_ROD]
 command_aliases:
   protected: [prot, p, pr]
   lost: [lostandfound, laf, lf, l]
@@ -26,6 +27,8 @@ command_aliases:
   store: [move, stable]
   storage: [setstable]
   help: [pls]
+  position1: [pos1, startpos, start]
+  position2: [pos2, endpos, end]
 mysql:
   enable: false
   host: localhost
