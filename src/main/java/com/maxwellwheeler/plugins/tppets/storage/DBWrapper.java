@@ -526,31 +526,70 @@ public class DBWrapper {
          *      LOST AND FOUND REGION STATEMENTS
          */
         String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        if (database.insertPrepStatement(insertLost, lfr.getZoneName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName())) {
-            thisPlugin.getLogWrapper().logSuccessfulAction("Lost and found region " + lfr.getZoneName() + " added to database.");
+        if (database.insertPrepStatement(insertLost, lfr.getRegionName(), lfr.getMinLoc().getBlockX(), lfr.getMinLoc().getBlockY(), lfr.getMinLoc().getBlockZ(), lfr.getMaxLoc().getBlockX(), lfr.getMaxLoc().getBlockY(), lfr.getMaxLoc().getBlockZ(), lfr.getWorldName())) {
+            thisPlugin.getLogWrapper().logSuccessfulAction("Lost and found region " + lfr.getRegionName() + " added to database.");
             return true;
         } else {
-            thisPlugin.getLogWrapper().logUnsuccessfulAction("Lost and found region " + lfr.getZoneName() + " can't be added to database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Lost and found region " + lfr.getRegionName() + " can't be added to database.");
             return false;
         }
     }
-    
-    /**
-     * Removes a {@link LostAndFoundRegion} from the database.
-     * @param lfr The {@link LostAndFoundRegion} instance to remove from the database.
-     * @return True if successful, false if not.
-     */
-    public boolean deleteLostRegion(LostAndFoundRegion lfr) {
+
+    public boolean removeLostRegion(String regionName) {
         String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
-        if (database.deletePrepStatement(deleteLost, lfr.getZoneName())) {
-            thisPlugin.getLogWrapper().logSuccessfulAction("Lost and found region " + lfr.getZoneName() + " removed from database.");
+        if (database.deletePrepStatement(deleteLost, regionName)) {
+            thisPlugin.getLogWrapper().logSuccessfulAction("Lost and found region " + regionName + " removed from database.");
             return true;
         } else {
-            thisPlugin.getLogWrapper().logUnsuccessfulAction("Lost and found region " + lfr.getZoneName() + " can't be removed from database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Lost and found region " + regionName + " can't be removed from database.");
             return false;
         }
     }
-    
+
+    public LostAndFoundRegion getLostRegion(String lfrName) throws SQLException {
+        LostAndFoundRegion ret = null;
+        Connection dbConn = database.getConnection();
+        if (dbConn == null) {
+            throw new SQLException();
+        }
+
+        try {
+            String selectLostRegion = "SELECT * FROM tpp_lost_regions WHERE zone_name = ?";
+            ResultSet rs = database.selectPrepStatement(dbConn, selectLostRegion, lfrName);
+            if (rs.next()) {
+                ret = new LostAndFoundRegion(rs.getString("zone_name"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"));
+            }
+            dbConn.close();
+        } catch (SQLException e) {
+            thisPlugin.getLogWrapper().logErrors("SQL Exception getting lost and found regions: " + e.getMessage());
+            throw e;
+        }
+
+        return ret;
+    }
+
+    public ProtectedRegion getProtectedRegion(String prName) throws SQLException {
+        ProtectedRegion ret = null;
+        Connection dbConn = database.getConnection();
+        if (dbConn == null) {
+            throw new SQLException();
+        }
+
+        try {
+            String selectProtectedRegion = "SELECT * FROM tpp_protected_regions WHERE zone_name = ?";
+            ResultSet rs = database.selectPrepStatement(dbConn, selectProtectedRegion, prName);
+            if (rs.next()) {
+                ret = new ProtectedRegion(rs.getString("zone_name"), rs.getString("enter_message"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"), rs.getString("lf_zone_name"));
+            }
+            dbConn.close();
+        } catch (SQLException e) {
+            thisPlugin.getLogWrapper().logErrors("SQL Exception getting lost and found regions: " + e.getMessage());
+            throw e;
+        }
+
+        return ret;
+    }
+
     /**
      * Gets the {@link Hashtable} used by the plugin internally to store the {@link LostAndFoundRegion} in memory from the database.
      * @return The {@link Hashtable} of &#60;LostAndFoundRegion's name, LostAndFoundRegion instance&#62;
@@ -587,11 +626,11 @@ public class DBWrapper {
          *      PROTECTED REGION STATEMENTS
          */
         String insertProtected = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        if (database.insertPrepStatement(insertProtected, pr.getZoneName(), pr.getEnterMessage(), pr.getMinLoc().getBlockX(), pr.getMinLoc().getBlockY(), pr.getMinLoc().getBlockZ(), pr.getMaxLoc().getBlockX(), pr.getMaxLoc().getBlockY(), pr.getMaxLoc().getBlockZ(), pr.getWorldName(), pr.getLfName())) {
-            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getZoneName() + " added to database.");
+        if (database.insertPrepStatement(insertProtected, pr.getRegionName(), pr.getEnterMessage(), pr.getMinLoc().getBlockX(), pr.getMinLoc().getBlockY(), pr.getMinLoc().getBlockZ(), pr.getMaxLoc().getBlockX(), pr.getMaxLoc().getBlockY(), pr.getMaxLoc().getBlockZ(), pr.getWorldName(), pr.getLfName())) {
+            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getRegionName() + " added to database.");
             return true;
         } else {
-            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getZoneName() + " can't be added to database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getRegionName() + " can't be added to database.");
             return false;
         }
     }
@@ -601,13 +640,13 @@ public class DBWrapper {
      * @param pr The {@link ProtectedRegion} instance to remove from the database.
      * @return True if successful, false if not.
      */
-    public boolean deleteProtectedRegion(ProtectedRegion pr) {
-        String deleteProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
-        if (database.deletePrepStatement(deleteProtected, pr.getZoneName())) {
-            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getZoneName() + " removed from database.");
+    public boolean removeProtectedRegion(String regionName) {
+        String removeProtected = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
+        if (database.deletePrepStatement(removeProtected, regionName)) {
+            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + regionName + " removed from database.");
             return true;
         } else {
-            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getZoneName() + " can't be removed from database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + regionName + " can't be removed from database.");
             return false;
         }
     }
@@ -671,11 +710,11 @@ public class DBWrapper {
      */
     public boolean updateProtectedRegion(ProtectedRegion pr) {
         String updateProtected = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
-        if (database.updatePrepStatement(updateProtected, pr.getLfName(), pr.getZoneName())) {
-            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getZoneName() + " updated in database.");
+        if (database.updatePrepStatement(updateProtected, pr.getLfName(), pr.getRegionName())) {
+            thisPlugin.getLogWrapper().logSuccessfulAction("Protected region " + pr.getRegionName() + " updated in database.");
             return true;
         } else {
-            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getZoneName() + " can't be updated in database.");
+            thisPlugin.getLogWrapper().logUnsuccessfulAction("Protected region " + pr.getRegionName() + " can't be updated in database.");
             return false;
         }
     }

@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
  *
  */
 public abstract class Region {
-    protected String zoneName;
+    protected String regionName;
     protected String worldName;
     protected World world;
     protected Location minLoc;
@@ -21,7 +21,7 @@ public abstract class Region {
     
     /**
      * A general constructor, used primarily for regeneration of the regions from databases.
-     * @param zoneName The name of the zone.
+     * @param regionName The name of the zone.
      * @param worldName The name of the world the zone is in. If worldName points to a non-existent world, world will be null but worldName will be what the world was.
      * @param minX The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's X location.
      * @param minY The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's Y location.
@@ -30,31 +30,31 @@ public abstract class Region {
      * @param maxY The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Y location.
      * @param maxZ The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Z location.
      */
-    Region(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        this(zoneName, worldName, Bukkit.getServer().getWorld(worldName), new Location(Bukkit.getServer().getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getServer().getWorld(worldName), maxX, maxY, maxZ));
+    Region(String regionName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        this(regionName, worldName, Bukkit.getServer().getWorld(worldName), new Location(Bukkit.getServer().getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getServer().getWorld(worldName), maxX, maxY, maxZ));
     }
     
     /**
      * The same style of constructor as Region(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ), but with the coordinates represented by Location objects that include the world.
-     * @param zoneName The name of the zone.
+     * @param regionName The name of the zone.
      * @param worldName The name of the world the zone is in. If worldName points to a non-existent world, world will be null but worldName will be what the world was.
      * @param minLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
      * @param maxLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
      */
-    public Region(String zoneName, String worldName, Location minLoc, Location maxLoc) {
-        this(zoneName, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc);
+    public Region(String regionName, String worldName, Location minLoc, Location maxLoc) {
+        this(regionName, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc);
     }
     
     /**
      * Same style of constructor as Region(String zoneName, String worldName, Location minLoc, Location maxLoc), but with the World reference explicitly made.
-     * @param zoneName The name of the zone.
+     * @param regionName The name of the zone.
      * @param worldName The name of the world the zone is in. If worldName points to a non-existent world, world will be null but worldName will be what the world was.
      * @param world An explicit reference to the world the region is in.
      * @param minLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
      * @param maxLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
      */
-    public Region(String zoneName, String worldName, World world, Location minLoc, Location maxLoc) {
-        this.zoneName = zoneName;
+    public Region(String regionName, String worldName, World world, Location minLoc, Location maxLoc) {
+        this.regionName = regionName;
         this.worldName = worldName;
         this.world = world;
         this.minLoc = minLoc;
@@ -72,22 +72,13 @@ public abstract class Region {
     private boolean isBetween(int min, int middle, int max) {
         return (middle >= min && middle <= max);
     }
-    
-    /**
-     * Checks if a player is within the region instance.
-     * @param pl The player to check
-     * @return True if player is within the region instance, false otherwise.
-     */
-    public boolean isInZone(Player pl) {
-        return isInZone(pl.getLocation());
-    }
-    
+
     /**
      * Checks if a location is within the region instance.
      * @param lc The location to check
      * @return True if location is within the region instance, false otherwise.
      */
-    public boolean isInZone(Location lc) {
+    public boolean isInRegion(Location lc) {
         return (minLoc.getWorld() != null && maxLoc.getWorld() != null && (lc.getWorld().equals(minLoc.getWorld()) && isBetween(minLoc.getBlockX(), lc.getBlockX(), maxLoc.getBlockX()) && isBetween(minLoc.getBlockY(), lc.getBlockY(), maxLoc.getBlockY()) && isBetween(minLoc.getBlockZ(), lc.getBlockZ(), maxLoc.getBlockZ())));
     }
     
@@ -96,8 +87,8 @@ public abstract class Region {
      */
     public abstract String toString();
 
-    public String getZoneName() {
-        return zoneName;
+    public String getRegionName() {
+        return regionName;
     }
     
     public String getWorldName() {

@@ -14,6 +14,7 @@ import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import net.milkbowl.vault.permission.Permission;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -98,7 +99,7 @@ public class TPPets extends JavaPlugin {
     private void initializePetIndex() {
         petIndex = new PetLimitChecker(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
     }
-    
+
     /**
      * Initializes the {@link DBWrapper} based on config options mysql.enable, mysql.host, mysql.port, mysql.database, mysql.username, and mysql.password.
      * If DBWrapper is false, it will use the SQLite connection rather than a MySQL one.
@@ -298,7 +299,7 @@ public class TPPets extends JavaPlugin {
      * @param pr The {@link ProtectedRegion} to be added.
      */
     public void addProtectedRegion (ProtectedRegion pr) {
-        protectedRegions.put(pr.getZoneName(), pr);
+        protectedRegions.put(pr.getRegionName(), pr);
     }
     
     /**
@@ -308,7 +309,7 @@ public class TPPets extends JavaPlugin {
      */
     public ProtectedRegion getProtectedRegionWithin(Location lc) {
         for (String key : protectedRegions.keySet()) { 
-            if (protectedRegions.get(key).isInZone(lc)) {
+            if (protectedRegions.get(key).isInRegion(lc)) {
                 return protectedRegions.get(key);
             }
         }
@@ -379,7 +380,7 @@ public class TPPets extends JavaPlugin {
      */
     public boolean isInLostRegion(Location lc) {
         for (String lfKey : lostRegions.keySet()) {
-            if (lostRegions.get(lfKey).isInZone(lc)) {
+            if (lostRegions.get(lfKey).isInRegion(lc)) {
                 return true;
             }
         }
@@ -397,15 +398,15 @@ public class TPPets extends JavaPlugin {
      * @param lfr {@link LostAndFoundRegion} to add.
      */
     public void addLostRegion(LostAndFoundRegion lfr) {
-        lostRegions.put(lfr.getZoneName(), lfr);
+        lostRegions.put(lfr.getRegionName(), lfr);
     }
     
     /**
      * Removes {@link LostAndFoundRegion} from active {@link LostAndFoundRegion} list
      * @param lfr {@link LostAndFoundRegion} to remove.
      */
-    public void removeLostRegion(LostAndFoundRegion lfr) {
-        lostRegions.remove(lfr.getZoneName());
+    public void removeLostRegion(String regionName) {
+        lostRegions.remove(regionName);
     }
 
     // TODO: ADD JAVADOC

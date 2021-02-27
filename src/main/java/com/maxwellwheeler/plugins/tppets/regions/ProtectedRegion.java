@@ -41,7 +41,7 @@ public class ProtectedRegion extends Region {
     
     @Override
     public String toString() {
-        return String.format("zoneName = %s; enterMessage = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", zoneName, enterMessage, worldName, minLoc.getBlockX(), minLoc.getBlockY(), minLoc.getBlockZ(), maxLoc.getBlockX(), maxLoc.getBlockY(), maxLoc.getBlockZ());
+        return String.format("zoneName = %s; enterMessage = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", regionName, enterMessage, worldName, minLoc.getBlockX(), minLoc.getBlockY(), minLoc.getBlockZ(), maxLoc.getBlockX(), maxLoc.getBlockY(), maxLoc.getBlockZ());
     }
     
     /**
@@ -100,7 +100,7 @@ public class ProtectedRegion extends Region {
         EntityActions.removePassenger(ent);
         if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
             ent.teleport(lfReference.getApproxCenter());
-            getPlugin().getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + ent.getUniqueId().toString() + " away from " + zoneName + " to " + this.getLfReference().zoneName);
+            getPlugin().getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + ent.getUniqueId().toString() + " away from " + regionName + " to " + this.getLfReference().regionName);
         }
     }
 

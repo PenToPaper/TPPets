@@ -39,6 +39,16 @@ public class ArgValidator {
         return nameMatcher.find() && !petName.equalsIgnoreCase("list") && !petName.toLowerCase().equals("all");
     }
 
+    public static boolean softValidateRegionName(String regionName) {
+        Matcher nameMatcher = Pattern.compile("^[\\w§]{1,64}$").matcher(regionName);
+        return nameMatcher.find();
+    }
+
+    public static boolean softValidateRegionEnterMessage(String enterMessage) {
+        Matcher nameMatcher = Pattern.compile("^[\\w§]{1,255}$").matcher(enterMessage);
+        return nameMatcher.find();
+    }
+
     /**
      * Checks if the storage name is valid
      * NOTE: Does not check for uniqueness

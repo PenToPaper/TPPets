@@ -48,7 +48,7 @@ public class TPPetsPlayerListener implements Listener {
         ProtectedRegion pr = thisPlugin.getProtectedRegionWithin(e.getTo());
         if (pr != null) {
             for (Entity ent : e.getPlayer().getNearbyEntities(10, 10, 10)) {
-                if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN) && pr.isInZone(ent.getLocation())) {
+                if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN) && pr.isInRegion(ent.getLocation())) {
                     Tameable tameableTemp = (Tameable) ent;
                     if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                         if (thisPlugin.getDatabase() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin)) && pr.getLfReference() != null) {
