@@ -1,6 +1,7 @@
+package command;
+
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
-import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
@@ -8,7 +9,6 @@ import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
