@@ -1,10 +1,11 @@
-package command;
+package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -66,7 +67,7 @@ public class TPPCommandStorageTest {
     }
 
     @Test
-    @DisplayName("Non-player sending command denies action silently")
+    @DisplayName("Non-player sending com.maxwellwheeler.plugins.tppets.test.command denies action silently")
     void nonPlayerSendingCommand() {
         CommandSender sender = mock(CommandSender.class);
         when(sender.hasPermission("tppets.storage")).thenReturn(true);
@@ -79,7 +80,7 @@ public class TPPCommandStorageTest {
     }
 
     @Test
-    @DisplayName("Non-player sending command for another player denies action silently")
+    @DisplayName("Non-player sending com.maxwellwheeler.plugins.tppets.test.command for another player denies action silently")
     void nonPlayerSendingCommandForAnother() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
@@ -156,7 +157,7 @@ public class TPPCommandStorageTest {
     }
 
     @Test
-    @DisplayName("Admins no action with command using f:[username] syntax")
+    @DisplayName("Admins no action with com.maxwellwheeler.plugins.tppets.test.command using f:[username] syntax")
     void adminNoAction() {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
@@ -176,7 +177,7 @@ public class TPPCommandStorageTest {
     }
 
     @Test
-    @DisplayName("No action with command")
+    @DisplayName("No action with com.maxwellwheeler.plugins.tppets.test.command")
     void playerNoAction() {
         String[] args = {"storage"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -188,7 +189,7 @@ public class TPPCommandStorageTest {
     }
 
     @Test
-    @DisplayName("Invalid action with command")
+    @DisplayName("Invalid action with com.maxwellwheeler.plugins.tppets.test.command")
     void playerInvalidAction() {
         String[] args = {"storage", "invalid"};
         this.commandTPP.onCommand(this.player, this.command, "", args);

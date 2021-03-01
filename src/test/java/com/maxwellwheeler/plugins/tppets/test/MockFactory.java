@@ -1,4 +1,4 @@
-package command;
+package com.maxwellwheeler.plugins.tppets.test;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;

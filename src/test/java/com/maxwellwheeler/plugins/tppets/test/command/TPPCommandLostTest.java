@@ -1,9 +1,10 @@
-package command;
+package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -49,7 +50,7 @@ public class TPPCommandLostTest {
     }
 
     @Test
-    @DisplayName("Can't run lost and found region command without a player sender")
+    @DisplayName("Can't run lost and found region com.maxwellwheeler.plugins.tppets.test.command without a player sender")
     void cantRunLostAndFoundNotPlayer() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
         when(sender.hasPermission("tppets.lost")).thenReturn(true);
@@ -66,7 +67,7 @@ public class TPPCommandLostTest {
     }
 
     @Test
-    @DisplayName("Can't run lost and found region command without command type")
+    @DisplayName("Can't run lost and found region com.maxwellwheeler.plugins.tppets.test.command without com.maxwellwheeler.plugins.tppets.test.command type")
     void cantRunLostAndFoundNoCommandType() throws SQLException {
         String[] args = {"lost"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -83,7 +84,7 @@ public class TPPCommandLostTest {
     }
 
     @Test
-    @DisplayName("Can't run lost and found region command without valid command type")
+    @DisplayName("Can't run lost and found region com.maxwellwheeler.plugins.tppets.test.command without valid com.maxwellwheeler.plugins.tppets.test.command type")
     void cantRunLostAndFoundInvalidCommandType() throws SQLException {
         String[] args = {"lost", "invalidtype"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -100,7 +101,7 @@ public class TPPCommandLostTest {
     }
 
     @Test
-    @DisplayName("Can't run lost and found region command with f:[username] who hasn't played")
+    @DisplayName("Can't run lost and found region com.maxwellwheeler.plugins.tppets.test.command with f:[username] who hasn't played")
     void cantRunLostAndFoundNoPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             OfflinePlayer player = MockFactory.getMockOfflinePlayer("MockPlayerId", "MockPlayerName");
@@ -123,7 +124,7 @@ public class TPPCommandLostTest {
     }
 
     @Test
-    @DisplayName("Can't run lost and found region command with invalid f:[username]")
+    @DisplayName("Can't run lost and found region com.maxwellwheeler.plugins.tppets.test.command with invalid f:[username]")
     void cantRunLostAndFoundInvalidPlayer() throws SQLException {
         String[] args = {"lost", "f:MockPlayerName;", "remove", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);

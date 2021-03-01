@@ -1,10 +1,11 @@
-package command;
+package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -54,7 +55,7 @@ public class TPPCommandPosition1Test {
     }
 
     @Test
-    @DisplayName("Position 1 is settable as first position through the command")
+    @DisplayName("Position 1 is settable as first position through the com.maxwellwheeler.plugins.tppets.test.command")
     void position1FirstPosition() {
         String[] args = {"position1"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -71,7 +72,7 @@ public class TPPCommandPosition1Test {
     }
 
     @Test
-    @DisplayName("Position 1 is settable as second position through the command")
+    @DisplayName("Position 1 is settable as second position through the com.maxwellwheeler.plugins.tppets.test.command")
     void position1SecondPosition() {
         this.regionSelectionManager.setEndLocation(this.admin, new Location(this.world, 400, 500, 600));
 

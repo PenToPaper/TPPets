@@ -1,9 +1,10 @@
-package command;
+package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -50,7 +51,7 @@ public class TPPCommandProtectedTest {
         this.commandTPP = new CommandTPP(aliases, tpPets); }
 
     @Test
-    @DisplayName("Can't run protected region command without a player sender")
+    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command without a player sender")
     void cantRunProtectedRegionNotPlayer() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
         when(sender.hasPermission("tppets.protected")).thenReturn(true);
@@ -66,7 +67,7 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region command without command type")
+    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command without com.maxwellwheeler.plugins.tppets.test.command type")
     void cantRunProtectedRegionNoCommandType() throws SQLException {
         String[] args = {"protected"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -82,7 +83,7 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region command without a valid command type")
+    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command without a valid com.maxwellwheeler.plugins.tppets.test.command type")
     void cantRunProtectedRegionInvalidCommandType() throws SQLException {
         String[] args = {"protected", "invalidtype"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -98,7 +99,7 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region command with f:[username] who hasn't played")
+    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command with f:[username] who hasn't played")
     void cantRunProtectedNoPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             OfflinePlayer player = MockFactory.getMockOfflinePlayer("MockPlayerId", "MockPlayerName");
@@ -120,7 +121,7 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region command with invalid f:[username]")
+    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command with invalid f:[username]")
     void cantRunProtectedRegionInvalidPlayer() throws SQLException {
         String[] args = {"protected", "f:MockPlayerName;", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
