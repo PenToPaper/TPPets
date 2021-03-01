@@ -17,8 +17,7 @@ public abstract class Region {
     protected World world;
     protected Location minLoc;
     protected Location maxLoc;
-    protected TPPets thisPlugin;
-    
+
     /**
      * A general constructor, used primarily for regeneration of the regions from databases.
      * @param regionName The name of the zone.
@@ -59,7 +58,6 @@ public abstract class Region {
         this.world = world;
         this.minLoc = minLoc;
         this.maxLoc = maxLoc;
-        this.thisPlugin = (TPPets) Bukkit.getServer().getPluginManager().getPlugin("TPPets");
     }
     
     /**
@@ -105,9 +103,5 @@ public abstract class Region {
     
     public Location getMaxLoc() {
         return maxLoc;
-    }
-
-    protected TPPets getPlugin() {
-        return thisPlugin;
     }
 }

@@ -61,13 +61,13 @@ public class CommandProtectedList extends Command {
     }
 
     private void listProtectedRegion(ProtectedRegion pr) {
-        String tempLfName = pr.getLfName() + (pr.getLfReference() == null ? " (Unset)" : "");
-        this.sender.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + pr.getRegionName());
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "enter message: " + ChatColor.WHITE + pr.getEnterMessage());
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "world: " + ChatColor.WHITE + pr.getWorldName());
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 1: " + ChatColor.WHITE + getLocationString(pr.getMinLoc()));
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 2: " + ChatColor.WHITE + getLocationString(pr.getMaxLoc()));
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "lost region: " + ChatColor.WHITE + tempLfName);    }
+        String tempLfName = pr.getLfName() + (pr.getLfReference() == null ? ChatColor.BLUE + " (Unset)" : "");
+        this.sender.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.WHITE + pr.getRegionName());
+        this.sender.sendMessage(ChatColor.BLUE + "    Enter Message: " + ChatColor.WHITE + pr.getEnterMessage());
+        this.sender.sendMessage(ChatColor.BLUE + "    World: " + ChatColor.WHITE + pr.getWorldName());
+        this.sender.sendMessage(ChatColor.BLUE + "    Endpoint 1: " + ChatColor.WHITE + getLocationString(pr.getMinLoc()));
+        this.sender.sendMessage(ChatColor.BLUE + "    Endpoint 2: " + ChatColor.WHITE + getLocationString(pr.getMaxLoc()));
+        this.sender.sendMessage(ChatColor.BLUE + "    Lost Region: " + ChatColor.WHITE + tempLfName);    }
 
     private void displayStatus() {
         switch(this.commandStatus) {

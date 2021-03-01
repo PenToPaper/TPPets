@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class TPPTeleportListTest {
+public class TPPCommandTeleportListTest {
     World world;
     List<World> worldList;
     Player player;

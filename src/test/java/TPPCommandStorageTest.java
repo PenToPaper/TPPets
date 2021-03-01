@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 // Using /tpp storage list to test response to syntax errors
-public class TPPStorageTest {
+public class TPPCommandStorageTest {
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;

@@ -1,5 +1,7 @@
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import org.bukkit.Location;
@@ -94,5 +96,17 @@ public class MockFactory {
         when(location.getBlockZ()).thenReturn(z);
         when(location.getWorld()).thenReturn(world);
         return storage;
+    }
+
+    public static LostAndFoundRegion getLostAndFoundRegion(String regionName, String worldName, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        Location minLoc = new Location(world, minX, minY, minZ);
+        Location maxLoc = new Location(world, maxX, maxY, maxZ);
+        return new LostAndFoundRegion(regionName, worldName, world, minLoc, maxLoc);
+    }
+
+    public static ProtectedRegion getProtectedRegion(String regionName, String enterMessage, String worldName, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, String lfString, TPPets tpPets) {
+        Location minLoc = new Location(world, minX, minY, minZ);
+        Location maxLoc = new Location(world, maxX, maxY, maxZ);
+        return new ProtectedRegion(regionName, enterMessage, worldName, world, minLoc, maxLoc, lfString, tpPets);
     }
 }

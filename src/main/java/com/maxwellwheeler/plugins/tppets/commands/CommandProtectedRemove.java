@@ -60,13 +60,13 @@ public class CommandProtectedRemove extends Command {
                 this.sender.sendMessage("You have removed protected region " + ChatColor.WHITE + this.args[0]);
                 break;
             case DB_FAIL:
-                this.sender.sendMessage(ChatColor.RED + "Could not remove lost and found region");
+                this.sender.sendMessage(ChatColor.RED + "Could not remove protected region");
                 break;
             case INVALID_NAME:
                 this.sender.sendMessage(ChatColor.RED + "Invalid region name: " + ChatColor.WHITE + this.args[0]);
                 break;
             case ALREADY_DONE:
-                this.sender.sendMessage(ChatColor.RED + "Region " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " already does not exist");
+                this.sender.sendMessage(ChatColor.RED + "Protected region " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " already does not exist");
                 break;
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp pr remove [region name]");

@@ -22,7 +22,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class TPPStorageAddTest {
+public class TPPCommandStorageAddTest {
     private Location playerLocation;
     private Player player;
     private Location adminLocation;

@@ -58,7 +58,7 @@ public class CommandLostRemove extends Command {
     private void displayStatus() {
         switch(this.commandStatus) {
             case SUCCESS:
-                this.sender.sendMessage("You have removed lost and found region " + ChatColor.WHITE + this.args[0]);
+                this.sender.sendMessage(ChatColor.BLUE + "You have removed lost and found region " + ChatColor.WHITE + this.args[0]);
                 break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not remove lost and found region");
@@ -67,7 +67,7 @@ public class CommandLostRemove extends Command {
                 this.sender.sendMessage(ChatColor.RED + "Invalid region name: " + ChatColor.WHITE + this.args[0]);
                 break;
             case ALREADY_DONE:
-                this.sender.sendMessage(ChatColor.RED + "Region " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " already does not exist");
+                this.sender.sendMessage(ChatColor.RED + "Lost and Found Region " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " already does not exist");
                 break;
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp lost remove [region name]");

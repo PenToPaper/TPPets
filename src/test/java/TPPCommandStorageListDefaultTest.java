@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TPPStorageListDefaultTest {
+public class TPPCommandStorageListDefaultTest {
     private Player admin;
     private List<World> worldList;
     private ArgumentCaptor<String> messageCaptor;

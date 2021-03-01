@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import java.util.Hashtable;
 
 public class RegionSelectionManager {
-    private Hashtable<String, SelectionSession> selectionSessions = new Hashtable<>();
+    private final Hashtable<String, SelectionSession> selectionSessions = new Hashtable<>();
 
     public RegionSelectionManager() {}
 
@@ -30,5 +30,9 @@ public class RegionSelectionManager {
         } else {
             this.selectionSessions.get(playerId).setEndLocation(endLocation);
         }
+    }
+
+    public void clearPlayerSession(Player player) {
+        this.selectionSessions.remove(player.getUniqueId().toString());
     }
 }

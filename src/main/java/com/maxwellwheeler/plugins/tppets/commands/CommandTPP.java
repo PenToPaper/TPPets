@@ -139,6 +139,7 @@ public class CommandTPP implements CommandExecutor {
                     } else {
                         permissionMessage(sender);
                     }
+                    break;
                 case "position2":
                     if (sender.hasPermission("tppets.protected") || sender.hasPermission("tppets.lost")) {
                         CommandPosition2 position2 = new CommandPosition2(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
@@ -146,6 +147,7 @@ public class CommandTPP implements CommandExecutor {
                     } else {
                         permissionMessage(sender);
                     }
+                    break;
                 case "help":
                 default:
                     sendHelp(sender);

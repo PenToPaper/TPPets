@@ -579,7 +579,7 @@ public class DBWrapper {
             String selectProtectedRegion = "SELECT * FROM tpp_protected_regions WHERE zone_name = ?";
             ResultSet rs = database.selectPrepStatement(dbConn, selectProtectedRegion, prName);
             if (rs.next()) {
-                ret = new ProtectedRegion(rs.getString("zone_name"), rs.getString("enter_message"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"), rs.getString("lf_zone_name"));
+                ret = new ProtectedRegion(rs.getString("zone_name"), rs.getString("enter_message"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"), rs.getString("lf_zone_name"), this.thisPlugin);
             }
             dbConn.close();
         } catch (SQLException e) {
@@ -663,7 +663,7 @@ public class DBWrapper {
                 String selectProtected = "SELECT * FROM tpp_protected_regions";
                 ResultSet rs = database.selectPrepStatement(dbConn, selectProtected);
                 while (rs.next()) {
-                    ret.put(rs.getString("zone_name"), new ProtectedRegion(rs.getString("zone_name"), rs.getString("enter_message"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"), rs.getString("lf_zone_name")));
+                    ret.put(rs.getString("zone_name"), new ProtectedRegion(rs.getString("zone_name"), rs.getString("enter_message"), rs.getString("world_name"), rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"), rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"), rs.getString("lf_zone_name"), this.thisPlugin));
                 }
                 dbConn.close();
             } catch (SQLException e) {

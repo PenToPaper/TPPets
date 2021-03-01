@@ -61,10 +61,10 @@ public class CommandLostList extends Command {
     }
 
     private void listLostAndFoundRegion(LostAndFoundRegion lfr) {
-        this.sender.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + lfr.getRegionName());
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "world: " + ChatColor.WHITE + lfr.getWorldName());
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 1: " + ChatColor.WHITE + getLocationString(lfr.getMinLoc()));
-        this.sender.sendMessage(ChatColor.BLUE + "    " + "endpoint 2: " + ChatColor.WHITE + getLocationString(lfr.getMaxLoc()));
+        this.sender.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.WHITE + lfr.getRegionName());
+        this.sender.sendMessage(ChatColor.BLUE + "    World: " + ChatColor.WHITE + lfr.getWorldName());
+        this.sender.sendMessage(ChatColor.BLUE + "    Endpoint 1: " + ChatColor.WHITE + getLocationString(lfr.getMinLoc()));
+        this.sender.sendMessage(ChatColor.BLUE + "    Endpoint 2: " + ChatColor.WHITE + getLocationString(lfr.getMaxLoc()));
     }
 
     private void displayStatus() {

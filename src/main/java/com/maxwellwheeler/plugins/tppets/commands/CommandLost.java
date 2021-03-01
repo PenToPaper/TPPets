@@ -52,9 +52,6 @@ public class CommandLost extends BaseCommand{
             case NO_PLAYER:
                 this.sender.sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + ArgValidator.isForSomeoneElse(this.args[0]));
                 break;
-            case INSUFFICIENT_PERMISSIONS:
-                this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
-                break;
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp lost [add/remove/list]");
                 break;

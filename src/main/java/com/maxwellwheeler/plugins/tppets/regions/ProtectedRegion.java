@@ -1,5 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.regions;
 
+import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,15 +29,15 @@ public class ProtectedRegion extends Region {
      * @param lfName The name of the {@link LostAndFoundRegion} to get the reference of.
      * @return A {@link LostAndFoundRegion} reference.
      */
-    private LostAndFoundRegion getLfReference (String lfName) {
+    private LostAndFoundRegion getLfReference (TPPets thisPlugin, String lfName) {
         return thisPlugin.getLostRegion(lfName);
     }
     
     /**
      * Updates this Protected Region's local lfReference property based on its lfName property.
      */
-    public void updateLFReference() {
-        this.lfReference = getLfReference(lfName);
+    public void updateLFReference(TPPets thisPlugin) {
+        this.lfReference = getLfReference(thisPlugin, lfName);
     }
     
     @Override
@@ -46,7 +47,7 @@ public class ProtectedRegion extends Region {
     
     /**
      * General constructor, used to recreate regions from database entries.
-     * @param zoneName The name of the Protected Region.
+     * @param regionName The name of the Protected Region.
      * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &#38;[#] color codes.
      * @param worldName The name of the world the Protected Region is in.
      * @param xOne The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point's X location.
@@ -57,26 +58,26 @@ public class ProtectedRegion extends Region {
      * @param zTwo The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Z location.
      * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
      */
-    public ProtectedRegion(String zoneName, String enterMessage, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo, int zTwo, String lfString) {
-        this(zoneName, enterMessage, worldName, new Location(Bukkit.getServer().getWorld(worldName), xOne, yOne, zOne), new Location(Bukkit.getServer().getWorld(worldName), xTwo, yTwo, zTwo), lfString);
+    public ProtectedRegion(String regionName, String enterMessage, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo, int zTwo, String lfString, TPPets thisPlugin) {
+        this(regionName, enterMessage, worldName, new Location(Bukkit.getServer().getWorld(worldName), xOne, yOne, zOne), new Location(Bukkit.getServer().getWorld(worldName), xTwo, yTwo, zTwo), lfString, thisPlugin);
     }
     
     /**
      * General constructor, uses Location objects to represent the maximum and minimum of the cube.
-     * @param zoneName The name of the Protected Region.
+     * @param regionName The name of the Protected Region.
      * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &#38;[#] color codes.
      * @param worldName The name of the world the Protected Region is in.
      * @param minLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
      * @param maxLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
      * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
      */
-    public ProtectedRegion(String zoneName, String enterMessage, String worldName, Location minLoc, Location maxLoc, String lfString) {
-        this(zoneName, enterMessage, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc, lfString);
+    public ProtectedRegion(String regionName, String enterMessage, String worldName, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
+        this(regionName, enterMessage, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc, lfString, thisPlugin);
     }
     
     /**
      * General constructor, uses Location objects to represent the maximum and minimum of the cube.
-     * @param zoneName The name of the Protected Region.
+     * @param regionName The name of the Protected Region.
      * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &#38;[#] color codes.
      * @param worldName The name of the world the Protected Region is in.
      * @param world A world reference representing the world where the Protected Region is in.
@@ -84,10 +85,14 @@ public class ProtectedRegion extends Region {
      * @param maxLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
      * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
      */
-    public ProtectedRegion(String zoneName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString) {
-        super(zoneName, worldName, world, minLoc, maxLoc);
+    public ProtectedRegion(String regionName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
+        this(regionName, enterMessage, worldName, world, minLoc, maxLoc, lfString);
+        this.lfReference = getLfReference(thisPlugin, lfString);
+    }
+
+    public ProtectedRegion(String regionName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString) {
+        super(regionName, worldName, world, minLoc, maxLoc);
         this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
-        this.lfReference = getLfReference(lfString);
         this.lfName = lfString;
     }
     
@@ -95,13 +100,13 @@ public class ProtectedRegion extends Region {
      * Teleports the given entity into the center of the lost region that the Protected Region references.
      * @param ent The entity to teleport.
      */
-    public void tpToLostRegion(Entity ent) {
+    public boolean tpToLostRegion(Entity ent) {
         EntityActions.setSitting(ent);
         EntityActions.removePassenger(ent);
         if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
-            ent.teleport(lfReference.getApproxCenter());
-            getPlugin().getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + ent.getUniqueId().toString() + " away from " + regionName + " to " + this.getLfReference().regionName);
+            return ent.teleport(lfReference.getApproxCenter());
         }
+        return false;
     }
 
     public String getEnterMessage() {
@@ -124,7 +129,7 @@ public class ProtectedRegion extends Region {
      * Directly sets the lfReference of the Protected Region.
      * @param lfString lfReference's name. This can be null.
      */
-    public void setLfReference(String lfString) {
-        this.lfReference = lfString == null ? null : getLfReference(lfString);
+    public void setLfReference(TPPets thisPlugin, String lfString) {
+        this.lfReference = lfString == null ? null : getLfReference(thisPlugin, lfString);
     }
 }

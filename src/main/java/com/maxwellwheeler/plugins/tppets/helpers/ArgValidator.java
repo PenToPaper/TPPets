@@ -40,12 +40,12 @@ public class ArgValidator {
     }
 
     public static boolean softValidateRegionName(String regionName) {
-        Matcher nameMatcher = Pattern.compile("^[\\w§]{1,64}$").matcher(regionName);
+        Matcher nameMatcher = Pattern.compile("^[\\w§ ]{1,64}$").matcher(regionName);
         return nameMatcher.find();
     }
 
     public static boolean softValidateRegionEnterMessage(String enterMessage) {
-        Matcher nameMatcher = Pattern.compile("^[\\w§]{1,255}$").matcher(enterMessage);
+        Matcher nameMatcher = Pattern.compile("^[\\w§ '.,!]{1,255}$").matcher(enterMessage);
         return nameMatcher.find();
     }
 

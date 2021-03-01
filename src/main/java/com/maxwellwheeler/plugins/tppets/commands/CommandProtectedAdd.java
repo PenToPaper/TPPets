@@ -63,16 +63,12 @@ public class CommandProtectedAdd extends Command {
 
         }
 
-        try {
-            ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1]);
-            if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
-                this.thisPlugin.addProtectedRegion(protectedRegion);
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added protected region " + protectedRegion.getLfName());
-            } else {
-                this.commandStatus = CommandStatus.DB_FAIL;
-            }
-        } catch (NullPointerException e) {
-            this.commandStatus = CommandStatus.UNEXPECTED_ERROR;
+        ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
+        if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
+            this.thisPlugin.addProtectedRegion(protectedRegion);
+            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added protected region " + protectedRegion.getRegionName());
+        } else {
+            this.commandStatus = CommandStatus.DB_FAIL;
         }
 
     }
@@ -80,7 +76,7 @@ public class CommandProtectedAdd extends Command {
     private void displayStatus() {
         switch(this.commandStatus) {
             case SUCCESS:
-                this.sender.sendMessage("You have added protected region " + ChatColor.WHITE + this.args[0]);
+                this.sender.sendMessage(ChatColor.BLUE + "You have added protected region " + ChatColor.WHITE + this.args[0]);
                 break;
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp protected add [region name] [lost and found region] [enter message]");
@@ -95,7 +91,7 @@ public class CommandProtectedAdd extends Command {
                 this.sender.sendMessage(ChatColor.RED + "Invalid enter message: " + ChatColor.WHITE + this.args[2]);
                 break;
             case NO_REGION:
-                this.sender.sendMessage(ChatColor.RED + "Can't add region without a square WorldEdit selection");
+                this.sender.sendMessage(ChatColor.RED + "Can't add region without a region selection");
                 break;
             case ALREADY_DONE:
                 this.sender.sendMessage(ChatColor.RED + "Region " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " already exists");

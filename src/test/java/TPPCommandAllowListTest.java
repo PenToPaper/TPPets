@@ -25,13 +25,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TPPAllowListTest {
+public class TPPCommandAllowListTest {
     private OfflinePlayer guest;
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
     private DBWrapper dbWrapper;
-    private ArgumentCaptor<String> logCaptor;
     private List<PetStorage> petStorageList;
     private TPPets tpPets;
     private Command command;

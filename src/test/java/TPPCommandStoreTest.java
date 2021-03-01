@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TPPStoreTest {
+public class TPPCommandStoreTest {
     World world;
     Player player;
     Player admin;

@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-public class TPPStorageListTest {
+public class TPPCommandStorageListTest {
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;

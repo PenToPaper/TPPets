@@ -18,6 +18,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.Hashtable;
@@ -56,8 +57,10 @@ public class TPPetsPlayerListener implements Listener {
                     Tameable tameableTemp = (Tameable) ent;
                     if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                         if (thisPlugin.getDatabase() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin)) && pr.getLfReference() != null) {
-                            pr.tpToLostRegion(ent);
-                            thisPlugin.getDatabase().updateOrInsertPet(ent);
+                            if (pr.tpToLostRegion(ent)) {
+                                thisPlugin.getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + ent.getUniqueId().toString() + " away from " + pr.getRegionName() + " to " + pr.getLfReference().getRegionName());
+                                thisPlugin.getDatabase().updateOrInsertPet(ent);
+                            }
                         }
                     }
                 }
@@ -116,11 +119,19 @@ public class TPPetsPlayerListener implements Listener {
                 Location getBlockLocation = Objects.requireNonNull(e.getClickedBlock()).getLocation();
                 if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
                     this.thisPlugin.getRegionSelectionManager().setStartLocation(e.getPlayer(), getBlockLocation);
+                    e.getPlayer().sendMessage(ChatColor.BLUE + "First position set!" + (this.thisPlugin.getRegionSelectionManager().getSelectionSession(e.getPlayer()).isCompleteSelection() ? " Selection is complete." : ""));
                 } else if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
                     this.thisPlugin.getRegionSelectionManager().setEndLocation(e.getPlayer(), getBlockLocation);
+                    e.getPlayer().sendMessage(ChatColor.BLUE + "Second position set!" + (this.thisPlugin.getRegionSelectionManager().getSelectionSession(e.getPlayer()).isCompleteSelection() ? " Selection is complete." : ""));
                 }
             } catch (NullPointerException ignored){}
         }
+    }
+
+
+    @EventHandler (priority=EventPriority.LOW)
+    public void onPlayerQuit(PlayerQuitEvent e) {
+        this.thisPlugin.getRegionSelectionManager().clearPlayerSession(e.getPlayer());
     }
     
     /**

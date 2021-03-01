@@ -4,6 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.SelectionSession;
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -46,24 +47,18 @@ public class CommandLostAdd extends Command {
                 this.commandStatus = CommandStatus.ALREADY_DONE;
                 return;
             }
-
         } catch (SQLException e) {
             this.commandStatus = CommandStatus.DB_FAIL;
             return;
-
         }
 
-        try {
-            LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion(this.args[0], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation());
-            if (this.thisPlugin.getDatabase().insertLostRegion(lostAndFoundRegion)) {
-                this.thisPlugin.addLostRegion(lostAndFoundRegion);
-                this.thisPlugin.updateLFReference(lostAndFoundRegion.getRegionName());
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added lost and found region " + lostAndFoundRegion.getRegionName());
-            } else {
-                this.commandStatus = CommandStatus.DB_FAIL;
-            }
-        } catch (NullPointerException e) {
-            this.commandStatus = CommandStatus.UNEXPECTED_ERROR;
+        LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion(this.args[0], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation());
+        if (this.thisPlugin.getDatabase().insertLostRegion(lostAndFoundRegion)) {
+            this.thisPlugin.addLostRegion(lostAndFoundRegion);
+            this.thisPlugin.updateLFReference(lostAndFoundRegion.getRegionName());
+            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added lost and found region " + lostAndFoundRegion.getRegionName());
+        } else {
+            this.commandStatus = CommandStatus.DB_FAIL;
         }
 
     }
@@ -71,13 +66,13 @@ public class CommandLostAdd extends Command {
     private void displayStatus() {
         switch(this.commandStatus) {
             case SUCCESS:
-                this.sender.sendMessage("You have added lost and found region " + ChatColor.WHITE + this.args[0]);
+                this.sender.sendMessage(ChatColor.BLUE + "You have added lost and found region " + ChatColor.WHITE + this.args[0]);
                 break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not add lost and found region");
                 break;
             case NO_REGION:
-                this.sender.sendMessage(ChatColor.RED + "Can't add region without a square WorldEdit selection");
+                this.sender.sendMessage(ChatColor.RED + "Can't add region without a region selection");
                 break;
             case INVALID_NAME:
                 this.sender.sendMessage(ChatColor.RED + "Invalid region name: " + ChatColor.WHITE + this.args[0]);

@@ -353,7 +353,7 @@ public class TPPets extends JavaPlugin {
         for (String key : protectedRegions.keySet()) {
             ProtectedRegion pr = protectedRegions.get(key);
             if (pr != null && pr.getLfName().equals(lfRegionName)) {
-                pr.updateLFReference();
+                pr.updateLFReference(this);
             }
         }
     }
@@ -366,7 +366,7 @@ public class TPPets extends JavaPlugin {
         for (String key : protectedRegions.keySet()) {
             ProtectedRegion pr = protectedRegions.get(key);
             if (pr != null && pr.getLfName().equals(lfRegionName)) {
-                pr.setLfReference(null);
+                pr.setLfReference(this, null);
             }
         }
     }
@@ -406,7 +406,6 @@ public class TPPets extends JavaPlugin {
     
     /**
      * Removes {@link LostAndFoundRegion} from active {@link LostAndFoundRegion} list
-     * @param lfr {@link LostAndFoundRegion} to remove.
      */
     public void removeLostRegion(String regionName) {
         lostRegions.remove(regionName);

@@ -17,7 +17,7 @@ public class LostAndFoundRegion extends Region {
     
     /**
      * General constructor, just sends arguments to superclass.
-     * @param zoneName The zone's name.
+     * @param regionName The zone's name.
      * @param worldName The zone's world's name.
      * @param minX The box that represents the region's space has a minimum point and maximum point. This represents its minimum point's x coordinate.
      * @param minY The box that represents the region's space has a minimum point and maximum point. This represents its minimum point's y coordinate.
@@ -26,32 +26,32 @@ public class LostAndFoundRegion extends Region {
      * @param maxY The box that represents the region's space has a minimum point and maximum point. This represents its maximum point's y coordinate.
      * @param maxZ The box that represents the region's space has a minimum point and maximum point. This represents its maximum point's z coordinate.
      */
-    public LostAndFoundRegion(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY,
+    public LostAndFoundRegion(String regionName, String worldName, int minX, int minY, int minZ, int maxX, int maxY,
             int maxZ) {
-        super(zoneName, worldName, minX, minY, minZ, maxX, maxY, maxZ);
+        super(regionName, worldName, minX, minY, minZ, maxX, maxY, maxZ);
     }
     
     /**
      * General constructor, just sends arguments to superclass.
-     * @param zoneName The zone's name.
+     * @param regionName The zone's name.
      * @param worldName The zone's world's name.
      * @param minLoc A location object representing the region's minimum point.
      * @param maxLoc A location object representing the region's maximum point.
      */
-    public LostAndFoundRegion(String zoneName, String worldName, Location minLoc, Location maxLoc) {
-        super(zoneName, worldName, minLoc, maxLoc);
+    public LostAndFoundRegion(String regionName, String worldName, Location minLoc, Location maxLoc) {
+        super(regionName, worldName, minLoc, maxLoc);
     }
     
     /**
      * General constructor, just sends arguments to superclass.
-     * @param zoneName The zone's name.
+     * @param regionName The zone's name.
      * @param worldName The zone's world's name.
      * @param world The zone's world.
      * @param minLoc A location object representing the region's minimum point.
      * @param maxLoc A location object representing the region's maximum point.
      */
-    public LostAndFoundRegion(String zoneName, String worldName, World world, Location minLoc, Location maxLoc) {
-        super(zoneName, worldName, world, minLoc, maxLoc);
+    public LostAndFoundRegion(String regionName, String worldName, World world, Location minLoc, Location maxLoc) {
+        super(regionName, worldName, world, minLoc, maxLoc);
     }
     
     /**
