@@ -5,9 +5,9 @@ import com.maxwellwheeler.plugins.tppets.helpers.ConfigUpdater;
 import com.maxwellwheeler.plugins.tppets.helpers.DBUpdater;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
-import com.maxwellwheeler.plugins.tppets.listeners.TPPetsChunkListener;
+import com.maxwellwheeler.plugins.tppets.listeners.ChunkUnloadPetPositionUpdater;
+import com.maxwellwheeler.plugins.tppets.listeners.PetInventoryProtector;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsEntityListener;
-import com.maxwellwheeler.plugins.tppets.listeners.TPPetsInventoryListener;
 import com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -280,9 +280,9 @@ public class TPPets extends JavaPlugin {
         
         // Register events + commands
         getLogWrapper().logSuccessfulAction("Registering commands and events.");
-        getServer().getPluginManager().registerEvents(new TPPetsChunkListener(this), this);
+        getServer().getPluginManager().registerEvents(new ChunkUnloadPetPositionUpdater(this), this);
+        getServer().getPluginManager().registerEvents(new PetInventoryProtector(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
-        getServer().getPluginManager().registerEvents(new TPPetsInventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this, customTools), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));

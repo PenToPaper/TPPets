@@ -60,6 +60,18 @@ public class PetType {
         }
     }
 
+    public static boolean isPetTypeTracked(Entity entity) {
+        return !PetType.getEnumByEntity(entity).equals(PetType.Pets.UNKNOWN);
+    }
+
+    public static boolean isPetTracked(Entity entity) {
+        if (isPetTypeTracked(entity)) {
+            Tameable tameableTemp = (Tameable) entity;
+            return tameableTemp.isTamed() && tameableTemp.getOwner() != null;
+        }
+        return false;
+    }
+
     /**
      * Translates the enum to an integer for the database
      */

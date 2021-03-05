@@ -11,6 +11,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 
 import java.util.UUID;
 
@@ -26,6 +27,14 @@ public class MockFactory {
         when(entityUUID.toString()).thenReturn(petID);
         when(mockEntity.getUniqueId()).thenReturn(entityUUID);
         when(mockEntity.getPassengers()).thenReturn(null);
+
+        return mockEntity;
+    }
+
+    public static Entity getTamedMockEntity(String petID, Class<? extends Tameable> entityClass, OfflinePlayer owner) {
+        Tameable mockEntity = (Tameable) getMockEntity(petID, entityClass);
+        when(mockEntity.isTamed()).thenReturn(true);
+        when(mockEntity.getOwner()).thenReturn(owner);
 
         return mockEntity;
     }
