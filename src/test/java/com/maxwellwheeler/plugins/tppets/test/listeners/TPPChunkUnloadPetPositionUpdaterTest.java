@@ -48,9 +48,8 @@ public class TPPChunkUnloadPetPositionUpdaterTest {
         this.chunkUnloadPetPositionUpdater = new ChunkUnloadPetPositionUpdater(this.tpPets);
         this.chunkUnloadEvent = mock(ChunkUnloadEvent.class);
 
-        Chunk chunk = mock(Chunk.class);
-        when(chunk.getEntities()).thenReturn(this.entities);
-        when(this.chunkUnloadEvent.getChunk()).thenReturn(chunk);
+        when(this.chunk.getEntities()).thenReturn(this.entities);
+        when(this.chunkUnloadEvent.getChunk()).thenReturn(this.chunk);
     }
 
     @Test

@@ -45,30 +45,6 @@ public class TPPetsPlayerListener implements Listener {
     }
     
     /**
-     * Event handler for PlayerMoveEvent. It checks if the player is within a {@link ProtectedRegion}. If they are, it removes pets that shouldn't be there that are within their vicinity.
-     * @param e The PlayerMoveEvent to respond to.
-     */
-    @EventHandler (priority=EventPriority.LOW)
-    public void onPlayerMove(PlayerMoveEvent e) {
-        ProtectedRegion pr = thisPlugin.getProtectedRegionWithin(e.getTo());
-        if (pr != null) {
-            for (Entity ent : e.getPlayer().getNearbyEntities(10, 10, 10)) {
-                if (ent instanceof Tameable && !PetType.getEnumByEntity(ent).equals(PetType.Pets.UNKNOWN) && pr.isInRegion(ent.getLocation())) {
-                    Tameable tameableTemp = (Tameable) ent;
-                    if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
-                        if (thisPlugin.getDatabase() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && pr.getWorld() != null && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", pr.getWorld(), thisPlugin)) && pr.getLfReference() != null) {
-                            if (pr.tpToLostRegion(ent)) {
-                                thisPlugin.getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + ent.getUniqueId().toString() + " away from " + pr.getRegionName() + " to " + pr.getLfReference().getRegionName());
-                                thisPlugin.getDatabase().updateOrInsertPet(ent);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
      * Event handler for PlayerInteractEntityEvent.
      * If the player shift right-clicks a pet with shears, it checks if the player owns it or can untame it through the permission node, and untames it, also removing it from the database.
      * If the player shift right-clicks a pet with a bone, it tells them whether or not it is tamed. 

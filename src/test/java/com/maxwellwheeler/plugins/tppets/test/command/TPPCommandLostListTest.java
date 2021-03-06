@@ -6,6 +6,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
+import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -49,9 +50,9 @@ public class TPPCommandLostListTest {
         this.world = mock(World.class);
 
         this.lostAndFoundRegions = new Hashtable<>();
-        this.lostAndFoundRegions.put("LostRegion1", MockFactory.getLostAndFoundRegion("LostRegion1", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600));
-        this.lostAndFoundRegions.put("LostRegion2", MockFactory.getLostAndFoundRegion("LostRegion2", "MockWorldName", this.world, 10, 20, 30, 40, 50, 60));
-        this.lostAndFoundRegions.put("LostRegion3", MockFactory.getLostAndFoundRegion("LostRegion3", "MockWorldName", this.world, 1, 2, 3, 4, 5, 6));
+        this.lostAndFoundRegions.put("LostRegion1", ObjectFactory.getLostAndFoundRegion("LostRegion1", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600));
+        this.lostAndFoundRegions.put("LostRegion2", ObjectFactory.getLostAndFoundRegion("LostRegion2", "MockWorldName", this.world, 10, 20, 30, 40, 50, 60));
+        this.lostAndFoundRegions.put("LostRegion3", ObjectFactory.getLostAndFoundRegion("LostRegion3", "MockWorldName", this.world, 1, 2, 3, 4, 5, 6));
         when(this.tpPets.getLostRegions()).thenReturn(this.lostAndFoundRegions);
         when(this.tpPets.getLostRegion("LostRegion1")).thenReturn(this.lostAndFoundRegions.get("LostRegion1"));
     }

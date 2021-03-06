@@ -109,15 +109,21 @@ public class MockFactory {
         return storage;
     }
 
-    public static LostAndFoundRegion getLostAndFoundRegion(String regionName, String worldName, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        Location minLoc = new Location(world, minX, minY, minZ);
-        Location maxLoc = new Location(world, maxX, maxY, maxZ);
-        return new LostAndFoundRegion(regionName, worldName, world, minLoc, maxLoc);
-    }
+    public static ProtectedRegion getProtectedRegion(String regionName, String enterMessage, String worldName, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, String lfString, LostAndFoundRegion lfReference) {
+        ProtectedRegion protectedRegion = mock(ProtectedRegion.class);
+        when(protectedRegion.getRegionName()).thenReturn(regionName);
+        when(protectedRegion.getEnterMessage()).thenReturn(enterMessage);
+        when(protectedRegion.getWorldName()).thenReturn(worldName);
+        when(protectedRegion.getWorld()).thenReturn(world);
+        when(protectedRegion.getLfName()).thenReturn(lfString);
+        when(protectedRegion.getLfReference()).thenReturn(lfReference);
 
-    public static ProtectedRegion getProtectedRegion(String regionName, String enterMessage, String worldName, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, String lfString, TPPets tpPets) {
-        Location minLoc = new Location(world, minX, minY, minZ);
-        Location maxLoc = new Location(world, maxX, maxY, maxZ);
-        return new ProtectedRegion(regionName, enterMessage, worldName, world, minLoc, maxLoc, lfString, tpPets);
+        Location minLocMock = MockFactory.getMockLocation(world, minX, minY, minZ);
+        Location maxLocMock = MockFactory.getMockLocation(world, maxX, maxY, maxZ);
+
+        when(protectedRegion.getMinLoc()).thenReturn(minLocMock);
+        when(protectedRegion.getMaxLoc()).thenReturn(maxLocMock);
+
+        return protectedRegion;
     }
 }

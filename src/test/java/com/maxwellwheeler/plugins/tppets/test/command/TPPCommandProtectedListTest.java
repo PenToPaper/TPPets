@@ -7,6 +7,7 @@ import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
+import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -49,13 +50,13 @@ public class TPPCommandProtectedListTest {
         this.commandTPP = new CommandTPP(aliases, tpPets);
         this.world = mock(World.class);
 
-        LostAndFoundRegion lfr = MockFactory.getLostAndFoundRegion("LostAndFoundRegion", "MockWorldName", this.world, 1, 2, 3, 4, 5, 6);
+        LostAndFoundRegion lfr = ObjectFactory.getLostAndFoundRegion("LostAndFoundRegion", "MockWorldName", this.world, 1, 2, 3, 4, 5, 6);
 
         when(this.tpPets.getLostRegion("LostAndFoundRegion")).thenReturn(lfr);
 
         this.protectedRegions = new Hashtable<>();
-        this.protectedRegions.put("ProtectedRegion1", MockFactory.getProtectedRegion("ProtectedRegion1", "Enter Message", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegion", this.tpPets));
-        this.protectedRegions.put("ProtectedRegion2", MockFactory.getProtectedRegion("ProtectedRegion2", "Enter Message", "MockWorldName", this.world, 10, 20, 30, 40, 50, 60, "LostRegion", this.tpPets));
+        this.protectedRegions.put("ProtectedRegion1", ObjectFactory.getProtectedRegion("ProtectedRegion1", "Enter Message", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegion", this.tpPets));
+        this.protectedRegions.put("ProtectedRegion2", ObjectFactory.getProtectedRegion("ProtectedRegion2", "Enter Message", "MockWorldName", this.world, 10, 20, 30, 40, 50, 60, "LostRegion", this.tpPets));
 
         when(this.tpPets.getProtectedRegions()).thenReturn(this.protectedRegions);
         when(this.tpPets.getProtectedRegion("ProtectedRegion1")).thenReturn(this.protectedRegions.get("ProtectedRegion1"));

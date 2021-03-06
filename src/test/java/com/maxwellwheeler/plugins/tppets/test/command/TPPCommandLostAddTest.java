@@ -7,6 +7,7 @@ import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
+import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -85,7 +86,7 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        LostAndFoundRegion expectedRegion = MockFactory.getLostAndFoundRegion("LostRegionName", "MockWorldName", this.world,100, 200, 300, 400, 500, 600);
+        LostAndFoundRegion expectedRegion = ObjectFactory.getLostAndFoundRegion("LostRegionName", "MockWorldName", this.world,100, 200, 300, 400, 500, 600);
 
         verify(this.dbWrapper, times(1)).getLostRegion(anyString());
 
@@ -186,7 +187,7 @@ public class TPPCommandLostAddTest {
     @Test
     @DisplayName("Can't add a lost and found region when one with the same name exists")
     void cannotAddLostAndFoundRegionAlreadyDone() throws SQLException {
-        when(this.dbWrapper.getLostRegion("LostRegionName")).thenReturn(MockFactory.getLostAndFoundRegion("LostRegionName", "MockWorldName", this.world,100, 200, 300, 400, 500, 600));
+        when(this.dbWrapper.getLostRegion("LostRegionName")).thenReturn(ObjectFactory.getLostAndFoundRegion("LostRegionName", "MockWorldName", this.world,100, 200, 300, 400, 500, 600));
 
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);

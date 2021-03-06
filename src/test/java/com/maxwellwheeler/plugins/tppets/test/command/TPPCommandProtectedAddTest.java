@@ -8,6 +8,7 @@ import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
+import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -90,7 +91,7 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        ProtectedRegion expectedRegion = MockFactory.getProtectedRegion("ProtectedRegionName", "Can't teleport here", "MockWorldName", this.world,100, 200, 300, 400, 500, 600, "LostRegionName", this.tpPets);
+        ProtectedRegion expectedRegion = ObjectFactory.getProtectedRegion("ProtectedRegionName", "Can't teleport here", "MockWorldName", this.world,100, 200, 300, 400, 500, 600, "LostRegionName", this.tpPets);
 
         verify(this.dbWrapper, times(1)).getProtectedRegion(anyString());
 
@@ -233,7 +234,7 @@ public class TPPCommandProtectedAddTest {
     @Test
     @DisplayName("Can't add a protected region when database finds a protected region with same name")
     void cantAddProtectedRegionAlreadyDone() throws SQLException {
-        ProtectedRegion pr = MockFactory.getProtectedRegion("ProtectedRegionName", "Enter message", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", this.tpPets);
+        ProtectedRegion pr = ObjectFactory.getProtectedRegion("ProtectedRegionName", "Enter message", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", this.tpPets);
         when(this.dbWrapper.getProtectedRegion("ProtectedRegionName")).thenReturn(pr);
 
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
