@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 public class TPPPlayerInteractPetExamineTest {
     private PlayerInteractEntityEvent playerInteractEntityEvent;

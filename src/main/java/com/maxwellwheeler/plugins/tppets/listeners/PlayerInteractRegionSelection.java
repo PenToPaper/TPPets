@@ -10,8 +10,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.Objects;
-
 public class PlayerInteractRegionSelection implements Listener {
     private final TPPets thisPlugin;
 

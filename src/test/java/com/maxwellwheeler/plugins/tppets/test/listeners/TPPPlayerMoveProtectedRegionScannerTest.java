@@ -10,7 +10,8 @@ import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 public class TPPPlayerMoveProtectedRegionScannerTest {
     private ProtectedRegion protectedRegion;
