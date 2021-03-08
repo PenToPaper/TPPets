@@ -1,10 +1,7 @@
 package com.maxwellwheeler.plugins.tppets;
 
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
-import com.maxwellwheeler.plugins.tppets.helpers.ConfigUpdater;
-import com.maxwellwheeler.plugins.tppets.helpers.DBUpdater;
-import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import com.maxwellwheeler.plugins.tppets.helpers.*;
 import com.maxwellwheeler.plugins.tppets.listeners.*;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -34,10 +31,10 @@ public class TPPets extends JavaPlugin {
     private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<>();
     private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<>();
     private Hashtable<String, List<String>> commandAliases = new Hashtable<>();
-    private Hashtable<String, List<Material>> customTools = new Hashtable<>();
     private Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
 
-    private RegionSelectionManager regionSelectionManager = new RegionSelectionManager();
+    private final ToolsManager toolsManager = new ToolsManager(getConfig().getConfigurationSection("tools"));
+    private final RegionSelectionManager regionSelectionManager = new RegionSelectionManager();
 
     // Database
     private DBWrapper database;
@@ -77,20 +74,6 @@ public class TPPets extends JavaPlugin {
 
     private void initializeStorageLimit() {
         storageLimit = getConfig().getInt("storage_limit", 0);
-    }
-
-    /**
-     * Initializes the customTools Hashtable, which is later used to allow servers to configure which tools can be applied to which tasks.
-     */
-    private void initializeCustomTools() {
-        ConfigurationSection toolsSection = getConfig().getConfigurationSection("tools");
-        for (String key : toolsSection.getKeys(false)) {
-            List<Material> rMat = new ArrayList<>();
-            for (String materialName : toolsSection.getStringList(key)) {
-                rMat.add(Material.getMaterial(materialName));
-            }
-            customTools.put(key, rMat);
-        }
     }
 
     /**
@@ -260,8 +243,7 @@ public class TPPets extends JavaPlugin {
         initializeCommandAliases();
         initializeAllowTP();
         initializeAllowUntamingPets();
-        initializeCustomTools();
-        
+
         // Database setup
         getLogWrapper().logSuccessfulAction("Setting up database.");
         initializeDBC();
@@ -280,8 +262,10 @@ public class TPPets extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ChunkUnloadPetPositionUpdater(this), this);
         getServer().getPluginManager().registerEvents(new PetInventoryProtector(this), this);
         getServer().getPluginManager().registerEvents(new PlayerMoveProtectedRegionScanner(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractPetExamine(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractPetRelease(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractRegionSelection(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
-        getServer().getPluginManager().registerEvents(new TPPetsPlayerListener(this, customTools), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));
 
@@ -461,6 +445,10 @@ public class TPPets extends JavaPlugin {
     
     public Permission getPerms() {
         return perms;
+    }
+
+    public ToolsManager getToolsManager() {
+        return toolsManager;
     }
     
     public boolean getVaultEnabled() {

@@ -40,14 +40,14 @@ public class PetInventoryProtector implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (handleInventoryAccess(event.getInventory().getHolder(), event.getWhoClicked())) {
+        if (!event.isCancelled() && handleInventoryAccess(event.getInventory().getHolder(), event.getWhoClicked())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler (priority = EventPriority.LOW)
     public void onInventoryOpen(InventoryOpenEvent event) {
-        if (handleInventoryAccess(event.getInventory().getHolder(), event.getPlayer())) {
+        if (!event.isCancelled() && handleInventoryAccess(event.getInventory().getHolder(), event.getPlayer())) {
             event.setCancelled(true);
         }
     }
