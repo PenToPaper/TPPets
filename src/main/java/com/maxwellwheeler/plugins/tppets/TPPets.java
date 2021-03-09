@@ -265,6 +265,7 @@ public class TPPets extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerInteractPetExamine(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractPetRelease(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractRegionSelection(this), this);
+        getServer().getPluginManager().registerEvents(new EntityTamedListener(this), this);
         getServer().getPluginManager().registerEvents(new TPPetsEntityListener(this), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));

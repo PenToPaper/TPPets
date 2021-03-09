@@ -906,23 +906,22 @@ public class DBWrapper {
      * @param pt The pet's type
      * @return Number of pets a player owns of that type
      */
-    public int getNumPetsByPT(String ownerUUID, PetType.Pets pt) {
+    public int getNumPetsByPT(String ownerUUID, PetType.Pets pt) throws SQLException {
         Connection dbConn = database.getConnection();
-        if (dbConn != null) {
-            try {
-                String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
-                ResultSet rs = database.selectPrepStatement(dbConn, getNumPets, UUIDUtils.trimUUID(ownerUUID), PetType.getIndexFromPet(pt));
-                int ret = -1;
-                if (rs.next()) {
-                    ret = rs.getInt("count");
-                }
-                dbConn.close();
-                return ret;
-            } catch (SQLException e) {
-                thisPlugin.getLogWrapper().logErrors("SQLException getting number of pets: " + e.getMessage());
-            }
+        if (dbConn == null) {
+            throw new SQLException();
         }
-        return -1;
+
+        String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
+        ResultSet rs = database.selectPrepStatement(dbConn, getNumPets, UUIDUtils.trimUUID(ownerUUID), PetType.getIndexFromPet(pt));
+        int ret;
+        if (rs.next()) {
+            ret = rs.getInt("count");
+        } else {
+            throw new SQLException();
+        }
+        dbConn.close();
+        return ret;
     }
 
     /**
@@ -930,23 +929,22 @@ public class DBWrapper {
      * @param ownerUUID The owner's UUID
      * @return Number of pets a player owns
      */
-    public int getNumPets(String ownerUUID) {
+    public int getNumPets(String ownerUUID) throws SQLException {
         Connection dbConn = database.getConnection();
-        if (dbConn != null) {
-            try {
-                String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ?";
-                ResultSet rs = database.selectPrepStatement(dbConn, getNumPets, UUIDUtils.trimUUID(ownerUUID));
-                int ret = -1;
-                if (rs.next()) {
-                    ret = rs.getInt("count");
-                }
-                dbConn.close();
-                return ret;
-            } catch (SQLException e) {
-                thisPlugin.getLogWrapper().logErrors("SQLException getting number of pets: " + e.getMessage());
-            }
+        if (dbConn == null) {
+            throw new SQLException();
         }
-        return -1;
+
+        String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ?";
+        ResultSet rs = database.selectPrepStatement(dbConn, getNumPets, UUIDUtils.trimUUID(ownerUUID));
+        int ret;
+        if (rs.next()) {
+            ret = rs.getInt("count");
+        } else {
+            throw new SQLException();
+        }
+        dbConn.close();
+        return ret;
     }
     
     /**

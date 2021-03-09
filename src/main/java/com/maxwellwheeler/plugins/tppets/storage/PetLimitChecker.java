@@ -3,7 +3,11 @@ package com.maxwellwheeler.plugins.tppets.storage;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AnimalTamer;
+
+import java.sql.SQLException;
+
 /**
  * An index of how many pets each player owns. Used for the limiting of tamed pets.
  * @author GatheringExp
@@ -19,15 +23,15 @@ public class PetLimitChecker {
         ALLOWED, TOTAL, DOG, CAT, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
     }
 
-    private TPPets thisPlugin;
-    private int totalLimit;
-    private int dogLimit;
-    private int catLimit;
-    private int birdLimit;
-    private int horseLimit;
-    private int muleLimit;
-    private int llamaLimit;
-    private int donkeyLimit;
+    private final TPPets thisPlugin;
+    private final int totalLimit;
+    private final int dogLimit;
+    private final int catLimit;
+    private final int birdLimit;
+    private final int horseLimit;
+    private final int muleLimit;
+    private final int llamaLimit;
+    private final int donkeyLimit;
 
     
     /**
@@ -80,6 +84,10 @@ public class PetLimitChecker {
         }
     }
 
+    public int getTotalLimit() {
+        return totalLimit;
+    }
+
     /**
      * Links the enum {@link RuleRestriction} with the enum {@link PetType.Pets}
      * @param pt The {@link PetType.Pets} enum value
@@ -106,44 +114,24 @@ public class PetLimitChecker {
                 return RuleRestriction.UNKNOWN;
         }
     }
-    
+
+    public boolean isWithinTotalLimit(OfflinePlayer owner) throws SQLException {
+        int numTotalPets = this.thisPlugin.getDatabase().getNumPets(owner.getUniqueId().toString());
+        return isWithinLimit(this.totalLimit, numTotalPets);
+    }
+
+    public boolean isWithinSpecificLimit(OfflinePlayer owner, PetType.Pets petType) throws SQLException {
+        int numSpecificPets = this.thisPlugin.getDatabase().getNumPetsByPT(owner.getUniqueId().toString(), petType);
+        return isWithinLimit(this.getSpecificLimit(petType), numSpecificPets);
+    }
+
     /**
      * Helper function that determines if the integer within is under (not inclusive) the limit
-     * @param limit The upper bound of the test, not inclusive.
+     * @param limit The upper bound of the test, non inclusive.
      * @param within The integer being tested that should be under the limit.
      * @return True if within is below limit, false if otherwise
      */
-    private boolean isWithinLimit(int limit, int within) {
+    public boolean isWithinLimit(int limit, int within) {
         return limit < 0 || within < limit;
-    }
-    
-    /**
-     * Core functionality of this object. Determines if a player should be able to tame a given pet.
-     * @param at The animal tamer that is attempting to tame a pet
-     * @param loc The location of the tamer, used in Vault's permission api
-     * @param pt The type of the the pet being tamed.
-     * @return The ruling. It can be allowed, disallowed because of X, or unknown
-     */
-    public RuleRestriction allowTame(AnimalTamer at, Location loc, PetType.Pets pt) {
-        if (PermissionChecker.onlineHasPerms(at, "tppets.bypasslimit") || PermissionChecker.offlineHasPerms(at, "tppets.bypasslimit", loc.getWorld(), thisPlugin) || (getSpecificLimit(pt) == -1 && totalLimit == -1)) {
-            return RuleRestriction.ALLOWED;
-        }
-        int numPetsByType = thisPlugin.getDatabase().getNumPetsByPT(at.getUniqueId().toString(), pt);
-        if (numPetsByType == -1) {
-            return RuleRestriction.UNKNOWN;
-        }
-        if (isWithinLimit(getSpecificLimit(pt), numPetsByType)) {
-            int numPetsTotal = thisPlugin.getDatabase().getNumPets(at.getUniqueId().toString());
-            if (numPetsTotal == -1) {
-                return RuleRestriction.UNKNOWN;
-            }
-            if (isWithinLimit(totalLimit, numPetsTotal)) {
-                return RuleRestriction.ALLOWED;
-            } else {
-                return RuleRestriction.TOTAL;
-            }
-        } else {
-            return enumLink(pt);
-        }
     }
 }

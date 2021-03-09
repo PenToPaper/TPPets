@@ -159,36 +159,6 @@ public class TPPetsEntityListener implements Listener {
             }
         }
     }
-    
-    /**
-     * Event handler for EntityTameEvent. It checks if the tamed entity should be allowed to be tamed based on the pet limits. If it can, it adds that to the {@link PetLimitChecker}
-     * @param e The EntityTameEvent object to respond to
-     */
-    @EventHandler (priority=EventPriority.HIGHEST)
-    public void onEntityTameEvent(EntityTameEvent e) {
-        if (!e.isCancelled() && e.getOwner() instanceof Player) {
-            PetType.Pets pt = PetType.getEnumByEntity(e.getEntity());
-            Player playerTemp = (Player) e.getOwner();
-            PetLimitChecker.RuleRestriction rr = thisPlugin.getPetIndex().allowTame(e.getOwner(), e.getEntity().getLocation(), pt);
-            if (!rr.equals(PetLimitChecker.RuleRestriction.ALLOWED)) {
-                e.setCancelled(true);
-                Tameable tameableTemp = (Tameable) e.getEntity();
-                tameableTemp.setTamed(false);
-                tameableTemp.setOwner(null);
-                if (e.getEntity() instanceof SkeletonHorse || e.getEntity() instanceof ZombieHorse) {
-                    tameableTemp.setTamed(true);
-                }
-                if (e.getOwner() instanceof Player) {
-                    playerTemp.sendMessage(ChatColor.BLUE + "You've surpassed the " + ChatColor.WHITE + rr.toString() + ChatColor.BLUE + " taming limit!");
-                }
-            } else {
-                String generatedName = thisPlugin.getDatabase().insertPet(e.getEntity(), e.getOwner().getUniqueId().toString());
-                if (generatedName != null) {
-                    playerTemp.sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + generatedName + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + generatedName + ChatColor.BLUE + " [new name]");
-                }
-            }
-        }
-    }
 
     /**
      * Event handler for EntityMountEvent. It checks if the player is allowed to mount that pet, using {@link #isAllowedToMount(Player, Entity)}, and cancels it if they aren't
@@ -214,24 +184,6 @@ public class TPPetsEntityListener implements Listener {
                     tameableTemp.setOwner(playerTemp);
                     thisPlugin.getServer().getPluginManager().callEvent(new EntityTameEvent((LivingEntity) e.getMount(), playerTemp));
                 }
-            }
-        }
-    }
-
-    /**
-     * Event handler for EntityBreedEvent. It checks if the player should own the offspring, based on pet limits
-     * @param e The EntityBreedEvent to respond to
-     */
-    @EventHandler (priority = EventPriority.LOW)
-    public void onEntityBreedEvent(EntityBreedEvent e) {
-        // e.getEntity() = new animal
-        // e.getMother() = one parent
-        // e.getFather() = other parent
-        // e.getBreeder() = entity (mostly player) that initiated the breeding by feeding
-        if (!e.isCancelled() && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
-            Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
-                thisPlugin.getServer().getPluginManager().callEvent(new EntityTameEvent(e.getEntity(), tameableTemp.getOwner()));
             }
         }
     }
