@@ -231,7 +231,7 @@ public class TPPets extends JavaPlugin {
         getLogWrapper().logSuccessfulAction("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new ChunkUnloadPetPositionUpdater(this), this);
         getServer().getPluginManager().registerEvents(new PetInventoryProtector(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerMoveProtectedRegionScanner(this), this);
+        getServer().getPluginManager().registerEvents(new ProtectedRegionScanner(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractPetExamine(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractPetRelease(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractRegionSelection(this), this);

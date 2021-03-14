@@ -1,10 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
-import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
@@ -13,7 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTameEvent;
-import org.bukkit.event.entity.EntityTeleportEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 /**
@@ -31,29 +26,6 @@ public class TPPetsEntityListener implements Listener {
      */
     public TPPetsEntityListener(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
-    }
-    
-    /**
-     * Event handler for EntityTeleportEvent. It checks if the entity is a pet that's teleporting into a {@link ProtectedRegion} or teleporting out of a {@link LostAndFoundRegion} and prevents that.
-     * Note that entities can be teleported out of the {@link LostAndFoundRegion} with the command, just not through natural mob behavior.
-     * @param e The event
-     */
-    @EventHandler (priority=EventPriority.LOW)
-    public void onEntityTeleportEvent(EntityTeleportEvent e) {
-        if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
-            Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null && !PermissionChecker.onlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere") && (!thisPlugin.getVaultEnabled() || !PermissionChecker.offlineHasPerms(tameableTemp.getOwner(), "tppets.tpanywhere", e.getEntity().getLocation().getWorld(), thisPlugin))) {
-                if (thisPlugin.isInProtectedRegion(e.getTo())) {
-                    EntityActions.setSitting(e.getEntity());
-                    e.setCancelled(true);
-                    thisPlugin.getLogWrapper().logSuccessfulAction("Prevented entity with UUID " + e.getEntity().getUniqueId().toString() +  " from entering protected region.");
-                } else if (thisPlugin.isInLostRegion(e.getFrom())) {
-                    // direct calls to entity.teleport() methods do not call this event, so cancelling this does not prevent players from taking their pets home
-                    EntityActions.setSitting(e.getEntity());
-                    e.setCancelled(true);
-                }
-            }
-        }
     }
     
     /**

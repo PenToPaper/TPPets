@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.PlayerMoveProtectedRegionScanner;
+import com.maxwellwheeler.plugins.tppets.listeners.ProtectedRegionScanner;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
@@ -23,7 +23,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-public class TPPPlayerMoveProtectedRegionScannerTest {
+public class TPPProtectedRegionScannerPlayerMoveTest {
     private ProtectedRegion protectedRegion;
     private Player player;
     private Location playerLocation;
@@ -34,7 +34,7 @@ public class TPPPlayerMoveProtectedRegionScannerTest {
     private ArgumentCaptor<Entity> entityCaptor;
     private TPPets tpPets;
     private PlayerMoveEvent playerMoveEvent;
-    private PlayerMoveProtectedRegionScanner playerMoveProtectedRegionScanner;
+    private ProtectedRegionScanner playerMoveProtectedRegionScanner;
 
     @BeforeEach
     public void beforeEach() {
@@ -50,7 +50,7 @@ public class TPPPlayerMoveProtectedRegionScannerTest {
         this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
         this.protectedRegion = MockFactory.getProtectedRegion("ProtectedRegionName", "Enter Message", "MockWorldName", world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", lostAndFoundRegion);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, this.playerLocation, new String[]{});
-        this.playerMoveProtectedRegionScanner = new PlayerMoveProtectedRegionScanner(this.tpPets);
+        this.playerMoveProtectedRegionScanner = new ProtectedRegionScanner(this.tpPets);
 
         this.nearbyEntityLocations = new ArrayList<>();
         Location entityInPrLocation = MockFactory.getMockLocation(world, 102, 203, 304);
