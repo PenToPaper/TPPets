@@ -14,7 +14,9 @@ import org.bukkit.entity.Tameable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * A wrapper class that abstracts away the specific database being used.

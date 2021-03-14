@@ -1,10 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.AnimalTamer;
 
 import java.sql.SQLException;
 

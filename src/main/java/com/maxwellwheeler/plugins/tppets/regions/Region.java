@@ -1,10 +1,8 @@
 package com.maxwellwheeler.plugins.tppets.regions;
 
-import com.maxwellwheeler.plugins.tppets.TPPets;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 /**
  * Abstract class for {@link ProtectedRegion} and {@link LostAndFoundRegion}
