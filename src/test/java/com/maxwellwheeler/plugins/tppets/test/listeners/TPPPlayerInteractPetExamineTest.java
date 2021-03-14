@@ -41,7 +41,7 @@ public class TPPPlayerInteractPetExamineTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
         TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, false, false, false);
-        this.horse = (Horse) MockFactory.getTamedMockEntity("MockHorseId", org.bukkit.entity.Horse.class, this.player);
+        this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.player);
 
         EquipmentSlot playerHand = EquipmentSlot.HAND;
         PetStorage horseStorage = new PetStorage("MockHorseId", 7, 100, 200, 300, "MockWorldname", "MockPlayerId", "MockHorseName", "MockHorseName");
@@ -111,7 +111,7 @@ public class TPPPlayerInteractPetExamineTest {
     @Test
     @DisplayName("Displays no owner if pet type is not tracked by TPPets")
     void displaysNoOwnerInvalidPetType() {
-        Villager villager = (Villager) MockFactory.getMockEntity("MockVillagerId", org.bukkit.entity.Villager.class);
+        Villager villager = MockFactory.getMockEntity("MockVillagerId", Villager.class);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(villager);
 
         this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);

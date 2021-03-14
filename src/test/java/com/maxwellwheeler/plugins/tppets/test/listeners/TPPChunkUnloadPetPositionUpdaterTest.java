@@ -35,9 +35,9 @@ public class TPPChunkUnloadPetPositionUpdaterTest {
     public void beforeEach() {
         OfflinePlayer petOwner = mock(OfflinePlayer.class);
         this.chunk = mock(Chunk.class);
-        Horse entity1 = (Horse) MockFactory.getTamedMockEntity("MockEntityId1", org.bukkit.entity.Horse.class, petOwner);
-        Wolf entity2 = (Wolf) MockFactory.getTamedMockEntity("MockEntityId2", org.bukkit.entity.Wolf.class, petOwner);
-        Villager entity3 = (Villager) MockFactory.getMockEntity("MockEntityId3", org.bukkit.entity.Villager.class);
+        Horse entity1 = MockFactory.getTamedMockEntity("MockEntityId1", Horse.class, petOwner);
+        Wolf entity2 = MockFactory.getTamedMockEntity("MockEntityId2", Wolf.class, petOwner);
+        Villager entity3 = MockFactory.getMockEntity("MockEntityId3", Villager.class);
         this.entities = new Entity[]{entity1, entity2, entity3};
         this.entityCaptor = ArgumentCaptor.forClass(Entity.class);
         this.dbWrapper = mock(DBWrapper.class);

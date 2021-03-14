@@ -37,7 +37,7 @@ public class TPPPlayerInteractPetReleaseTest {
         this.toolsManager = mock(ToolsManager.class);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
         TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, false, false, false);
-        this.horse = (Horse) MockFactory.getTamedMockEntity("MockHorseId", org.bukkit.entity.Horse.class, this.player);
+        this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.player);
 
         EquipmentSlot playerHand = EquipmentSlot.HAND;
         this.playerInteractPetRelease = new PlayerInteractPetRelease(tpPets);
@@ -90,7 +90,7 @@ public class TPPPlayerInteractPetReleaseTest {
     @Test
     @DisplayName("Releases standable pet")
     void releasesStandablePet() {
-        Wolf wolf = (Wolf) MockFactory.getTamedMockEntity("MockWolfId", org.bukkit.entity.Wolf.class, this.player);
+        Wolf wolf = MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(wolf);
         when(this.dbWrapper.deletePet(wolf)).thenReturn(true);
 
@@ -108,7 +108,7 @@ public class TPPPlayerInteractPetReleaseTest {
     @Test
     @DisplayName("Releases skeleton horse pet without setting tamed = false")
     void releasesSkeletonHorsePet() {
-        SkeletonHorse skeletonHorse = (SkeletonHorse) MockFactory.getTamedMockEntity("MockSkeletonHorseId", org.bukkit.entity.SkeletonHorse.class, this.player);
+        SkeletonHorse skeletonHorse = MockFactory.getTamedMockEntity("MockSkeletonHorseId", SkeletonHorse.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(skeletonHorse);
         when(this.dbWrapper.deletePet(skeletonHorse)).thenReturn(true);
 
@@ -125,7 +125,7 @@ public class TPPPlayerInteractPetReleaseTest {
     @Test
     @DisplayName("Releases zombie horse pet without setting tamed = false")
     void releasesZombieHorsePet() {
-        ZombieHorse zombieHorse = (ZombieHorse) MockFactory.getTamedMockEntity("MockZombieHorseId", org.bukkit.entity.ZombieHorse.class, this.player);
+        ZombieHorse zombieHorse = MockFactory.getTamedMockEntity("MockZombieHorseId", ZombieHorse.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(zombieHorse);
         when(this.dbWrapper.deletePet(zombieHorse)).thenReturn(true);
 
@@ -187,7 +187,7 @@ public class TPPPlayerInteractPetReleaseTest {
     @Test
     @DisplayName("Displays no owner if pet type is not tracked by TPPets")
     void displaysNoOwnerInvalidPetType() {
-        Villager villager = (Villager) MockFactory.getMockEntity("MockVillagerId", org.bukkit.entity.Villager.class);
+        Villager villager = MockFactory.getMockEntity("MockVillagerId", Villager.class);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(villager);
 
         this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);

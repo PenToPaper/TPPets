@@ -5,14 +5,15 @@ import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTameEvent;
+import org.bukkit.event.entity.EntityTeleportEvent;
 import org.spigotmc.event.entity.EntityMountEvent;
 
 /**
@@ -66,95 +67,6 @@ public class TPPetsEntityListener implements Listener {
             if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
                 if (thisPlugin.getDatabase() != null) {
                     thisPlugin.getDatabase().deletePet(e.getEntity());
-                }
-            }
-        }
-    }
-    
-    /**
-     * Event handler for EntityDamageByEntityEvent. It prevents player damage and mob damage, even through potions and arrows.
-     * @param e The event.
-     */
-    @SuppressWarnings("unlikely-arg-type")
-    @EventHandler (priority=EventPriority.LOW)
-    public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
-        // First three lines determine if this is an entity we care about
-        if (e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
-            Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
-                // If we're supposed to prevent player damage, prevent damage directly from players that don't own the pet, and indirectly through projectiles.
-                if (thisPlugin.getPreventPlayerDamage()) {
-                    // Direct damage
-                    if (e.getDamager() instanceof Player && !(e.getDamager().hasPermission("tppets.bypassprotection")) && (thisPlugin.getPreventOwnerDamage() || (!(e.getDamager().equals(tameableTemp.getOwner())) && !thisPlugin.isAllowedToPet(e.getEntity().getUniqueId().toString(), e.getDamager().getUniqueId().toString())))) {
-                        e.setCancelled(true);
-                        thisPlugin.getLogWrapper().logPreventedDamage("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
-                        return;
-                    // Indirect damage
-                    } else if (e.getDamager() instanceof Projectile) {
-                        Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof Player && !(e.getDamager()).hasPermission("tppets.bypassprotection") && (thisPlugin.getPreventOwnerDamage() || (!projTemp.getShooter().equals(tameableTemp.getOwner()) && !thisPlugin.isAllowedToPet(e.getEntity().getUniqueId().toString(), ((Player) projTemp.getShooter()).getUniqueId().toString())))) {
-                            e.setCancelled(true);
-                            thisPlugin.getLogWrapper().logPreventedDamage("Prevented player damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
-                            return;
-                        }
-                    }
-                }
-                // If we're supposed to prevent mob damage, prevent damage directly from mobs and indirectly through any mob-based projectiles
-                if (thisPlugin.getPreventMobDamage()) {
-                    // Direct damage
-                    if (e.getDamager() instanceof LivingEntity && !(e.getDamager() instanceof Player)) {
-                        e.setCancelled(true);
-                        thisPlugin.getLogWrapper().logPreventedDamage("Prevented mob damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
-                        return;
-                    // Indirect damage
-                    } else if (e.getDamager() instanceof Projectile) {
-                        Projectile projTemp = (Projectile) e.getDamager();
-                        if (projTemp.getShooter() instanceof LivingEntity && !(projTemp.getShooter() instanceof Player)) {
-                            e.setCancelled(true);
-                            thisPlugin.getLogWrapper().logPreventedDamage("Prevented mob damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Event handler for EntityDamageEvent. It prevents environmental damage.
-     * @param e The event
-     */
-    @EventHandler (priority=EventPriority.LOW)
-    public void onEntityDamageEvent(EntityDamageEvent e) {
-        if ((thisPlugin.getPreventEnvironmentalDamage()) && e.getEntity() instanceof Tameable && !PetType.getEnumByEntity(e.getEntity()).equals(PetType.Pets.UNKNOWN)) {
-            Tameable tameableTemp = (Tameable) e.getEntity();
-            if (tameableTemp.isTamed() && tameableTemp.getOwner() != null) {
-                switch (e.getCause()) {
-                    case BLOCK_EXPLOSION:
-                    case CONTACT:
-                    case CRAMMING:
-                    case CUSTOM:
-                    case DRAGON_BREATH:
-                    case DROWNING:
-                    case FALL:
-                    case FALLING_BLOCK:
-                    case FIRE:
-                    case FIRE_TICK:
-                    case FLY_INTO_WALL:
-                    case HOT_FLOOR:
-                    case LAVA:
-                    case LIGHTNING:
-                    case MELTING:
-                    case POISON:
-                    case STARVATION:
-                    case SUFFOCATION:
-                    case THORNS:
-                    case WITHER:
-                        e.setCancelled(true);
-                        thisPlugin.getLogWrapper().logPreventedDamage("Prevented environmental damage to pet with UUID " + e.getEntity().getUniqueId().toString() +  ".");
-                        break;
-                    default:
-                        break;
                 }
             }
         }

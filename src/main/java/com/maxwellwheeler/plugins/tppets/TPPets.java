@@ -9,10 +9,7 @@ import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import net.milkbowl.vault.permission.Permission;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,6 +32,7 @@ public class TPPets extends JavaPlugin {
 
     private final ToolsManager toolsManager = new ToolsManager(getConfig().getConfigurationSection("tools"));
     private final RegionSelectionManager regionSelectionManager = new RegionSelectionManager();
+    private final MobDamageManager mobDamageManager = new MobDamageManager(this, getConfig().getStringList("protect_pets_from"));
 
     // Database
     private DBWrapper database;
@@ -44,11 +42,6 @@ public class TPPets extends JavaPlugin {
     private ConfigUpdater configUpdater;
 
     private LogWrapper logWrapper;
-
-    private boolean preventPlayerDamage = false;
-    private boolean preventEnvironmentalDamage = false;
-    private boolean preventMobDamage = false;
-    private boolean preventOwnerDamage = false;
     
     // Vault stuff
     private Permission perms;
@@ -142,29 +135,6 @@ public class TPPets extends JavaPlugin {
      */
     private void initializeAllowUntamingPets() {
         allowUntamingPets = getConfig().getBoolean("allow_untaming_pets");
-    }
-    
-    /**
-     * Initializes local variables tracking what damage to prevent.
-     */
-    private void initializeDamageConfigs() {
-        List<String> configList = getConfig().getStringList("protect_pets_from");
-        if (configList.contains("PlayerDamage")) {
-            preventPlayerDamage = true;
-            getLogWrapper().logSuccessfulAction("Preventing player damage...");
-        }
-        if (configList.contains("EnvironmentalDamage")) {
-            preventEnvironmentalDamage = true;
-            getLogWrapper().logSuccessfulAction("Preventing environmental damage...");
-        }
-        if (configList.contains("MobDamage")) {
-            preventMobDamage = true;
-            getLogWrapper().logSuccessfulAction("Preventing mob damage...");
-        }
-        if (configList.contains("OwnerDamage")) {
-            preventOwnerDamage = true;
-            getLogWrapper().logSuccessfulAction("Preventing owner damage...");
-        }
     }
     
     /**
@@ -270,7 +240,6 @@ public class TPPets extends JavaPlugin {
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));
 
-        initializeDamageConfigs();
         initializeLostRegions();
         initializeVault();
     }
@@ -423,23 +392,7 @@ public class TPPets extends JavaPlugin {
     public Hashtable<String, LostAndFoundRegion> getLostRegions() {
         return lostRegions;
     }
-    
-    public boolean getPreventPlayerDamage() {
-        return preventPlayerDamage;
-    }
-    
-    public boolean getPreventEnvironmentalDamage() {
-        return preventEnvironmentalDamage;
-    }
-    
-    public boolean getPreventMobDamage() {
-        return preventMobDamage;
-    }
 
-    public boolean getPreventOwnerDamage() {
-        return preventOwnerDamage;
-    }
-    
     public LostAndFoundRegion getLostRegion(String name) {
         return lostRegions.get(name);
     }
@@ -486,5 +439,9 @@ public class TPPets extends JavaPlugin {
 
     public LogWrapper getLogWrapper() {
         return logWrapper;
+    }
+
+    public MobDamageManager getMobDamageManager() {
+        return mobDamageManager;
     }
 }

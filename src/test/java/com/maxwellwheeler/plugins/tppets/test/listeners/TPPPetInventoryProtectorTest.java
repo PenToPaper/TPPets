@@ -33,7 +33,7 @@ public class TPPPetInventoryProtectorTest {
     public void beforeEach() {
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
         this.guest = MockFactory.getMockPlayer("MockGuestId", "MockGuestName", null, null, new String[]{});
-        this.donkey = (Donkey) MockFactory.getTamedMockEntity("MockPetId", org.bukkit.entity.Donkey.class, this.player);
+        this.donkey = MockFactory.getTamedMockEntity("MockPetId", Donkey.class, this.player);
         this.inventory = mock(LlamaInventory.class);
         when(this.inventory.getHolder()).thenReturn(this.donkey);
 

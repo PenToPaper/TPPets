@@ -1,4 +1,4 @@
-protect_pets_from: [PlayerDamage, OwnerDamage, EnvironmentalDamage, MobDamage]
+protect_pets_from: [GuestDamage, StrangerDamage, OwnerDamage, EnvironmentalDamage, MobDamage]
 tp_pets_between_worlds: true
 allow_untaming_pets: true
 total_pet_limit: -1

@@ -50,7 +50,7 @@ public class TPPCommandStoreTest {
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.horse = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+        this.horse = MockFactory.getMockEntity("MockPetId", Horse.class);
 
         // Plugin
         this.dbWrapper = mock(DBWrapper.class);

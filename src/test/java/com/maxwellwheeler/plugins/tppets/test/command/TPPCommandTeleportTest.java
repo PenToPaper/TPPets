@@ -394,10 +394,10 @@ public class TPPCommandTeleportTest {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
-            Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
 
             // The incorrect pet Entity instance
-            Horse incorrectPet = (Horse) MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
+            Horse incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", Horse.class);
 
             // A list of both entities
             when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
@@ -444,7 +444,7 @@ public class TPPCommandTeleportTest {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
-            Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
 
             // A list of both entities
             when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
@@ -487,7 +487,7 @@ public class TPPCommandTeleportTest {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
-            Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
 
             // A list of both entities
             when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
@@ -526,7 +526,7 @@ public class TPPCommandTeleportTest {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
-            Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
 
             // A list of both entities
             when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
@@ -570,10 +570,10 @@ public class TPPCommandTeleportTest {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
-            Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
 
             // The incorrect pet Entity instance
-            Horse incorrectPet = (Horse) MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
+            Horse incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
             when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
@@ -621,10 +621,10 @@ public class TPPCommandTeleportTest {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
-            Horse correctPet = (Horse) MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Horse correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
 
             // The incorrect pet Entity instance
-            Horse incorrectPet = (Horse) MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
+            Horse incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
 
             // A list of both entities
             when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});

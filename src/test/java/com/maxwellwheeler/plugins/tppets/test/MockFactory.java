@@ -21,8 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class MockFactory {
-    public static Entity getMockEntity(String petID, Class<? extends Entity> entityClass) {
-        Entity mockEntity = mock(entityClass);
+    public static <T extends Entity> T getMockEntity(String petID, Class<T> entityClass) {
+        T mockEntity = mock(entityClass);
         UUID entityUUID = mock(UUID.class);
         when(entityUUID.toString()).thenReturn(petID);
         when(mockEntity.getUniqueId()).thenReturn(entityUUID);
@@ -31,8 +31,8 @@ public class MockFactory {
         return mockEntity;
     }
 
-    public static Entity getTamedMockEntity(String petID, Class<? extends Tameable> entityClass, OfflinePlayer owner) {
-        Tameable mockEntity = (Tameable) getMockEntity(petID, entityClass);
+    public static <T extends Tameable> T getTamedMockEntity(String petID, Class<T> entityClass, OfflinePlayer owner) {
+        T mockEntity = getMockEntity(petID, entityClass);
         when(mockEntity.isTamed()).thenReturn(true);
         when(mockEntity.getOwner()).thenReturn(owner);
 

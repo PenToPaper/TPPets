@@ -35,7 +35,7 @@ public class TPPEntityTamedListenerTest {
     @BeforeEach
     public void beforeEach() throws SQLException {
         this.owner = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
-        this.horse = (Horse) MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
+        this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
         this.dbWrapper = mock(DBWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, false, false, false);
@@ -317,7 +317,7 @@ public class TPPEntityTamedListenerTest {
     @DisplayName("EntityTameEvent - Stands up sitting pets")
     void entityTameEventStandsSittingPets() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        Wolf wolf = (Wolf) MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.owner);
+        Wolf wolf = MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.owner);
         when(entityTameEvent.getEntity()).thenReturn(wolf);
 
         // Causes error and for pet to untame
@@ -339,7 +339,7 @@ public class TPPEntityTamedListenerTest {
     @DisplayName("EntityTameEvent - Doesn't untame skeleton horses")
     void entityTameEventDoesntUntameSkeletonHorse() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        SkeletonHorse skeletonHorse = (SkeletonHorse) MockFactory.getTamedMockEntity("MockHorseId", SkeletonHorse.class, this.owner);
+        SkeletonHorse skeletonHorse = MockFactory.getTamedMockEntity("MockHorseId", SkeletonHorse.class, this.owner);
         when(entityTameEvent.getEntity()).thenReturn(skeletonHorse);
 
         // Causes error and for pet to untame
@@ -360,7 +360,7 @@ public class TPPEntityTamedListenerTest {
     @DisplayName("EntityTameEvent - Doesn't untame zombie horses")
     void entityTameEventDoesntUntameZombieHorse() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        ZombieHorse zombieHorse = (ZombieHorse) MockFactory.getTamedMockEntity("MockHorseId", ZombieHorse.class, this.owner);
+        ZombieHorse zombieHorse = MockFactory.getTamedMockEntity("MockHorseId", ZombieHorse.class, this.owner);
         when(entityTameEvent.getEntity()).thenReturn(zombieHorse);
 
         // Causes error and for pet to untame
@@ -628,7 +628,7 @@ public class TPPEntityTamedListenerTest {
     @DisplayName("EntityBreedEvent - Stands up sitting pets")
     void entityBreedEventStandsSittingPets() throws SQLException {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
-        Wolf wolf = (Wolf) MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.owner);
+        Wolf wolf = MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.owner);
         when(entityBreedEvent.getEntity()).thenReturn(wolf);
 
         // Causes error and for pet to untame
@@ -650,7 +650,7 @@ public class TPPEntityTamedListenerTest {
     @DisplayName("EntityBreedEvent - Doesn't untame skeleton horses")
     void entityBreedEventDoesntUntameSkeletonHorse() throws SQLException {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
-        SkeletonHorse skeletonHorse = (SkeletonHorse) MockFactory.getTamedMockEntity("MockHorseId", SkeletonHorse.class, this.owner);
+        SkeletonHorse skeletonHorse = MockFactory.getTamedMockEntity("MockHorseId", SkeletonHorse.class, this.owner);
         when(entityBreedEvent.getEntity()).thenReturn(skeletonHorse);
 
         // Causes error and for pet to untame
@@ -671,7 +671,7 @@ public class TPPEntityTamedListenerTest {
     @DisplayName("EntityBreedEvent - Doesn't untame zombie horses")
     void entityBreedEventDoesntUntameZombieHorse() throws SQLException {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
-        ZombieHorse zombieHorse = (ZombieHorse) MockFactory.getTamedMockEntity("MockHorseId", ZombieHorse.class, this.owner);
+        ZombieHorse zombieHorse = MockFactory.getTamedMockEntity("MockHorseId", ZombieHorse.class, this.owner);
         when(entityBreedEvent.getEntity()).thenReturn(zombieHorse);
 
         // Causes error and for pet to untame
