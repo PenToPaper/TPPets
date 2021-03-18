@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.PetInventoryProtector;
+import com.maxwellwheeler.plugins.tppets.listeners.PetAccessProtector;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
@@ -21,13 +21,13 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class TPPPetInventoryProtectorInventoryClickTest {
+public class TPPPetAccessProtectorInventoryClickTest {
     private Player player;
     private Player guest;
     private LogWrapper logWrapper;
     private Inventory inventory;
     private TPPets thisPlugin;
-    private PetInventoryProtector petInventoryProtector;
+    private PetAccessProtector petInventoryProtector;
 
     @BeforeEach
     public void beforeEach() {
@@ -43,7 +43,7 @@ public class TPPPetInventoryProtectorInventoryClickTest {
 
         when(this.player.hasPermission("tppets.mountother")).thenReturn(false);
 
-        this.petInventoryProtector = new PetInventoryProtector(this.thisPlugin);
+        this.petInventoryProtector = new PetAccessProtector(this.thisPlugin);
     }
 
     InventoryClickEvent getInventoryClickEvent(Player sender) {

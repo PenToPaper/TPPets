@@ -230,7 +230,7 @@ public class TPPets extends JavaPlugin {
         // Register events + commands
         getLogWrapper().logSuccessfulAction("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new ChunkUnloadPetPositionUpdater(this), this);
-        getServer().getPluginManager().registerEvents(new PetInventoryProtector(this), this);
+        getServer().getPluginManager().registerEvents(new PetAccessProtector(this), this);
         getServer().getPluginManager().registerEvents(new ProtectedRegionScanner(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractPetExamine(this), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractPetRelease(this), this);

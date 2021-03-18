@@ -4,6 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,13 +12,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.InventoryHolder;
+import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.Objects;
 
-public class PetInventoryProtector implements Listener {
+public class PetAccessProtector implements Listener {
     private final TPPets thisPlugin;
 
-    public PetInventoryProtector(TPPets thisPlugin) {
+    public PetAccessProtector(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 
@@ -49,6 +51,15 @@ public class PetInventoryProtector implements Listener {
     public void onInventoryOpen(InventoryOpenEvent event) {
         if (!event.isCancelled() && handleInventoryAccess(event.getInventory().getHolder(), event.getPlayer())) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler (priority = EventPriority.LOW)
+    public void entityMountProtect(EntityMountEvent event) {
+        if (!event.isCancelled() && event.getEntity() instanceof Player && PetType.isPetTracked(event.getMount()) && !doesAccessorHavePermission((Player) event.getEntity(), (Tameable) event.getMount())) {
+            event.setCancelled(true);
+            event.getEntity().sendMessage(ChatColor.RED + "You don't have permission to do that");
+            this.thisPlugin.getLogWrapper().logUnsuccessfulAction("Player with UUID " + event.getEntity().getUniqueId() + " was denied permission to mount pet " + event.getMount().getUniqueId());
         }
     }
 }

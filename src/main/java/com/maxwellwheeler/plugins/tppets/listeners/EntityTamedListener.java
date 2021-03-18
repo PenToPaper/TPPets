@@ -13,6 +13,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityTameEvent;
+import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.sql.SQLException;
 
@@ -63,7 +64,7 @@ public class EntityTamedListener implements Listener {
     private void cancelTame(Tameable pet) {
         EntityActions.setStanding(pet);
         pet.setOwner(null);
-        if (!(pet instanceof SkeletonHorse || pet instanceof ZombieHorse)) {
+        if (!isSpecialHorse(pet)) {
             pet.setTamed(false);
         }
     }
@@ -125,6 +126,28 @@ public class EntityTamedListener implements Listener {
                 cancelTame(pet);
                 event.setCancelled(true);
                 displayStatus(owner, pet, eventStatus);
+            }
+
+        }
+    }
+
+    private boolean isSpecialHorse(Entity entity) {
+        return entity instanceof ZombieHorse || entity instanceof SkeletonHorse;
+    }
+
+    @EventHandler (priority = EventPriority.LOW)
+    public void entityMountTameSpecialHorse(EntityMountEvent event) {
+        if (!event.isCancelled() && event.getEntity() instanceof Player && isSpecialHorse(event.getMount()) && !PetType.isPetTracked(event.getMount())) {
+            Tameable pet = (Tameable) event.getMount();
+            Player player = (Player) event.getEntity();
+            EventStatus eventStatus = onNewTamedEntity(player, pet);
+
+            if (eventStatus == EventStatus.SUCCESS) {
+                pet.setTamed(true);
+                pet.setOwner(player);
+            } else {
+                event.setCancelled(true);
+                displayStatus(player, pet, eventStatus);
             }
 
         }
