@@ -16,10 +16,10 @@ import org.bukkit.inventory.EquipmentSlot;
 
 import static com.maxwellwheeler.plugins.tppets.listeners.EventStatus.*;
 
-public class PlayerInteractPetRelease implements Listener {
+public class ListenerPlayerInteractPetRelease implements Listener {
     private final TPPets thisPlugin;
 
-    public PlayerInteractPetRelease(TPPets thisPlugin) {
+    public ListenerPlayerInteractPetRelease(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

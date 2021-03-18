@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.ProtectedRegionScanner;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
@@ -23,7 +23,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
-public class TPPProtectedRegionScannerPlayerMoveTest {
+public class TPPListenerProtectedRegionPlayerMoveTest {
     private ProtectedRegion protectedRegion;
     private Player player;
     private Location playerLocation;
@@ -34,7 +34,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     private ArgumentCaptor<Entity> entityCaptor;
     private TPPets tpPets;
     private PlayerMoveEvent playerMoveEvent;
-    private ProtectedRegionScanner playerMoveProtectedRegionScanner;
+    private ListenerProtectedRegion playerMoveListenerProtectedRegion;
 
     @BeforeEach
     public void beforeEach() {
@@ -50,7 +50,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
         this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
         this.protectedRegion = MockFactory.getProtectedRegion("ProtectedRegionName", "Enter Message", "MockWorldName", world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", lostAndFoundRegion);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, this.playerLocation, new String[]{});
-        this.playerMoveProtectedRegionScanner = new ProtectedRegionScanner(this.tpPets);
+        this.playerMoveListenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);
 
         this.nearbyEntityLocations = new ArrayList<>();
         Location entityInPrLocation = MockFactory.getMockLocation(world, 102, 203, 304);
@@ -85,7 +85,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     @Test
     @DisplayName("Teleports pets away from protected regions when they're inside it and not allowed to be there")
     void teleportsScannedPetsAwayWhenNotAllowedToBeInPr() {
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, times(1)).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, times(1)).logSuccessfulAction("Teleported pet with UUID MockInPrPet away from ProtectedRegionName to LostAndFoundRegionName");
@@ -103,7 +103,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     void cannotTeleportScannedPetsAwayWhenPlayerNotInPr() {
         when(this.tpPets.getProtectedRegionWithin(this.playerLocation)).thenReturn(null);
 
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -121,7 +121,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     void cannotTeleportScannedPetsAwayWhenPlayerNotInPrWithLfr() {
         when(this.protectedRegion.getLfReference()).thenReturn(null);
 
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -139,7 +139,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     void cannotTeleportScannedPetsAwayWhenPlayerNotInPrWithWorld() {
         when(this.protectedRegion.getWorld()).thenReturn(null);
 
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -157,7 +157,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     void cannotTeleportScannedPetsAwayWhenPetsNotInPr() {
         when(this.protectedRegion.isInRegion(this.nearbyEntityLocations.get(0))).thenReturn(false);
 
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -175,7 +175,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     void cannotTeleportScannedPetsAwayWhenOnlineOwnerHasPermission() {
         when(this.player.hasPermission("tppets.tpanywhere")).thenReturn(true);
 
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -196,7 +196,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
         when(this.tpPets.getVaultEnabled()).thenReturn(true);
         when(this.tpPets.getPerms()).thenReturn(permission);
 
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -214,7 +214,7 @@ public class TPPProtectedRegionScannerPlayerMoveTest {
     void cannotLogActionsWithTeleportationError() {
         when(this.protectedRegion.tpToLostRegion(this.nearbyEntities.get(0))).thenReturn(false);
 
-        this.playerMoveProtectedRegionScanner.onPlayerMove(this.playerMoveEvent);
+        this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, times(1)).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());

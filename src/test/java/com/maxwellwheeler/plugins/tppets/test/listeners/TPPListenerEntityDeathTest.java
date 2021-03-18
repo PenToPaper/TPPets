@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.EntityDeathListener;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityDeath;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.entity.*;
@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-public class TPPEntityDeathListenerTest {
+public class TPPListenerEntityDeathTest {
     private Horse horse;
     private DBWrapper dbWrapper;
-    private EntityDeathListener entityDeathListener;
+    private ListenerEntityDeath listenerEntityDeath;
 
     @BeforeEach
     public void beforeEach() {
@@ -27,7 +27,7 @@ public class TPPEntityDeathListenerTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, false, false, false);
 
-        this.entityDeathListener = new EntityDeathListener(tpPets);
+        this.listenerEntityDeath = new ListenerEntityDeath(tpPets);
     }
 
     private EntityDeathEvent getEntityDeathEvent(LivingEntity entity) {
@@ -41,7 +41,7 @@ public class TPPEntityDeathListenerTest {
     void deletesValidPet() {
         EntityDeathEvent entityDeathEvent = getEntityDeathEvent(this.horse);
 
-        this.entityDeathListener.onEntityDeathEvent(entityDeathEvent);
+        this.listenerEntityDeath.onEntityDeathEvent(entityDeathEvent);
 
         verify(this.dbWrapper, times(1)).deletePet(this.horse);
     }
@@ -52,7 +52,7 @@ public class TPPEntityDeathListenerTest {
         Villager villager = MockFactory.getMockEntity("MockVillagerId", org.bukkit.entity.Villager.class);
         EntityDeathEvent entityDeathEvent = getEntityDeathEvent(villager);
 
-        this.entityDeathListener.onEntityDeathEvent(entityDeathEvent);
+        this.listenerEntityDeath.onEntityDeathEvent(entityDeathEvent);
 
         verify(this.dbWrapper, never()).deletePet(any(Entity.class));
     }

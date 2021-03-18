@@ -10,10 +10,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerInteractRegionSelection implements Listener {
+public class ListenerPlayerInteractRegionSelection implements Listener {
     private final TPPets thisPlugin;
 
-    public PlayerInteractRegionSelection(TPPets thisPlugin) {
+    public ListenerPlayerInteractRegionSelection(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

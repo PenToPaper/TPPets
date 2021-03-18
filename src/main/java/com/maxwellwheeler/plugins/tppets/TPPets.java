@@ -229,15 +229,15 @@ public class TPPets extends JavaPlugin {
         
         // Register events + commands
         getLogWrapper().logSuccessfulAction("Registering commands and events.");
-        getServer().getPluginManager().registerEvents(new ChunkUnloadPetPositionUpdater(this), this);
-        getServer().getPluginManager().registerEvents(new PetAccessProtector(this), this);
-        getServer().getPluginManager().registerEvents(new ProtectedRegionScanner(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerInteractPetExamine(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerInteractPetRelease(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerInteractRegionSelection(this), this);
-        getServer().getPluginManager().registerEvents(new EntityTamedListener(this), this);
-        getServer().getPluginManager().registerEvents(new EntityDamageListener(this), this);
-        getServer().getPluginManager().registerEvents(new EntityDeathListener(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerPetPosition(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerPetAccess(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerProtectedRegion(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerPlayerInteractPetExamine(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerPlayerInteractPetRelease(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerPlayerInteractRegionSelection(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerEntityTamed(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerEntityDamage(this), this);
+        getServer().getPluginManager().registerEvents(new ListenerEntityDeath(this), this);
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));
 

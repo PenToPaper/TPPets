@@ -16,10 +16,10 @@ import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.util.Objects;
 
-public class PetAccessProtector implements Listener {
+public class ListenerPetAccess implements Listener {
     private final TPPets thisPlugin;
 
-    public PetAccessProtector(TPPets thisPlugin) {
+    public ListenerPetAccess(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.PetAccessProtector;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerPetAccess;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
@@ -16,14 +16,14 @@ import org.spigotmc.event.entity.EntityMountEvent;
 
 import static org.mockito.Mockito.*;
 
-public class TPPPetAccessProtectorEntityMountTest {
+public class TPPListenerPetAccessEntityMountTest {
     private Player admin;
     private Player owner;
     private Player guest;
     private Player stranger;
     private Horse horse;
     private LogWrapper logWrapper;
-    private PetAccessProtector petAccessProtector;
+    private ListenerPetAccess listenerPetAccess;
 
     @BeforeEach
     public void beforeEach() {
@@ -35,7 +35,7 @@ public class TPPPetAccessProtectorEntityMountTest {
         DBWrapper dbWrapper = mock(DBWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         TPPets tpPets = MockFactory.getMockPlugin(dbWrapper, this.logWrapper, false, false, false);
-        this.petAccessProtector = new PetAccessProtector(tpPets);
+        this.listenerPetAccess = new ListenerPetAccess(tpPets);
 
         when(tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);
     }
@@ -53,7 +53,7 @@ public class TPPPetAccessProtectorEntityMountTest {
     void cannotMountWhenStrangerAttempts() {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.stranger, this.horse);
 
-        this.petAccessProtector.entityMountProtect(entityMountEvent);
+        this.listenerPetAccess.entityMountProtect(entityMountEvent);
 
         verify(entityMountEvent, times(1)).setCancelled(true);
         verify(this.stranger, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
@@ -66,7 +66,7 @@ public class TPPPetAccessProtectorEntityMountTest {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.stranger, this.horse);
         when(entityMountEvent.isCancelled()).thenReturn(true);
 
-        this.petAccessProtector.entityMountProtect(entityMountEvent);
+        this.listenerPetAccess.entityMountProtect(entityMountEvent);
 
         verify(entityMountEvent, never()).setCancelled(anyBoolean());
         verify(this.stranger, never()).sendMessage(anyString());
@@ -80,7 +80,7 @@ public class TPPPetAccessProtectorEntityMountTest {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.stranger, this.horse);
         when(entityMountEvent.getEntity()).thenReturn(villager);
 
-        this.petAccessProtector.entityMountProtect(entityMountEvent);
+        this.listenerPetAccess.entityMountProtect(entityMountEvent);
 
         verify(entityMountEvent, never()).setCancelled(anyBoolean());
         verify(this.stranger, never()).sendMessage(anyString());
@@ -93,7 +93,7 @@ public class TPPPetAccessProtectorEntityMountTest {
         this.horse = MockFactory.getMockEntity("MockHorseId", org.bukkit.entity.Horse.class);
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.stranger, this.horse);
 
-        this.petAccessProtector.entityMountProtect(entityMountEvent);
+        this.listenerPetAccess.entityMountProtect(entityMountEvent);
 
         verify(entityMountEvent, never()).setCancelled(anyBoolean());
         verify(this.stranger, never()).sendMessage(anyString());
@@ -105,7 +105,7 @@ public class TPPPetAccessProtectorEntityMountTest {
     void cannotCancelMountIfMountedByAdmin() {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.admin, this.horse);
 
-        this.petAccessProtector.entityMountProtect(entityMountEvent);
+        this.listenerPetAccess.entityMountProtect(entityMountEvent);
 
         verify(entityMountEvent, never()).setCancelled(anyBoolean());
         verify(this.admin, never()).sendMessage(anyString());
@@ -117,7 +117,7 @@ public class TPPPetAccessProtectorEntityMountTest {
     void cannotCancelMountIfMountedByOwner() {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.owner, this.horse);
 
-        this.petAccessProtector.entityMountProtect(entityMountEvent);
+        this.listenerPetAccess.entityMountProtect(entityMountEvent);
 
         verify(entityMountEvent, never()).setCancelled(anyBoolean());
         verify(this.owner, never()).sendMessage(anyString());
@@ -129,7 +129,7 @@ public class TPPPetAccessProtectorEntityMountTest {
     void cannotCancelMountIfMountedByGuest() {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.guest, this.horse);
 
-        this.petAccessProtector.entityMountProtect(entityMountEvent);
+        this.listenerPetAccess.entityMountProtect(entityMountEvent);
 
         verify(entityMountEvent, never()).setCancelled(anyBoolean());
         verify(this.guest, never()).sendMessage(anyString());

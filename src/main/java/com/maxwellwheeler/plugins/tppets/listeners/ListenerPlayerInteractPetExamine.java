@@ -17,10 +17,10 @@ import java.util.Objects;
 
 import static com.maxwellwheeler.plugins.tppets.listeners.EventStatus.*;
 
-public class PlayerInteractPetExamine implements Listener {
+public class ListenerPlayerInteractPetExamine implements Listener {
     private final TPPets thisPlugin;
 
-    public PlayerInteractPetExamine(TPPets thisPlugin) {
+    public ListenerPlayerInteractPetExamine(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

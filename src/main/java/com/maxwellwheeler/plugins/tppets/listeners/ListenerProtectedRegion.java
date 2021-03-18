@@ -14,10 +14,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-public class ProtectedRegionScanner implements Listener {
+public class ListenerProtectedRegion implements Listener {
     private final TPPets thisPlugin;
 
-    public ProtectedRegionScanner(TPPets thisPlugin) {
+    public ListenerProtectedRegion(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

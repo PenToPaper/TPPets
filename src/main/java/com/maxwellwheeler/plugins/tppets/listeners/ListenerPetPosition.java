@@ -8,10 +8,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
 
-public class ChunkUnloadPetPositionUpdater implements Listener {
+public class ListenerPetPosition implements Listener {
     private final TPPets thisPlugin;
 
-    public ChunkUnloadPetPositionUpdater(TPPets thisPlugin) {
+    public ListenerPetPosition(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

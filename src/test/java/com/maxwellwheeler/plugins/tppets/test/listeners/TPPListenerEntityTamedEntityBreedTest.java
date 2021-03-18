@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.EntityTamedListener;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityTamed;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
@@ -21,12 +21,12 @@ import java.sql.SQLException;
 
 import static org.mockito.Mockito.*;
 
-public class TPPEntityTamedListenerEntityBreedEventTest {
+public class TPPListenerEntityTamedEntityBreedTest {
     private Player owner;
     private Horse horse;
     private TPPets tpPets;
     private DBWrapper dbWrapper;
-    private EntityTamedListener entityTamedListener;
+    private ListenerEntityTamed listenerEntityTamed;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
@@ -37,7 +37,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, false, false, false);
         PetLimitChecker petIndex = new PetLimitChecker(this.tpPets, 1, 1, 1, 1, 1, 1, 1, 1);
 
-        this.entityTamedListener = new EntityTamedListener(this.tpPets);
+        this.listenerEntityTamed = new ListenerEntityTamed(this.tpPets);
 
         when(this.tpPets.getPetIndex()).thenReturn(petIndex);
         when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(0);
@@ -57,7 +57,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
     void allowsEntityBreeding() throws SQLException {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
         verify(this.dbWrapper, times(1)).getNumPets("MockPlayerId");
@@ -75,7 +75,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(10);
         when(this.owner.hasPermission("tppets.bypasslimit")).thenReturn(true);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
         verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
@@ -103,7 +103,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         when(this.tpPets.getPerms()).thenReturn(permission);
         when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(10);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
         verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
@@ -132,7 +132,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
 
         when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(10);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
         verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
@@ -150,7 +150,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(10);
         when(this.owner.hasPermission("tppets.bypasslimit")).thenReturn(true);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
         verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
@@ -167,7 +167,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
         when(entityBreedEvent.isCancelled()).thenReturn(true);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
         verify(this.dbWrapper, never()).getNumPets(anyString());
@@ -185,7 +185,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         AnimalTamer animalTamer = mock(AnimalTamer.class);
         when(this.horse.getOwner()).thenReturn(animalTamer);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
         verify(this.dbWrapper, never()).getNumPets(anyString());
@@ -203,7 +203,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         Entity entity = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Villager.class);
         when(entityBreedEvent.getEntity()).thenReturn((LivingEntity) entity);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
         verify(this.dbWrapper, never()).getNumPets(anyString());
@@ -220,7 +220,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
         when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(1);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "You've exceeded the limit for total pets! Limit: 1");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
@@ -237,7 +237,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
         when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(1);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "You've exceeded the limit for this pet type! Horse Limit: 1");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
@@ -254,7 +254,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
         when(this.dbWrapper.getNumPets("MockPlayerId")).thenThrow(new SQLException());
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
@@ -271,7 +271,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
         when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenThrow(new SQLException());
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
@@ -288,7 +288,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
         when(this.dbWrapper.insertPet(this.horse, "MockPlayerId")).thenReturn(null);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
@@ -309,7 +309,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         // Causes error and for pet to untame
         when(this.dbWrapper.insertPet(wolf, "MockPlayerId")).thenReturn(null);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
@@ -331,7 +331,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         // Causes error and for pet to untame
         when(this.dbWrapper.insertPet(skeletonHorse, "MockPlayerId")).thenReturn(null);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
@@ -352,7 +352,7 @@ public class TPPEntityTamedListenerEntityBreedEventTest {
         // Causes error and for pet to untame
         when(this.dbWrapper.insertPet(zombieHorse, "MockPlayerId")).thenReturn(null);
 
-        this.entityTamedListener.onEntityBreedEvent(entityBreedEvent);
+        this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.dbWrapper, times(1)).getNumPets(anyString());

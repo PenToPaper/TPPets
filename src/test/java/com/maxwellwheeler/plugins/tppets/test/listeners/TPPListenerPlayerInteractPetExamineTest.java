@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsManager;
-import com.maxwellwheeler.plugins.tppets.listeners.PlayerInteractPetExamine;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerPlayerInteractPetExamine;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
@@ -25,9 +25,9 @@ import java.util.Collections;
 
 import static org.mockito.Mockito.*;
 
-public class TPPPlayerInteractPetExamineTest {
+public class TPPListenerPlayerInteractPetExamineTest {
     private PlayerInteractEntityEvent playerInteractEntityEvent;
-    private PlayerInteractPetExamine playerInteractPetExamine;
+    private ListenerPlayerInteractPetExamine listenerPlayerInteractPetExamine;
     private Horse horse;
     private Player player;
     private ToolsManager toolsManager;
@@ -45,7 +45,7 @@ public class TPPPlayerInteractPetExamineTest {
 
         EquipmentSlot playerHand = EquipmentSlot.HAND;
         PetStorage horseStorage = new PetStorage("MockHorseId", 7, 100, 200, 300, "MockWorldname", "MockPlayerId", "MockHorseName", "MockHorseName");
-        this.playerInteractPetExamine = new PlayerInteractPetExamine(tpPets);
+        this.listenerPlayerInteractPetExamine = new ListenerPlayerInteractPetExamine(tpPets);
 
         PlayerInventory playerInventory = mock(PlayerInventory.class);
         ItemStack itemStack = mock(ItemStack.class);
@@ -65,7 +65,7 @@ public class TPPPlayerInteractPetExamineTest {
     @Test
     @DisplayName("Displays pet owner")
     void displaysPetOwner() {
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " and belongs to " + ChatColor.WHITE + "MockPlayerName");
@@ -77,7 +77,7 @@ public class TPPPlayerInteractPetExamineTest {
     void doesNotAttemptToDisplayWhenClickingWithOffhand() {
         when(this.playerInteractEntityEvent.getHand()).thenReturn(EquipmentSlot.OFF_HAND);
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, never()).sendMessage(anyString());
@@ -89,7 +89,7 @@ public class TPPPlayerInteractPetExamineTest {
     void doesNotAttemptToDisplayWhenNotSneaking() {
         when(this.player.isSneaking()).thenReturn(false);
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, never()).sendMessage(anyString());
@@ -101,7 +101,7 @@ public class TPPPlayerInteractPetExamineTest {
     void doesNotAttemptToDisplayInvalidMaterial() {
         when(this.toolsManager.isMaterialValidTool("get_owner", Material.BONE)).thenReturn(false);
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, never()).sendMessage(anyString());
@@ -114,7 +114,7 @@ public class TPPPlayerInteractPetExamineTest {
         Villager villager = MockFactory.getMockEntity("MockVillagerId", Villager.class);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(villager);
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This pet doesn't have an owner");
@@ -126,7 +126,7 @@ public class TPPPlayerInteractPetExamineTest {
     void displaysNoOwnerNotOwned() {
         when(this.horse.isTamed()).thenReturn(false);
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This pet doesn't have an owner");
@@ -138,7 +138,7 @@ public class TPPPlayerInteractPetExamineTest {
     void displaysNoOwnerNoOwner() {
         when(this.horse.getOwner()).thenReturn(null);
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This pet doesn't have an owner");
@@ -150,7 +150,7 @@ public class TPPPlayerInteractPetExamineTest {
     void displaysDbFailWhenDbFails() {
         when(this.dbWrapper.getPetsFromUUIDs("MockHorseId", "MockPlayerId")).thenReturn(null);
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not get pet data");
@@ -162,7 +162,7 @@ public class TPPPlayerInteractPetExamineTest {
     void displaysDbFailCantFindPet() {
         when(this.dbWrapper.getPetsFromUUIDs("MockHorseId", "MockPlayerId")).thenReturn(new ArrayList<>());
 
-        this.playerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).getPetsFromUUIDs(anyString(), anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not get pet data");

@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsManager;
-import com.maxwellwheeler.plugins.tppets.listeners.PlayerInteractRegionSelection;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerPlayerInteractRegionSelection;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TPPPlayerInteractRegionSelectionTest {
-    private PlayerInteractRegionSelection playerInteractRegionSelection;
+public class TPPListenerPlayerInteractRegionSelectionTest {
+    private ListenerPlayerInteractRegionSelection listenerPlayerInteractRegionSelection;
     private PlayerInteractEvent playerInteractEvent;
     private Player player;
     private ToolsManager toolsManager;
@@ -52,7 +52,7 @@ public class TPPPlayerInteractRegionSelectionTest {
         when(tpPets.getToolsManager()).thenReturn(this.toolsManager);
         when(tpPets.getRegionSelectionManager()).thenReturn(this.regionSelectionManager);
 
-        this.playerInteractRegionSelection = new PlayerInteractRegionSelection(tpPets);
+        this.listenerPlayerInteractRegionSelection = new ListenerPlayerInteractRegionSelection(tpPets);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class TPPPlayerInteractRegionSelectionTest {
     void setsFirstPosition() {
         when(this.playerInteractEvent.getAction()).thenReturn(Action.LEFT_CLICK_BLOCK);
 
-        this.playerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "First position set!");
 
@@ -77,7 +77,7 @@ public class TPPPlayerInteractRegionSelectionTest {
         when(this.playerInteractEvent.getAction()).thenReturn(Action.LEFT_CLICK_BLOCK);
         this.regionSelectionManager.setEndLocation(this.player, this.blockLocation);
 
-        this.playerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "First position set! Selection is complete.");
 
@@ -90,7 +90,7 @@ public class TPPPlayerInteractRegionSelectionTest {
     void setsSecondPosition() {
         when(this.playerInteractEvent.getAction()).thenReturn(Action.RIGHT_CLICK_BLOCK);
 
-        this.playerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Second position set!");
 
@@ -107,7 +107,7 @@ public class TPPPlayerInteractRegionSelectionTest {
         when(this.playerInteractEvent.getAction()).thenReturn(Action.RIGHT_CLICK_BLOCK);
         this.regionSelectionManager.setStartLocation(this.player, this.blockLocation);
 
-        this.playerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Second position set! Selection is complete.");
 
@@ -120,7 +120,7 @@ public class TPPPlayerInteractRegionSelectionTest {
     void cannotSetPositionInvalidAction() {
         when(this.playerInteractEvent.getAction()).thenReturn(Action.LEFT_CLICK_AIR);
 
-        this.playerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));
@@ -131,7 +131,7 @@ public class TPPPlayerInteractRegionSelectionTest {
     void cannotSetPositionInvalidTool() {
         when(this.playerInteractEvent.getMaterial()).thenReturn(Material.BEETROOT);
 
-        this.playerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));
@@ -142,7 +142,7 @@ public class TPPPlayerInteractRegionSelectionTest {
     void cannotSetPositionInvalidBlock() {
         when(this.playerInteractEvent.getClickedBlock()).thenReturn(null);
 
-        this.playerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));
@@ -157,7 +157,7 @@ public class TPPPlayerInteractRegionSelectionTest {
         this.regionSelectionManager.setEndLocation(this.player, this.blockLocation);
         assertNotNull(this.regionSelectionManager.getSelectionSession(this.player));
 
-        this.playerInteractRegionSelection.onPlayerQuit(playerQuitEvent);
+        this.listenerPlayerInteractRegionSelection.onPlayerQuit(playerQuitEvent);
 
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));

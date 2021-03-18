@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.MobDamageManager;
-import com.maxwellwheeler.plugins.tppets.listeners.EntityDamageListener;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityDamage;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.entity.*;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
-public class TPPEntityDamageListenerEntityDamageByEntityTest {
+public class TPPListenerEntityDamageEntityDamageByEntityTest {
     private Player owner;
     private Player guest;
     private Player stranger;
@@ -28,7 +28,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
     private Minecart environment;
     private BlockProjectileSource blockProjectileSource;
     private Horse horse;
-    private EntityDamageListener entityDamageListener;
+    private ListenerEntityDamage listenerEntityDamage;
     private TPPets tpPets;
 
     @BeforeEach
@@ -45,7 +45,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(dbWrapper, logWrapper, false, false, false);
 
-        this.entityDamageListener = new EntityDamageListener(this.tpPets);
+        this.listenerEntityDamage = new ListenerEntityDamage(this.tpPets);
 
         MobDamageManager mobDamageManager = new MobDamageManager(this.tpPets, Arrays.asList("OwnerDamage", "GuestDamage", "StrangerDamage", "EnvironmentalDamage", "MobDamage"));
         when(this.tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);
@@ -71,7 +71,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Villager villager = MockFactory.getMockEntity("MockVillagerId", org.bukkit.entity.Villager.class);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.owner, villager);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -83,7 +83,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
     void preventsOwnerDamage() {
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.owner, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -94,7 +94,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.owner);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -107,7 +107,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.owner, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -121,7 +121,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.owner);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -133,7 +133,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.owner, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -146,7 +146,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.owner);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -158,7 +158,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
     void preventsGuestDamage() {
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.guest, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -169,7 +169,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.guest);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -182,7 +182,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.guest, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -196,7 +196,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.guest);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -208,7 +208,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.guest, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -221,7 +221,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.guest);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -233,7 +233,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
     void preventsStrangerDamage() {
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.stranger, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -244,7 +244,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.stranger);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -257,7 +257,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.stranger, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -271,7 +271,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.stranger);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -283,7 +283,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.stranger, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -296,7 +296,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.stranger);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -308,7 +308,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
     void preventsMobDamage() {
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.mob, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -319,7 +319,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.mob);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -332,7 +332,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.mob, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -346,7 +346,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.mob);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -358,7 +358,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
     void preventsEnvironmentalEntityDamage() {
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.environment, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -369,7 +369,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.blockProjectileSource);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
     }
@@ -382,7 +382,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
 
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(this.environment, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -396,7 +396,7 @@ public class TPPEntityDamageListenerEntityDamageByEntityTest {
         Projectile arrow = getMockProjectile(this.blockProjectileSource);
         EntityDamageByEntityEvent entityDamageByEntityEvent = getEntityDamageByEntityEvent(arrow, this.horse);
 
-        this.entityDamageListener.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
+        this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
     }

@@ -17,10 +17,10 @@ import org.spigotmc.event.entity.EntityMountEvent;
 
 import java.sql.SQLException;
 
-public class EntityTamedListener implements Listener {
+public class ListenerEntityTamed implements Listener {
     private final TPPets thisPlugin;
 
-    public EntityTamedListener(TPPets thisPlugin) {
+    public ListenerEntityTamed(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

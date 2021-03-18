@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.ChunkUnloadPetPositionUpdater;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerPetPosition;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Chunk;
@@ -22,14 +22,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class TPPChunkUnloadPetPositionUpdaterTest {
+public class TPPListenerPetPositionTest {
     private Chunk chunk;
     private Entity[] entities;
     private TPPets tpPets;
     private DBWrapper dbWrapper;
     private ArgumentCaptor<Entity> entityCaptor;
     private ChunkUnloadEvent chunkUnloadEvent;
-    private ChunkUnloadPetPositionUpdater chunkUnloadPetPositionUpdater;
+    private ListenerPetPosition listenerPetPosition;
 
     @BeforeEach
     public void beforeEach() {
@@ -45,7 +45,7 @@ public class TPPChunkUnloadPetPositionUpdaterTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, true, false, true);
 
-        this.chunkUnloadPetPositionUpdater = new ChunkUnloadPetPositionUpdater(this.tpPets);
+        this.listenerPetPosition = new ListenerPetPosition(this.tpPets);
         this.chunkUnloadEvent = mock(ChunkUnloadEvent.class);
 
         when(this.chunk.getEntities()).thenReturn(this.entities);
@@ -55,7 +55,7 @@ public class TPPChunkUnloadPetPositionUpdaterTest {
     @Test
     @DisplayName("Registers pet positions in the database on chunk unload events")
     void listsSpecificLostAndFoundRegions() {
-        this.chunkUnloadPetPositionUpdater.onChunkUnload(this.chunkUnloadEvent);
+        this.listenerPetPosition.onChunkUnload(this.chunkUnloadEvent);
 
         verify(this.dbWrapper, times(2)).updateOrInsertPet(this.entityCaptor.capture());
         List<Entity> entitiesUpdated = this.entityCaptor.getAllValues();

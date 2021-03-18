@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsManager;
-import com.maxwellwheeler.plugins.tppets.listeners.PlayerInteractPetRelease;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerPlayerInteractPetRelease;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-public class TPPPlayerInteractPetReleaseTest {
+public class TPPListenerPlayerInteractPetReleaseTest {
     private PlayerInteractEntityEvent playerInteractEntityEvent;
-    private PlayerInteractPetRelease playerInteractPetRelease;
+    private ListenerPlayerInteractPetRelease listenerPlayerInteractPetRelease;
     private Horse horse;
     private Player player;
     private ToolsManager toolsManager;
@@ -40,7 +40,7 @@ public class TPPPlayerInteractPetReleaseTest {
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.player);
 
         EquipmentSlot playerHand = EquipmentSlot.HAND;
-        this.playerInteractPetRelease = new PlayerInteractPetRelease(tpPets);
+        this.listenerPlayerInteractPetRelease = new ListenerPlayerInteractPetRelease(tpPets);
 
         PlayerInventory playerInventory = mock(PlayerInventory.class);
         ItemStack itemStack = mock(ItemStack.class);
@@ -60,7 +60,7 @@ public class TPPPlayerInteractPetReleaseTest {
     @Test
     @DisplayName("Releases pet")
     void releasesPet() {
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).deletePet(this.horse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
@@ -77,7 +77,7 @@ public class TPPPlayerInteractPetReleaseTest {
         when(this.horse.getOwner()).thenReturn(offlinePlayer);
         when(this.player.hasPermission("tppets.untameother")).thenReturn(true);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).deletePet(this.horse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
@@ -94,7 +94,7 @@ public class TPPPlayerInteractPetReleaseTest {
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(wolf);
         when(this.dbWrapper.deletePet(wolf)).thenReturn(true);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).deletePet(wolf);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
@@ -112,7 +112,7 @@ public class TPPPlayerInteractPetReleaseTest {
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(skeletonHorse);
         when(this.dbWrapper.deletePet(skeletonHorse)).thenReturn(true);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).deletePet(skeletonHorse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
@@ -129,7 +129,7 @@ public class TPPPlayerInteractPetReleaseTest {
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(zombieHorse);
         when(this.dbWrapper.deletePet(zombieHorse)).thenReturn(true);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).deletePet(zombieHorse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
@@ -144,7 +144,7 @@ public class TPPPlayerInteractPetReleaseTest {
     void doesNotAttemptToReleaseWhenClickingWithOffhand() {
         when(this.playerInteractEntityEvent.getHand()).thenReturn(EquipmentSlot.OFF_HAND);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).deletePet(any());
         verify(this.player, never()).sendMessage(anyString());
@@ -159,7 +159,7 @@ public class TPPPlayerInteractPetReleaseTest {
     void doesNotAttemptToReleaseWhenNotSneaking() {
         when(this.player.isSneaking()).thenReturn(false);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).deletePet(any());
         verify(this.player, never()).sendMessage(anyString());
@@ -174,7 +174,7 @@ public class TPPPlayerInteractPetReleaseTest {
     void doesNotAttemptToReleaseInvalidMaterial() {
         when(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS)).thenReturn(false);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).deletePet(any());
         verify(this.player, never()).sendMessage(anyString());
@@ -190,7 +190,7 @@ public class TPPPlayerInteractPetReleaseTest {
         Villager villager = MockFactory.getMockEntity("MockVillagerId", Villager.class);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(villager);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).deletePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
@@ -205,7 +205,7 @@ public class TPPPlayerInteractPetReleaseTest {
     void displaysNoOwnerNotOwned() {
         when(this.horse.isTamed()).thenReturn(false);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).deletePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
@@ -220,7 +220,7 @@ public class TPPPlayerInteractPetReleaseTest {
     void displaysNoOwnerNoOwner() {
         when(this.horse.getOwner()).thenReturn(null);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).deletePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
@@ -236,7 +236,7 @@ public class TPPPlayerInteractPetReleaseTest {
         OfflinePlayer offlinePlayer = mock(OfflinePlayer.class);
         when(this.horse.getOwner()).thenReturn(offlinePlayer);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, never()).deletePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
@@ -251,7 +251,7 @@ public class TPPPlayerInteractPetReleaseTest {
     void displaysDbFailWhenDbFails() {
         when(this.dbWrapper.deletePet(this.horse)).thenReturn(false);
 
-        this.playerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.dbWrapper, times(1)).deletePet(this.horse);
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not release pet");

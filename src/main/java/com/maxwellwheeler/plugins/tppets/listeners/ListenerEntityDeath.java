@@ -7,12 +7,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-public class EntityDeathListener implements Listener {
+public class ListenerEntityDeath implements Listener {
     // TODO: Can database ever be null?
     // TODO: Log database errors to console?
     private final TPPets thisPlugin;
 
-    public EntityDeathListener(TPPets thisPlugin) {
+    public ListenerEntityDeath(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

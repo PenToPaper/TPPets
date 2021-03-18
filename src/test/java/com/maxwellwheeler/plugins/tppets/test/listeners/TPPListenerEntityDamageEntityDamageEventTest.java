@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.MobDamageManager;
-import com.maxwellwheeler.plugins.tppets.listeners.EntityDamageListener;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityDamage;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.entity.Entity;
@@ -19,9 +19,9 @@ import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 
-public class TPPEntityDamageListenerEntityDamageTest {
+public class TPPListenerEntityDamageEntityDamageEventTest {
     private Horse horse;
-    private EntityDamageListener entityDamageListener;
+    private ListenerEntityDamage listenerEntityDamage;
     private TPPets tpPets;
 
     @BeforeEach
@@ -33,7 +33,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(dbWrapper, logWrapper, false, false, false);
 
-        this.entityDamageListener = new EntityDamageListener(this.tpPets);
+        this.listenerEntityDamage = new ListenerEntityDamage(this.tpPets);
 
         MobDamageManager mobDamageManager = new MobDamageManager(this.tpPets, Arrays.asList("OwnerDamage", "GuestDamage", "StrangerDamage", "EnvironmentalDamage", "MobDamage"));
         when(this.tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);
@@ -52,7 +52,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsBlockExplosionType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.BLOCK_EXPLOSION, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -65,7 +65,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.BLOCK_EXPLOSION, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -75,7 +75,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsContactType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.CONTACT, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -88,7 +88,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.CONTACT, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -98,7 +98,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsCrammingType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.CRAMMING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -111,7 +111,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.CRAMMING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -121,7 +121,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsCustomType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.CUSTOM, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -134,7 +134,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.CUSTOM, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -144,7 +144,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsDragonBreathType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.DRAGON_BREATH, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -157,7 +157,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.DRAGON_BREATH, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -167,7 +167,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsDrowningType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.DROWNING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -180,7 +180,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.DROWNING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -190,7 +190,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsDryoutType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.DRYOUT, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -203,7 +203,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.DRYOUT, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -213,7 +213,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsFallType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FALL, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -226,7 +226,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FALL, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -236,7 +236,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsFallingBlockType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FALLING_BLOCK, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -249,7 +249,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FALLING_BLOCK, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -259,7 +259,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsFireType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FIRE, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -272,7 +272,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FIRE, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -282,7 +282,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsFireTickType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FIRE_TICK, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -295,7 +295,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FIRE_TICK, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -305,7 +305,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsFlyIntoWallType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FLY_INTO_WALL, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -318,7 +318,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.FLY_INTO_WALL, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -328,7 +328,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsHotFloorType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.HOT_FLOOR, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -341,7 +341,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.HOT_FLOOR, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -351,7 +351,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsLavaType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.LAVA, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -364,7 +364,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.LAVA, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -374,7 +374,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsLightningType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.LIGHTNING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -387,7 +387,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.LIGHTNING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -397,7 +397,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsMeltingType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.MELTING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -410,7 +410,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.MELTING, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -420,7 +420,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsPoisonType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.POISON, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -433,7 +433,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.POISON, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -443,7 +443,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsStarvationType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.STARVATION, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -456,7 +456,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.STARVATION, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -466,7 +466,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsSuffocationType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.SUFFOCATION, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -479,7 +479,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.SUFFOCATION, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -489,7 +489,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsThornsType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.THORNS, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -502,7 +502,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.THORNS, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -512,7 +512,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void preventsWitherType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.WITHER, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, times(1)).setCancelled(true);
     }
@@ -525,7 +525,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
 
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.WITHER, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -535,7 +535,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void doesntPreventEntityAttackType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.ENTITY_ATTACK, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -545,7 +545,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void doesntPreventEntityExplosionType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.ENTITY_EXPLOSION, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -555,7 +555,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void doesntPreventEntitySweepAttackType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -565,7 +565,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void doesntPreventMagicType() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.MAGIC, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -575,7 +575,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void doesntPreventProjectile() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.PROJECTILE, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -585,7 +585,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void doesntPreventSuicide() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.SUICIDE, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }
@@ -595,7 +595,7 @@ public class TPPEntityDamageListenerEntityDamageTest {
     void doesntPreventVoid() {
         EntityDamageEvent entityDamageEvent = getEntityDamageEvent(EntityDamageEvent.DamageCause.VOID, this.horse);
 
-        this.entityDamageListener.onEntityDamageEvent(entityDamageEvent);
+        this.listenerEntityDamage.onEntityDamageEvent(entityDamageEvent);
 
         verify(entityDamageEvent, never()).setCancelled(anyBoolean());
     }

@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.ProtectedRegionScanner;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
@@ -20,14 +20,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
+public class TPPListenerProtectedRegionEntityTeleportIntoPrTest {
     private ProtectedRegion protectedRegion;
     private Player player;
     private Wolf wolf;
     private Location teleportingTo;
     private TPPets tpPets;
     private EntityTeleportEvent entityTeleportEvent;
-    private ProtectedRegionScanner protectedRegionScanner;
+    private ListenerProtectedRegion listenerProtectedRegion;
 
     @BeforeEach
     public void beforeEach() {
@@ -40,7 +40,7 @@ public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(dbWrapper, logWrapper, false, false, false);
         this.entityTeleportEvent = mock(EntityTeleportEvent.class);
-        this.protectedRegionScanner = new ProtectedRegionScanner(this.tpPets);
+        this.listenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);
 
         when(this.entityTeleportEvent.getEntity()).thenReturn(this.wolf);
         when(this.entityTeleportEvent.getTo()).thenReturn(this.teleportingTo);
@@ -52,7 +52,7 @@ public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
     @Test
     @DisplayName("Cancels teleport when moving into PR and owner doesn't have permission")
     void cancelsTeleport() {
-        this.protectedRegionScanner.entityTeleportIntoPr(this.entityTeleportEvent);
+        this.listenerProtectedRegion.entityTeleportIntoPr(this.entityTeleportEvent);
 
         verify(this.wolf, times(1)).setSitting(true);
         verify(this.entityTeleportEvent, times(1)).setCancelled(true);
@@ -64,7 +64,7 @@ public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
         Villager villager = MockFactory.getMockEntity("MockVillagerId", org.bukkit.entity.Villager.class);
         when(this.entityTeleportEvent.getEntity()).thenReturn(villager);
 
-        this.protectedRegionScanner.entityTeleportIntoPr(this.entityTeleportEvent);
+        this.listenerProtectedRegion.entityTeleportIntoPr(this.entityTeleportEvent);
 
         verify(this.entityTeleportEvent, never()).setCancelled(anyBoolean());
     }
@@ -74,7 +74,7 @@ public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
     void cannotCancelTeleportWhenPetNotGoingToPr() {
         when(this.tpPets.getProtectedRegionWithin(this.teleportingTo)).thenReturn(null);
 
-        this.protectedRegionScanner.entityTeleportIntoPr(this.entityTeleportEvent);
+        this.listenerProtectedRegion.entityTeleportIntoPr(this.entityTeleportEvent);
 
         verify(this.wolf, never()).setSitting(anyBoolean());
         verify(this.entityTeleportEvent, never()).setCancelled(anyBoolean());
@@ -85,7 +85,7 @@ public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
     void cannotCancelTeleportWhenPetNotGoingToValidPr() {
         when(this.protectedRegion.getWorld()).thenReturn(null);
 
-        this.protectedRegionScanner.entityTeleportIntoPr(this.entityTeleportEvent);
+        this.listenerProtectedRegion.entityTeleportIntoPr(this.entityTeleportEvent);
 
         verify(this.wolf, never()).setSitting(anyBoolean());
         verify(this.entityTeleportEvent, never()).setCancelled(anyBoolean());
@@ -96,7 +96,7 @@ public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
     void cannotCancelTeleportWhenOnlineOwnerHasPermission() {
         when(this.player.hasPermission("tppets.tpanywhere")).thenReturn(true);
 
-        this.protectedRegionScanner.entityTeleportIntoPr(this.entityTeleportEvent);
+        this.listenerProtectedRegion.entityTeleportIntoPr(this.entityTeleportEvent);
 
         verify(this.wolf, never()).setSitting(anyBoolean());
         verify(this.entityTeleportEvent, never()).setCancelled(anyBoolean());
@@ -112,7 +112,7 @@ public class TPPProtectedRegionScannerEntityTeleportIntoPrTest {
         when(this.tpPets.getPerms()).thenReturn(permission);
         when(permission.playerHas("MockWorldName", offlinePlayer, "tppets.tpanywhere")).thenReturn(true);
 
-        this.protectedRegionScanner.entityTeleportIntoPr(this.entityTeleportEvent);
+        this.listenerProtectedRegion.entityTeleportIntoPr(this.entityTeleportEvent);
 
         verify(this.wolf, never()).setSitting(anyBoolean());
         verify(this.entityTeleportEvent, never()).setCancelled(anyBoolean());

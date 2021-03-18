@@ -10,10 +10,10 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 // Can re-implement logging of damage prevented if people want it, but seems excessive for now
-public class EntityDamageListener implements Listener {
+public class ListenerEntityDamage implements Listener {
     private final TPPets thisPlugin;
 
-    public EntityDamageListener(TPPets thisPlugin) {
+    public ListenerEntityDamage(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 

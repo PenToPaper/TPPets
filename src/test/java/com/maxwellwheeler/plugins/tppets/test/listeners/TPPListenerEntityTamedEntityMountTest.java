@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.listeners.EntityTamedListener;
+import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityTamed;
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
@@ -18,10 +18,10 @@ import java.sql.SQLException;
 
 import static org.mockito.Mockito.*;
 
-public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
+public class TPPListenerEntityTamedEntityMountTest {
     private Player player;
     private SkeletonHorse skeletonHorse;
-    private EntityTamedListener entityTamedListener;
+    private ListenerEntityTamed listenerEntityTamed;
     private DBWrapper dbWrapper;
 
     @BeforeEach
@@ -39,7 +39,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
         when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(0);
         when(this.dbWrapper.insertPet(this.skeletonHorse, "MockPlayerId")).thenReturn("MockHorseName");
 
-        this.entityTamedListener = new EntityTamedListener(tpPets);
+        this.listenerEntityTamed = new ListenerEntityTamed(tpPets);
     }
 
     private EntityMountEvent getEntityMountEvent(Entity mounting, Entity mount) {
@@ -55,7 +55,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
     void allowsSkeletonHorseTaming() throws SQLException {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
         verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -72,7 +72,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
         when(this.dbWrapper.insertPet(zombieHorse, "MockPlayerId")).thenReturn("MockHorseName");
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, zombieHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
         verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -88,7 +88,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
         when(entityMountEvent.isCancelled()).thenReturn(true);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, never()).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -105,7 +105,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
         Villager villager = MockFactory.getMockEntity("MockVillagerId", org.bukkit.entity.Villager.class);
         EntityMountEvent entityMountEvent = getEntityMountEvent(villager, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, never()).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -122,7 +122,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
         Horse horse = MockFactory.getMockEntity("MockHorseId", org.bukkit.entity.Horse.class);
         EntityMountEvent entityMountEvent = getEntityMountEvent(horse, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, never()).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -141,7 +141,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, never()).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -160,7 +160,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, never()).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -180,7 +180,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, never()).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -197,7 +197,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -215,7 +215,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
         verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -233,7 +233,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
         verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -251,7 +251,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
         verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
@@ -269,7 +269,7 @@ public class TPPEntityTamedListenerEntityMountTameSpecialHorseTest {
 
         EntityMountEvent entityMountEvent = getEntityMountEvent(this.player, this.skeletonHorse);
 
-        this.entityTamedListener.entityMountTameSpecialHorse(entityMountEvent);
+        this.listenerEntityTamed.entityMountTameSpecialHorse(entityMountEvent);
 
         verify(this.dbWrapper, times(1)).getNumPets(anyString());
         verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
