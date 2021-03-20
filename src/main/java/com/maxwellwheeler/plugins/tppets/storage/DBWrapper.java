@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,8 +25,8 @@ import java.util.List;
  *
  */
 public class DBWrapper {
-    private DBFrame database;
-    private TPPets thisPlugin;
+    private final DBFrame database;
+    private final TPPets thisPlugin;
 
 
     /**
@@ -38,7 +39,7 @@ public class DBWrapper {
      * @param thisPlugin A reference to the TPPets plugin instance
      */
     public DBWrapper(String host, int port, String dbName, String dbUsername, String dbPassword, TPPets thisPlugin) {
-        database = new MySQLFrame(host, port, dbName, dbUsername, dbPassword, thisPlugin);
+        this.database = new MySQLFrame(host, port, dbName, dbUsername, dbPassword, thisPlugin);
         this.thisPlugin = thisPlugin;
     }
     
@@ -49,7 +50,7 @@ public class DBWrapper {
      * @param thisPlugin A reference to the TPPets plugin instance.
      */
     public DBWrapper(String dbPath, String dbName, TPPets thisPlugin) {
-        database = new SQLiteFrame(dbPath, dbName, thisPlugin);
+        this.database = new SQLiteFrame(dbPath, dbName, thisPlugin);
         this.thisPlugin = thisPlugin;
     }
     
@@ -57,7 +58,7 @@ public class DBWrapper {
      * Creates all needed tables if they don't exist.
      * @return True if successful, false if not.
      */
-    public boolean initializeTables() {
+    public boolean initializeTables() throws SQLException {
         String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
                 "pet_id CHAR(32),\n" +
                 "user_id CHAR(32),\n" +
@@ -132,21 +133,20 @@ public class DBWrapper {
      * @param petName The pet name to check
      * @return True if it's unique, false if it's not
      */
-    public boolean isNameUnique(String ownerUUID, String petName) {
+    public boolean isNameUnique(String ownerUUID, String petName) throws SQLException {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
-        Connection dbConn = database.getConnection();
-        if (dbConn != null) {
-            String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
-            ResultSet rs = database.selectPrepStatement(dbConn, selectIsNameUnique, trimmedOwnerUUID, petName.toLowerCase());
-            try {
-                boolean ret = rs.next();
-                dbConn.close();
-                return !ret;
-            } catch (SQLException e) {
-                thisPlugin.getLogWrapper().logErrors("SQL Exception checking if pet name is unique: " + e.getMessage());
-            }
+        String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
+
+        try (Connection dbConn = this.database.getConnection();
+             PreparedStatement selectStatement = this.database.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedOwnerUUID, petName);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            return resultSet.next();
+
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("SQL Exception checking if pet name is unique: " + exception.getMessage());
+            throw exception;
+
         }
-        return false;
     }
 
     /**
