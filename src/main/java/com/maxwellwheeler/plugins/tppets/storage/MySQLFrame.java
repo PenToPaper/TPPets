@@ -11,7 +11,7 @@ import java.sql.SQLException;
  * @author GatheringExp
  *
  */
-public class MySQLFrame extends DBGeneral {
+public class MySQLFrame extends DBFrame {
     private final String host;
     private final int port;
     private final String dbName;
@@ -37,14 +37,15 @@ public class MySQLFrame extends DBGeneral {
     }
     
     @Override
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
         try {
             if (host != null && port >= 0 && port <= 65535 && dbName != null && dbUsername != null && dbPassword != null) {
                 return DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + dbName + "?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false", dbUsername, dbPassword);
             }
-        } catch (SQLException e) {
-            thisPlugin.getLogWrapper().logErrors("Can't connect to MySQL database:" + e.getMessage());
+            throw new SQLException("Invalid database credentials");
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't connect to MySQL database:" + exception.getMessage());
+            throw exception;
         }
-        return null;
     }
 }

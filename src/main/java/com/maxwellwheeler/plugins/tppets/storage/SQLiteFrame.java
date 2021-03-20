@@ -12,7 +12,7 @@ import java.sql.SQLException;
  * @author GatheringExp
  *
  */
-public class SQLiteFrame extends DBGeneral {
+public class SQLiteFrame extends DBFrame {
     private final String dbPath;
     private final String dbName;
     private File dbDir;
@@ -29,27 +29,39 @@ public class SQLiteFrame extends DBGeneral {
         this.dbName = dbName;
         this.thisPlugin = thisPlugin;
     }
+
+    private void makeDatabaseDirectory() throws SQLException {
+        File dbDir = new File(this.dbPath);
+        SQLException exception = new SQLException("Could not access database directory");
+        try {
+            if (!dbDir.exists() && !dbDir.mkdir()) {
+                throw exception;
+            }
+        } catch (SecurityException ignored) {
+            throw exception;
+        }
+
+    }
     
     @Override
-    public Connection getConnection() {
-        File dbDir = new File(dbPath);
-        if (!dbDir.exists()) {
-            try {
-                dbDir.mkdir();
-            } catch (SecurityException e) {
-                thisPlugin.getLogWrapper().logErrors("Security Exception creating database" + e.getMessage());
-            }
-        }
+    public Connection getConnection() throws SQLException {
         try {
+            if (this.dbPath == null || this.dbName == null) {
+                throw new SQLException("Invalid database path");
+            }
+
+            makeDatabaseDirectory();
+
             return DriverManager.getConnection(getJDBCPath());
-        } catch (SQLException e) {
-            thisPlugin.getLogWrapper().logErrors("SQL Exception creating database" + e.getMessage());
+
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't connect to SQLite database:" + exception.getMessage());
+            throw exception;
         }
-        return null;
     }
 
     private String getJDBCPath() {
-        return "jdbc:sqlite:" + dbPath + File.separator + dbName + ".db";
+        return "jdbc:sqlite:" + this.dbPath + File.separator + this.dbName + ".db";
     }
 
 }
