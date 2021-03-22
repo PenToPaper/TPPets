@@ -200,6 +200,12 @@ public abstract class SQLWrapper {
         return this.updatePrepStatement(updatePetLocation, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedPetId, trimmedOwnerId);
     }
 
+    public boolean renamePet(@NotNull String ownerUUID, @NotNull String oldName, @NotNull String newName) throws SQLException {
+        String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE owner_id = ? AND effective_pet_name = ?";
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerUUID);
+        return this.updatePrepStatement(updatePetName, newName, newName.toLowerCase(), trimmedOwnerId, oldName.toLowerCase());
+    }
+
     public List<PetStorage> getAllPetsFromOwner(@NotNull String ownerUUID) throws SQLException {
         String trimmedUUID = UUIDUtils.trimUUID(ownerUUID);
         String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
