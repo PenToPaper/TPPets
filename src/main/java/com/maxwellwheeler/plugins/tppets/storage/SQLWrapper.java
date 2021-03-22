@@ -4,11 +4,13 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.sun.istack.internal.NotNull;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Tameable;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public abstract class SQLWrapper {
     protected final TPPets thisPlugin;
@@ -181,7 +183,21 @@ public abstract class SQLWrapper {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(entity));
 
-        return this.insertPrepStatement(insertPet, trimmedPetId, petTypeIndex, entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ(), entity.getWorld(), trimmedOwnerId, petName, petName.toLowerCase());
+        return this.insertPrepStatement(insertPet, trimmedPetId, petTypeIndex, entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ(), entity.getWorld().getName(), trimmedOwnerId, petName, petName.toLowerCase());
+    }
+
+    public boolean updatePetLocation(@NotNull Entity entity) throws SQLException {
+        if (!PetType.isPetTracked(entity)) {
+            return false;
+        }
+
+        String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
+
+        Tameable pet = (Tameable) entity;
+        String trimmedPetId = UUIDUtils.trimUUID(entity.getUniqueId());
+        String trimmedOwnerId = UUIDUtils.trimUUID(Objects.requireNonNull(pet.getOwner()).getUniqueId());
+
+        return this.updatePrepStatement(updatePetLocation, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedPetId, trimmedOwnerId);
     }
 
     public List<PetStorage> getAllPetsFromOwner(@NotNull String ownerUUID) throws SQLException {
