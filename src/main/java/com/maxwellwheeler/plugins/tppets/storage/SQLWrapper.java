@@ -146,12 +146,12 @@ public abstract class SQLWrapper {
                 && this.thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
 
-    public boolean isNameUnique(@NotNull String ownerUUID, @NotNull String petName) throws SQLException {
-        String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
+    public boolean isNameUnique(@NotNull String ownerId, @NotNull String petName) throws SQLException {
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
 
         try (Connection dbConn = this.getConnection();
-             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedOwnerUUID, petName);
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedownerId, petName);
              ResultSet resultSet = selectStatement.executeQuery()) {
             return resultSet.next();
         } catch (SQLException exception) {
@@ -160,14 +160,14 @@ public abstract class SQLWrapper {
         }
     }
 
-    public String generateUniquePetName(@NotNull String ownerUUID, PetType.Pets petType) throws SQLException {
-        List<PetStorage> currentPetsList = this.getAllPetsFromOwner(ownerUUID);
+    public String generateUniquePetName(@NotNull String ownerId, PetType.Pets petType) throws SQLException {
+        List<PetStorage> currentPetsList = this.getAllPetsFromOwner(ownerId);
         int lastIndexChecked = currentPetsList.size();
         String ret;
 
         do {
             ret = petType.toString() + lastIndexChecked++;
-        } while (!this.isNameUnique(ownerUUID, ret));
+        } while (!this.isNameUnique(ownerId, ret));
 
         return ret;
     }
@@ -200,14 +200,28 @@ public abstract class SQLWrapper {
         return this.updatePrepStatement(updatePetLocation, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedPetId, trimmedOwnerId);
     }
 
-    public boolean renamePet(@NotNull String ownerUUID, @NotNull String oldName, @NotNull String newName) throws SQLException {
+    public boolean renamePet(@NotNull String ownerId, @NotNull String oldName, @NotNull String newName) throws SQLException {
         String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE owner_id = ? AND effective_pet_name = ?";
-        String trimmedOwnerId = UUIDUtils.trimUUID(ownerUUID);
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         return this.updatePrepStatement(updatePetName, newName, newName.toLowerCase(), trimmedOwnerId, oldName.toLowerCase());
     }
+    
+    public List<PetStorage> getSpecificPet(@NotNull String ownerId, @NotNull String petName) throws SQLException {
+        String selectSpecificPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        try (Connection dbConn = this.getConnection();
+            PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectSpecificPet), trimmedOwnerId, petName);
+            ResultSet resultSet = selectStatement.executeQuery()) {
+            List<PetStorage> ret = new ArrayList<>();
+            while (resultSet.next()) {
+                ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
+            }
+            return ret;
+        }
+    }
 
-    public List<PetStorage> getAllPetsFromOwner(@NotNull String ownerUUID) throws SQLException {
-        String trimmedUUID = UUIDUtils.trimUUID(ownerUUID);
+    public List<PetStorage> getAllPetsFromOwner(@NotNull String ownerId) throws SQLException {
+        String trimmedUUID = UUIDUtils.trimUUID(ownerId);
         String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
         try (Connection dbConn = this.getConnection();
              PreparedStatement prepStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsFromOwner), trimmedUUID);
