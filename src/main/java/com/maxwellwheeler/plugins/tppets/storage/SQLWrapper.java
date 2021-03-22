@@ -2,8 +2,13 @@ package com.maxwellwheeler.plugins.tppets.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import com.sun.istack.internal.NotNull;
+import org.bukkit.entity.Entity;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public abstract class SQLWrapper {
     protected final TPPets thisPlugin;
@@ -139,7 +144,7 @@ public abstract class SQLWrapper {
                 && this.thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
 
-    public boolean isNameUnique(String ownerUUID, String petName) throws SQLException {
+    public boolean isNameUnique(@NotNull String ownerUUID, @NotNull String petName) throws SQLException {
         String trimmedOwnerUUID = UUIDUtils.trimUUID(ownerUUID);
         String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
 
@@ -147,11 +152,49 @@ public abstract class SQLWrapper {
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedOwnerUUID, petName);
              ResultSet resultSet = selectStatement.executeQuery()) {
             return resultSet.next();
-
         } catch (SQLException exception) {
             this.thisPlugin.getLogWrapper().logErrors("SQL Exception checking if pet name is unique: " + exception.getMessage());
             throw exception;
+        }
+    }
 
+    public String generateUniquePetName(@NotNull String ownerUUID, PetType.Pets petType) throws SQLException {
+        List<PetStorage> currentPetsList = this.getAllPetsFromOwner(ownerUUID);
+        int lastIndexChecked = currentPetsList.size();
+        String ret;
+
+        do {
+            ret = petType.toString() + lastIndexChecked++;
+        } while (!this.isNameUnique(ownerUUID, ret));
+
+        return ret;
+    }
+
+    public boolean insertPet(@NotNull Entity entity, @NotNull String ownerId, @NotNull String petName) throws SQLException {
+        if (!PetType.isPetTypeTracked(entity) || !this.isNameUnique(ownerId, petName)) {
+            return false;
+        }
+
+        String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name, effective_pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        String trimmedPetId = UUIDUtils.trimUUID(entity.getUniqueId());
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(entity));
+
+        return this.insertPrepStatement(insertPet, trimmedPetId, petTypeIndex, entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ(), entity.getWorld(), trimmedOwnerId, petName, petName.toLowerCase());
+    }
+
+    public List<PetStorage> getAllPetsFromOwner(@NotNull String ownerUUID) throws SQLException {
+        String trimmedUUID = UUIDUtils.trimUUID(ownerUUID);
+        String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement prepStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsFromOwner), trimmedUUID);
+             ResultSet resultSet = prepStatement.executeQuery()) {
+            List<PetStorage> ret = new ArrayList<>();
+            while (resultSet.next()) {
+                ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
+            }
+            return ret;
         }
     }
 }
