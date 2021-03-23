@@ -79,7 +79,7 @@ public abstract class SQLWrapper {
         }
     }
 
-    // Public methods
+    // Initializers
 
     public boolean initializeTables() throws SQLException {
         String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
@@ -145,6 +145,8 @@ public abstract class SQLWrapper {
                 && this.createStatement(makeTableDefaultStorageLocations)
                 && this.thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
+
+    // Pet actions
 
     public boolean isNameUnique(@NotNull String ownerId, @NotNull String petName) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
@@ -232,5 +234,13 @@ public abstract class SQLWrapper {
             }
             return ret;
         }
+    }
+
+    // Allowed players
+    public boolean insertAllowedPlayer(@NotNull String petId, @NotNull String playerId) throws SQLException {
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        String trimmedPlayerId = UUIDUtils.trimUUID(playerId);
+        String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
+        return this.insertPrepStatement(insertAllowedPlayer, trimmedPetId, trimmedPlayerId);
     }
 }
