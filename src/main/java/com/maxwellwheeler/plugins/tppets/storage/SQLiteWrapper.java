@@ -12,10 +12,9 @@ import java.sql.SQLException;
  * @author GatheringExp
  *
  */
-public class SQLiteFrame extends DBFrame {
+public class SQLiteWrapper extends SQLWrapper {
     private final String dbPath;
     private final String dbName;
-    private File dbDir;
 
     /**
      * The initializer storing all the data needed for the SQLite connection.
@@ -23,11 +22,10 @@ public class SQLiteFrame extends DBFrame {
      * @param dbName The name of the database file itself, without the file extension.
      * @param thisPlugin A reference to the TPPets plugin instance.
      */
-    public SQLiteFrame(String dbPath, String dbName, TPPets thisPlugin) {
+    public SQLiteWrapper(String dbPath, String dbName, TPPets thisPlugin) {
         super(thisPlugin);
         this.dbPath = dbPath;
         this.dbName = dbName;
-        this.thisPlugin = thisPlugin;
     }
 
     private void makeDatabaseDirectory() throws SQLException {
