@@ -325,4 +325,17 @@ public abstract class SQLWrapper {
             return null;
         }
     }
+
+    public Hashtable<String, ProtectedRegion> getProtectedRegions() throws SQLException {
+        String selectProtectedRegions = "SELECT * FROM tpp_protected_regions";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectProtectedRegions));
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            Hashtable<String, ProtectedRegion> ret = new Hashtable<>();
+            while (resultSet.next()) {
+                ret.put(resultSet.getString("zone_name"), new ProtectedRegion(resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getString("lf_zone_name"), this.thisPlugin));
+            }
+            return ret;
+        }
+    }
 }
