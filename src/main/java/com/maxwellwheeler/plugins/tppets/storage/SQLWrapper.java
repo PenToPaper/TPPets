@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.sun.istack.internal.NotNull;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
@@ -264,5 +265,12 @@ public abstract class SQLWrapper {
         String trimmedPlayerId = UUIDUtils.trimUUID(playerId);
         String deleteAllowedPlayer = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
         return this.deletePrepStatement(deleteAllowedPlayer, trimmedPetId, trimmedPlayerId);
+    }
+
+    // Lost regions
+
+    public boolean insertLostRegion(LostAndFoundRegion lostAndFoundRegion) throws SQLException {
+        String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        return this.insertPrepStatement(insertLost, lostAndFoundRegion.getRegionName(), lostAndFoundRegion.getMinLoc().getBlockX(), lostAndFoundRegion.getMinLoc().getBlockY(), lostAndFoundRegion.getMinLoc().getBlockZ(), lostAndFoundRegion.getMaxLoc().getBlockX(), lostAndFoundRegion.getMaxLoc().getBlockY(), lostAndFoundRegion.getMaxLoc().getBlockZ(), lostAndFoundRegion.getWorldName());
     }
 }
