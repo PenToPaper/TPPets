@@ -269,6 +269,19 @@ public abstract class SQLWrapper {
         }
     }
 
+    public int getNumPets(String ownerId) throws SQLException {
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getNumPets), trimmedOwnerId);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            if (resultSet.next()) {
+                return resultSet.getInt("count");
+            }
+            throw new SQLException("Could not select count");
+        }
+    }
+
     // Allowed players
 
     public boolean insertAllowedPlayer(@NotNull String petId, @NotNull String playerId) throws SQLException {
