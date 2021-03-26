@@ -8,11 +8,15 @@ import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.sun.istack.internal.NotNull;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Objects;
 
 public abstract class SQLWrapper {
     protected final TPPets thisPlugin;
@@ -415,5 +419,10 @@ public abstract class SQLWrapper {
             return this.insertPrepStatement(insertServerStorage, storageName, storageName.toLowerCase(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld().getName());
         }
         return false;
+    }
+
+    public boolean removeServerStorageLocation(@NotNull String storageName, @NotNull World world) throws SQLException {
+        String removeServerStorage = "DELETE FROM tpp_server_storage_locations WHERE effective_storage_name = ? AND world_name = ?";
+        return this.deletePrepStatement(removeServerStorage, storageName.toLowerCase(), world.getName());
     }
 }
