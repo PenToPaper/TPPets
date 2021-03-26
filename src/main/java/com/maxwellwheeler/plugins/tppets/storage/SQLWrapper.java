@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.storage;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.sun.istack.internal.NotNull;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
@@ -286,6 +287,20 @@ public abstract class SQLWrapper {
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
                 return new LostAndFoundRegion(resultSet.getString("zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"));
+            }
+            return null;
+        }
+    }
+
+    // Protected regions
+
+    public ProtectedRegion getProtectedRegion(@NotNull String regionName) throws SQLException {
+        String selectProtectedRegion = "SELECT * FROM tpp_protected_regions WHERE zone_name = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectProtectedRegion), regionName);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            if (resultSet.next()) {
+                return new ProtectedRegion(resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getString("lf_zone_name"), this.thisPlugin);
             }
             return null;
         }
