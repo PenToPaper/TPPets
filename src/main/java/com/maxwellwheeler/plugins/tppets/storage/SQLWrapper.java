@@ -223,11 +223,25 @@ public abstract class SQLWrapper {
     }
 
     public List<PetStorage> getAllPetsFromOwner(@NotNull String ownerId) throws SQLException {
-        String trimmedUUID = UUIDUtils.trimUUID(ownerId);
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
         try (Connection dbConn = this.getConnection();
-             PreparedStatement prepStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsFromOwner), trimmedUUID);
-             ResultSet resultSet = prepStatement.executeQuery()) {
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsFromOwner), trimmedOwnerId);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            List<PetStorage> ret = new ArrayList<>();
+            while (resultSet.next()) {
+                ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
+            }
+            return ret;
+        }
+    }
+
+    public List<PetStorage> getPetFromOwnerWorld(@NotNull String ownerId, @NotNull String worldName) throws SQLException {
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsGeneric), trimmedOwnerId, worldName);
+             ResultSet resultSet = selectStatement.executeQuery()) {
             List<PetStorage> ret = new ArrayList<>();
             while (resultSet.next()) {
                 ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
