@@ -5,6 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.sun.istack.internal.NotNull;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
@@ -356,4 +357,16 @@ public abstract class SQLWrapper {
             return ret;
         }
     }
+
+    // Storage locations
+
+    public boolean addStorageLocation(@NotNull String ownerId, @NotNull String storageName, Location location) throws SQLException {
+        if (location.getWorld() != null) {
+            String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+            String insertStorage = "INSERT INTO tpp_user_storage_locations (user_id, storage_name, effective_storage_name, loc_x, loc_y, loc_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            return this.insertPrepStatement(insertStorage, trimmedOwnerId, storageName, storageName.toLowerCase(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld().getName());
+        }
+        return false;
+    }
+
 }
