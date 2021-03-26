@@ -256,7 +256,7 @@ public abstract class SQLWrapper {
         }
     }
 
-    public int getNumPets(String ownerId, PetType.Pets petType) throws SQLException {
+    public int getNumPetsByPT(String ownerId, PetType.Pets petType) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
         try (Connection dbConn = this.getConnection();
