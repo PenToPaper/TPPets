@@ -439,4 +439,19 @@ public abstract class SQLWrapper {
             return null;
         }
     }
+
+    public List<StorageLocation> getServerStorageLocations(@NotNull World world) throws SQLException {
+        String getServerStorage = "SELECT * FROM tpp_server_storage_locations WHERE world_name = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getServerStorage), world.getName());
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            List<StorageLocation> ret = new ArrayList<>();
+            while (resultSet.next()) {
+                // TODO: Consider refactoring StorageLocation to include constructor that lets us do everything in one line
+                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                ret.add(new StorageLocation(null, resultSet.getString("storage_name"), retLoc));
+            }
+            return ret;
+        }
+    }
 }
