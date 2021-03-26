@@ -6,14 +6,14 @@ import com.maxwellwheeler.plugins.tppets.listeners.*;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
+import com.maxwellwheeler.plugins.tppets.storage.*;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -35,7 +35,7 @@ public class TPPets extends JavaPlugin {
     private final MobDamageManager mobDamageManager = new MobDamageManager(this, getConfig().getStringList("protect_pets_from"));
 
     // Database
-    private DBWrapper database;
+    private SQLWrapper database;
     private DBUpdater databaseUpdater;
 
     // Config
@@ -83,14 +83,10 @@ public class TPPets extends JavaPlugin {
     private void initializeDBC() {
         if (!getConfig().getBoolean("mysql.enable")) {
             // Use SQLite connection
-            database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
+            this.database = new SQLiteWrapper(getDataFolder().getPath(), "tppets", this);
         } else {
             // Use MySQL connection
-            database = new DBWrapper(getConfig().getString("mysql.host"), getConfig().getInt("mysql.port"), getConfig().getString("mysql.database"), getConfig().getString("mysql.username"), getConfig().getString("mysql.password"), this);
-            if (database.getRealDatabase().getConnection() == null) {
-                // Unless MySQL connection fails
-                database = new DBWrapper(getDataFolder().getPath(), "tppets", this);
-            }
+            this.database = new MySQLWrapper(getConfig().getString("mysql.host"), getConfig().getInt("mysql.port"), getConfig().getString("mysql.database"), getConfig().getString("mysql.username"), getConfig().getString("mysql.password"), this);
         }
     }
 
@@ -98,11 +94,11 @@ public class TPPets extends JavaPlugin {
      * Updates the database if it can, otherwise turns database = null, negatively impacting virtually every aspect of this plugin
      */
     private void updateDBC() {
-        databaseUpdater = new DBUpdater(this);
-        databaseUpdater.update(this.getDatabase());
+        this.databaseUpdater = new DBUpdater(this);
+        this.databaseUpdater.update(this.getDatabase());
         if (!databaseUpdater.isUpToDate()) {
-            getLogWrapper().logErrors("Database is unable to be updated");
-            database = null;
+            getLogWrapper().logErrors("Database is unable to be updated. Plugin cannot run.");
+            getServer().getPluginManager().disablePlugin(this);
         }
     }
 
@@ -110,8 +106,14 @@ public class TPPets extends JavaPlugin {
      * Creates the tables if they don't exist, using the DBWrapper
      */
     private void createTables() {
-        if (database != null && !database.initializeTables()) {
-            database = null;
+        try {
+            if (!this.database.initializeTables()) {
+                getLogWrapper().logErrors("Database is unable to be initialized. Plugin cannot run.");
+                getServer().getPluginManager().disablePlugin(this);
+            }
+        } catch (SQLException exception) {
+            getLogWrapper().logErrors("Database is unable to be initialized. Plugin cannot run." + exception.getMessage());
+            getServer().getPluginManager().disablePlugin(this);
         }
     }
 
@@ -157,18 +159,18 @@ public class TPPets extends JavaPlugin {
      * Initializes protected regions in a list
      */
     private void initializeProtectedRegions() {
-        if (database != null) {
-            protectedRegions = database.getProtectedRegions();
-        }
+        try {
+            this.protectedRegions = this.database.getProtectedRegions();
+        } catch (SQLException ignored) {}
     }
     
     /**
      * Initializes protected regions in a list
      */
     private void initializeLostRegions() {
-        if (database != null) {
-            lostRegions = database.getLostRegions();
-        }
+        try {
+            this.lostRegions = this.database.getLostRegions();
+        } catch (SQLException ignored) {}
     }
     
     /**
@@ -197,9 +199,9 @@ public class TPPets extends JavaPlugin {
      * Initializes allowed players {@link Hashtable}
      */
     private void initializeAllowedPlayers() {
-        if (database != null) {
-            allowedPlayers = database.getAllAllowedPlayers();
-        }
+        try {
+            this.allowedPlayers = this.database.getAllAllowedPlayers();
+        } catch (SQLException ignored) {}
     }
     
     @Override
@@ -382,7 +384,7 @@ public class TPPets extends JavaPlugin {
         return regionSelectionManager;
     }
 
-    public DBWrapper getDatabase() {
+    public SQLWrapper getDatabase() {
         return database;
     }
     
