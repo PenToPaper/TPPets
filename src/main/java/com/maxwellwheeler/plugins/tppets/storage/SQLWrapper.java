@@ -425,4 +425,18 @@ public abstract class SQLWrapper {
         String removeServerStorage = "DELETE FROM tpp_server_storage_locations WHERE effective_storage_name = ? AND world_name = ?";
         return this.deletePrepStatement(removeServerStorage, storageName.toLowerCase(), world.getName());
     }
+
+    public StorageLocation getServerStorageLocation(@NotNull String storageName, @NotNull World world) throws SQLException {
+        String getServerStorage = "SELECT * FROM tpp_server_storage_locations WHERE effective_storage_name = ? AND world_name = ? LIMIT 1";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getServerStorage), storageName.toLowerCase(), world.getName());
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            if (resultSet.next()) {
+                // TODO: Consider refactoring StorageLocation to include ServerStorageLocation as a separate class?
+                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                return new StorageLocation("server", resultSet.getString("storage_name"), retLoc);
+            }
+            return null;
+        }
+    }
 }
