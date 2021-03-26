@@ -153,7 +153,7 @@ public abstract class SQLWrapper {
         String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
 
         try (Connection dbConn = this.getConnection();
-             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedownerId, petName);
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedOwnerId, petName.toLowerCase());
              ResultSet resultSet = selectStatement.executeQuery()) {
             return resultSet.next();
         } catch (SQLException exception) {
@@ -212,8 +212,8 @@ public abstract class SQLWrapper {
         String selectSpecificPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         try (Connection dbConn = this.getConnection();
-            PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectSpecificPet), trimmedOwnerId, petName);
-            ResultSet resultSet = selectStatement.executeQuery()) {
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectSpecificPet), trimmedOwnerId, petName.toLowerCase());
+             ResultSet resultSet = selectStatement.executeQuery()) {
             List<PetStorage> ret = new ArrayList<>();
             while (resultSet.next()) {
                 ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
@@ -369,4 +369,9 @@ public abstract class SQLWrapper {
         return false;
     }
 
+    public boolean removeStorageLocation(@NotNull String ownerId, @NotNull String storageName) throws SQLException {
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        String removeStorage = "DELETE FROM tpp_user_storage_locations WHERE user_id = ? AND effective_storage_name = ?";
+        return this.deletePrepStatement(removeStorage, trimmedOwnerId, storageName.toLowerCase());
+    }
 }
