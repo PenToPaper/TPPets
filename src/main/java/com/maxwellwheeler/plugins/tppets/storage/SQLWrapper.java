@@ -4,13 +4,18 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.sun.istack.internal.NotNull;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Objects;
 
 public abstract class SQLWrapper {
     protected final TPPets thisPlugin;
@@ -373,5 +378,20 @@ public abstract class SQLWrapper {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String removeStorage = "DELETE FROM tpp_user_storage_locations WHERE user_id = ? AND effective_storage_name = ?";
         return this.deletePrepStatement(removeStorage, trimmedOwnerId, storageName.toLowerCase());
+    }
+
+    public StorageLocation getStorageLocation(@NotNull String ownerId, @NotNull String storageName) throws SQLException {
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        String getStorageLocation = "SELECT * FROM tpp_user_storage_locations WHERE user_id = ? AND effective_storage_name = ? LIMIT 1";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getStorageLocation), trimmedOwnerId, storageName.toLowerCase());
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            if (resultSet.next()) {
+                // TODO: CONSIDER REFACTORING PROTECTEDREGION CONSTRUCTOR TO BE SIMILAR WHERE YOU HAVE TO SUPPLY THE REFERENCE YOURSELF?
+                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                return new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc);
+            }
+            return null;
+        }
     }
 }
