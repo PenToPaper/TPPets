@@ -265,6 +265,24 @@ public abstract class SQLWrapper {
         return this.deletePrepStatement(deleteAllowedPlayer, trimmedPetId, trimmedPlayerId);
     }
 
+    public Hashtable<String, List<String>> getAllAllowedPlayers() throws SQLException {
+        String selectAllAllowedPlayers = "SELECT * FROM tpp_allowed_players ORDER BY pet_id";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectAllAllowedPlayers));
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            Hashtable<String, List<String>> ret = new Hashtable<>();
+            while (resultSet.next()) {
+                String petId = resultSet.getString("pet_id");
+                String playerId = resultSet.getString("user_id");
+                if (!ret.containsKey(petId)) {
+                    ret.put(petId, new ArrayList<>());
+                }
+                ret.get(petId).add(playerId);
+            }
+            return ret;
+        }
+    }
+
     // Lost regions
 
     public boolean insertLostRegion(@NotNull LostAndFoundRegion lostAndFoundRegion) throws SQLException {
