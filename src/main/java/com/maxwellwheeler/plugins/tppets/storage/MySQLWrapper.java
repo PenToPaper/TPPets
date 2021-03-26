@@ -11,7 +11,7 @@ import java.sql.SQLException;
  * @author GatheringExp
  *
  */
-public class MySQLFrame extends DBFrame {
+public class MySQLWrapper extends SQLWrapper {
     private final String host;
     private final int port;
     private final String dbName;
@@ -27,7 +27,7 @@ public class MySQLFrame extends DBFrame {
      * @param dbPassword The password to use in the connection
      * @param thisPlugin A reference to the TPPets plugin instance
      */
-    public MySQLFrame(String host, int port, String dbName, String dbUsername, String dbPassword, TPPets thisPlugin) {
+    public MySQLWrapper(String host, int port, String dbName, String dbUsername, String dbPassword, TPPets thisPlugin) {
         super(thisPlugin);
         this.host = host;
         this.port = port;
