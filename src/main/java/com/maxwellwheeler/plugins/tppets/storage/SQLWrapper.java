@@ -256,6 +256,19 @@ public abstract class SQLWrapper {
         }
     }
 
+    public int getNumPets(String ownerId, PetType.Pets petType) throws SQLException {
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getNumPets), trimmedOwnerId, petType);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            if (resultSet.next()) {
+                return resultSet.getInt("count");
+            }
+            throw new SQLException("Could not select count");
+        }
+    }
+
     // Allowed players
 
     public boolean insertAllowedPlayer(@NotNull String petId, @NotNull String playerId) throws SQLException {
