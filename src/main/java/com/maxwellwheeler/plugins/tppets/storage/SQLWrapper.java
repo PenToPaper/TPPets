@@ -309,6 +309,11 @@ public abstract class SQLWrapper {
         return this.insertPrepStatement(insertProtectedRegion, protectedRegion.getRegionName(), protectedRegion.getEnterMessage(), protectedRegion.getMinLoc().getBlockX(), protectedRegion.getMinLoc().getBlockY(), protectedRegion.getMinLoc().getBlockZ(), protectedRegion.getMaxLoc().getBlockX(), protectedRegion.getMaxLoc().getBlockY(), protectedRegion.getMaxLoc().getBlockZ(), protectedRegion.getWorldName(), protectedRegion.getLfName());
     }
 
+    public boolean removeProtectedRegion(@NotNull String regionName) throws SQLException {
+        String removeProtectedRegion = "DELETE FROM tpp_protected_regions WHERE zone_name = ?";
+        return this.deletePrepStatement(removeProtectedRegion, regionName);
+    }
+
     public ProtectedRegion getProtectedRegion(@NotNull String regionName) throws SQLException {
         String selectProtectedRegion = "SELECT * FROM tpp_protected_regions WHERE zone_name = ?";
         try (Connection dbConn = this.getConnection();
