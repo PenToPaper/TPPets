@@ -9,10 +9,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class SQLWrapper {
     protected final TPPets thisPlugin;
@@ -289,6 +286,19 @@ public abstract class SQLWrapper {
                 return new LostAndFoundRegion(resultSet.getString("zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"));
             }
             return null;
+        }
+    }
+
+    public Hashtable<String, LostAndFoundRegion> getLostRegions() throws SQLException {
+        String selectLostRegions = "SELECT * FROM tpp_lost_regions";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectLostRegions));
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            Hashtable<String, LostAndFoundRegion> ret = new Hashtable<>();
+            while (resultSet.next()) {
+                ret.put(resultSet.getString("zone_name"), new LostAndFoundRegion(resultSet.getString("zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z")));
+            }
+            return ret;
         }
     }
 
