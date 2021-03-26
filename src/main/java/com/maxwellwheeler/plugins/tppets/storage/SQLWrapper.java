@@ -394,4 +394,19 @@ public abstract class SQLWrapper {
             return null;
         }
     }
+
+    public List<StorageLocation> getPlayerStorageLocations(@NotNull String ownerId) throws SQLException {
+        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        String getStorageLocations = "SELECT * FROM tpp_user_storage_locations WHERE user_id = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getStorageLocations), trimmedOwnerId);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            List<StorageLocation> ret = new ArrayList<>();
+            if (resultSet.next()) {
+                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                ret.add(new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc));
+            }
+            return ret;
+        }
+    }
 }
