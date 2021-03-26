@@ -278,4 +278,16 @@ public abstract class SQLWrapper {
         String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
         return this.deletePrepStatement(deleteLost, regionName);
     }
+
+    public LostAndFoundRegion getLostRegion(@NotNull String regionName) throws SQLException {
+        String selectLostRegion = "SELECT * FROM tpp_lost_regions WHERE zone_name = ?";
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectLostRegion), regionName);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            if (resultSet.next()) {
+                return new LostAndFoundRegion(resultSet.getString("zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"));
+            }
+            return null;
+        }
+    }
 }
