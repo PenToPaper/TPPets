@@ -237,10 +237,18 @@ public abstract class SQLWrapper {
     }
 
     // Allowed players
+
     public boolean insertAllowedPlayer(@NotNull String petId, @NotNull String playerId) throws SQLException {
         String trimmedPetId = UUIDUtils.trimUUID(petId);
         String trimmedPlayerId = UUIDUtils.trimUUID(playerId);
         String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
         return this.insertPrepStatement(insertAllowedPlayer, trimmedPetId, trimmedPlayerId);
+    }
+
+    public boolean removeAllowedPlayer(@NotNull String petId, @NotNull String playerId) throws SQLException {
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        String trimmedPlayerId = UUIDUtils.trimUUID(playerId);
+        String deleteAllowedPlayer = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
+        return this.deletePrepStatement(deleteAllowedPlayer, trimmedPetId, trimmedPlayerId);
     }
 }
