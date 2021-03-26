@@ -304,6 +304,11 @@ public abstract class SQLWrapper {
 
     // Protected regions
 
+    public boolean insertProtectedRegion(@NotNull ProtectedRegion protectedRegion) throws SQLException {
+        String insertProtectedRegion = "INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        return this.insertPrepStatement(insertProtectedRegion, protectedRegion.getRegionName(), protectedRegion.getEnterMessage(), protectedRegion.getMinLoc().getBlockX(), protectedRegion.getMinLoc().getBlockY(), protectedRegion.getMinLoc().getBlockZ(), protectedRegion.getMaxLoc().getBlockX(), protectedRegion.getMaxLoc().getBlockY(), protectedRegion.getMaxLoc().getBlockZ(), protectedRegion.getWorldName(), protectedRegion.getLfName());
+    }
+
     public ProtectedRegion getProtectedRegion(@NotNull String regionName) throws SQLException {
         String selectProtectedRegion = "SELECT * FROM tpp_protected_regions WHERE zone_name = ?";
         try (Connection dbConn = this.getConnection();
