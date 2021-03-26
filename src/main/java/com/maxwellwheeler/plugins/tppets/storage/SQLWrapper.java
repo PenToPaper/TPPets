@@ -269,8 +269,13 @@ public abstract class SQLWrapper {
 
     // Lost regions
 
-    public boolean insertLostRegion(LostAndFoundRegion lostAndFoundRegion) throws SQLException {
+    public boolean insertLostRegion(@NotNull LostAndFoundRegion lostAndFoundRegion) throws SQLException {
         String insertLost = "INSERT INTO tpp_lost_regions(zone_name, min_x, min_y, min_z, max_x, max_y, max_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         return this.insertPrepStatement(insertLost, lostAndFoundRegion.getRegionName(), lostAndFoundRegion.getMinLoc().getBlockX(), lostAndFoundRegion.getMinLoc().getBlockY(), lostAndFoundRegion.getMinLoc().getBlockZ(), lostAndFoundRegion.getMaxLoc().getBlockX(), lostAndFoundRegion.getMaxLoc().getBlockY(), lostAndFoundRegion.getMaxLoc().getBlockZ(), lostAndFoundRegion.getWorldName());
+    }
+
+    public boolean removeLostRegion(@NotNull String regionName) throws SQLException {
+        String deleteLost = "DELETE FROM tpp_lost_regions WHERE zone_name = ?";
+        return this.deletePrepStatement(deleteLost, regionName);
     }
 }
