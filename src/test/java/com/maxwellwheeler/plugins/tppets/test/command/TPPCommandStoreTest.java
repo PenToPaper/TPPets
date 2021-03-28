@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.sql.SQLException;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -366,6 +367,42 @@ public class TPPCommandStoreTest {
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
         assertEquals(ChatColor.RED + "Could not find " + ChatColor.WHITE + "MyStorage;", message);
+    }
+
+
+    @Test
+    @DisplayName("Cannot teleport user's pets when database fails to find storage")
+    void cannotTeleportUsersPetsDbFailFindStorage() {
+        String[] args = {"store", "MyPet", "MyStorage"};
+        when(this.dbWrapper.getStorageLocation("MockPlayerName", "MyStorage")).thenThrow(new SQLException());
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.dbWrapper, never()).getStorageLocation(anyString(), anyString());
+        verify(this.chunk, never()).load();
+        verify(this.horse, never()).teleport(any(Location.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not find storage", message);
+    }
+
+
+    @Test
+    @DisplayName("Cannot teleport user's pets when database fails to find server storage")
+    void cannotTeleportUsersPetsDbFailFindDefaultStorage() {
+        String[] args = {"store", "MyPet"};
+        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenThrow(new SQLException());
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.dbWrapper, never()).getStorageLocation(anyString(), anyString());
+        verify(this.chunk, never()).load();
+        verify(this.horse, never()).teleport(any(Location.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not find storage", message);
     }
 
 
