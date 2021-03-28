@@ -22,34 +22,34 @@ public class CommandProtectedAdd extends Command {
     }
 
     private void processCommandGeneric() {
-        if (!ArgValidator.validateArgsLength(this.args, 3)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return;
-        }
-
-        if (!ArgValidator.softValidateRegionName(this.args[0])) {
-            this.commandStatus = CommandStatus.INVALID_PR_NAME;
-            return;
-        }
-
-        if (!ArgValidator.softValidateRegionName(this.args[1])) {
-            this.commandStatus = CommandStatus.INVALID_LR_NAME;
-            return;
-        }
-
-        if(!ArgValidator.softValidateRegionEnterMessage(this.args[2])) {
-            this.commandStatus = CommandStatus.INVALID_MESSAGE;
-            return;
-        }
-
-        SelectionSession selectionSession = this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender);
-
-        if (selectionSession == null || !selectionSession.isCompleteSelection()) {
-            this.commandStatus = CommandStatus.NO_REGION;
-            return;
-        }
-
         try {
+            if (!ArgValidator.validateArgsLength(this.args, 3)) {
+                this.commandStatus = CommandStatus.SYNTAX_ERROR;
+                return;
+            }
+
+            if (!ArgValidator.softValidateRegionName(this.args[0])) {
+                this.commandStatus = CommandStatus.INVALID_PR_NAME;
+                return;
+            }
+
+            if (!ArgValidator.softValidateRegionName(this.args[1])) {
+                this.commandStatus = CommandStatus.INVALID_LR_NAME;
+                return;
+            }
+
+            if(!ArgValidator.softValidateRegionEnterMessage(this.args[2])) {
+                this.commandStatus = CommandStatus.INVALID_MESSAGE;
+                return;
+            }
+
+            SelectionSession selectionSession = this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender);
+
+            if (selectionSession == null || !selectionSession.isCompleteSelection()) {
+                this.commandStatus = CommandStatus.NO_REGION;
+                return;
+            }
+
             ProtectedRegion pr = this.thisPlugin.getDatabase().getProtectedRegion(this.args[0]);
 
             if (pr != null) {
@@ -57,20 +57,17 @@ public class CommandProtectedAdd extends Command {
                 return;
             }
 
+            ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
+            if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
+                this.thisPlugin.addProtectedRegion(protectedRegion);
+                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added protected region " + protectedRegion.getRegionName());
+            } else {
+                this.commandStatus = CommandStatus.DB_FAIL;
+            }
+
         } catch (SQLException e) {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-
         }
-
-        ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
-        if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
-            this.thisPlugin.addProtectedRegion(protectedRegion);
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added protected region " + protectedRegion.getRegionName());
-        } else {
-            this.commandStatus = CommandStatus.DB_FAIL;
-        }
-
     }
 
     private void displayStatus() {
