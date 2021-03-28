@@ -21,17 +21,18 @@ public class CommandProtectedRemove extends Command {
     }
 
     private void processCommandGeneric() {
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return;
-        }
-
-        if (!ArgValidator.softValidateRegionName(this.args[0])) {
-            this.commandStatus = CommandStatus.INVALID_NAME;
-            return;
-        }
-
         try {
+            if (!ArgValidator.validateArgsLength(this.args, 1)) {
+                this.commandStatus = CommandStatus.SYNTAX_ERROR;
+                return;
+            }
+
+            if (!ArgValidator.softValidateRegionName(this.args[0])) {
+                this.commandStatus = CommandStatus.INVALID_NAME;
+                return;
+            }
+
+
             ProtectedRegion pr = this.thisPlugin.getDatabase().getProtectedRegion(this.args[0]);
 
             if (pr == null) {
@@ -39,19 +40,16 @@ public class CommandProtectedRemove extends Command {
                 return;
             }
 
+            if (this.thisPlugin.getDatabase().removeProtectedRegion(this.args[0])) {
+                this.thisPlugin.removeProtectedRegion(this.args[0]);
+                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed protected region " + this.args[0]);
+            } else {
+                this.commandStatus = CommandStatus.DB_FAIL;
+            }
+
         } catch (SQLException e) {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-
         }
-
-        if (this.thisPlugin.getDatabase().removeProtectedRegion(this.args[0])) {
-            this.thisPlugin.removeProtectedRegion(this.args[0]);
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed protected region " + this.args[0]);
-        } else {
-            this.commandStatus = CommandStatus.DB_FAIL;
-        }
-
     }
 
     private void displayStatus() {
