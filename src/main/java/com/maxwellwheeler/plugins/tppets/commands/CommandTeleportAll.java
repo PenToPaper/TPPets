@@ -5,12 +5,10 @@ import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
 public class CommandTeleportAll extends TeleportCommand {
@@ -54,20 +52,12 @@ public class CommandTeleportAll extends TeleportCommand {
         }
     }
 
+    // TODO: Implement tpPetsBetweenWorlds functionality
     private boolean initializePetList() {
         try {
             this.petType = PetType.Pets.valueOf(this.args[0].toUpperCase());
 
-            List<PetStorage> petList = new ArrayList<>();
-
-            for (World world : Bukkit.getWorlds()) {
-                List<PetStorage> petListWorld = thisPlugin.getDatabase().getPetsGeneric(this.commandFor.getUniqueId().toString(), world.getName(), this.petType);
-                if (petListWorld == null) {
-                    this.commandStatus = CommandStatus.DB_FAIL;
-                    return false;
-                }
-                petList.addAll(petListWorld);
-            }
+            List<PetStorage> petList = this.thisPlugin.getDatabase().getAllPetsFromOwner(this.commandFor.getUniqueId().toString());
 
             if (petList.size() == 0) {
                 this.commandStatus = CommandStatus.NO_PET;
@@ -78,6 +68,9 @@ public class CommandTeleportAll extends TeleportCommand {
 
         } catch (IllegalArgumentException ignored) {
             this.commandStatus = CommandStatus.NO_PET_TYPE;
+            return false;
+        } catch (SQLException ignored) {
+            this.commandStatus = CommandStatus.DB_FAIL;
             return false;
         }
         return true;
