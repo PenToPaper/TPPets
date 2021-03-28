@@ -22,44 +22,42 @@ public class CommandLostAdd extends Command {
     }
 
     private void processCommandGeneric() {
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return;
-        }
-
-        if (!ArgValidator.softValidateRegionName(this.args[0])) {
-            this.commandStatus = CommandStatus.INVALID_NAME;
-            return;
-        }
-
-        SelectionSession selectionSession = this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender);
-
-        if (selectionSession == null || !selectionSession.isCompleteSelection()) {
-            this.commandStatus = CommandStatus.NO_REGION;
-            return;
-        }
-
         try {
+            if (!ArgValidator.validateArgsLength(this.args, 1)) {
+                this.commandStatus = CommandStatus.SYNTAX_ERROR;
+                return;
+            }
+
+            if (!ArgValidator.softValidateRegionName(this.args[0])) {
+                this.commandStatus = CommandStatus.INVALID_NAME;
+                return;
+            }
+
+            SelectionSession selectionSession = this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender);
+
+            if (selectionSession == null || !selectionSession.isCompleteSelection()) {
+                this.commandStatus = CommandStatus.NO_REGION;
+                return;
+            }
+
             LostAndFoundRegion lfr = this.thisPlugin.getDatabase().getLostRegion(this.args[0]);
 
             if (lfr != null) {
                 this.commandStatus = CommandStatus.ALREADY_DONE;
                 return;
             }
-        } catch (SQLException e) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-        }
 
-        LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion(this.args[0], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation());
-        if (this.thisPlugin.getDatabase().insertLostRegion(lostAndFoundRegion)) {
-            this.thisPlugin.addLostRegion(lostAndFoundRegion);
-            this.thisPlugin.updateLFReference(lostAndFoundRegion.getRegionName());
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added lost and found region " + lostAndFoundRegion.getRegionName());
-        } else {
+            LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion(this.args[0], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation());
+            if (this.thisPlugin.getDatabase().insertLostRegion(lostAndFoundRegion)) {
+                this.thisPlugin.addLostRegion(lostAndFoundRegion);
+                this.thisPlugin.updateLFReference(lostAndFoundRegion.getRegionName());
+                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added lost and found region " + lostAndFoundRegion.getRegionName());
+            } else {
+                this.commandStatus = CommandStatus.DB_FAIL;
+            }
+        } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
         }
-
     }
 
     private void displayStatus() {
