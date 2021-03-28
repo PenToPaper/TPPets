@@ -8,6 +8,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,26 +24,22 @@ public class CommandStorageListDefault extends Command {
     }
 
     private void listDefaultStorages() {
-        if (this.thisPlugin.getDatabase() == null) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-        }
+        try {
 
-        // Checks all worlds and stores their storage locations. Doing this first checks for database failures\
-        List<StorageLocation> allStorageLocations = new ArrayList<>();
+            // Checks all worlds and stores their storage locations. Doing this first checks for database failures\
+            List<StorageLocation> allStorageLocations = new ArrayList<>();
 
-        for (World world : Bukkit.getWorlds()) {
-            List<StorageLocation> storageLocations = this.thisPlugin.getDatabase().getServerStorageLocations(world);
+            for (World world : Bukkit.getWorlds()) {
+                List<StorageLocation> storageLocations = this.thisPlugin.getDatabase().getServerStorageLocations(world);
 
-            if (storageLocations == null) {
-                this.commandStatus = CommandStatus.DB_FAIL;
-                return;
+                allStorageLocations.addAll(storageLocations);
             }
 
-            allStorageLocations.addAll(storageLocations);
-        }
+            listAllStorages(this.sender, allStorageLocations);
 
-        listAllStorages(this.sender, allStorageLocations);
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
+        }
     }
 
     private void listAllStorages(Player pl, List<StorageLocation> storageLocations) {
