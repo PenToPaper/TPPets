@@ -25,11 +25,12 @@ public class ListenerEntityTamed implements Listener {
     }
 
     private EventStatus onNewTamedEntity(OfflinePlayer owner, Entity entity) {
-        PetType.Pets petType = PetType.getEnumByEntity(entity);
-
-        boolean canBypassPetLimit = canBypassPetLimit(owner, entity.getWorld());
-
         try {
+
+            PetType.Pets petType = PetType.getEnumByEntity(entity);
+
+            boolean canBypassPetLimit = canBypassPetLimit(owner, entity.getWorld());
+
             if (!canBypassPetLimit && !this.thisPlugin.getPetIndex().isWithinTotalLimit(owner)) {
                 return EventStatus.TOTAL_LIMIT;
             }
@@ -37,21 +38,22 @@ public class ListenerEntityTamed implements Listener {
             if (!canBypassPetLimit && !this.thisPlugin.getPetIndex().isWithinSpecificLimit(owner, petType)) {
                 return EventStatus.TYPE_LIMIT;
             }
+
+            String generatedName = this.thisPlugin.getDatabase().generateUniquePetName(owner.getUniqueId().toString(), PetType.getEnumByEntity(entity));
+
+            if (!this.thisPlugin.getDatabase().insertPet(entity, owner.getUniqueId().toString(), generatedName)) {
+                return EventStatus.DB_FAIL;
+            }
+
+            if (owner instanceof Player) {
+                ((Player)owner).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + generatedName + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + generatedName + ChatColor.BLUE + " [new name]");
+            }
+
+            return EventStatus.SUCCESS;
+
         } catch (SQLException ignored) {
             return EventStatus.DB_FAIL;
         }
-
-        String generatedName = this.thisPlugin.getDatabase().insertPet(entity, owner.getUniqueId().toString());
-
-        if (generatedName == null) {
-            return EventStatus.DB_FAIL;
-        }
-
-        if (owner instanceof Player) {
-            ((Player)owner).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + generatedName + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + generatedName + ChatColor.BLUE + " [new name]");
-        }
-
-        return EventStatus.SUCCESS;
     }
 
     private boolean canBypassPetLimit(OfflinePlayer owner, World world) {

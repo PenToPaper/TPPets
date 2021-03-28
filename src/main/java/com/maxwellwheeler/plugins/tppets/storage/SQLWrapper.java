@@ -166,7 +166,7 @@ public abstract class SQLWrapper {
         }
     }
 
-    public String generateUniquePetName(@NotNull String ownerId, PetType.Pets petType) throws SQLException {
+    public String generateUniquePetName(@NotNull String ownerId, @NotNull PetType.Pets petType) throws SQLException {
         List<PetStorage> currentPetsList = this.getAllPetsFromOwner(ownerId);
         int lastIndexChecked = currentPetsList.size();
         String ret;
@@ -178,18 +178,28 @@ public abstract class SQLWrapper {
         return ret;
     }
 
-    public boolean insertPet(@NotNull Entity entity, @NotNull String ownerId, @NotNull String petName) throws SQLException {
-        if (!PetType.isPetTypeTracked(entity) || !this.isNameUnique(ownerId, petName)) {
+    public boolean insertPet(@NotNull Entity pet, @NotNull String ownerId, @NotNull String petName) throws SQLException {
+        if (!PetType.isPetTypeTracked(pet) || !this.isNameUnique(ownerId, petName)) {
             return false;
         }
 
         String insertPet = "INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name, effective_pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        String trimmedPetId = UUIDUtils.trimUUID(entity.getUniqueId());
+        String trimmedPetId = UUIDUtils.trimUUID(pet.getUniqueId());
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
-        int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(entity));
+        int petTypeIndex = PetType.getIndexFromPet(PetType.getEnumByEntity(pet));
 
-        return this.insertPrepStatement(insertPet, trimmedPetId, petTypeIndex, entity.getLocation().getBlockX(), entity.getLocation().getBlockY(), entity.getLocation().getBlockZ(), entity.getWorld().getName(), trimmedOwnerId, petName, petName.toLowerCase());
+        return this.insertPrepStatement(insertPet, trimmedPetId, petTypeIndex, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedOwnerId, petName, petName.toLowerCase());
+    }
+
+    public boolean removePet(@NotNull Entity pet) throws SQLException {
+        if (PetType.isPetTypeTracked(pet)) {
+            String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ?";
+            String trimmedPetId = UUIDUtils.trimUUID(pet.getUniqueId());
+
+            return this.deletePrepStatement(deletePet, trimmedPetId);
+        }
+        return false;
     }
 
     public boolean updatePetLocation(@NotNull Entity entity) throws SQLException {
@@ -211,7 +221,8 @@ public abstract class SQLWrapper {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         return this.updatePrepStatement(updatePetName, newName, newName.toLowerCase(), trimmedOwnerId, oldName.toLowerCase());
     }
-    
+
+    // TODO: Make return single PetStorage. List not needed anymore
     public List<PetStorage> getSpecificPet(@NotNull String ownerId, @NotNull String petName) throws SQLException {
         String selectSpecificPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
