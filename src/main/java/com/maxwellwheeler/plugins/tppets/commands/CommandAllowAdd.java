@@ -8,6 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,47 +31,48 @@ public class CommandAllowAdd extends BaseCommand {
     }
 
     private void processCommandGeneric() {
-        OfflinePlayer playerToAllow = this.getOfflinePlayer(this.args[0]);
+        // TODO: Make pet names case-insensitive
+        // TODO: Make sure errors are properly logged
+        try {
+            OfflinePlayer playerToAllow = this.getOfflinePlayer(this.args[0]);
 
-        if (playerToAllow == null) {
-            this.commandStatus = CommandStatus.NO_TARGET_PLAYER;
-            return;
-        }
+            if (playerToAllow == null) {
+                this.commandStatus = CommandStatus.NO_TARGET_PLAYER;
+                return;
+            }
 
-        if (!ArgValidator.softValidatePetName(this.args[1])) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return;
-        }
+            if (!ArgValidator.softValidatePetName(this.args[1])) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return;
+            }
 
-        List<PetStorage> petList = this.thisPlugin.getDatabase().getPetByName(this.commandFor.getUniqueId().toString(), this.args[1]);
+            List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[1]);
 
-        if (petList == null) {
+            if (petList.size() == 0) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return;
+            }
+
+            String trimmedPlayerId = UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString());
+
+            if (this.thisPlugin.getAllowedPlayers().containsKey(petList.get(0).petId) && this.thisPlugin.getAllowedPlayers().get(petList.get(0).petId).contains(trimmedPlayerId)) {
+                this.commandStatus = CommandStatus.ALREADY_DONE;
+                return;
+            }
+
+            if (this.allowPlayer(petList.get(0).petId, trimmedPlayerId)) {
+                this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " allowed " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
+                this.commandStatus = CommandStatus.SUCCESS;
+            } else {
+                this.commandStatus = CommandStatus.DB_FAIL;
+            }
+
+        } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return;
         }
-
-        if (petList.size() == 0) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return;
-        }
-
-        String trimmedPlayerId = UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString());
-
-        if (this.thisPlugin.getAllowedPlayers().containsKey(petList.get(0).petId) && this.thisPlugin.getAllowedPlayers().get(petList.get(0).petId).contains(trimmedPlayerId)) {
-            this.commandStatus = CommandStatus.ALREADY_DONE;
-            return;
-        }
-
-        if (this.allowPlayer(petList.get(0).petId, trimmedPlayerId)) {
-            this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " allowed " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
-            this.commandStatus = CommandStatus.SUCCESS;
-        } else {
-            this.commandStatus = CommandStatus.DB_FAIL;
-        }
-
     }
 
-    private boolean allowPlayer(String petId, String playerId) {
+    private boolean allowPlayer(String petId, String playerId) throws SQLException {
         if (this.thisPlugin.getDatabase().insertAllowedPlayer(petId, playerId)) {
             if (!this.thisPlugin.getAllowedPlayers().containsKey(petId)) {
                 this.thisPlugin.getAllowedPlayers().put(petId, new ArrayList<>());
