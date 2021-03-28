@@ -21,17 +21,18 @@ public class CommandLostRemove extends Command {
     }
 
     private void processCommandGeneric() {
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return;
-        }
-
-        if (!ArgValidator.softValidateRegionName(this.args[0])) {
-            this.commandStatus = CommandStatus.INVALID_NAME;
-            return;
-        }
-
         try {
+            if (!ArgValidator.validateArgsLength(this.args, 1)) {
+                this.commandStatus = CommandStatus.SYNTAX_ERROR;
+                return;
+            }
+
+            if (!ArgValidator.softValidateRegionName(this.args[0])) {
+                this.commandStatus = CommandStatus.INVALID_NAME;
+                return;
+            }
+
+
             LostAndFoundRegion lfr = this.thisPlugin.getDatabase().getLostRegion(this.args[0]);
 
             if (lfr == null) {
@@ -39,20 +40,16 @@ public class CommandLostRemove extends Command {
                 return;
             }
 
+            if (this.thisPlugin.getDatabase().removeLostRegion(this.args[0])) {
+                this.thisPlugin.removeLFReference(this.args[0]);
+                this.thisPlugin.removeLostRegion(this.args[0]);
+                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed lost and found region " + this.args[0]);
+            } else {
+                this.commandStatus = CommandStatus.DB_FAIL;
+            }
         } catch (SQLException e) {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-
         }
-
-        if (this.thisPlugin.getDatabase().removeLostRegion(this.args[0])) {
-            this.thisPlugin.removeLFReference(this.args[0]);
-            this.thisPlugin.removeLostRegion(this.args[0]);
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed lost and found region " + this.args[0]);
-        } else {
-            this.commandStatus = CommandStatus.DB_FAIL;
-        }
-
     }
 
     private void displayStatus() {
