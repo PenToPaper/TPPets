@@ -50,7 +50,7 @@ public class CommandTeleportPet extends TeleportCommand {
     }
 
     public void processCommand() {
-        if (this.commandStatus == CommandStatus.SUCCESS && initializePet() && isValidSyntax()) {
+        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
             processCommandGeneric();
         }
 
@@ -63,48 +63,49 @@ public class CommandTeleportPet extends TeleportCommand {
     }
 
     private void processCommandGeneric() {
-        if (!PermissionChecker.hasPermissionToTeleportType(this.pet.petType, this.sender)) {
-            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-            return;
-        }
-
-        if (!this.thisPlugin.canTpThere(this.sender)) {
-            this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
-            return;
-        }
-
-        if (!this.teleportPetsFromStorage(this.sender.getLocation(), Collections.singletonList(this.pet), this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
-            this.commandStatus = CommandStatus.CANT_TELEPORT;
-        }
-    }
-
-    private boolean initializePet() {
-        // TODO: toLowerCase?
         try {
-            if (!ArgValidator.validateArgsLength(this.args, 1)) {
-                this.commandStatus = CommandStatus.SYNTAX_ERROR;
-                return false;
+            initializePet();
+
+            if (!PermissionChecker.hasPermissionToTeleportType(this.pet.petType, this.sender)) {
+                this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
+                return;
             }
 
-            if (!ArgValidator.softValidatePetName(this.args[0])) {
-                this.commandStatus = CommandStatus.NO_PET;
-                return false;
+            if (!this.thisPlugin.canTpThere(this.sender)) {
+                this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
+                return;
             }
 
-            List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
-
-            if (petList.size() == 0) {
-                this.commandStatus = CommandStatus.NO_PET;
-                return false;
+            if (!this.teleportPetsFromStorage(this.sender.getLocation(), Collections.singletonList(this.pet), this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+                this.commandStatus = CommandStatus.CANT_TELEPORT;
             }
-
-            this.pet = petList.get(0);
-            return true;
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
+        }
+    }
+
+    private boolean initializePet() throws SQLException {
+        // TODO: toLowerCase?
+        if (!ArgValidator.validateArgsLength(this.args, 1)) {
+            this.commandStatus = CommandStatus.SYNTAX_ERROR;
             return false;
         }
+
+        if (!ArgValidator.softValidatePetName(this.args[0])) {
+            this.commandStatus = CommandStatus.NO_PET;
+            return false;
+        }
+
+        List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+
+        if (petList.size() == 0) {
+            this.commandStatus = CommandStatus.NO_PET;
+            return false;
+        }
+
+        this.pet = petList.get(0);
+        return true;
     }
 
     private void displayStatus() {

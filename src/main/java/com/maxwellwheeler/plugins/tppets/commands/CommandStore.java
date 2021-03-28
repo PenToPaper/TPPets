@@ -3,7 +3,6 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -81,8 +80,8 @@ class CommandStore extends TeleportCommand {
         }
     }
 
-    public boolean storePet(StorageLocation storageLocation) {
-        return teleportSpecificPet(storageLocation.getLoc(), this.commandFor, this.args[0], PetType.Pets.UNKNOWN, true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"), false);
+    private boolean storePet(StorageLocation storageLocation) throws SQLException {
+        return teleportPetsFromStorage(storageLocation.getLoc(), this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]), true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
     }
 
     public void displayStatus() {

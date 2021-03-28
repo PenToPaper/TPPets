@@ -33,27 +33,32 @@ public class CommandTeleportAll extends TeleportCommand {
     }
 
     private void processCommandGeneric() {
-        if (!initializePetList()) {
-            return;
-        }
+        try {
+            if (!initializePetList()) {
+                return;
+            }
 
-        if (!PermissionChecker.hasPermissionToTeleportType(this.petType, this.sender)) {
-            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-            return;
-        }
+            if (!PermissionChecker.hasPermissionToTeleportType(this.petType, this.sender)) {
+                this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
+                return;
+            }
 
-        if (!this.thisPlugin.canTpThere(this.sender)) {
-            this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
-            return;
-        }
+            if (!this.thisPlugin.canTpThere(this.sender)) {
+                this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
+                return;
+            }
 
-        if (!this.teleportPetsFromStorage(this.sender.getLocation(), this.petList, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
-            this.commandStatus = CommandStatus.CANT_TELEPORT;
+            if (!this.teleportPetsFromStorage(this.sender.getLocation(), this.petList, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+                this.commandStatus = CommandStatus.CANT_TELEPORT;
+            }
+
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
         }
     }
 
     // TODO: Implement tpPetsBetweenWorlds functionality
-    private boolean initializePetList() {
+    private boolean initializePetList() throws SQLException {
         try {
             this.petType = PetType.Pets.valueOf(this.args[0].toUpperCase());
 
@@ -68,9 +73,6 @@ public class CommandTeleportAll extends TeleportCommand {
 
         } catch (IllegalArgumentException ignored) {
             this.commandStatus = CommandStatus.NO_PET_TYPE;
-            return false;
-        } catch (SQLException ignored) {
-            this.commandStatus = CommandStatus.DB_FAIL;
             return false;
         }
         return true;
