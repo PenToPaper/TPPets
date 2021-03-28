@@ -5,12 +5,10 @@ import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
 public class CommandTeleportList extends TeleportCommand {
@@ -62,24 +60,20 @@ public class CommandTeleportList extends TeleportCommand {
     }
 
     private boolean initializePetList() {
-        List<PetStorage> petList = new ArrayList<>();
+        try {
+            List<PetStorage> petList = this.thisPlugin.getDatabase().getAllPetsFromOwner(this.commandFor.getUniqueId().toString());
 
-        for (World world : Bukkit.getWorlds()) {
-            List<PetStorage> petListWorld = thisPlugin.getDatabase().getPetsGeneric(this.commandFor.getUniqueId().toString(), world.getName(), this.petType);
-            if (petListWorld == null) {
-                this.commandStatus = CommandStatus.DB_FAIL;
+            if (petList.size() == 0) {
+                this.commandStatus = CommandStatus.NO_PET;
                 return false;
             }
-            petList.addAll(petListWorld);
-        }
 
-        if (petList.size() == 0) {
-            this.commandStatus = CommandStatus.NO_PET;
+            this.petList = petList;
+            return true;
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
             return false;
         }
-
-        this.petList = petList;
-        return true;
     }
 
     private void announcePetsFromList() {
