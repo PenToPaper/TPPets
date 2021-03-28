@@ -87,7 +87,6 @@ public abstract class SQLWrapper {
 
     // Initializers
 
-    // TODO: Make sure database updater is run properly
     public boolean initializeTables() throws SQLException {
         String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
                 "pet_id CHAR(32),\n" +

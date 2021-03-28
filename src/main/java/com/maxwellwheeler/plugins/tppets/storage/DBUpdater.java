@@ -90,17 +90,19 @@ public class DBUpdater {
         return sqlWrapper.updatePrepStatement(updateDbVersion, schemaVersion);
     }
 
-    private boolean setCurrentSchemaVersion(SQLWrapper sqlWrapper, int schemaVersion) throws SQLException {
-        boolean ret;
+    private boolean setCurrentSchemaVersionInDb(SQLWrapper sqlWrapper, int schemaVersion) throws SQLException {
         if (this.schemaVersion == 0 || this.schemaVersion == 1) {
-            ret = createDbVersionTable(sqlWrapper) && insertDbVersion(sqlWrapper, schemaVersion);
-        } else {
-            ret = updateDbVersion(sqlWrapper, schemaVersion);
+            return createDbVersionTable(sqlWrapper) && insertDbVersion(sqlWrapper, schemaVersion);
         }
-        if (ret) {
+        return updateDbVersion(sqlWrapper, schemaVersion);
+    }
+
+    private boolean setCurrentSchemaVersion(SQLWrapper sqlWrapper, int schemaVersion) throws SQLException {
+        if (setCurrentSchemaVersionInDb(sqlWrapper, schemaVersion)) {
             this.schemaVersion = schemaVersion;
+            return true;
         }
-        return ret;
+        return false;
     }
 
     private class OneToTwo {
