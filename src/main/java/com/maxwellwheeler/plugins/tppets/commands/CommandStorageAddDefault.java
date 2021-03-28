@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.sql.SQLException;
+
 public class CommandStorageAddDefault extends Command {
     CommandStorageAddDefault(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
@@ -18,25 +20,25 @@ public class CommandStorageAddDefault extends Command {
     }
 
     private void addDefaultStorage() {
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return;
-        }
+        try {
+            if (!ArgValidator.validateArgsLength(this.args, 1)) {
+                this.commandStatus = CommandStatus.SYNTAX_ERROR;
+                return;
+            }
 
-        if (this.thisPlugin.getDatabase() == null) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-        }
+            if (this.thisPlugin.getDatabase().getServerStorageLocation(this.args[0], this.sender.getWorld()) != null) {
+                this.commandStatus = CommandStatus.ALREADY_DONE;
+                return;
+            }
 
-        if (this.thisPlugin.getDatabase().getServerStorageLocation(this.args[0], this.sender.getWorld()) != null) {
-            this.commandStatus = CommandStatus.ALREADY_DONE;
-            return;
-        }
+            if (this.thisPlugin.getDatabase().addServerStorageLocation(this.args[0], this.sender.getLocation())) {
+                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has added server location " + this.args[0] + " " + TeleportCommand.formatLocation(this.sender.getLocation()));
+                this.commandStatus = CommandStatus.SUCCESS;
+            } else {
+                this.commandStatus = CommandStatus.DB_FAIL;
+            }
 
-        if (this.thisPlugin.getDatabase().addServerStorageLocation(this.args[0], this.sender.getLocation())) {
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has added server location " + this.args[0] + " " + TeleportCommand.formatLocation(this.sender.getLocation()));
-            this.commandStatus = CommandStatus.SUCCESS;
-        } else {
+        } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
         }
     }
