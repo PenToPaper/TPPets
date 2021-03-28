@@ -1,7 +1,9 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
 import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,11 +79,8 @@ public class ArgValidator {
      * @param petName The pet name to validate
      * @return True if pet name checks out, false otherwise
      */
-    public static boolean validatePetName(DBWrapper dbw, String ownerUUID, String petName) {
-        if (dbw != null) {
-            return softValidatePetName(petName) && dbw.isNameUnique(ownerUUID, petName);
-        }
-        return false;
+    public static boolean validatePetName(SQLWrapper sqlWrapper, String ownerUUID, String petName) throws SQLException {
+        return softValidatePetName(petName) && sqlWrapper.isNameUnique(ownerUUID, petName);
     }
 
     /**
