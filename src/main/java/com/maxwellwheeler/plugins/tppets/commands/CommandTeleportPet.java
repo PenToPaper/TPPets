@@ -9,6 +9,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -78,30 +79,32 @@ public class CommandTeleportPet extends TeleportCommand {
     }
 
     private boolean initializePet() {
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return false;
-        }
+        // TODO: toLowerCase?
+        try {
+            if (!ArgValidator.validateArgsLength(this.args, 1)) {
+                this.commandStatus = CommandStatus.SYNTAX_ERROR;
+                return false;
+            }
 
-        if (!ArgValidator.softValidatePetName(this.args[0])) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return false;
-        }
+            if (!ArgValidator.softValidatePetName(this.args[0])) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return false;
+            }
 
-        List<PetStorage> petList = this.thisPlugin.getDatabase().getPetByName(this.commandFor.getUniqueId().toString(), this.args[0]);
+            List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-        if (petList == null) {
+            if (petList.size() == 0) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return false;
+            }
+
+            this.pet = petList.get(0);
+            return true;
+
+        } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
             return false;
         }
-
-        if (petList.size() == 0) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return false;
-        }
-
-        this.pet = petList.get(0);
-        return true;
     }
 
     private void displayStatus() {
