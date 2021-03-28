@@ -7,8 +7,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
+import java.sql.SQLException;
+
 public class ListenerEntityDeath implements Listener {
-    // TODO: Can database ever be null?
     // TODO: Log database errors to console?
     private final TPPets thisPlugin;
 
@@ -18,8 +19,10 @@ public class ListenerEntityDeath implements Listener {
 
     @EventHandler(priority= EventPriority.MONITOR)
     public void onEntityDeathEvent(EntityDeathEvent event) {
-        if (PetType.isPetTracked(event.getEntity())) {
-            this.thisPlugin.getDatabase().deletePet(event.getEntity());
-        }
+        try {
+            if (PetType.isPetTracked(event.getEntity())) {
+                this.thisPlugin.getDatabase().removePet(event.getEntity());
+            }
+        } catch (SQLException ignored) {}
     }
 }
