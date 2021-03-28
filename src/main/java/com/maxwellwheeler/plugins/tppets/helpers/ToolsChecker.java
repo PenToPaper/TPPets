@@ -6,7 +6,6 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * Basic object to check if tools are valid, used mostly in {@link com.maxwellwheeler.plugins.tppets.listeners.TPPetsPlayerListener}
  * @author GatheringExp
  */
 public class ToolsChecker {
