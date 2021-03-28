@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.sql.SQLException;
+
 public class CommandStorageRemove extends Command {
     CommandStorageRemove(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
@@ -18,27 +20,28 @@ public class CommandStorageRemove extends Command {
     }
 
     private void removeStorage() {
-        if (!ArgValidator.validateArgsLength(this.args, 1)) {
-            this.commandStatus = CommandStatus.SYNTAX_ERROR;
-            return;
-        }
+        try {
 
-        if (this.thisPlugin.getDatabase() == null) {
+            if (!ArgValidator.validateArgsLength(this.args, 1)) {
+                this.commandStatus = CommandStatus.SYNTAX_ERROR;
+                return;
+            }
+
+            if (!ArgValidator.validateStorageName(this.args[0]) || this.thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), this.args[0]) == null) {
+                this.commandStatus = CommandStatus.ALREADY_DONE;
+                return;
+            }
+
+            if (!this.thisPlugin.getDatabase().removeStorageLocation(commandFor.getUniqueId().toString(), this.args[0])) {
+                this.commandStatus = CommandStatus.DB_FAIL;
+                return;
+            }
+
+            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed location " + this.args[0] + " from " + commandFor.getName());
+
+        } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return;
         }
-
-        if (!ArgValidator.validateStorageName(this.args[0]) || this.thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), this.args[0]) == null) {
-            this.commandStatus = CommandStatus.ALREADY_DONE;
-            return;
-        }
-
-        if (!this.thisPlugin.getDatabase().removeStorageLocation(commandFor.getUniqueId().toString(), this.args[0])) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-        }
-
-        this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed location " + this.args[0] + " from " + commandFor.getName());
     }
 
     private void displayStatus() {
