@@ -24,13 +24,16 @@ public class DBUpdater {
     public void update(SQLWrapper sqlWrapper) throws SQLException {
         if (this.schemaVersion != this.updatedVersion) {
             if (this.schemaVersion == 1) {
-                oneToTwo(sqlWrapper);
+                OneToTwo oneToTwo = new OneToTwo();
+                oneToTwo.run(sqlWrapper);
             }
             if (this.schemaVersion == 2) {
-                twoToThree(sqlWrapper);
+                TwoToThree twoToThree = new TwoToThree();
+                twoToThree.run(sqlWrapper);
             }
             if (this.schemaVersion == 3) {
-                threeToFour(sqlWrapper);
+                ThreeToFour threeToFour = new ThreeToFour();
+                threeToFour.run(sqlWrapper);
             }
         }
     }
@@ -100,223 +103,230 @@ public class DBUpdater {
         return ret;
     }
 
-    // 1 to 2 and 2 to 1
+    private class OneToTwo {
+        private OneToTwo(){}
 
-    private boolean oneToTwoAddPetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
-        String alterTableStatement = "ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)";
-        return sqlWrapper.updatePrepStatement(alterTableStatement);
-    }
-
-    private boolean oneToTwoCreateAllowedPlayersTable(SQLWrapper sqlWrapper) throws SQLException {
-        String createAllowedPlayersTable = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id), FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);";
-        return sqlWrapper.createStatement(createAllowedPlayersTable);
-    }
-
-    private boolean oneToTwoCreateDbVersionTable(SQLWrapper sqlWrapper) throws SQLException {
-        String createDbVersionTable = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)";
-        return sqlWrapper.createStatement(createDbVersionTable);
-    }
-
-    private boolean oneToTwoSetDefaultPetName(SQLWrapper sqlWrapper, String petId, PetType.Pets petType, int petIndex) throws SQLException {
-        String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE pet_id = ?";
-        String petName = petType.toString().toUpperCase() + petIndex;
-        return sqlWrapper.updatePrepStatement(updatePetName, petName, petId);
-    }
-
-    private boolean oneToTwoFillPetName(SQLWrapper sqlWrapper) throws SQLException {
-        String selectAllPets = "SELECT * FROM tpp_unloaded_pets";
-        try (Connection dbConn = sqlWrapper.getConnection();
-             PreparedStatement preparedStatement = dbConn.prepareStatement(selectAllPets);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-            Hashtable<String, Integer> numPetsByPlayer = new Hashtable<>();
-            while (resultSet.next()) {
-                PetStorage pet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
-                int currentOwnerPetCount = numPetsByPlayer.getOrDefault(pet.ownerId, 0);
-
-                if (!oneToTwoSetDefaultPetName(sqlWrapper, pet.petId, pet.petType, currentOwnerPetCount)) {
-                    return false;
-                }
-                numPetsByPlayer.put(pet.ownerId, currentOwnerPetCount + 1);
-            }
+        private boolean oneToTwoAddPetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
+            String alterTableStatement = "ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)";
+            return sqlWrapper.updatePrepStatement(alterTableStatement);
         }
-        return true;
-    }
 
-    private void twoToOneRemovePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
-        String renameTableStatement = "ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)";
-        String createVersionOneTableStatement = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
-                + "pet_id CHAR(32) PRIMARY KEY,\n"
-                + "pet_type TINYINT NOT NULL,\n"
-                + "pet_x INT NOT NULL,\n"
-                + "pet_y INT NOT NULL,\n"
-                + "pet_z INT NOT NULL,\n"
-                + "pet_world VARCHAR(25) NOT NULL,\n"
-                + "owner_id CHAR(32) NOT NULL"
-                + ");";
-        String insertOldDataStatement = "INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id FROM tpp_unloaded_pets_temp";
-        String dropOldTableStatement = "DROP TABLE tpp_unloaded_pets_temp";
-
-        sqlWrapper.updatePrepStatement(renameTableStatement);
-        sqlWrapper.createStatement(createVersionOneTableStatement);
-        sqlWrapper.insertPrepStatement(insertOldDataStatement);
-        sqlWrapper.updatePrepStatement(dropOldTableStatement);
-    }
-
-    private void twoToOneDropAllowedPlayersTable(SQLWrapper sqlWrapper) throws SQLException {
-        String dropAllowedPlayersTable = "DROP TABLE IF EXISTS tpp_allowed_players";
-        sqlWrapper.updatePrepStatement(dropAllowedPlayersTable);
-    }
-
-    private void twoToOneDropDbVersionTable(SQLWrapper sqlWrapper) throws SQLException {
-        String dropDbVersionTable = "DROP TABLE IF EXISTS tpp_db_version";
-        sqlWrapper.updatePrepStatement(dropDbVersionTable);
-    }
-
-    // TODO: Make classes in this same file for each version change
-    private void twoToOne(SQLWrapper sqlWrapper) throws SQLException {
-        twoToOneRemovePetNameColumn(sqlWrapper);
-        twoToOneDropAllowedPlayersTable(sqlWrapper);
-        twoToOneDropDbVersionTable(sqlWrapper);
-    }
-
-    private boolean oneToTwo(SQLWrapper sqlWrapper) throws SQLException {
-        if (oneToTwoAddPetNameColumn(sqlWrapper) && oneToTwoFillPetName(sqlWrapper) && oneToTwoCreateAllowedPlayersTable(sqlWrapper) && oneToTwoCreateDbVersionTable(sqlWrapper)) {
-            return setCurrentSchemaVersion(sqlWrapper, 2);
+        private boolean oneToTwoCreateAllowedPlayersTable(SQLWrapper sqlWrapper) throws SQLException {
+            String createAllowedPlayersTable = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(pet_id CHAR(32), user_id CHAR(32), PRIMARY KEY(pet_id, user_id), FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);";
+            return sqlWrapper.createStatement(createAllowedPlayersTable);
         }
-        twoToOne(sqlWrapper);
-        return false;
-    }
 
-    // 2 to 3 and 3 to 2
+        private boolean oneToTwoCreateDbVersionTable(SQLWrapper sqlWrapper) throws SQLException {
+            String createDbVersionTable = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)";
+            return sqlWrapper.createStatement(createDbVersionTable);
+        }
 
-    private boolean twoToThreeAddEffectivePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
-        String alterTableStatement = "ALTER TABLE tpp_unloaded_pets ADD COLUMN effective_pet_name VARCHAR(64)";
-        return sqlWrapper.updatePrepStatement(alterTableStatement);
-    }
+        private boolean oneToTwoSetDefaultPetName(SQLWrapper sqlWrapper, String petId, PetType.Pets petType, int petIndex) throws SQLException {
+            String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ? WHERE pet_id = ?";
+            String petName = petType.toString().toUpperCase() + petIndex;
+            return sqlWrapper.updatePrepStatement(updatePetName, petName, petId);
+        }
 
-    private boolean twoToThreePopulateEffectivePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
-        String populateTableStatement = "UPDATE tpp_unloaded_pets SET effective_pet_name = lower(pet_name)";
-        return sqlWrapper.updatePrepStatement(populateTableStatement);
-    }
+        private boolean oneToTwoFillPetName(SQLWrapper sqlWrapper) throws SQLException {
+            String selectAllPets = "SELECT * FROM tpp_unloaded_pets";
+            try (Connection dbConn = sqlWrapper.getConnection();
+                 PreparedStatement preparedStatement = dbConn.prepareStatement(selectAllPets);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                Hashtable<String, Integer> numPetsByPlayer = new Hashtable<>();
+                while (resultSet.next()) {
+                    PetStorage pet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
+                    int currentOwnerPetCount = numPetsByPlayer.getOrDefault(pet.ownerId, 0);
 
-    private boolean twoToThreeRemovePetsNamedAllList(SQLWrapper sqlWrapper) throws SQLException {
-        String selectInvalidPets = "SELECT * FROM tpp_unloaded_pets WHERE effective_pet_name = \"all\" OR effective_pet_name = \"list\"";
-        try (Connection dbConn = sqlWrapper.getConnection();
-             PreparedStatement preparedStatement = dbConn.prepareStatement(selectInvalidPets);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-            while (resultSet.next()) {
-                PetStorage invalidPet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
-                String generatedName = sqlWrapper.generateUniquePetName(invalidPet.ownerId, invalidPet.petType);
-                if (!sqlWrapper.renamePet(invalidPet.ownerId, invalidPet.petName, generatedName)) {
-                    return false;
+                    if (!oneToTwoSetDefaultPetName(sqlWrapper, pet.petId, pet.petType, currentOwnerPetCount)) {
+                        return false;
+                    }
+                    numPetsByPlayer.put(pet.ownerId, currentOwnerPetCount + 1);
                 }
             }
+            return true;
         }
-        return true;
+
+        private void twoToOneRemovePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
+            String renameTableStatement = "ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)";
+            String createVersionOneTableStatement = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+                    + "pet_id CHAR(32) PRIMARY KEY,\n"
+                    + "pet_type TINYINT NOT NULL,\n"
+                    + "pet_x INT NOT NULL,\n"
+                    + "pet_y INT NOT NULL,\n"
+                    + "pet_z INT NOT NULL,\n"
+                    + "pet_world VARCHAR(25) NOT NULL,\n"
+                    + "owner_id CHAR(32) NOT NULL"
+                    + ");";
+            String insertOldDataStatement = "INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id FROM tpp_unloaded_pets_temp";
+            String dropOldTableStatement = "DROP TABLE tpp_unloaded_pets_temp";
+
+            sqlWrapper.updatePrepStatement(renameTableStatement);
+            sqlWrapper.createStatement(createVersionOneTableStatement);
+            sqlWrapper.insertPrepStatement(insertOldDataStatement);
+            sqlWrapper.updatePrepStatement(dropOldTableStatement);
+        }
+
+        private void twoToOneDropAllowedPlayersTable(SQLWrapper sqlWrapper) throws SQLException {
+            String dropAllowedPlayersTable = "DROP TABLE IF EXISTS tpp_allowed_players";
+            sqlWrapper.updatePrepStatement(dropAllowedPlayersTable);
+        }
+
+        private void twoToOneDropDbVersionTable(SQLWrapper sqlWrapper) throws SQLException {
+            String dropDbVersionTable = "DROP TABLE IF EXISTS tpp_db_version";
+            sqlWrapper.updatePrepStatement(dropDbVersionTable);
+        }
+
+        private void twoToOne(SQLWrapper sqlWrapper) throws SQLException {
+            twoToOneRemovePetNameColumn(sqlWrapper);
+            twoToOneDropAllowedPlayersTable(sqlWrapper);
+            twoToOneDropDbVersionTable(sqlWrapper);
+        }
+
+        private void run(SQLWrapper sqlWrapper) throws SQLException {
+            if (oneToTwoAddPetNameColumn(sqlWrapper) && oneToTwoFillPetName(sqlWrapper) && oneToTwoCreateAllowedPlayersTable(sqlWrapper) && oneToTwoCreateDbVersionTable(sqlWrapper)) {
+                setCurrentSchemaVersion(sqlWrapper, 2);
+                return;
+            }
+            twoToOne(sqlWrapper);
+        }
     }
 
-    private boolean twoToThreeRenameDuplicates(SQLWrapper sqlWrapper) throws SQLException {
-        String selectDuplicates = "SELECT * \n"
-                + "FROM tpp_unloaded_pets upi\n"
-                + "WHERE EXISTS (\n"
-                + "SELECT 1\n"
-                + "FROM tpp_unloaded_pets upj\n"
-                + "WHERE upj.effective_pet_name = upi.effective_pet_name\n"
-                + "AND upj.owner_id = upi.owner_id\n"
-                + "LIMIT 1, 1)";
-        try (Connection dbConn = sqlWrapper.getConnection();
-             PreparedStatement preparedStatement = dbConn.prepareStatement(selectDuplicates);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-            while (resultSet.next()) {
-                PetStorage invalidPet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
-                String generatedName = sqlWrapper.generateUniquePetName(invalidPet.ownerId, invalidPet.petType);
-                if (!sqlWrapper.renamePet(invalidPet.ownerId, invalidPet.petName, generatedName)) {
-                    return false;
+    private class TwoToThree {
+        private TwoToThree(){}
+
+        private boolean twoToThreeAddEffectivePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
+            String alterTableStatement = "ALTER TABLE tpp_unloaded_pets ADD COLUMN effective_pet_name VARCHAR(64)";
+            return sqlWrapper.updatePrepStatement(alterTableStatement);
+        }
+
+        private boolean twoToThreePopulateEffectivePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
+            String populateTableStatement = "UPDATE tpp_unloaded_pets SET effective_pet_name = lower(pet_name)";
+            return sqlWrapper.updatePrepStatement(populateTableStatement);
+        }
+
+        private boolean twoToThreeRemovePetsNamedAllList(SQLWrapper sqlWrapper) throws SQLException {
+            String selectInvalidPets = "SELECT * FROM tpp_unloaded_pets WHERE effective_pet_name = \"all\" OR effective_pet_name = \"list\"";
+            try (Connection dbConn = sqlWrapper.getConnection();
+                 PreparedStatement preparedStatement = dbConn.prepareStatement(selectInvalidPets);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    PetStorage invalidPet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
+                    String generatedName = sqlWrapper.generateUniquePetName(invalidPet.ownerId, invalidPet.petType);
+                    if (!sqlWrapper.renamePet(invalidPet.ownerId, invalidPet.petName, generatedName)) {
+                        return false;
+                    }
                 }
             }
+            return true;
         }
-        return true;
-    }
 
-    private void threeToTwoRemoveEffectivePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
-        String renameTableStatement = "ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp";
-        String createVersionOneTableStatement = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
-                + "pet_id CHAR(32) PRIMARY KEY,\n"
-                + "pet_type TINYINT NOT NULL,\n"
-                + "pet_x INT NOT NULL,\n"
-                + "pet_y INT NOT NULL,\n"
-                + "pet_z INT NOT NULL,\n"
-                + "pet_world VARCHAR(25) NOT NULL,\n"
-                + "owner_id CHAR(32) NOT NULL,\n"
-                + "pet_name VARCHAR(64)"
-                + ");";
-        String insertOldDataStatement = "INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name FROM tpp_unloaded_pets_temp";
-        String dropOldTableStatement = "DROP TABLE tpp_unloaded_pets_temp";
-
-        sqlWrapper.updatePrepStatement(renameTableStatement);
-        sqlWrapper.createStatement(createVersionOneTableStatement);
-        sqlWrapper.insertPrepStatement(insertOldDataStatement);
-        sqlWrapper.updatePrepStatement(dropOldTableStatement);
-    }
-
-    private void threeToTwo(SQLWrapper sqlWrapper) throws SQLException {
-        threeToTwoRemoveEffectivePetNameColumn(sqlWrapper);
-    }
-
-    private boolean twoToThree(SQLWrapper sqlWrapper) throws SQLException {
-        if (twoToThreeAddEffectivePetNameColumn(sqlWrapper) && twoToThreePopulateEffectivePetNameColumn(sqlWrapper) && twoToThreeRemovePetsNamedAllList(sqlWrapper) && twoToThreeRenameDuplicates(sqlWrapper)) {
-            return setCurrentSchemaVersion(sqlWrapper, 3);
+        private boolean twoToThreeRenameDuplicates(SQLWrapper sqlWrapper) throws SQLException {
+            String selectDuplicates = "SELECT * \n"
+                    + "FROM tpp_unloaded_pets upi\n"
+                    + "WHERE EXISTS (\n"
+                    + "SELECT 1\n"
+                    + "FROM tpp_unloaded_pets upj\n"
+                    + "WHERE upj.effective_pet_name = upi.effective_pet_name\n"
+                    + "AND upj.owner_id = upi.owner_id\n"
+                    + "LIMIT 1, 1)";
+            try (Connection dbConn = sqlWrapper.getConnection();
+                 PreparedStatement preparedStatement = dbConn.prepareStatement(selectDuplicates);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    PetStorage invalidPet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
+                    String generatedName = sqlWrapper.generateUniquePetName(invalidPet.ownerId, invalidPet.petType);
+                    if (!sqlWrapper.renamePet(invalidPet.ownerId, invalidPet.petName, generatedName)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
-        threeToTwo(sqlWrapper);
-        return false;
-    }
 
-    private boolean threeToFourCreateTppUserStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
-        String createUserStorageTable = "CREATE TABLE IF NOT EXISTS tpp_user_storage_locations (\n" +
-                "user_id CHAR(32) NOT NULL, \n" +
-                "storage_name VARCHAR(64) NOT NULL, \n" +
-                "effective_storage_name VARCHAR(64) NOT NULL," +
-                "loc_x INT NOT NULL, \n" +
-                "loc_y INT NOT NULL, \n" +
-                "loc_z INT NOT NULL, \n" +
-                "world_name VARCHAR(25) NOT NULL, \n" +
-                "PRIMARY KEY (user_id, effective_storage_name))";
-        return sqlWrapper.createStatement(createUserStorageTable);
-    }
+        private void threeToTwoRemoveEffectivePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
+            String renameTableStatement = "ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp";
+            String createVersionOneTableStatement = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+                    + "pet_id CHAR(32) PRIMARY KEY,\n"
+                    + "pet_type TINYINT NOT NULL,\n"
+                    + "pet_x INT NOT NULL,\n"
+                    + "pet_y INT NOT NULL,\n"
+                    + "pet_z INT NOT NULL,\n"
+                    + "pet_world VARCHAR(25) NOT NULL,\n"
+                    + "owner_id CHAR(32) NOT NULL,\n"
+                    + "pet_name VARCHAR(64)"
+                    + ");";
+            String insertOldDataStatement = "INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name FROM tpp_unloaded_pets_temp";
+            String dropOldTableStatement = "DROP TABLE tpp_unloaded_pets_temp";
 
-    private boolean threeToFourCreateTppServerStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
-        String createServerStorageTable = "CREATE TABLE IF NOT EXISTS tpp_server_storage_locations (\n" +
-                "storage_name VARCHAR(64) NOT NULL, \n" +
-                "effective_storage_name VARCHAR(64) NOT NULL, \n" +
-                "loc_x INT NOT NULL, \n" +
-                "loc_y INT NOT NULL, \n" +
-                "loc_z INT NOT NULL, \n" +
-                "world_name VARCHAR(25) NOT NULL, \n" +
-                "PRIMARY KEY (effective_storage_name, world_name))";
-        return sqlWrapper.createStatement(createServerStorageTable);
-    }
-
-    private void fourToThreeDropUserStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
-        String dropUserStorageTable = "DROP TABLE IF EXISTS tpp_user_storage_locations";
-        sqlWrapper.updatePrepStatement(dropUserStorageTable);
-    }
-
-    private void fourToThreeDropServerStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
-        String dropServerStorageTable = "DROP TABLE IF EXISTS tpp_server_storage_locations";
-        sqlWrapper.updatePrepStatement(dropServerStorageTable);
-    }
-
-    private void fourToThree(SQLWrapper sqlWrapper) throws SQLException {
-        fourToThreeDropUserStorageLocations(sqlWrapper);
-        fourToThreeDropServerStorageLocations(sqlWrapper);
-    }
-
-    private boolean threeToFour(SQLWrapper sqlWrapper) throws SQLException {
-        if (threeToFourCreateTppUserStorageLocations(sqlWrapper) && threeToFourCreateTppServerStorageLocations(sqlWrapper)) {
-            return setCurrentSchemaVersion(sqlWrapper, 4);
+            sqlWrapper.updatePrepStatement(renameTableStatement);
+            sqlWrapper.createStatement(createVersionOneTableStatement);
+            sqlWrapper.insertPrepStatement(insertOldDataStatement);
+            sqlWrapper.updatePrepStatement(dropOldTableStatement);
         }
-        fourToThree(sqlWrapper);
-        return false;
+
+        private void threeToTwo(SQLWrapper sqlWrapper) throws SQLException {
+            threeToTwoRemoveEffectivePetNameColumn(sqlWrapper);
+        }
+
+        private void run(SQLWrapper sqlWrapper) throws SQLException {
+            if (twoToThreeAddEffectivePetNameColumn(sqlWrapper) && twoToThreePopulateEffectivePetNameColumn(sqlWrapper) && twoToThreeRemovePetsNamedAllList(sqlWrapper) && twoToThreeRenameDuplicates(sqlWrapper)) {
+                setCurrentSchemaVersion(sqlWrapper, 3);
+                return;
+            }
+            threeToTwo(sqlWrapper);
+        }
+    }
+
+    private class ThreeToFour {
+        private ThreeToFour(){}
+
+        private boolean threeToFourCreateTppUserStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
+            String createUserStorageTable = "CREATE TABLE IF NOT EXISTS tpp_user_storage_locations (\n" +
+                    "user_id CHAR(32) NOT NULL, \n" +
+                    "storage_name VARCHAR(64) NOT NULL, \n" +
+                    "effective_storage_name VARCHAR(64) NOT NULL," +
+                    "loc_x INT NOT NULL, \n" +
+                    "loc_y INT NOT NULL, \n" +
+                    "loc_z INT NOT NULL, \n" +
+                    "world_name VARCHAR(25) NOT NULL, \n" +
+                    "PRIMARY KEY (user_id, effective_storage_name))";
+            return sqlWrapper.createStatement(createUserStorageTable);
+        }
+
+        private boolean threeToFourCreateTppServerStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
+            String createServerStorageTable = "CREATE TABLE IF NOT EXISTS tpp_server_storage_locations (\n" +
+                    "storage_name VARCHAR(64) NOT NULL, \n" +
+                    "effective_storage_name VARCHAR(64) NOT NULL, \n" +
+                    "loc_x INT NOT NULL, \n" +
+                    "loc_y INT NOT NULL, \n" +
+                    "loc_z INT NOT NULL, \n" +
+                    "world_name VARCHAR(25) NOT NULL, \n" +
+                    "PRIMARY KEY (effective_storage_name, world_name))";
+            return sqlWrapper.createStatement(createServerStorageTable);
+        }
+
+        private void fourToThreeDropUserStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
+            String dropUserStorageTable = "DROP TABLE IF EXISTS tpp_user_storage_locations";
+            sqlWrapper.updatePrepStatement(dropUserStorageTable);
+        }
+
+        private void fourToThreeDropServerStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
+            String dropServerStorageTable = "DROP TABLE IF EXISTS tpp_server_storage_locations";
+            sqlWrapper.updatePrepStatement(dropServerStorageTable);
+        }
+
+        private void fourToThree(SQLWrapper sqlWrapper) throws SQLException {
+            fourToThreeDropUserStorageLocations(sqlWrapper);
+            fourToThreeDropServerStorageLocations(sqlWrapper);
+        }
+
+        private void run(SQLWrapper sqlWrapper) throws SQLException {
+            if (threeToFourCreateTppUserStorageLocations(sqlWrapper) && threeToFourCreateTppServerStorageLocations(sqlWrapper)) {
+                setCurrentSchemaVersion(sqlWrapper, 4);
+                return;
+            }
+            fourToThree(sqlWrapper);
+        }
     }
 
     public boolean isUpToDate() {
