@@ -9,6 +9,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,27 +32,27 @@ public class CommandAllowList extends BaseCommand{
     }
 
     private void processCommandGeneric() {
-        if (!ArgValidator.softValidatePetName(this.args[0])) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return;
-        }
+        try {
+            if (!ArgValidator.softValidatePetName(this.args[0])) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return;
+            }
 
-        List<PetStorage> petList = this.thisPlugin.getDatabase().getPetByName(this.commandFor.getUniqueId().toString(), this.args[0]);
+            List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-        if (petList == null) {
+            if (petList.size() == 0) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return;
+            }
+
+            // TODO: Remove untrim and trim from UUIDs. Kinda a silly idea in the first place lol
+            List<String> playerUUIDs = thisPlugin.getAllowedPlayers().get(petList.get(0).petId);
+
+            this.announceAllowedPlayers(playerUUIDs);
+
+        } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return;
         }
-
-        if (petList.size() == 0) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return;
-        }
-
-        // TODO: Remove untrim and trim from UUIDs. Kinda a silly idea in the first place lol
-        List<String> playerUUIDs = thisPlugin.getAllowedPlayers().get(petList.get(0).petId);
-
-        this.announceAllowedPlayers(playerUUIDs);
     }
 
     private void announceAllowedPlayers(List<String> playerUUIDs) {
