@@ -7,6 +7,8 @@ import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import java.sql.SQLException;
+
 /**
  * Object used for store commands
  * @author GatheringExp
@@ -38,41 +40,45 @@ class CommandStore extends TeleportCommand {
 
     private void processCommandGeneric() {
         // The first argument is always the pet name. Check if it's a valid pet name.
-        if (!ArgValidator.softValidatePetName(this.args[0])) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return;
-        }
-
-        StorageLocation storageLocation;
-
-        if (ArgValidator.validateArgsLength(this.args, 2)) {
-            // Syntax: /tpp store [pet name] [storage location]
-
-            this.hasSpecificStorage = true;
-
-            if (!ArgValidator.validateStorageName(this.args[1])) {
-                this.commandStatus = CommandStatus.INVALID_NAME;
+        try {
+            if (!ArgValidator.softValidatePetName(this.args[0])) {
+                this.commandStatus = CommandStatus.NO_PET;
                 return;
             }
 
-            storageLocation = this.thisPlugin.getDatabase().getStorageLocation(this.commandFor.getUniqueId().toString(), this.args[1]);
-        } else {
-            // Syntax: /tpp store [pet name]
+            StorageLocation storageLocation;
 
-            storageLocation = this.thisPlugin.getDatabase().getDefaultServerStorageLocation(this.sender.getWorld());
-            this.hasSpecificStorage = false;
-        }
+            if (ArgValidator.validateArgsLength(this.args, 2)) {
+                // Syntax: /tpp store [pet name] [storage location]
 
-        if (storageLocation != null) {
-            if (storePet(storageLocation)) {
-                thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
+                this.hasSpecificStorage = true;
+
+                if (!ArgValidator.validateStorageName(this.args[1])) {
+                    this.commandStatus = CommandStatus.INVALID_NAME;
+                    return;
+                }
+
+                storageLocation = this.thisPlugin.getDatabase().getStorageLocation(this.commandFor.getUniqueId().toString(), this.args[1]);
             } else {
-                this.commandStatus = CommandStatus.CANT_TELEPORT;
-            }
-        } else {
-            this.commandStatus = CommandStatus.INVALID_NAME;
-        }
+                // Syntax: /tpp store [pet name]
 
+                storageLocation = this.thisPlugin.getDatabase().getServerStorageLocation("default", this.sender.getWorld());
+                this.hasSpecificStorage = false;
+            }
+
+            if (storageLocation != null) {
+                if (storePet(storageLocation)) {
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
+                } else {
+                    this.commandStatus = CommandStatus.CANT_TELEPORT;
+                }
+            } else {
+                this.commandStatus = CommandStatus.INVALID_NAME;
+            }
+
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
+        }
     }
 
     public boolean storePet(StorageLocation storageLocation) {
@@ -104,6 +110,9 @@ class CommandStore extends TeleportCommand {
                 break;
             case CANT_TELEPORT:
                 this.sender.sendMessage(ChatColor.RED + "Could not store " + (isForSelf() ? "your " : ChatColor.WHITE + this.commandFor.getName() + "'s " + ChatColor.RED) + "pet");
+                break;
+            case DB_FAIL:
+                this.sender.sendMessage(ChatColor.RED + "Could not find storage");
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
