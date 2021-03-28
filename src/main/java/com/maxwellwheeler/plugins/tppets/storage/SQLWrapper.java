@@ -87,13 +87,13 @@ public abstract class SQLWrapper {
 
     // Initializers
 
+    // TODO: Make sure database updater is run properly
     public boolean initializeTables() throws SQLException {
         String makeTableAllowedPlayers = "CREATE TABLE IF NOT EXISTS tpp_allowed_players(" +
                 "pet_id CHAR(32),\n" +
                 "user_id CHAR(32),\n" +
                 "PRIMARY KEY(pet_id, user_id),\n" +
                 "FOREIGN KEY(pet_id) REFERENCES tpp_unloaded_pets(pet_id) ON DELETE CASCADE);";
-        String makeTableDBVersion = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY);";
         String makeTableProtectedRegions = "CREATE TABLE IF NOT EXISTS tpp_protected_regions (\n"
                 + "zone_name VARCHAR(64) PRIMARY KEY,\n"
                 + "enter_message VARCHAR(255),\n"
@@ -145,7 +145,6 @@ public abstract class SQLWrapper {
         return this.createStatement(makeTableUnloadedPets)
                 && this.createStatement(makeTableLostRegions)
                 && this.createStatement(makeTableProtectedRegions)
-                && this.createStatement(makeTableDBVersion)
                 && this.createStatement(makeTableAllowedPlayers)
                 && this.createStatement(makeTableUserStorageLocations)
                 && this.createStatement(makeTableDefaultStorageLocations)
