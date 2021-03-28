@@ -7,7 +7,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
@@ -191,26 +190,6 @@ public class CommandTPP implements CommandExecutor {
 
         }
         sender.sendMessage(ChatColor.DARK_GRAY + "-------------------------------------");
-    }
-    
-    /**
-     * Takes an inputArray of strings, and truncates it to length truncate, taking all leftover elements of the array and combining it into the last element of the truncated one. Ex: separateArgs(new String[]{"Hi", "Hello", " World"}, 2) = {"Hi", "Hello World"} 
-     * @param inputArray The array to be concatenated
-     * @param truncate The length of the final array
-     * @return A truncated String[] array, with all elements after truncate combined into the last element.
-     */
-    private String[] separateArgs(String[] inputArray, int truncate) {
-        if (inputArray.length < truncate) {
-            return inputArray;
-        }
-        String[] truncatedArrayBits = Arrays.copyOfRange(inputArray, truncate-1, inputArray.length);
-        List<String> retList = new ArrayList<>(Arrays.asList(Arrays.copyOfRange(inputArray, 0, truncate - 1)));
-        StringBuilder replacementTruncation = new StringBuilder();
-        for (String str : truncatedArrayBits) {
-            replacementTruncation.append(str).append(" ");
-        }
-        retList.add(replacementTruncation.toString());
-        return retList.toArray(new String[truncate]);
     }
     
     /**
