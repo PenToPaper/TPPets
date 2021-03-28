@@ -1,6 +1,5 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 
 import java.sql.SQLException;
@@ -74,7 +73,6 @@ public class ArgValidator {
 
     /**
      * Soft validates pet names and checks that pet name is unique.
-     * @param dbw The {@link DBWrapper} instance for the database connection
      * @param ownerUUID The pet owner's UUID, used for checking if pet names are unique to them
      * @param petName The pet name to validate
      * @return True if pet name checks out, false otherwise
