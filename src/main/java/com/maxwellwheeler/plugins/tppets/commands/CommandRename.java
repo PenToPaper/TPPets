@@ -6,6 +6,7 @@ import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class CommandRename extends BaseCommand {
@@ -28,39 +29,39 @@ public class CommandRename extends BaseCommand {
     }
 
     private void processCommandGeneric() {
-        if (!ArgValidator.softValidatePetName(this.args[0])) {
-            this.commandStatus = CommandStatus.NO_TARGET_PET;
-            return;
-        }
+        try {
+            if (!ArgValidator.softValidatePetName(this.args[0])) {
+                this.commandStatus = CommandStatus.NO_TARGET_PET;
+                return;
+            }
 
-        if (!ArgValidator.softValidatePetName(this.args[1])) {
-            this.commandStatus = CommandStatus.INVALID_NAME;
-            return;
-        }
+            if (!ArgValidator.softValidatePetName(this.args[1])) {
+                this.commandStatus = CommandStatus.INVALID_NAME;
+                return;
+            }
 
-        List<PetStorage> pet = this.thisPlugin.getDatabase().getPetByName(this.commandFor.getUniqueId().toString(), this.args[0]);
+            List<PetStorage> pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-        if (pet == null) {
+            if (pet.size() == 0) {
+                this.commandStatus = CommandStatus.NO_TARGET_PET;
+                return;
+            }
+
+            if (!ArgValidator.validatePetName(this.thisPlugin.getDatabase(), this.commandFor.getUniqueId().toString(), this.args[1])) {
+                this.commandStatus = CommandStatus.PET_NAME_ALREADY_IN_USE;
+                return;
+            }
+
+            if (!this.thisPlugin.getDatabase().renamePet(this.commandFor.getUniqueId().toString(), this.args[0], this.args[1])) {
+                this.commandStatus = CommandStatus.DB_FAIL;
+                return;
+            }
+
+            this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " has changed " + this.commandFor.getName() + "'s pet named " + this.args[0] + " to " + this.args[1]);
+
+        } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return;
         }
-
-        if (pet.size() == 0) {
-            this.commandStatus = CommandStatus.NO_TARGET_PET;
-            return;
-        }
-
-        if (!ArgValidator.validatePetName(this.thisPlugin.getDatabase(), this.commandFor.getUniqueId().toString(), this.args[1])) {
-            this.commandStatus = CommandStatus.PET_NAME_ALREADY_IN_USE;
-            return;
-        }
-
-        if (!this.thisPlugin.getDatabase().renamePet(this.commandFor.getUniqueId().toString(), this.args[0], this.args[1])) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-            return;
-        }
-
-        this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " has changed " + this.commandFor.getName() + "'s pet named " + this.args[0] + " to " + this.args[1]);
     }
 
     private void displayStatus() {
