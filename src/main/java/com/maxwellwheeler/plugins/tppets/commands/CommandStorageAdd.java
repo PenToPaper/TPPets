@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.sql.SQLException;
+
 public class CommandStorageAdd extends Command {
     CommandStorageAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
@@ -33,39 +35,36 @@ public class CommandStorageAdd extends Command {
             return;
         }
 
-        if (addStorageToDb()) {
-            this.commandStatus = CommandStatus.SUCCESS;
+        try {
+
+            addStorageToDb();
+
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
         }
     }
 
-    private boolean addStorageToDb() {
-        if (this.thisPlugin.getDatabase() == null) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-            return false;
-        }
-
+    private void addStorageToDb() throws SQLException {
         if (this.thisPlugin.getDatabase().getStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0]) != null) {
             this.commandStatus = CommandStatus.ALREADY_DONE;
-            return false;
+            return;
         }
 
         if (!isNewStorageWithinLimit()) {
             this.commandStatus = CommandStatus.LIMIT_REACHED;
-            return false;
+            return;
         }
 
         if (this.thisPlugin.getDatabase().addStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0], this.sender.getLocation())) {
             this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getUniqueId().toString() + " has added location " + this.args[0] + " " + TeleportCommand.formatLocation(this.sender.getLocation()) + " for " + this.commandFor.getName());
             this.commandStatus = CommandStatus.SUCCESS;
-            return true;
         } else {
             this.commandStatus = CommandStatus.DB_FAIL;
-            return false;
         }
     }
 
-    public boolean isNewStorageWithinLimit() {
-        return this.sender.hasPermission("tppets.bypassstoragelimit") || this.thisPlugin.getStorageLimit() < 0 || this.thisPlugin.getDatabase().getStorageLocations(this.commandFor.getUniqueId().toString()).size() < this.thisPlugin.getStorageLimit();
+    public boolean isNewStorageWithinLimit() throws SQLException {
+        return this.sender.hasPermission("tppets.bypassstoragelimit") || this.thisPlugin.getStorageLimit() < 0 || this.thisPlugin.getDatabase().getPlayerStorageLocations(this.commandFor.getUniqueId().toString()).size() < this.thisPlugin.getStorageLimit();
     }
 
     private void displayStatus() {
