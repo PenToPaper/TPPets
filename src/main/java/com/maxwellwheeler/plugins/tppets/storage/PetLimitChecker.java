@@ -118,7 +118,7 @@ public class PetLimitChecker {
     }
 
     public boolean isWithinSpecificLimit(OfflinePlayer owner, PetType.Pets petType) throws SQLException {
-        int numSpecificPets = this.thisPlugin.getDatabase().getNumPetsByPT(owner.getUniqueId().toString(), petType);
+        int numSpecificPets = this.thisPlugin.getDatabase().getNumPetsByPetType(owner.getUniqueId().toString(), petType);
         return isWithinLimit(this.getSpecificLimit(petType), numSpecificPets);
     }
 
