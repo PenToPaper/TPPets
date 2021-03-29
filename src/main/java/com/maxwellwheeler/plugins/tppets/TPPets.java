@@ -94,10 +94,15 @@ public class TPPets extends JavaPlugin {
      * Updates the database if it can, otherwise turns database = null, negatively impacting virtually every aspect of this plugin
      */
     private void updateDBC() {
-        this.databaseUpdater = new DBUpdater(this);
-        this.databaseUpdater.update(this.getDatabase());
-        if (!databaseUpdater.isUpToDate()) {
-            getLogWrapper().logErrors("Database is unable to be updated. Plugin cannot run.");
+        try {
+            this.databaseUpdater = new DBUpdater(this);
+            this.databaseUpdater.update(this.getDatabase());
+            if (!databaseUpdater.isUpToDate()) {
+                getLogWrapper().logErrors("Database is unable to be updated. Plugin cannot run.");
+                getServer().getPluginManager().disablePlugin(this);
+            }
+        } catch (SQLException exception) {
+            getLogWrapper().logErrors("Database is unable to be updated. Plugin cannot run." + exception.getMessage());
             getServer().getPluginManager().disablePlugin(this);
         }
     }
