@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.21.0</version>
+            <version>3.34.0</version>
         </dependency>
         <dependency>
             <groupId>net.milkbowl.vault</groupId>
@@ -97,6 +97,11 @@
             <artifactId>mockito-inline</artifactId>
             <version>3.6.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations-java5</artifactId>
+            <version>19.0.0</version>
         </dependency>
     </dependencies>
 </project>

@@ -5,7 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.sun.istack.internal.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
