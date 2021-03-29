@@ -1,12 +1,13 @@
 package com.maxwellwheeler.plugins.tppets.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkUnloadEvent;
+
+import java.sql.SQLException;
 
 public class ListenerPetPosition implements Listener {
     private final TPPets thisPlugin;
@@ -15,12 +16,13 @@ public class ListenerPetPosition implements Listener {
         this.thisPlugin = thisPlugin;
     }
 
+    // Doesn't untame pets that the player currently owns, as that would be mean
     @EventHandler(priority= EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent event) {
         for (Entity entity : event.getChunk().getEntities()) {
-            if (PetType.isPetTracked(entity) && this.thisPlugin.getDatabase() != null) {
-                this.thisPlugin.getDatabase().updateOrInsertPet(entity);
-            }
+            try {
+                this.thisPlugin.getDatabase().insertOrUpdatePetLocation(entity);
+            } catch (SQLException ignored) {}
         }
     }
 }

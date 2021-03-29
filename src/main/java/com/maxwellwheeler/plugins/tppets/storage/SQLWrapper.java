@@ -192,10 +192,10 @@ public abstract class SQLWrapper {
         return this.insertPrepStatement(insertPet, trimmedPetId, petTypeIndex, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedOwnerId, petName, petName.toLowerCase());
     }
 
-    public boolean removePet(@NotNull Entity pet) throws SQLException {
-        if (PetType.isPetTypeTracked(pet)) {
+    public boolean removePet(@NotNull Entity entity) throws SQLException {
+        if (PetType.isPetTracked(entity)) {
             String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ?";
-            String trimmedPetId = UUIDUtils.trimUUID(pet.getUniqueId());
+            String trimmedPetId = UUIDUtils.trimUUID(entity.getUniqueId());
 
             return this.deletePrepStatement(deletePet, trimmedPetId);
         }
@@ -216,6 +216,20 @@ public abstract class SQLWrapper {
         return this.updatePrepStatement(updatePetLocation, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedPetId, trimmedOwnerId);
     }
 
+    public boolean insertOrUpdatePetLocation(@NotNull Entity entity) throws SQLException {
+        if (PetType.isPetTracked(entity)) {
+            Tameable pet = (Tameable) entity;
+            if (getSpecificPet(entity.getUniqueId().toString()) != null) {
+                return updatePetLocation(entity);
+            } else if (pet.getOwner() != null) {
+                String ownerId = pet.getOwner().getUniqueId().toString();
+                String petName = generateUniquePetName(ownerId, PetType.getEnumByEntity(entity));
+                return insertPet(entity, ownerId, petName);
+            }
+        }
+        return false;
+    }
+
     public boolean renamePet(@NotNull String ownerId, @NotNull String oldName, @NotNull String newName) throws SQLException {
         String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE owner_id = ? AND effective_pet_name = ?";
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
@@ -234,6 +248,19 @@ public abstract class SQLWrapper {
                 ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
             }
             return ret;
+        }
+    }
+
+    public PetStorage getSpecificPet(@NotNull String petId) throws SQLException {
+        String selectSpecificPet = "SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?";
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        try (Connection dbConn = this.getConnection();
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectSpecificPet), trimmedPetId);
+             ResultSet resultSet = selectStatement.executeQuery()) {
+            if (resultSet.next()) {
+                return new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name"));
+            }
+            return null;
         }
     }
 
