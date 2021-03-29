@@ -221,7 +221,7 @@ public abstract class SQLWrapper {
             Tameable pet = (Tameable) entity;
             if (getSpecificPet(entity.getUniqueId().toString()) != null) {
                 return updatePetLocation(entity);
-            } else if (pet.getOwner() != null) {
+            } else {
                 String ownerId = pet.getOwner().getUniqueId().toString();
                 String petName = generateUniquePetName(ownerId, PetType.getEnumByEntity(entity));
                 return insertPet(entity, ownerId, petName);
