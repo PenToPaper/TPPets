@@ -12,8 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-import java.util.List;
-import java.util.Objects;
+import java.sql.SQLException;
 
 import static com.maxwellwheeler.plugins.tppets.listeners.EventStatus.*;
 
@@ -25,22 +24,26 @@ public class ListenerPlayerInteractPetExamine implements Listener {
     }
 
     private EventStatus onPlayerExaminePet(PlayerInteractEntityEvent event) {
-        if (!PetType.isPetTracked(event.getRightClicked())) {
-            return NO_OWNER;
-        }
+        try {
+            if (!PetType.isPetTracked(event.getRightClicked())) {
+                return NO_OWNER;
+            }
 
-        Tameable pet = (Tameable) event.getRightClicked();
+            Tameable pet = (Tameable) event.getRightClicked();
 
-        // TODO: LOOK INTO MODIFYING THIS METHOD TO ONLY NEED THE PET'S UUID
-        List<PetStorage> psList = this.thisPlugin.getDatabase().getPetsFromUUIDs(pet.getUniqueId().toString(), Objects.requireNonNull(pet.getOwner()).getUniqueId().toString());
+            PetStorage petStorage = this.thisPlugin.getDatabase().getSpecificPet(pet.getUniqueId().toString());
 
-        if (psList == null || psList.size() == 0) {
+            if (petStorage == null) {
+                return DB_FAIL;
+            }
+
+            event.getPlayer().sendMessage(ChatColor.BLUE + "This is " + ChatColor.WHITE + petStorage.petName + ChatColor.BLUE + " and belongs to " + ChatColor.WHITE + pet.getOwner().getName());
+            event.setCancelled(true);
+            return SUCCESS;
+
+        } catch (SQLException exception) {
             return DB_FAIL;
         }
-
-        event.getPlayer().sendMessage(ChatColor.BLUE + "This is " + ChatColor.WHITE + psList.get(0).petName + ChatColor.BLUE + " and belongs to " + ChatColor.WHITE + pet.getOwner().getName());
-        event.setCancelled(true);
-        return SUCCESS;
     }
 
     private void displayCommandStatus(Player examiningPlayer, EventStatus eventStatus) {
