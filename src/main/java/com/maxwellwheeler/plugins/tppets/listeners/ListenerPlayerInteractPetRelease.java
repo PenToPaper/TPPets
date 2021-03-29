@@ -14,6 +14,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
+import java.sql.SQLException;
+
 import static com.maxwellwheeler.plugins.tppets.listeners.EventStatus.*;
 
 public class ListenerPlayerInteractPetRelease implements Listener {
@@ -24,24 +26,29 @@ public class ListenerPlayerInteractPetRelease implements Listener {
     }
 
     private EventStatus onPlayerReleasePet(PlayerInteractEntityEvent event) {
-        if (!PetType.isPetTracked(event.getRightClicked())) {
-            return NO_OWNER;
-        }
+        try {
+            if (!PetType.isPetTracked(event.getRightClicked())) {
+                return NO_OWNER;
+            }
 
-        Tameable pet = (Tameable) event.getRightClicked();
+            Tameable pet = (Tameable) event.getRightClicked();
 
-        if (!doesPlayerHavePermissionToRelease(event.getPlayer(), pet)) {
-            return INSUFFICIENT_PERMISSIONS;
-        }
+            if (!doesPlayerHavePermissionToRelease(event.getPlayer(), pet)) {
+                return INSUFFICIENT_PERMISSIONS;
+            }
 
-        if (!this.thisPlugin.getDatabase().deletePet(pet)) {
+            if (!this.thisPlugin.getDatabase().removePet(pet)) {
+                return DB_FAIL;
+            }
+
+            releasePetEntity(pet);
+            event.setCancelled(true);
+            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + event.getPlayer().getName() + " untamed entity " + event.getRightClicked().getUniqueId().toString());
+            return SUCCESS;
+
+        } catch (SQLException exception) {
             return DB_FAIL;
         }
-
-        releasePetEntity(pet);
-        event.setCancelled(true);
-        this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + event.getPlayer().getName() + " untamed entity " + event.getRightClicked().getUniqueId().toString());
-        return SUCCESS;
     }
 
     private void displayCommandStatus(Player examiningPlayer, EventStatus eventStatus) {
