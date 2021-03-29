@@ -14,6 +14,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+import java.sql.SQLException;
+
 public class ListenerProtectedRegion implements Listener {
     private final TPPets thisPlugin;
 
@@ -39,8 +41,10 @@ public class ListenerProtectedRegion implements Listener {
         for (Entity entity : event.getPlayer().getNearbyEntities(10, 10, 10)) {
             // If the entity is near the player and tracked by TPPets
             if (pr.isInRegion(entity.getLocation()) && PetType.isPetTracked(entity) && !canPetBeInPr((Tameable) entity, pr.getWorld()) && pr.tpToLostRegion(entity)) {
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + entity.getUniqueId().toString() + " away from " + pr.getRegionName() + " to " + pr.getLfReference().getRegionName());
-                this.thisPlugin.getDatabase().updateOrInsertPet(entity);
+                try {
+                    this.thisPlugin.getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + entity.getUniqueId().toString() + " away from " + pr.getRegionName() + " to " + pr.getLfReference().getRegionName());
+                    this.thisPlugin.getDatabase().insertOrUpdatePetLocation(entity);
+                } catch (SQLException ignored) {}
             }
         }
     }
