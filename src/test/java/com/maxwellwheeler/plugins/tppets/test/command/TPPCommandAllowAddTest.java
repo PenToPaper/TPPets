@@ -3,8 +3,8 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -32,7 +33,7 @@ public class TPPCommandAllowAddTest {
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
     private List<PetStorage> petStorageList;
@@ -47,10 +48,10 @@ public class TPPCommandAllowAddTest {
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.allowguests"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.allowguests", "tppets.allowother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("allow");
@@ -63,12 +64,12 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Adds a new player to a pet")
-    void addsPlayerToPet() {
+    void addsPlayerToPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
-            when(this.dbWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
@@ -79,7 +80,7 @@ public class TPPCommandAllowAddTest {
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
             assertEquals("MockGuestId", this.allowedPlayers.get("MockPetId").get(0));
 
-            verify(this.dbWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -93,13 +94,13 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Admin adds new players to pet")
-    void adminAddPlayerToPet() {
+    void adminAddPlayerToPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
-            when(this.dbWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allow", "f:MockPlayerName", "MockGuestName", "MockPetName"};
@@ -110,7 +111,7 @@ public class TPPCommandAllowAddTest {
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
             assertEquals("MockGuestId", this.allowedPlayers.get("MockPetId").get(0));
 
-            verify(this.dbWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -125,7 +126,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Silently fails when admin is not user")
-    void cannotAdminAddPlayerToPetNotPlayer() {
+    void cannotAdminAddPlayerToPetNotPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -136,7 +137,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
         }
     }
@@ -144,7 +145,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Admin insufficient permissions username with f:[username] syntax")
-    void cannotAdminAddPlayerToPetInsufficientPermissions() {
+    void cannotAdminAddPlayerToPetInsufficientPermissions() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -155,7 +156,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -166,7 +167,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Admin cannot add player to pet without valid user")
-    void cannotAdminAddPlayerToPetNoPlayer() {
+    void cannotAdminAddPlayerToPetNoPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             when(this.player.hasPlayedBefore()).thenReturn(false);
 
@@ -179,7 +180,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -190,7 +191,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Admin cannot add player to pet without target pet")
-    void cannotAdminAddPlayerToPetNoTargetPet() {
+    void cannotAdminAddPlayerToPetNoTargetPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -199,7 +200,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -210,7 +211,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Silently fails when player is not user")
-    void cannotAddPlayerToPetNotPlayer() {
+    void cannotAddPlayerToPetNotPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -221,20 +222,20 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
         }
     }
 
     @Test
     @DisplayName("Cannot add player to pet without target pet")
-    void cannotAddPlayerToPetNoTargetPet() {
+    void cannotAddPlayerToPetNoTargetPet() throws SQLException {
         String[] args = {"allow", "MockGuestName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
         assertEquals(0, this.allowedPlayers.size());
 
-        verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+        verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -245,7 +246,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Cannot add player to pet without target player")
-    void cannotAddPlayerToPetNoTargetPlayer() {
+    void cannotAddPlayerToPetNoTargetPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             when(this.guest.hasPlayedBefore()).thenReturn(false);
 
@@ -256,7 +257,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -267,7 +268,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Cannot add player to pet with invalid pet name")
-    void cannotAddPlayerToPetInvalidPetName() {
+    void cannotAddPlayerToPetInvalidPetName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
@@ -276,7 +277,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -288,18 +289,18 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Cannot add player to pet when database fails to find pet")
-    void cannotAddPlayerToPetDbFailPet() {
+    void cannotAddPlayerToPetDbFailPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(null);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenThrow(new SQLException());
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -311,18 +312,18 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Cannot add player to pet when no pet in database with name")
-    void cannotAddPlayerToPetNoPetWithName() {
+    void cannotAddPlayerToPetNoPetWithName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(new ArrayList<>());
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -334,7 +335,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Cannot add player to pet when player is already added to pet")
-    void cannotAddPlayerToPetAlreadyDone() {
+    void cannotAddPlayerToPetAlreadyDone() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
@@ -342,13 +343,13 @@ public class TPPCommandAllowAddTest {
             alreadyAllowedPlayers.add("MockGuestId");
             this.allowedPlayers.put("MockPetId", alreadyAllowedPlayers);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -360,7 +361,7 @@ public class TPPCommandAllowAddTest {
 
     @Test
     @DisplayName("Admin cannot add player to pet when player is already added to pet")
-    void cannotAdminAddPlayerToPetAlreadyDone() {
+    void cannotAdminAddPlayerToPetAlreadyDone() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
@@ -369,13 +370,13 @@ public class TPPCommandAllowAddTest {
             alreadyAllowedPlayers.add("MockGuestId");
             this.allowedPlayers.put("MockPetId", alreadyAllowedPlayers);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allow", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -386,13 +387,13 @@ public class TPPCommandAllowAddTest {
 
 
     @Test
-    @DisplayName("Cannot add player to pet when database fails to add player to pet")
-    void cannotAddPlayerToPetDbFailAdd() {
+    @DisplayName("Cannot add player to pet when database can't to add player to pet")
+    void cannotAddPlayerToPetDbCannotAdd() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
-            when(this.dbWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(false);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(false);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
@@ -400,7 +401,31 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.allowedPlayers.size());
 
-            verify(this.dbWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
+
+            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+            String capturedMessageOutput = this.messageCaptor.getValue();
+            assertEquals(ChatColor.RED + "Could not allow user to pet", capturedMessageOutput);
+        }
+    }
+
+    @Test
+    @DisplayName("Cannot add player to pet when database fails when adding player to pet")
+    void cannotAddPlayerToPetDbFailAdd() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
+
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenThrow(new SQLException());
+            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
+
+            String[] args = {"allow", "MockGuestName", "MockPetName"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            assertEquals(0, this.allowedPlayers.size());
+
+            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
