@@ -5,7 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
@@ -52,9 +52,9 @@ public class MockFactory {
         return loc;
     }
 
-    public static TPPets getMockPlugin(DBWrapper dbWrapper, LogWrapper logWrapper, boolean canTpThere, boolean allowTpBetweenWorlds, boolean isAllowedToPet) {
+    public static TPPets getMockPlugin(SQLWrapper sqlWrapper, LogWrapper logWrapper, boolean canTpThere, boolean allowTpBetweenWorlds, boolean isAllowedToPet) {
         TPPets tpPets = mock(TPPets.class);
-        when(tpPets.getDatabase()).thenReturn(dbWrapper);
+        when(tpPets.getDatabase()).thenReturn(sqlWrapper);
         when(tpPets.canTpThere(any())).thenReturn(canTpThere);
         when(tpPets.getAllowTpBetweenWorlds()).thenReturn(allowTpBetweenWorlds);
         if (logWrapper != null) {
