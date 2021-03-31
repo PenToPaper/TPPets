@@ -3,9 +3,11 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,12 +25,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 public class TPPCommandLostTest {
     private Player admin;
     private ArgumentCaptor<String> stringCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private TPPets tpPets;
     private Command command;
@@ -38,9 +39,9 @@ public class TPPCommandLostTest {
     public void beforeEach() {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.lost"});
         this.stringCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("lost");
@@ -58,8 +59,8 @@ public class TPPCommandLostTest {
         String[] args = {"lost", "remove", "LostRegionName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeLostRegion(anyString());
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).removeLostRegion(anyString());
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.tpPets, never()).removeLFReference(anyString());
         verify(this.tpPets, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -72,8 +73,8 @@ public class TPPCommandLostTest {
         String[] args = {"lost"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeLostRegion(anyString());
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).removeLostRegion(anyString());
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.tpPets, never()).removeLFReference(anyString());
         verify(this.tpPets, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -89,8 +90,8 @@ public class TPPCommandLostTest {
         String[] args = {"lost", "invalidtype"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeLostRegion(anyString());
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).removeLostRegion(anyString());
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.tpPets, never()).removeLFReference(anyString());
         verify(this.tpPets, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -111,8 +112,8 @@ public class TPPCommandLostTest {
             String[] args = {"lost", "f:MockPlayerName", "remove", "LostRegionName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, never()).removeLostRegion(anyString());
-            verify(this.dbWrapper, never()).getLostRegion(anyString());
+            verify(this.sqlWrapper, never()).removeLostRegion(anyString());
+            verify(this.sqlWrapper, never()).getLostRegion(anyString());
             verify(this.tpPets, never()).removeLFReference(anyString());
             verify(this.tpPets, never()).removeLostRegion(anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -129,8 +130,8 @@ public class TPPCommandLostTest {
         String[] args = {"lost", "f:MockPlayerName;", "remove", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeLostRegion(anyString());
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).removeLostRegion(anyString());
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.tpPets, never()).removeLFReference(anyString());
         verify(this.tpPets, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
