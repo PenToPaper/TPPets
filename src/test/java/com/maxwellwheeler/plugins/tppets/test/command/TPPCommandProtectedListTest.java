@@ -5,7 +5,7 @@ import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
@@ -27,39 +27,35 @@ import static org.mockito.Mockito.*;
 public class TPPCommandProtectedListTest {
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
-    private DBWrapper dbWrapper;
-    private LogWrapper logWrapper;
     private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
-    private Hashtable<String, ProtectedRegion> protectedRegions;
-    private World world;
 
     @BeforeEach
     public void beforeEach() {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.protected"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
-        this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
+        LogWrapper logWrapper = mock(LogWrapper.class);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("protected");
         aliases.put("protected", altAlias);
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
-        this.world = mock(World.class);
+        World world = mock(World.class);
 
-        LostAndFoundRegion lfr = ObjectFactory.getLostAndFoundRegion("LostAndFoundRegion", "MockWorldName", this.world, 1, 2, 3, 4, 5, 6);
+        LostAndFoundRegion lfr = ObjectFactory.getLostAndFoundRegion("LostAndFoundRegion", "MockWorldName", world, 1, 2, 3, 4, 5, 6);
 
         when(this.tpPets.getLostRegion("LostAndFoundRegion")).thenReturn(lfr);
 
-        this.protectedRegions = new Hashtable<>();
-        this.protectedRegions.put("ProtectedRegion1", ObjectFactory.getProtectedRegion("ProtectedRegion1", "Enter Message", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegion", this.tpPets));
-        this.protectedRegions.put("ProtectedRegion2", ObjectFactory.getProtectedRegion("ProtectedRegion2", "Enter Message", "MockWorldName", this.world, 10, 20, 30, 40, 50, 60, "LostRegion", this.tpPets));
+        Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<>();
+        protectedRegions.put("ProtectedRegion1", ObjectFactory.getProtectedRegion("ProtectedRegion1", "Enter Message", "MockWorldName", world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegion", this.tpPets));
+        protectedRegions.put("ProtectedRegion2", ObjectFactory.getProtectedRegion("ProtectedRegion2", "Enter Message", "MockWorldName", world, 10, 20, 30, 40, 50, 60, "LostRegion", this.tpPets));
 
-        when(this.tpPets.getProtectedRegions()).thenReturn(this.protectedRegions);
-        when(this.tpPets.getProtectedRegion("ProtectedRegion1")).thenReturn(this.protectedRegions.get("ProtectedRegion1"));
+        when(this.tpPets.getProtectedRegions()).thenReturn(protectedRegions);
+        when(this.tpPets.getProtectedRegion("ProtectedRegion1")).thenReturn(protectedRegions.get("ProtectedRegion1"));
     }
 
     @Test
