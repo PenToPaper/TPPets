@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -25,12 +25,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.never;
 
 public class TPPCommandProtectedTest {
     private Player admin;
     private ArgumentCaptor<String> stringCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private TPPets tpPets;
     private Command command;
@@ -40,9 +39,9 @@ public class TPPCommandProtectedTest {
     public void beforeEach() {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.protected"});
         this.stringCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("protected");
@@ -59,8 +58,8 @@ public class TPPCommandProtectedTest {
         String[] args = {"protected", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.tpPets, never()).removeProtectedRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(sender, never()).sendMessage(anyString());
@@ -72,8 +71,8 @@ public class TPPCommandProtectedTest {
         String[] args = {"protected"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.tpPets, never()).removeProtectedRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -88,8 +87,8 @@ public class TPPCommandProtectedTest {
         String[] args = {"protected", "invalidtype"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.tpPets, never()).removeProtectedRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -109,8 +108,8 @@ public class TPPCommandProtectedTest {
             String[] args = {"protected", "f:MockPlayerName", "remove", "ProtectedRegionName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, never()).removeProtectedRegion(anyString());
-            verify(this.dbWrapper, never()).getProtectedRegion(anyString());
+            verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
+            verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
             verify(this.tpPets, never()).removeProtectedRegion(anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -126,8 +125,8 @@ public class TPPCommandProtectedTest {
         String[] args = {"protected", "f:MockPlayerName;", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.tpPets, never()).removeProtectedRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
