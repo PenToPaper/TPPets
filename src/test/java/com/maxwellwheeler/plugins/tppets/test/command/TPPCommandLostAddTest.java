@@ -5,7 +5,7 @@ import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
@@ -29,7 +29,7 @@ public class TPPCommandLostAddTest {
     private org.bukkit.World world;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
     private ArgumentCaptor<String> stringCaptor;
@@ -44,11 +44,11 @@ public class TPPCommandLostAddTest {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.lost"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.regionCaptor = ArgumentCaptor.forClass(LostAndFoundRegion.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
         this.stringCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("lost");
@@ -62,8 +62,8 @@ public class TPPCommandLostAddTest {
 
         when(this.world.getName()).thenReturn("MockWorldName");
         when(this.tpPets.getRegionSelectionManager()).thenReturn(this.regionSelectionManager);
-        when(this.dbWrapper.getLostRegion("LostRegionName")).thenReturn(null);
-        when(this.dbWrapper.insertLostRegion(any(LostAndFoundRegion.class))).thenReturn(true);
+        when(this.sqlWrapper.getLostRegion("LostRegionName")).thenReturn(null);
+        when(this.sqlWrapper.insertLostRegion(any(LostAndFoundRegion.class))).thenReturn(true);
     }
 
     void assertEqualsLostAndFoundRegion(LostAndFoundRegion expectedLfr, LostAndFoundRegion actualLfr) {
@@ -88,9 +88,9 @@ public class TPPCommandLostAddTest {
 
         LostAndFoundRegion expectedRegion = ObjectFactory.getLostAndFoundRegion("LostRegionName", "MockWorldName", this.world,100, 200, 300, 400, 500, 600);
 
-        verify(this.dbWrapper, times(1)).getLostRegion(anyString());
+        verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
 
-        verify(this.dbWrapper, times(1)).insertLostRegion(this.regionCaptor.capture());
+        verify(this.sqlWrapper, times(1)).insertLostRegion(this.regionCaptor.capture());
         LostAndFoundRegion capturedInsert = this.regionCaptor.getValue();
         assertEqualsLostAndFoundRegion(expectedRegion, capturedInsert);
 
@@ -117,8 +117,8 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
-        verify(this.dbWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).updateLFReference(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -134,8 +134,8 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add", "LostRegionName;"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
-        verify(this.dbWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).updateLFReference(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -153,8 +153,8 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
-        verify(this.dbWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).updateLFReference(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -173,8 +173,8 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getLostRegion(anyString());
-        verify(this.dbWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.sqlWrapper, never()).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).updateLFReference(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -187,13 +187,13 @@ public class TPPCommandLostAddTest {
     @Test
     @DisplayName("Can't add a lost and found region when one with the same name exists")
     void cannotAddLostAndFoundRegionAlreadyDone() throws SQLException {
-        when(this.dbWrapper.getLostRegion("LostRegionName")).thenReturn(ObjectFactory.getLostAndFoundRegion("LostRegionName", "MockWorldName", this.world,100, 200, 300, 400, 500, 600));
+        when(this.sqlWrapper.getLostRegion("LostRegionName")).thenReturn(ObjectFactory.getLostAndFoundRegion("LostRegionName", "MockWorldName", this.world,100, 200, 300, 400, 500, 600));
 
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).getLostRegion(anyString());
-        verify(this.dbWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).updateLFReference(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -204,15 +204,15 @@ public class TPPCommandLostAddTest {
     }
 
     @Test
-    @DisplayName("Can't add a lost and found region when database fails to determine if region already exists")
+    @DisplayName("Can't add a lost and found region when db fails to determine if region already exists")
     void cannotAddLostAndFoundRegionDbSearchFail() throws SQLException {
-        when(this.dbWrapper.getLostRegion("LostRegionName")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getLostRegion("LostRegionName")).thenThrow(new SQLException());
 
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).getLostRegion(anyString());
-        verify(this.dbWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
+        verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).updateLFReference(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -223,15 +223,34 @@ public class TPPCommandLostAddTest {
     }
 
     @Test
-    @DisplayName("Can't add a lost and found region when database fails to insert new region")
-    void cannotAddLostAndFoundRegionDbInsertFail() throws SQLException {
-        when(this.dbWrapper.insertLostRegion(any(LostAndFoundRegion.class))).thenReturn(false);
+    @DisplayName("Can't add a lost and found region when db cannot insert new region")
+    void cannotAddLostAndFoundRegionDbCannotInsert() throws SQLException {
+        when(this.sqlWrapper.insertLostRegion(any(LostAndFoundRegion.class))).thenReturn(false);
 
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).getLostRegion(anyString());
-        verify(this.dbWrapper, times(1)).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
+        verify(this.sqlWrapper, times(1)).insertLostRegion(any(LostAndFoundRegion.class));
+        verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
+        verify(this.tpPets, never()).updateLFReference(anyString());
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessage = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not add lost and found region", capturedMessage);
+    }
+
+    @Test
+    @DisplayName("Can't add a lost and found region when db fails to insert new region")
+    void cannotAddLostAndFoundRegionDbFailsInsert() throws SQLException {
+        when(this.sqlWrapper.insertLostRegion(any(LostAndFoundRegion.class))).thenThrow(new SQLException());
+
+        String[] args = {"lost", "add", "LostRegionName"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
+        verify(this.sqlWrapper, times(1)).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).addLostRegion(any(LostAndFoundRegion.class));
         verify(this.tpPets, never()).updateLFReference(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
