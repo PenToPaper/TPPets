@@ -3,8 +3,8 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,22 +18,23 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 public class TPPCommandAllowRemoveTest {
     private OfflinePlayer guest;
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
     private List<PetStorage> petStorageList;
@@ -48,10 +49,10 @@ public class TPPCommandAllowRemoveTest {
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.allowguests"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.allowguests", "tppets.allowother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("remove");
@@ -66,12 +67,12 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Removes an existing player from a pet")
-    void removesPlayerFromPet() {
+    void removesPlayerFromPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
-            when(this.dbWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
@@ -81,7 +82,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(0, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -95,13 +96,13 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Admin removes an existing player from a pet")
-    void adminRemovesPlayerFromPet() {
+    void adminRemovesPlayerFromPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
-            when(this.dbWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
@@ -111,7 +112,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(0, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -125,7 +126,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Silently fails when admin is not a player")
-    void cannotAdminRemovePlayerFromPetNotPlayer() {
+    void cannotAdminRemovePlayerFromPetNotPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -139,7 +140,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(sender, never()).sendMessage(anyString());
         }
@@ -147,7 +148,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when admin has insufficient permissions")
-    void cannotAdminRemovePlayerFromPetInsufficientPermissions() {
+    void cannotAdminRemovePlayerFromPetInsufficientPermissions() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -160,7 +161,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -171,7 +172,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when f:[username] is not found")
-    void cannotAdminRemovePlayerFromPetNoPlayer() {
+    void cannotAdminRemovePlayerFromPetNoPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -184,7 +185,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -196,7 +197,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Admin fails to remove player when no pet name specified")
-    void cannotAdminRemovePlayerFromPetNoPetName() {
+    void cannotAdminRemovePlayerFromPetNoPetName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -207,7 +208,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -219,7 +220,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Silently fails when sender is not a player")
-    void cannotRemovePlayerFromPetNotPlayer() {
+    void cannotRemovePlayerFromPetNotPlayer() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
         when(sender.hasPermission("tppets.allowguests")).thenReturn(true);
 
@@ -230,7 +231,7 @@ public class TPPCommandAllowRemoveTest {
         assertTrue(this.allowedPlayers.containsKey("MockPetId"));
         assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-        verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+        verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(sender, never()).sendMessage(anyString());
     }
@@ -238,7 +239,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when no pet name specified")
-    void cannotRemovePlayerFromPetNoPet() {
+    void cannotRemovePlayerFromPetNoPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
@@ -249,7 +250,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -260,7 +261,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when no player with name specified")
-    void cannotRemovePlayerFromPetNoTargetPlayer() {
+    void cannotRemovePlayerFromPetNoTargetPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
@@ -273,7 +274,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -285,7 +286,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when no valid pet name specified")
-    void cannotRemovePlayerFromPetInvalidPetName() {
+    void cannotRemovePlayerFromPetInvalidPetName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
@@ -296,7 +297,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -307,11 +308,11 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when db fails when finding pet")
-    void cannotRemovePlayerFromPetDbSearchFail() {
+    void cannotRemovePlayerFromPetDbSearchFail() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(null);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenThrow(new SQLException());
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -320,7 +321,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -331,11 +332,11 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when db can't find pet")
-    void cannotRemovePlayerFromPetDbSearchNoResults() {
+    void cannotRemovePlayerFromPetDbSearchNoResults() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(new ArrayList<>());
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -344,7 +345,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -355,7 +356,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when player already isn't allowed to pet")
-    void cannotRemovePlayerFromPetDbSearchAlreadyDone() {
+    void cannotRemovePlayerFromPetDbSearchAlreadyDone() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
@@ -363,7 +364,7 @@ public class TPPCommandAllowRemoveTest {
             allowed.add("MockPlayerId");
             this.allowedPlayers.put("MockPetId", allowed);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
@@ -373,7 +374,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -385,7 +386,7 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Admin fails to remove player when player already isn't allowed to pet")
-    void adminCannotRemovePlayerFromPetDbSearchAlreadyDone() {
+    void adminCannotRemovePlayerFromPetDbSearchAlreadyDone() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
@@ -394,7 +395,7 @@ public class TPPCommandAllowRemoveTest {
             allowed.add("MockPlayerId");
             this.allowedPlayers.put("MockPetId", allowed);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
@@ -404,7 +405,7 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, never()).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -415,13 +416,13 @@ public class TPPCommandAllowRemoveTest {
 
 
     @Test
-    @DisplayName("Fails to remove player when db fails when removing player from pet")
-    void cannotRemovePlayerFromPetDbRemoveFail() {
+    @DisplayName("Fails to remove player when db cannot remove player from pet")
+    void cannotRemovePlayerFromPetDbCannotRemove() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.dbWrapper.getPetByName("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
-            when(this.dbWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(false);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(false);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
@@ -431,7 +432,33 @@ public class TPPCommandAllowRemoveTest {
             assertTrue(this.allowedPlayers.containsKey("MockPetId"));
             assertEquals(1, this.allowedPlayers.get("MockPetId").size());
 
-            verify(this.dbWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
+            verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+            String capturedMessageOutput = this.messageCaptor.getValue();
+            assertEquals(ChatColor.RED + "Could not allow user to pet", capturedMessageOutput);
+        }
+    }
+
+    @Test
+    @DisplayName("Fails to remove player when db fails to remove player from pet")
+    void cannotRemovePlayerFromPetDbRemoveFail() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
+
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenThrow(new SQLException());
+            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
+
+            String[] args = {"remove", "MockGuestName", "MockPetName"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            assertEquals(1, this.allowedPlayers.size());
+            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
+            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+
+            verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
