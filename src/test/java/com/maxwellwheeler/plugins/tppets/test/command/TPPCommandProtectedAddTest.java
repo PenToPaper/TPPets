@@ -6,7 +6,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
@@ -26,29 +26,27 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 public class TPPCommandProtectedAddTest {
     private org.bukkit.World world;
     private Player admin;
     private ArgumentCaptor<String> stringCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<ProtectedRegion> regionCaptor;
     private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
     private RegionSelectionManager regionSelectionManager;
-    private LostAndFoundRegion linkedLostRegion;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.protected"});
         this.stringCaptor = ArgumentCaptor.forClass(String.class);
         this.regionCaptor = ArgumentCaptor.forClass(ProtectedRegion.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("protected");
@@ -59,13 +57,13 @@ public class TPPCommandProtectedAddTest {
         this.regionSelectionManager = new RegionSelectionManager();
         this.regionSelectionManager.setStartLocation(this.admin, new Location(this.world, 100, 200, 300));
         this.regionSelectionManager.setEndLocation(this.admin, new Location(this.world, 400, 500, 600));
-        this.linkedLostRegion = new LostAndFoundRegion("LostRegionName", "MockWorldName", this.world, new Location(this.world, 100, 200, 300), new Location(this.world, 400, 500, 600));
+        LostAndFoundRegion linkedLostRegion = new LostAndFoundRegion("LostRegionName", "MockWorldName", this.world, new Location(this.world, 100, 200, 300), new Location(this.world, 400, 500, 600));
 
         when(this.world.getName()).thenReturn("MockWorldName");
-        when(this.tpPets.getLostRegion("LostRegionName")).thenReturn(this.linkedLostRegion);
+        when(this.tpPets.getLostRegion("LostRegionName")).thenReturn(linkedLostRegion);
         when(this.tpPets.getRegionSelectionManager()).thenReturn(this.regionSelectionManager);
-        when(this.dbWrapper.getProtectedRegion("ProtectedRegionName")).thenReturn(null);
-        when(this.dbWrapper.insertProtectedRegion(any(ProtectedRegion.class))).thenReturn(true);
+        when(this.sqlWrapper.getProtectedRegion("ProtectedRegionName")).thenReturn(null);
+        when(this.sqlWrapper.insertProtectedRegion(any(ProtectedRegion.class))).thenReturn(true);
     }
 
     void assertEqualsProtectedRegion(ProtectedRegion expectedPr, ProtectedRegion actualPr) {
@@ -93,9 +91,9 @@ public class TPPCommandProtectedAddTest {
 
         ProtectedRegion expectedRegion = ObjectFactory.getProtectedRegion("ProtectedRegionName", "Can't teleport here", "MockWorldName", this.world,100, 200, 300, 400, 500, 600, "LostRegionName", this.tpPets);
 
-        verify(this.dbWrapper, times(1)).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
 
-        verify(this.dbWrapper, times(1)).insertProtectedRegion(this.regionCaptor.capture());
+        verify(this.sqlWrapper, times(1)).insertProtectedRegion(this.regionCaptor.capture());
         ProtectedRegion capturedInsert = this.regionCaptor.getValue();
         assertEqualsProtectedRegion(expectedRegion, capturedInsert);
 
@@ -118,8 +116,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -134,8 +132,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName;", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -150,8 +148,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName;", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -166,8 +164,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here;"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -184,8 +182,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -203,8 +201,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -216,13 +214,13 @@ public class TPPCommandProtectedAddTest {
     @Test
     @DisplayName("Can't add a protected region when database fails when getting protected region")
     void cantAddProtectedRegionDbFailGettingPr() throws SQLException {
-        when(this.dbWrapper.getProtectedRegion("ProtectedRegionName")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getProtectedRegion("ProtectedRegionName")).thenThrow(new SQLException());
 
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -235,13 +233,13 @@ public class TPPCommandProtectedAddTest {
     @DisplayName("Can't add a protected region when database finds a protected region with same name")
     void cantAddProtectedRegionAlreadyDone() throws SQLException {
         ProtectedRegion pr = ObjectFactory.getProtectedRegion("ProtectedRegionName", "Enter message", "MockWorldName", this.world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", this.tpPets);
-        when(this.dbWrapper.getProtectedRegion("ProtectedRegionName")).thenReturn(pr);
+        when(this.sqlWrapper.getProtectedRegion("ProtectedRegionName")).thenReturn(pr);
 
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).getProtectedRegion(anyString());
-        verify(this.dbWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -253,13 +251,31 @@ public class TPPCommandProtectedAddTest {
     @Test
     @DisplayName("Can't add a protected region when database fails to insert the new protected region")
     void cantAddProtectedRegionDbFailInsertingPr() throws SQLException {
-        when(this.dbWrapper.insertProtectedRegion(any(ProtectedRegion.class))).thenReturn(false);
+        when(this.sqlWrapper.insertProtectedRegion(any(ProtectedRegion.class))).thenThrow(new SQLException());
 
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).getProtectedRegion(anyString());
-        verify(this.dbWrapper, times(1)).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, times(1)).insertProtectedRegion(any(ProtectedRegion.class));
+        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
+        String capturedMessage = this.stringCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not add protected region", capturedMessage);
+    }
+
+    @Test
+    @DisplayName("Can't add a protected region when database cannot insert the new protected region")
+    void cantAddProtectedRegionDbCannotInsertPr() throws SQLException {
+        when(this.sqlWrapper.insertProtectedRegion(any(ProtectedRegion.class))).thenReturn(false);
+
+        String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
+        verify(this.sqlWrapper, times(1)).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
