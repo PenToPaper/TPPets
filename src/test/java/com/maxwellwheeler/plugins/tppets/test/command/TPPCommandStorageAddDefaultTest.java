@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -29,7 +30,7 @@ public class TPPCommandStorageAddDefaultTest {
     private Location adminLocation;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
     private TPPets tpPets;
@@ -43,10 +44,10 @@ public class TPPCommandStorageAddDefaultTest {
         this.adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, this.adminLocation, new String[]{"tppets.storage", "tppets.setdefaultstorage"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
@@ -57,14 +58,14 @@ public class TPPCommandStorageAddDefaultTest {
 
     @Test
     @DisplayName("Adds storage locations to the database")
-    void addStorageLocation() {
-        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
-        when(this.dbWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(true);
+    void addStorageLocation() throws SQLException {
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
+        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(true);
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
@@ -76,14 +77,15 @@ public class TPPCommandStorageAddDefaultTest {
     }
 
     @Test
-    @DisplayName("Reports database failure when database not found")
-    void cannotAddStorageLocationNoDatabase() {
-        when(this.tpPets.getDatabase()).thenReturn(null);
+    @DisplayName("Reports database failure when database cannot add entry")
+    void cannotAddStorageLocationDBCannotAdd() throws SQLException {
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
+        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(false);
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -92,32 +94,49 @@ public class TPPCommandStorageAddDefaultTest {
     }
 
     @Test
-    @DisplayName("Reports database failure when database cannot add entry")
-    void cannotAddStorageLocationDatabaseNoEntry() {
-        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
-        when(this.dbWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(false);
+    @DisplayName("Reports database failure when database fails adding new entry")
+    void cannotAddStorageLocationDBFailAdding() throws SQLException {
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
+        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenThrow(new SQLException());
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not add sever storage location", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Could not add storage location", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Reports database failure when database fails finding existing entry")
+    void cannotAddStorageLocationDBFailGetting() throws SQLException {
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenThrow(new SQLException());
+        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(true);
+
+        String[] args = {"storage", "add", "default"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.sqlWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not add storage location", capturedMessageOutput);
     }
 
     @Test
     @DisplayName("Does not add server storage location if it already exists")
-    void cannotAddStorageLocationAlreadyExists() {
+    void cannotAddStorageLocationAlreadyExists() throws SQLException {
         StorageLocation storageLocation = mock(StorageLocation.class);
-        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
