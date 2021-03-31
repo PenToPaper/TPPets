@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -22,14 +22,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.never;
 
 public class TPPCommandPosition1Test {
     private Player admin;
     private ArgumentCaptor<String> stringCaptor;
-    private DBWrapper dbWrapper;
-    private LogWrapper logWrapper;
-    private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
     private RegionSelectionManager regionSelectionManager;
@@ -40,9 +36,9 @@ public class TPPCommandPosition1Test {
         this.world = mock(World.class);
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, new Location(this.world, 100, 200, 300), new String[]{"tppets.lost"});
         this.stringCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
-        this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
+        LogWrapper logWrapper = mock(LogWrapper.class);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("position1");
@@ -51,7 +47,7 @@ public class TPPCommandPosition1Test {
         this.commandTPP = new CommandTPP(aliases, tpPets);
         this.regionSelectionManager = new RegionSelectionManager();
 
-        when(this.tpPets.getRegionSelectionManager()).thenReturn(this.regionSelectionManager);
+        when(tpPets.getRegionSelectionManager()).thenReturn(this.regionSelectionManager);
     }
 
     @Test
