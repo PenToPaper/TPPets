@@ -66,11 +66,13 @@ class CommandStore extends TeleportCommand {
             }
 
             if (storageLocation != null) {
-                if (storePet(storageLocation)) {
-                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
-                } else {
-                    this.commandStatus = CommandStatus.CANT_TELEPORT;
-                }
+                try {
+                    if (storePet(storageLocation)) {
+                        thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
+                    } else {
+                        this.commandStatus = CommandStatus.CANT_TELEPORT;
+                    }
+                } catch (SQLException ignored) {}
             } else {
                 this.commandStatus = CommandStatus.INVALID_NAME;
             }
