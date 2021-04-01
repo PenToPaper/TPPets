@@ -4,12 +4,13 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -24,17 +26,15 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 public class TPPCommandStorageListDefaultTest {
     private Player admin;
     private List<World> worldList;
     private ArgumentCaptor<String> messageCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private Command command;
     private CommandTPP commandTPP;
     private List<StorageLocation> storageLocations;
-    private TPPets tpPets;
 
     // TODO: MAKE IT SO THAT MOCKS ARE NOT DESTROYED ON EACH TEST. JUST RESET THEM
     @BeforeEach
@@ -44,9 +44,9 @@ public class TPPCommandStorageListDefaultTest {
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
 
         // Plugin
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
 
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -54,7 +54,7 @@ public class TPPCommandStorageListDefaultTest {
         altAlias.add("storage");
         aliases.put("storage", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, this.tpPets);
+        this.commandTPP = new CommandTPP(aliases, tpPets);
 
         // Database
         World worldOne = mock(World.class);
@@ -75,17 +75,17 @@ public class TPPCommandStorageListDefaultTest {
 
     @Test
     @DisplayName("Lists server storage locations from the database")
-    void listServerStorageLocations() {
+    void listServerStorageLocations() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
-            when(this.dbWrapper.getServerStorageLocations(this.worldList.get(0))).thenReturn(Collections.singletonList(this.storageLocations.get(0)));
-            when(this.dbWrapper.getServerStorageLocations(this.worldList.get(1))).thenReturn(Collections.singletonList(this.storageLocations.get(1)));
+            when(this.sqlWrapper.getServerStorageLocations(this.worldList.get(0))).thenReturn(Collections.singletonList(this.storageLocations.get(0)));
+            when(this.sqlWrapper.getServerStorageLocations(this.worldList.get(1))).thenReturn(Collections.singletonList(this.storageLocations.get(1)));
 
             String[] args = {"storage", "list", "default"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, times(2)).getServerStorageLocations(any(World.class));
+            verify(this.sqlWrapper, times(2)).getServerStorageLocations(any(World.class));
 
             verify(this.admin, times(6)).sendMessage(this.messageCaptor.capture());
             List<String> messages = this.messageCaptor.getAllValues();
@@ -99,32 +99,32 @@ public class TPPCommandStorageListDefaultTest {
     }
 
     @Test
-    @DisplayName("Reports database not found failure to the user")
-    void cantListServerStorageLocationsDatabaseNotFound() {
-        when(this.tpPets.getDatabase()).thenReturn(null);
+    @DisplayName("Silently fails when sender is invalid type")
+    void cannotListWhenSenderIsInvalidType() throws SQLException {
+        CommandSender sender = mock(CommandSender.class);
+        when(sender.hasPermission("tppets.store")).thenReturn(true);
+        when(sender.hasPermission("tppets.setdefaultstorage")).thenReturn(true);
 
         String[] args = {"storage", "list", "default"};
-        this.commandTPP.onCommand(this.admin, this.command, "", args);
+        this.commandTPP.onCommand(sender, this.command, "", args);
 
-        verify(this.dbWrapper, never()).getServerStorageLocations(any(World.class));
+        verify(this.sqlWrapper, never()).getServerStorageLocations(any(World.class));
 
-        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
-        String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not find storage locations", message);
+        verify(sender, never()).sendMessage(anyString());
     }
 
     @Test
     @DisplayName("Reports general database failure to the user")
-    void cantListServerStorageLocationsDatabaseError() {
+    void cantListServerStorageLocationsDatabaseError() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
-            when(this.dbWrapper.getServerStorageLocations(this.worldList.get(0))).thenReturn(null);
+            when(this.sqlWrapper.getServerStorageLocations(this.worldList.get(0))).thenThrow(new SQLException());
 
             String[] args = {"storage", "list", "default"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, times(1)).getServerStorageLocations(any(World.class));
+            verify(this.sqlWrapper, times(1)).getServerStorageLocations(any(World.class));
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
