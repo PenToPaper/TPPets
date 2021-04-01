@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.*;
 public class TPPCommandStorageRemoveDefaultTest {
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
     private TPPets tpPets;
@@ -40,10 +41,10 @@ public class TPPCommandStorageRemoveDefaultTest {
         when(this.world.getName()).thenReturn("MockWorld");
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.storage", "tppets.setdefaultstorage"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
@@ -54,15 +55,15 @@ public class TPPCommandStorageRemoveDefaultTest {
 
     @Test
     @DisplayName("Removes default storage locations from the database")
-    void removeStorageLocation() {
+    void removeStorageLocation() throws SQLException {
         StorageLocation storageLocation = mock(StorageLocation.class);
-        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
-        when(this.dbWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
+        when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
 
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
@@ -74,14 +75,15 @@ public class TPPCommandStorageRemoveDefaultTest {
     }
 
     @Test
-    @DisplayName("Reports database failure when database not found")
-    void cannotRemoveStorageLocationNoDatabase() {
-        when(this.tpPets.getDatabase()).thenReturn(null);
+    @DisplayName("Reports database failure when database fails when getting existing entry")
+    void cannotRemoveStorageLocationDbFailGetting() throws SQLException {
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenThrow(new SQLException());
+        when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
 
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.sqlWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -91,15 +93,33 @@ public class TPPCommandStorageRemoveDefaultTest {
 
     @Test
     @DisplayName("Reports database failure when database cannot remove entry")
-    void cannotRemoveStorageLocationNoDatabaseRemoval() {
+    void cannotRemoveStorageLocationDbCannotRemove() throws SQLException {
         StorageLocation storageLocation = mock(StorageLocation.class);
-        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
-        when(this.dbWrapper.removeServerStorageLocation("default", this.world)).thenReturn(false);
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
+        when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(false);
 
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not remove sever storage location" + ChatColor.WHITE + "default", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Reports database failure when database fails when removing entry")
+    void cannotRemoveStorageLocationDbFailRemoving() throws SQLException {
+        StorageLocation storageLocation = mock(StorageLocation.class);
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
+        when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenThrow(new SQLException());
+
+        String[] args = {"storage", "remove", "default"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -109,13 +129,13 @@ public class TPPCommandStorageRemoveDefaultTest {
 
     @Test
     @DisplayName("Does not add server storage location if it already does not exist")
-    void cannotRemoveStorageLocationAlreadyDoesNotExist() {
-        when(this.dbWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
+    void cannotRemoveStorageLocationAlreadyDoesNotExist() throws SQLException {
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
 
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
+        verify(this.sqlWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
