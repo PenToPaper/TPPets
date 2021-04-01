@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -28,7 +29,7 @@ public class TPPCommandStorageRemoveTest {
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
     private StorageLocation storageLocation;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
     private Command command;
@@ -41,10 +42,10 @@ public class TPPCommandStorageRemoveTest {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.storageother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.storageLocation = mock(StorageLocation.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
@@ -55,14 +56,14 @@ public class TPPCommandStorageRemoveTest {
 
     @Test
     @DisplayName("Removes storage locations from the database")
-    void removeStorageLocation() {
-        when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-        when(this.dbWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(true);
+    void removeStorageLocation() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+        when(this.sqlWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(true);
 
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).removeStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
@@ -75,17 +76,17 @@ public class TPPCommandStorageRemoveTest {
 
     @Test
     @DisplayName("Admin removes storage locations for other people from the database")
-    void adminRemoveStorageLocation() {
+    void adminRemoveStorageLocation() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.dbWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(true);
+            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+            when(this.sqlWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(true);
 
             String[] args = {"storage", "f:MockPlayerName", "remove", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, times(1)).removeStorageLocation(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -99,13 +100,13 @@ public class TPPCommandStorageRemoveTest {
 
     @Test
     @DisplayName("Cannot remove storage locations that do not exist")
-    void cannotRemoveNonExistentStorage() {
-        when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
+    void cannotRemoveNonExistentStorage() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
 
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -114,11 +115,11 @@ public class TPPCommandStorageRemoveTest {
 
     @Test
     @DisplayName("Cannot remove storage location without argument provided")
-    void cannotRemoveNonProvidedStorage() {
+    void cannotRemoveNonProvidedStorage() throws SQLException {
         String[] args = {"storage", "remove"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -127,16 +128,16 @@ public class TPPCommandStorageRemoveTest {
 
     @Test
     @DisplayName("Admins cannot remove storage locations for other people that do not exist")
-    void adminCannotRemoveNonExistentStorage() {
+    void adminCannotRemoveNonExistentStorage() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
+            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
 
             String[] args = {"storage", "f:MockPlayerName", "remove", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
+            verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -145,15 +146,15 @@ public class TPPCommandStorageRemoveTest {
     }
 
     @Test
-    @DisplayName("Reports database failure to remove storage to user")
-    void reportsDatabaseFailureToRemove() {
-        when(this.dbWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-        when(this.dbWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(false);
+    @DisplayName("Reports database cannot to remove storage to user")
+    void reportsDbCannotRemove() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+        when(this.sqlWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(false);
 
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.dbWrapper, times(1)).removeStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -161,14 +162,31 @@ public class TPPCommandStorageRemoveTest {
     }
 
     @Test
-    @DisplayName("Reports failure to find database to user")
-    void reportsDatabaseFailureToFindDb() {
-        when(this.tpPets.getDatabase()).thenReturn(null);
+    @DisplayName("Reports database failure when removing storage to user")
+    void reportsDbFailureToRemove() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+        when(this.sqlWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenThrow(new SQLException());
 
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.dbWrapper, never()).removeStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not remove storage location", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Reports database failure when getting existing storage to user")
+    void reportsDbFailureToGet() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenThrow(new SQLException());
+        when(this.sqlWrapper.removeStorageLocation("MockPlayerId", "StorageName")).thenReturn(true);
+
+        String[] args = {"storage", "remove", "StorageName"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
