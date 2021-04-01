@@ -34,7 +34,6 @@ public class TPPCommandStorageListTest {
     private Command command;
     private CommandTPP commandTPP;
     private List<StorageLocation> storageLocations;
-    private TPPets tpPets;
 
     @BeforeEach
     public void beforeEach(){
@@ -46,7 +45,7 @@ public class TPPCommandStorageListTest {
         // Plugin
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
 
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -54,7 +53,7 @@ public class TPPCommandStorageListTest {
         altAlias.add("storage");
         aliases.put("storage", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, this.tpPets);
+        this.commandTPP = new CommandTPP(aliases, tpPets);
 
         // Database
         World world = mock(World.class);
