@@ -34,7 +34,6 @@ public class TPPCommandStorageRemoveTest {
     private ArgumentCaptor<String> logCaptor;
     private Command command;
     private CommandTPP commandTPP;
-    private TPPets tpPets;
 
     @BeforeEach
     public void beforeEach(){
@@ -45,13 +44,13 @@ public class TPPCommandStorageRemoveTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
         aliases.put("storage", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, this.tpPets);
+        this.commandTPP = new CommandTPP(aliases, tpPets);
     }
 
     @Test
