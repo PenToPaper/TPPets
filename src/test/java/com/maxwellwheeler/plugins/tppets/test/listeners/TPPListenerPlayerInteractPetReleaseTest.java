@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsManager;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerPlayerInteractPetRelease;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -18,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
+
 import static org.mockito.Mockito.*;
 
 public class TPPListenerPlayerInteractPetReleaseTest {
@@ -26,17 +28,17 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     private Horse horse;
     private Player player;
     private ToolsManager toolsManager;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws SQLException {
         this.playerInteractEntityEvent = mock(PlayerInteractEntityEvent.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.toolsManager = mock(ToolsManager.class);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
-        TPPets tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false, false);
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.player);
 
         EquipmentSlot playerHand = EquipmentSlot.HAND;
@@ -54,15 +56,15 @@ public class TPPListenerPlayerInteractPetReleaseTest {
         when(itemStack.getType()).thenReturn(Material.SHEARS);
         when(tpPets.getToolsManager()).thenReturn(this.toolsManager);
         when(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS)).thenReturn(true);
-        when(this.dbWrapper.deletePet(this.horse)).thenReturn(true);
+        when(this.sqlWrapper.removePet(this.horse)).thenReturn(true);
     }
 
     @Test
     @DisplayName("Releases pet")
-    void releasesPet() {
+    void releasesPet() throws SQLException {
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, times(1)).deletePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet(this.horse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
@@ -72,14 +74,14 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Releases pet with tppets.untameother")
-    void releasesPetUntameOther() {
+    void releasesPetUntameOther() throws SQLException {
         OfflinePlayer offlinePlayer = mock(OfflinePlayer.class);
         when(this.horse.getOwner()).thenReturn(offlinePlayer);
         when(this.player.hasPermission("tppets.untameother")).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, times(1)).deletePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet(this.horse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
@@ -89,14 +91,14 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Releases standable pet")
-    void releasesStandablePet() {
+    void releasesStandablePet() throws SQLException {
         Wolf wolf = MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(wolf);
-        when(this.dbWrapper.deletePet(wolf)).thenReturn(true);
+        when(this.sqlWrapper.removePet(wolf)).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, times(1)).deletePet(wolf);
+        verify(this.sqlWrapper, times(1)).removePet(wolf);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockWolfId");
         verify(wolf, times(1)).setSitting(false);
@@ -107,14 +109,14 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Releases skeleton horse pet without setting tamed = false")
-    void releasesSkeletonHorsePet() {
+    void releasesSkeletonHorsePet() throws SQLException {
         SkeletonHorse skeletonHorse = MockFactory.getTamedMockEntity("MockSkeletonHorseId", SkeletonHorse.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(skeletonHorse);
-        when(this.dbWrapper.deletePet(skeletonHorse)).thenReturn(true);
+        when(this.sqlWrapper.removePet(skeletonHorse)).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, times(1)).deletePet(skeletonHorse);
+        verify(this.sqlWrapper, times(1)).removePet(skeletonHorse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockSkeletonHorseId");
         verify(skeletonHorse, times(1)).setOwner(null);
@@ -124,14 +126,14 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Releases zombie horse pet without setting tamed = false")
-    void releasesZombieHorsePet() {
+    void releasesZombieHorsePet() throws SQLException {
         ZombieHorse zombieHorse = MockFactory.getTamedMockEntity("MockZombieHorseId", ZombieHorse.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(zombieHorse);
-        when(this.dbWrapper.deletePet(zombieHorse)).thenReturn(true);
+        when(this.sqlWrapper.removePet(zombieHorse)).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, times(1)).deletePet(zombieHorse);
+        verify(this.sqlWrapper, times(1)).removePet(zombieHorse);
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockZombieHorseId");
         verify(zombieHorse, times(1)).setOwner(null);
@@ -141,12 +143,12 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Doesn't attempt to release pet if clicking with offhand")
-    void doesNotAttemptToReleaseWhenClickingWithOffhand() {
+    void doesNotAttemptToReleaseWhenClickingWithOffhand() throws SQLException {
         when(this.playerInteractEntityEvent.getHand()).thenReturn(EquipmentSlot.OFF_HAND);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, never()).deletePet(any());
+        verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, never()).sendMessage(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -156,12 +158,12 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Doesn't attempt to release pet if player isn't sneaking")
-    void doesNotAttemptToReleaseWhenNotSneaking() {
+    void doesNotAttemptToReleaseWhenNotSneaking() throws SQLException {
         when(this.player.isSneaking()).thenReturn(false);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, never()).deletePet(any());
+        verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, never()).sendMessage(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -171,12 +173,12 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Doesn't attempt to release pet if player isn't clicking with the correct material")
-    void doesNotAttemptToReleaseInvalidMaterial() {
+    void doesNotAttemptToReleaseInvalidMaterial() throws SQLException {
         when(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS)).thenReturn(false);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, never()).deletePet(any());
+        verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, never()).sendMessage(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -186,13 +188,13 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Displays no owner if pet type is not tracked by TPPets")
-    void displaysNoOwnerInvalidPetType() {
+    void displaysNoOwnerInvalidPetType() throws SQLException {
         Villager villager = MockFactory.getMockEntity("MockVillagerId", Villager.class);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(villager);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, never()).deletePet(any());
+        verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -202,12 +204,12 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Displays no owner if pet is not tamed")
-    void displaysNoOwnerNotOwned() {
+    void displaysNoOwnerNotOwned() throws SQLException {
         when(this.horse.isTamed()).thenReturn(false);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, never()).deletePet(any());
+        verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -217,12 +219,12 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Displays no owner if pet has no owner")
-    void displaysNoOwnerNoOwner() {
+    void displaysNoOwnerNoOwner() throws SQLException {
         when(this.horse.getOwner()).thenReturn(null);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, never()).deletePet(any());
+        verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -232,13 +234,13 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Displays insufficient permissions if player isn't the owner of the pet and isn't an admin")
-    void displaysInsufficientPermissionsIfNotOwnerAndNotAdmin() {
+    void displaysInsufficientPermissionsIfNotOwnerAndNotAdmin() throws SQLException {
         OfflinePlayer offlinePlayer = mock(OfflinePlayer.class);
         when(this.horse.getOwner()).thenReturn(offlinePlayer);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, never()).deletePet(any());
+        verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -248,12 +250,12 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
     @Test
     @DisplayName("Displays db fail if database fails")
-    void displaysDbFailWhenDbFails() {
-        when(this.dbWrapper.deletePet(this.horse)).thenReturn(false);
+    void displaysDbFailWhenDbFails() throws SQLException {
+        when(this.sqlWrapper.removePet(this.horse)).thenReturn(false);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.dbWrapper, times(1)).deletePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet(this.horse);
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not release pet");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
