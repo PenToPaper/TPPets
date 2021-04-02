@@ -3,9 +3,9 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -32,21 +33,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class TPPCommandTeleportAllTest {
-    World world;
-    List<World> worldList;
-    Location playerLocation;
-    Player player;
-    Location adminLocation;
-    Player admin;
-    ArgumentCaptor<String> messageCaptor;
-    Chunk chunk;
-    DBWrapper dbWrapper;
-    LogWrapper logWrapper;
-    ArgumentCaptor<String> logCaptor;
-    ArgumentCaptor<Location> teleportCaptor;
-    TPPets tpPets;
-    Command command;
-    CommandTPP commandTPP;
+    private World world;
+    private List<World> worldList;
+    private Location playerLocation;
+    private Player player;
+    private Location adminLocation;
+    private Player admin;
+    private ArgumentCaptor<String> messageCaptor;
+    private Chunk chunk;
+    private SQLWrapper sqlWrapper;
+    private ArgumentCaptor<Location> teleportCaptor;
+    private TPPets tpPets;
+    private Command command;
+    private CommandTPP commandTPP;
 
     @BeforeEach
     public void beforeEach() {
@@ -61,11 +60,10 @@ public class TPPCommandTeleportAllTest {
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(anyInt(), anyInt())).thenReturn(this.chunk);
-        this.dbWrapper = mock(DBWrapper.class);
-        this.logWrapper = mock(LogWrapper.class);
-        this.logCaptor = ArgumentCaptor.forClass(String.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
+        LogWrapper logWrapper = mock(LogWrapper.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
         this.command = mock(Command.class);
     }
 
@@ -125,7 +123,7 @@ public class TPPCommandTeleportAllTest {
 
     @ParameterizedTest
     @MethodSource("teleportsPetsProvider")
-    void teleportsValidPets(PetType.Pets petType, Class<? extends Entity> className) {
+    void teleportsValidPets(PetType.Pets petType, Class<? extends Entity> className) throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -142,7 +140,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", petType)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -161,7 +159,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Can't teleport all in ProtectedRegions without tppets.tpanywhere")
-    void cannotTeleportInProtectedRegionsWithoutPermission() {
+    void cannotTeleportInProtectedRegionsWithoutPermission() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -178,7 +176,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -200,7 +198,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Can't teleport all without tppets.horses")
-    void cannotTeleportWithoutPetPermission() {
+    void cannotTeleportWithoutPetPermission() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -217,7 +215,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -239,7 +237,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("No pet type provided")
-    void cannotTeleportWithoutType() {
+    void cannotTeleportWithoutType() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -256,7 +254,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -275,7 +273,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Invalid pet type provided")
-    void invalidPetType() {
+    void invalidPetType() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -292,7 +290,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -311,7 +309,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Notifies users when no pets can be found in the database")
-    void cannotTeleportNoPetsInDb() {
+    void cannotTeleportNoPetsInDb() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -322,7 +320,7 @@ public class TPPCommandTeleportAllTest {
             when(this.chunk.getEntities()).thenReturn(entities);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(new ArrayList<>());
 
             this.setAliases();
 
@@ -341,7 +339,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Can't teleport pets when database error occurs")
-    void cannotTeleportDbError() {
+    void cannotTeleportDbError() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -352,7 +350,7 @@ public class TPPCommandTeleportAllTest {
             when(this.chunk.getEntities()).thenReturn(entities);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(null);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(null);
 
             this.setAliases();
 
@@ -371,7 +369,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Reports teleporting error to user")
-    void cannotTeleportTeleportError() {
+    void cannotTeleportTeleportError() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -387,7 +385,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -402,7 +400,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Does not report teleporting error to user if some pets were successfully teleported")
-    void cannotTeleportTeleportErrorUnreported() {
+    void cannotTeleportTeleportErrorUnreported() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -419,7 +417,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -436,7 +434,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Admin teleporting all of another player's horses")
-    void adminTeleportsHorses() {
+    void adminTeleportsHorses() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -453,7 +451,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -475,7 +473,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Admin can't teleport all of another player's pets if they haven't played before")
-    void cantAdminTeleportHorsesPlayerNotPlayedBefore() {
+    void cantAdminTeleportHorsesPlayerNotPlayedBefore() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -492,7 +490,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -515,7 +513,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Admin can't teleport all of another player's pets if their name is invalid")
-    void cantAdminTeleportHorsesInvalidPlayerName() {
+    void cantAdminTeleportHorsesInvalidPlayerName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -532,7 +530,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
@@ -551,7 +549,7 @@ public class TPPCommandTeleportAllTest {
 
     @Test
     @DisplayName("Admin without permission can't teleport all of another player's pets")
-    void cantAdminTeleportHorsesInsufficientPermissions() {
+    void cantAdminTeleportHorsesInsufficientPermissions() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -568,7 +566,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetsGeneric("MockPlayerId", "MockWorld", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
             this.setAliases();
 
