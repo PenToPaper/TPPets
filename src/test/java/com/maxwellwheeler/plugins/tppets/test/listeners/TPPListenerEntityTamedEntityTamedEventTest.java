@@ -3,9 +3,9 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityTamed;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetLimitChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
@@ -26,24 +26,25 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     private Player owner;
     private Horse horse;
     private TPPets tpPets;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private ListenerEntityTamed listenerEntityTamed;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         this.owner = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false, false);
         PetLimitChecker petIndex = new PetLimitChecker(this.tpPets, 1, 1, 1, 1, 1, 1, 1, 1);
 
         this.listenerEntityTamed = new ListenerEntityTamed(this.tpPets);
 
         when(this.tpPets.getPetIndex()).thenReturn(petIndex);
-        when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(0);
-        when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(0);
-        when(this.dbWrapper.insertPet(this.horse, "MockPlayerId")).thenReturn("MockHorseName");
+        when(this.sqlWrapper.getNumPets("MockPlayerId")).thenReturn(0);
+        when(this.sqlWrapper.getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE)).thenReturn(0);
+        when(this.sqlWrapper.generateUniquePetName("MockPlayerId", PetType.Pets.HORSE)).thenReturn("MockHorseName");
+        when(this.sqlWrapper.insertPet(this.horse, "MockPlayerId", "MockHorseName")).thenReturn(true);
     }
 
     private EntityTameEvent getEntityTameEvent() {
@@ -62,9 +63,9 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
-        verify(this.dbWrapper, times(1)).getNumPets("MockPlayerId");
-        verify(this.dbWrapper, times(1)).getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE);
-        verify(this.dbWrapper, times(1)).insertPet(this.horse, "MockPlayerId");
+        verify(this.sqlWrapper, times(1)).getNumPets("MockPlayerId");
+        verify(this.sqlWrapper, times(1)).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
+        verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockHorseName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -74,15 +75,15 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Allows bypassing total tame limit with online permission")
     void allowsEntityTamingOnlineBypassingTotalLimit() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(10);
+        when(this.sqlWrapper.getNumPets("MockPlayerId")).thenReturn(10);
         when(this.owner.hasPermission("tppets.bypasslimit")).thenReturn(true);
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
-        verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
-        verify(this.dbWrapper, never()).getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE);
-        verify(this.dbWrapper, times(1)).insertPet(this.horse, "MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
+        verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockHorseName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -104,14 +105,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         Permission permission = mock(Permission.class);
         when(permission.playerHas("MockWorldName", offlineOwner, "tppets.bypasslimit")).thenReturn(true);
         when(this.tpPets.getPerms()).thenReturn(permission);
-        when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(10);
+        when(this.sqlWrapper.getNumPets("MockPlayerId")).thenReturn(10);
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
-        verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
-        verify(this.dbWrapper, never()).getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE);
-        verify(this.dbWrapper, times(1)).insertPet(this.horse, "MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
+        verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockHorseName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -134,14 +135,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         when(permission.playerHas("MockWorldName", offlineOwner, "tppets.bypasslimit")).thenReturn(true);
         when(this.tpPets.getPerms()).thenReturn(permission);
 
-        when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(10);
+        when(this.sqlWrapper.getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE)).thenReturn(10);
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
-        verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
-        verify(this.dbWrapper, never()).getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE);
-        verify(this.dbWrapper, times(1)).insertPet(this.horse, "MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
+        verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockHorseName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -151,15 +152,15 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Allows bypassing horse tame limit with online permission")
     void allowsEntityTamingOnlineBypassingSpecificLimit() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(10);
+        when(this.sqlWrapper.getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE)).thenReturn(10);
         when(this.owner.hasPermission("tppets.bypasslimit")).thenReturn(true);
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
-        verify(this.dbWrapper, never()).getNumPets("MockPlayerId");
-        verify(this.dbWrapper, never()).getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE);
-        verify(this.dbWrapper, times(1)).insertPet(this.horse, "MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
+        verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
+        verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockHorseName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -174,9 +175,9 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
-        verify(this.dbWrapper, never()).getNumPets(anyString());
-        verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, never()).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, never()).getNumPets(anyString());
+        verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -192,9 +193,9 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
-        verify(this.dbWrapper, never()).getNumPets(anyString());
-        verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, never()).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, never()).getNumPets(anyString());
+        verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -204,15 +205,15 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Doesn't process if entity is not Tameable")
     void cannotProcessEntityTamingIfEntityNotTameable() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        Entity entity = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Villager.class);
-        when(entityTameEvent.getEntity()).thenReturn((LivingEntity) entity);
+        LivingEntity entity = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Villager.class);
+        when(entityTameEvent.getEntity()).thenReturn(entity);
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, never()).sendMessage(anyString());
-        verify(this.dbWrapper, never()).getNumPets(anyString());
-        verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, never()).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, never()).getNumPets(anyString());
+        verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, never()).setCancelled(anyBoolean());
@@ -222,14 +223,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Reports failure to meet total limit")
     void reportsEntityTamingTotalLimitExceeded() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        when(this.dbWrapper.getNumPets("MockPlayerId")).thenReturn(1);
+        when(this.sqlWrapper.getNumPets("MockPlayerId")).thenReturn(1);
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "You've exceeded the limit for total pets! Limit: 1");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, never()).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -239,14 +240,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Reports failure to meet pet limit")
     void reportsEntityTamingSpecificLimitExceeded() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenReturn(1);
+        when(this.sqlWrapper.getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE)).thenReturn(1);
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "You've exceeded the limit for this pet type! Horse Limit: 1");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, never()).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -256,14 +257,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Reports database failure when getting total limit")
     void reportsEntityTamingDbFailGettingTotalLimit() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        when(this.dbWrapper.getNumPets("MockPlayerId")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getNumPets("MockPlayerId")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, never()).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, never()).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -273,14 +274,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Reports database failure when getting specific limit")
     void reportsEntityTamingDbFailGettingSpecificLimit() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        when(this.dbWrapper.getNumPetsByPT("MockPlayerId", PetType.Pets.HORSE)).thenThrow(new SQLException());
+        when(this.sqlWrapper.getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE)).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, never()).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -290,14 +291,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     @DisplayName("Reports database failure when inserting new pet into database")
     void reportsEntityTamingDbFailInsertingPet() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
-        when(this.dbWrapper.insertPet(this.horse, "MockPlayerId")).thenReturn(null);
+        when(this.sqlWrapper.insertPet(this.horse, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, times(1)).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -311,14 +312,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         when(entityTameEvent.getEntity()).thenReturn(wolf);
 
         // Causes error and for pet to untame
-        when(this.dbWrapper.insertPet(wolf, "MockPlayerId")).thenReturn(null);
+        when(this.sqlWrapper.insertPet(wolf, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, times(1)).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
         verify(wolf, times(1)).setOwner(null);
         verify(wolf, times(1)).setTamed(false);
         verify(wolf, times(1)).setSitting(false);
@@ -333,14 +334,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         when(entityTameEvent.getEntity()).thenReturn(skeletonHorse);
 
         // Causes error and for pet to untame
-        when(this.dbWrapper.insertPet(skeletonHorse, "MockPlayerId")).thenReturn(null);
+        when(this.sqlWrapper.insertPet(skeletonHorse, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, times(1)).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
         verify(skeletonHorse, times(1)).setOwner(null);
         verify(skeletonHorse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -354,14 +355,14 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         when(entityTameEvent.getEntity()).thenReturn(zombieHorse);
 
         // Causes error and for pet to untame
-        when(this.dbWrapper.insertPet(zombieHorse, "MockPlayerId")).thenReturn(null);
+        when(this.sqlWrapper.insertPet(zombieHorse, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
 
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
-        verify(this.dbWrapper, times(1)).getNumPets(anyString());
-        verify(this.dbWrapper, times(1)).getNumPetsByPT(anyString(), any(PetType.Pets.class));
-        verify(this.dbWrapper, times(1)).insertPet(any(Entity.class), anyString());
+        verify(this.sqlWrapper, times(1)).getNumPets(anyString());
+        verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
+        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
         verify(zombieHorse, times(1)).setOwner(null);
         verify(zombieHorse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, times(1)).setCancelled(true);
