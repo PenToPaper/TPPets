@@ -5,7 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.ToolsManager;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerPlayerInteractRegionSelection;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -27,16 +27,15 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
     private ListenerPlayerInteractRegionSelection listenerPlayerInteractRegionSelection;
     private PlayerInteractEvent playerInteractEvent;
     private Player player;
-    private ToolsManager toolsManager;
     private RegionSelectionManager regionSelectionManager;
     private Location blockLocation;
 
     @BeforeEach
     public void beforeEach() {
-        DBWrapper dbWrapper = mock(DBWrapper.class);
+        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(dbWrapper, logWrapper, false, false, false);
-        this.toolsManager = mock(ToolsManager.class);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        ToolsManager toolsManager = mock(ToolsManager.class);
         this.playerInteractEvent = mock(PlayerInteractEvent.class);
         Block blockClicked = mock(Block.class);
         World world = mock(World.class);
@@ -44,12 +43,12 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
         this.regionSelectionManager = new RegionSelectionManager();
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
 
-        when(this.toolsManager.isMaterialValidTool("select_region", Material.BLAZE_ROD)).thenReturn(true);
+        when(toolsManager.isMaterialValidTool("select_region", Material.BLAZE_ROD)).thenReturn(true);
         when(this.playerInteractEvent.getMaterial()).thenReturn(Material.BLAZE_ROD);
         when(blockClicked.getLocation()).thenReturn(this.blockLocation);
         when(this.playerInteractEvent.getClickedBlock()).thenReturn(blockClicked);
         when(this.playerInteractEvent.getPlayer()).thenReturn(this.player);
-        when(tpPets.getToolsManager()).thenReturn(this.toolsManager);
+        when(tpPets.getToolsManager()).thenReturn(toolsManager);
         when(tpPets.getRegionSelectionManager()).thenReturn(this.regionSelectionManager);
 
         this.listenerPlayerInteractRegionSelection = new ListenerPlayerInteractRegionSelection(tpPets);
