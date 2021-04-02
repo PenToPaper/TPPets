@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerPetAccess;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Chest;
@@ -37,9 +37,9 @@ public class TPPListenerPetAccessInventoryClickTest {
         this.inventory = mock(LlamaInventory.class);
         when(this.inventory.getHolder()).thenReturn(donkey);
 
-        DBWrapper dbWrapper = mock(DBWrapper.class);
+        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.thisPlugin = MockFactory.getMockPlugin(dbWrapper, this.logWrapper, true, false, false);
+        this.thisPlugin = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, true, false, false);
 
         when(this.player.hasPermission("tppets.mountother")).thenReturn(false);
 
