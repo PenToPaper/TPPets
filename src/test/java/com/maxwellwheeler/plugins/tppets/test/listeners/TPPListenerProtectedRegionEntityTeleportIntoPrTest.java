@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
@@ -36,9 +36,9 @@ public class TPPListenerProtectedRegionEntityTeleportIntoPrTest {
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, null, new String[]{});
         this.wolf = MockFactory.getTamedMockEntity("MockWolfId", org.bukkit.entity.Wolf.class, this.player);
         this.teleportingTo = MockFactory.getMockLocation(world, 100, 200, 300);
-        DBWrapper dbWrapper = mock(DBWrapper.class);
+        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(dbWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
         this.entityTeleportEvent = mock(EntityTeleportEvent.class);
         this.listenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);
 
