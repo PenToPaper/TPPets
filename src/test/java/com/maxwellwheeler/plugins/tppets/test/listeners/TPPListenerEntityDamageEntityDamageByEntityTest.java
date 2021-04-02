@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.MobDamageManager;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityDamage;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -41,9 +41,9 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.blockProjectileSource = mock(BlockProjectileSource.class);
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
 
-        DBWrapper dbWrapper = mock(DBWrapper.class);
+        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(dbWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
 
         this.listenerEntityDamage = new ListenerEntityDamage(this.tpPets);
 
