@@ -5,7 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Location;
@@ -16,8 +16,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +29,8 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
     private Location playerLocation;
     private List<Entity> nearbyEntities;
     private List<Location> nearbyEntityLocations;
-    private DBWrapper dbWrapper;
+    private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
-    private ArgumentCaptor<Entity> entityCaptor;
     private TPPets tpPets;
     private PlayerMoveEvent playerMoveEvent;
     private ListenerProtectedRegion playerMoveListenerProtectedRegion;
@@ -43,11 +42,10 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
         World world = mock(World.class);
 
         this.playerLocation = MockFactory.getMockLocation(world, 101, 202, 303);
-        this.entityCaptor = ArgumentCaptor.forClass(Entity.class);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.playerMoveEvent = mock(PlayerMoveEvent.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         this.protectedRegion = MockFactory.getProtectedRegion("ProtectedRegionName", "Enter Message", "MockWorldName", world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", lostAndFoundRegion);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, this.playerLocation, new String[]{});
         this.playerMoveListenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);
@@ -84,113 +82,113 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
 
     @Test
     @DisplayName("Teleports pets away from protected regions when they're inside it and not allowed to be there")
-    void teleportsScannedPetsAwayWhenNotAllowedToBeInPr() {
+    void teleportsScannedPetsAwayWhenNotAllowedToBeInPr() throws SQLException {
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, times(1)).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, times(1)).logSuccessfulAction("Teleported pet with UUID MockInPrPet away from ProtectedRegionName to LostAndFoundRegionName");
-        verify(this.dbWrapper, times(1)).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, times(1)).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 
     @Test
     @DisplayName("Doesn't teleport pets away when player is not in the protected region")
-    void cannotTeleportScannedPetsAwayWhenPlayerNotInPr() {
+    void cannotTeleportScannedPetsAwayWhenPlayerNotInPr() throws SQLException {
         when(this.tpPets.getProtectedRegionWithin(this.playerLocation)).thenReturn(null);
 
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 
     @Test
     @DisplayName("Doesn't teleport pets away when player is in a protected region without a lost and found region")
-    void cannotTeleportScannedPetsAwayWhenPlayerNotInPrWithLfr() {
+    void cannotTeleportScannedPetsAwayWhenPlayerNotInPrWithLfr() throws SQLException {
         when(this.protectedRegion.getLfReference()).thenReturn(null);
 
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 
     @Test
     @DisplayName("Doesn't teleport pets away when player is in a protected region without a world")
-    void cannotTeleportScannedPetsAwayWhenPlayerNotInPrWithWorld() {
+    void cannotTeleportScannedPetsAwayWhenPlayerNotInPrWithWorld() throws SQLException {
         when(this.protectedRegion.getWorld()).thenReturn(null);
 
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 
     @Test
     @DisplayName("Doesn't teleport pets away when they're not in the protected region")
-    void cannotTeleportScannedPetsAwayWhenPetsNotInPr() {
+    void cannotTeleportScannedPetsAwayWhenPetsNotInPr() throws SQLException {
         when(this.protectedRegion.isInRegion(this.nearbyEntityLocations.get(0))).thenReturn(false);
 
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 
     @Test
     @DisplayName("Doesn't teleport pets away when they're owned by an online player with permission")
-    void cannotTeleportScannedPetsAwayWhenOnlineOwnerHasPermission() {
+    void cannotTeleportScannedPetsAwayWhenOnlineOwnerHasPermission() throws SQLException {
         when(this.player.hasPermission("tppets.tpanywhere")).thenReturn(true);
 
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 
     @Test
     @DisplayName("Doesn't teleport pets away when they're owned by an offline player with vault with permission")
-    void cannotTeleportScannedPetsAwayWhenOfflineOwnerHasPermission() {
+    void cannotTeleportScannedPetsAwayWhenOfflineOwnerHasPermission() throws SQLException {
         Permission permission = mock(Permission.class);
         when(permission.playerHas("MockWorldName", this.player, "tppets.tpanywhere")).thenReturn(true);
         when(this.tpPets.getVaultEnabled()).thenReturn(true);
@@ -200,30 +198,30 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 
     @Test
     @DisplayName("Doesn't log actions or update pet in db if there was an error teleporting pet away")
-    void cannotLogActionsWithTeleportationError() {
+    void cannotLogActionsWithTeleportationError() throws SQLException {
         when(this.protectedRegion.tpToLostRegion(this.nearbyEntities.get(0))).thenReturn(false);
 
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, times(1)).tpToLostRegion(this.nearbyEntities.get(0));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(0));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(1));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(1));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(2));
-        verify(this.dbWrapper, never()).updateOrInsertPet(this.nearbyEntities.get(2));
+        verify(this.sqlWrapper, never()).insertOrUpdatePetLocation(this.nearbyEntities.get(2));
     }
 }
