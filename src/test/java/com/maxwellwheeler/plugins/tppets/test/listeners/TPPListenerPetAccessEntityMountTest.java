@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerPetAccess;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Horse;
@@ -32,9 +32,9 @@ public class TPPListenerPetAccessEntityMountTest {
         this.guest = MockFactory.getMockPlayer("MockGuestId", "MockGuestName", null, null, new String[]{});
         this.stranger = MockFactory.getMockPlayer("MockStrangerId", "MockStrangerName", null, null, new String[]{});
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", org.bukkit.entity.Horse.class, this.owner);
-        DBWrapper dbWrapper = mock(DBWrapper.class);
+        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(dbWrapper, this.logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false, false);
         this.listenerPetAccess = new ListenerPetAccess(tpPets);
 
         when(tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);
