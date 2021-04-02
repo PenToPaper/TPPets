@@ -3,9 +3,9 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.storage.DBWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
+import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -32,40 +33,36 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class TPPCommandTeleportTest {
-    World world;
-    List<World> worldList;
-    Location playerLocation;
-    Player player;
-    Location adminLocation;
-    Player admin;
-    ArgumentCaptor<String> messageCaptor;
-    Chunk chunk;
-    DBWrapper dbWrapper;
-    LogWrapper logWrapper;
-    ArgumentCaptor<String> logCaptor;
-    ArgumentCaptor<Location> teleportCaptor;
-    TPPets tpPets;
-    Command command;
-    CommandTPP commandTPP;
+public class TPPCommandTeleportPetTest {
+    private World world;
+    private List<World> worldList;
+    private Player player;
+    private Player admin;
+    private ArgumentCaptor<String> messageCaptor;
+    private Chunk chunk;
+    private SQLWrapper sqlWrapper;
+    private LogWrapper logWrapper;
+    private ArgumentCaptor<Location> teleportCaptor;
+    private TPPets tpPets;
+    private Command command;
+    private CommandTPP commandTPP;
 
     @BeforeEach
     public void beforeEach(){
         this.world = mock(World.class);
         this.worldList = new ArrayList<>();
         this.worldList.add(this.world);
-        this.playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
-        this.adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
-        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, this.playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, this.adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs", "tppets.teleportother"});
+        Location playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
+        Location adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
+        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs", "tppets.teleportother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(100, 100)).thenReturn(this.chunk);
-        this.dbWrapper = mock(DBWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.logCaptor = ArgumentCaptor.forClass(String.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
-        this.tpPets = MockFactory.getMockPlugin(this.dbWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         this.command = mock(Command.class);
     }
 
@@ -80,7 +77,7 @@ public class TPPCommandTeleportTest {
 
     @ParameterizedTest
     @MethodSource("teleportsPetsProvider")
-    void teleportsValidPets(PetType.Pets petType, Class<? extends Entity> className) {
+    void teleportsValidPets(PetType.Pets petType, Class<? extends Entity> className) throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             String petName = petType.toString().toUpperCase() + "0";
 
@@ -97,11 +94,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", petName, petName);
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", petName)).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", petName, petType)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", petName)).thenReturn(Collections.singletonList(pet));
 
             this.setAliases();
 
@@ -143,7 +138,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Can't teleport in ProtectedRegions without tppets.tpanywhere")
-    void cannotTeleportInProtectedRegionsWithoutPermission() {
+    void cannotTeleportInProtectedRegionsWithoutPermission() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -158,11 +153,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Permissions modifications
             when(this.tpPets.canTpThere(any())).thenReturn(false);
@@ -183,7 +176,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Can't teleport without tppets.horses")
-    void cannotTeleportWithoutPetPermission() {
+    void cannotTeleportWithoutPetPermission() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -198,11 +191,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Permissions modifications
             when(this.player.hasPermission("tppets.horses")).thenReturn(false);
@@ -225,7 +216,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("No pet name provided")
-    void cannotTeleportWithoutName() {
+    void cannotTeleportWithoutName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -240,11 +231,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             this.setAliases();
 
@@ -264,7 +253,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Defaults to teleporting first argument pet name when 2 arguments provided without f:[username] syntax")
-    void defaultsToTeleportingPetWithFirstArgument() {
+    void defaultsToTeleportingPetWithFirstArgument() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -279,11 +268,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             this.setAliases();
 
@@ -311,7 +298,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Pet with name not in database")
-    void invalidPetName() {
+    void invalidPetName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -325,11 +312,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             this.setAliases();
 
@@ -348,8 +333,8 @@ public class TPPCommandTeleportTest {
     }
 
     @Test
-    @DisplayName("Invalid pet name")
-    void petNotInDatabase() {
+    @DisplayName("Database fails to find pet")
+    void databaseFailsFindingPet() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -361,13 +346,8 @@ public class TPPCommandTeleportTest {
             // A list of both entities
             when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet});
 
-            // PetStorage
-            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
-
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(null);
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenThrow(new SQLException());
 
             this.setAliases();
 
@@ -387,7 +367,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Admin teleporting another player's horse")
-    void adminTeleportsHorse() {
+    void adminTeleportsHorse() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -404,11 +384,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Command aliases
             this.setAliases();
@@ -437,7 +415,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Admin teleporting another player's horse when the player hasn't played before")
-    void adminHorseTeleportPlayerNotPlayedBefore() {
+    void adminHorseTeleportPlayerNotPlayedBefore() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -451,11 +429,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Command aliases
             this.setAliases();
@@ -480,7 +456,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Admin teleporting another player's horse with invalid player name")
-    void adminHorseTeleportInvalidPlayerName() {
+    void adminHorseTeleportInvalidPlayerName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -494,11 +470,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Command aliases
             this.setAliases();
@@ -519,7 +493,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Player without permissions trying to teleport another player's pet")
-    void playerHorseTeleportInsufficientPermissions() {
+    void playerHorseTeleportInsufficientPermissions() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -533,11 +507,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Command aliases
             this.setAliases();
@@ -563,7 +535,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Player with permissions trying to teleport another player's pet")
-    void guestHorseTeleportWithPermissions() {
+    void guestHorseTeleportWithPermissions() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -580,11 +552,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Command aliases
             this.setAliases();
@@ -614,7 +584,7 @@ public class TPPCommandTeleportTest {
 
     @Test
     @DisplayName("Player with permissions trying to teleport another player's pet while there is a passenger")
-    void guestHorseTeleportWithPermissionsPassenger() {
+    void guestHorseTeleportWithPermissionsPassenger() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -631,11 +601,9 @@ public class TPPCommandTeleportTest {
 
             // PetStorage
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
-            List<PetStorage> petList = Collections.singletonList(pet);
 
             // Plugin database wrapper instance
-            when(this.dbWrapper.getPetByName("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
-            when(this.dbWrapper.getPetsFromOwnerNamePetType("MockPlayerId", "HORSE0", PetType.Pets.HORSE)).thenReturn(petList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
 
             // Command aliases
             this.setAliases();
