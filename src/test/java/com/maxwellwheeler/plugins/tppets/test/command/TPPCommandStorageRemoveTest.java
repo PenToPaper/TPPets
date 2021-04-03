@@ -185,7 +185,7 @@ public class TPPCommandStorageRemoveTest {
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
