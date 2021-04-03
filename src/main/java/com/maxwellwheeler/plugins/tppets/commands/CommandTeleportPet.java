@@ -50,8 +50,12 @@ public class CommandTeleportPet extends TeleportCommand {
     }
 
     public void processCommand() {
-        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
-            processCommandGeneric();
+        try {
+            if (this.commandStatus == CommandStatus.SUCCESS && initializePet() && isValidSyntax()) {
+                processCommandGeneric();
+            }
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
         }
 
         displayStatus();
@@ -62,26 +66,19 @@ public class CommandTeleportPet extends TeleportCommand {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
-    private void processCommandGeneric() {
-        try {
-            initializePet();
+    private void processCommandGeneric() throws SQLException {
+        if (!PermissionChecker.hasPermissionToTeleportType(this.pet.petType, this.sender)) {
+            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
+            return;
+        }
 
-            if (!PermissionChecker.hasPermissionToTeleportType(this.pet.petType, this.sender)) {
-                this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-                return;
-            }
+        if (!this.thisPlugin.canTpThere(this.sender)) {
+            this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
+            return;
+        }
 
-            if (!this.thisPlugin.canTpThere(this.sender)) {
-                this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
-                return;
-            }
-
-            if (!this.teleportPetsFromStorage(this.sender.getLocation(), Collections.singletonList(this.pet), this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
-                this.commandStatus = CommandStatus.CANT_TELEPORT;
-            }
-
-        } catch (SQLException exception) {
-            this.commandStatus = CommandStatus.DB_FAIL;
+        if (!this.teleportPetsFromStorage(this.sender.getLocation(), Collections.singletonList(this.pet), this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+            this.commandStatus = CommandStatus.CANT_TELEPORT;
         }
     }
 

@@ -543,6 +543,7 @@ public class TPPCommandTeleportPetTest {
 
             // The correct pet Entity instance
             Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
+            when(correctPet.getPassengers()).thenReturn(new ArrayList<>());
 
             // The incorrect pet Entity instance
             Horse incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
