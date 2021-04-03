@@ -209,7 +209,7 @@ public class TPPCommandStorageTest {
         String[] args = {"storage", "list", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+        verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
