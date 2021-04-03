@@ -56,9 +56,10 @@ public class TPPListenerPetPositionTest {
     void listsSpecificLostAndFoundRegions() throws SQLException {
         this.listenerPetPosition.onChunkUnload(this.chunkUnloadEvent);
 
-        verify(this.sqlWrapper, times(2)).insertOrUpdatePetLocation(this.entityCaptor.capture());
+        verify(this.sqlWrapper, times(3)).insertOrUpdatePetLocation(this.entityCaptor.capture());
         List<Entity> entitiesUpdated = this.entityCaptor.getAllValues();
         assertEquals(this.entities[0], entitiesUpdated.get(0));
         assertEquals(this.entities[1], entitiesUpdated.get(1));
+        assertEquals(this.entities[2], entitiesUpdated.get(2));
     }
 }
