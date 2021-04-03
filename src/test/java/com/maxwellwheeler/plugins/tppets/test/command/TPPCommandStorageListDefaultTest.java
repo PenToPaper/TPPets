@@ -102,7 +102,7 @@ public class TPPCommandStorageListDefaultTest {
     @DisplayName("Silently fails when sender is invalid type")
     void cannotListWhenSenderIsInvalidType() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
-        when(sender.hasPermission("tppets.store")).thenReturn(true);
+        when(sender.hasPermission("tppets.storage")).thenReturn(true);
         when(sender.hasPermission("tppets.setdefaultstorage")).thenReturn(true);
 
         String[] args = {"storage", "list", "default"};
