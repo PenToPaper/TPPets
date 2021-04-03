@@ -294,7 +294,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityBreedEvent, times(1)).setCancelled(true);
@@ -304,7 +304,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
     @DisplayName("Reports database failure when inserting new pet into database")
     void reportsEntityBreedingDbFailInsertingPet() throws SQLException {
         EntityBreedEvent entityBreedEvent = getEntityBreedEvent();
-        when(this.sqlWrapper.insertPet(this.horse, "MockPlayerId", "MockPetName")).thenReturn(null);
+        when(this.sqlWrapper.insertPet(this.horse, "MockPlayerId", "MockPetName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
 
@@ -325,6 +325,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         when(entityBreedEvent.getEntity()).thenReturn(wolf);
 
         // Causes error and for pet to untame
+        when(this.sqlWrapper.generateUniquePetName("MockPlayerId", PetType.Pets.DOG)).thenReturn("MockPetName");
         when(this.sqlWrapper.insertPet(wolf, "MockPlayerId", "MockPetName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityBreedEvent(entityBreedEvent);
