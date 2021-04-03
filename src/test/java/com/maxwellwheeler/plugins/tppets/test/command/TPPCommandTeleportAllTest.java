@@ -350,7 +350,7 @@ public class TPPCommandTeleportAllTest {
             when(this.chunk.getEntities()).thenReturn(entities);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(null);
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenThrow(new SQLException());
 
             this.setAliases();
 
