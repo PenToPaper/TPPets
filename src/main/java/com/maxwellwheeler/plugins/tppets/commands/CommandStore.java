@@ -3,10 +3,12 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Object used for store commands
@@ -66,13 +68,11 @@ class CommandStore extends TeleportCommand {
             }
 
             if (storageLocation != null) {
-                try {
-                    if (storePet(storageLocation)) {
-                        thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
-                    } else {
-                        this.commandStatus = CommandStatus.CANT_TELEPORT;
-                    }
-                } catch (SQLException ignored) {}
+                if (storePet(storageLocation)) {
+                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
+                } else {
+                    this.commandStatus = CommandStatus.CANT_TELEPORT;
+                }
             } else {
                 this.commandStatus = CommandStatus.INVALID_NAME;
             }
@@ -83,7 +83,12 @@ class CommandStore extends TeleportCommand {
     }
 
     private boolean storePet(StorageLocation storageLocation) throws SQLException {
-        return teleportPetsFromStorage(storageLocation.getLoc(), this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]), true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
+        List<PetStorage> petStorage = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+        try {
+            return teleportPetsFromStorage(storageLocation.getLoc(), petStorage, true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
+        } catch (SQLException ignored) {
+            return true;
+        }
     }
 
     public void displayStatus() {
@@ -113,7 +118,7 @@ class CommandStore extends TeleportCommand {
                 this.sender.sendMessage(ChatColor.RED + "Could not store " + (isForSelf() ? "your " : ChatColor.WHITE + this.commandFor.getName() + "'s " + ChatColor.RED) + "pet");
                 break;
             case DB_FAIL:
-                this.sender.sendMessage(ChatColor.RED + "Could not find storage");
+                this.sender.sendMessage(ChatColor.RED + "Could not process request");
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");

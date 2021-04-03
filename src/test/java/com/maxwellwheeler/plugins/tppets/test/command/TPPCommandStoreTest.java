@@ -10,6 +10,7 @@ import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +74,7 @@ public class TPPCommandStoreTest {
         this.pet = new PetStorage("MockPetId", 7, 700, 800, 900, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(700, 900)).thenReturn(this.chunk);
+        when(this.chunk.getEntities()).thenReturn(new Entity[]{this.horse});
     }
 
     @Test
@@ -80,8 +82,6 @@ public class TPPCommandStoreTest {
     void teleportsUsersPetsToDefaultStorage() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
@@ -117,8 +117,6 @@ public class TPPCommandStoreTest {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
-
             when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
 
@@ -151,8 +149,6 @@ public class TPPCommandStoreTest {
     void teleportsUsersPetsToSpecificStorage() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
@@ -187,8 +183,6 @@ public class TPPCommandStoreTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
-
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
@@ -229,7 +223,7 @@ public class TPPCommandStoreTest {
             String[] args = {"store", "f:PlayerName", "PetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+            verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
             verify(this.horse, never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -249,7 +243,7 @@ public class TPPCommandStoreTest {
             String[] args = {"store", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+            verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
             verify(this.horse, never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -271,7 +265,7 @@ public class TPPCommandStoreTest {
             String[] args = {"store", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+            verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
             verify(this.horse, never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -292,7 +286,7 @@ public class TPPCommandStoreTest {
             String[] args = {"store", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+            verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
             verify(this.horse, never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -313,7 +307,7 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "PetName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+        verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -327,7 +321,7 @@ public class TPPCommandStoreTest {
         String[] args = {"store"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+        verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -344,7 +338,7 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "MyPet;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getServerStorageLocation("default", any(World.class));
+        verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -376,17 +370,17 @@ public class TPPCommandStoreTest {
     @DisplayName("Cannot teleport user's pets when database fails to find storage")
     void cannotTeleportUsersPetsDbFailFindStorage() throws SQLException {
         String[] args = {"store", "MyPet", "MyStorage"};
-        when(this.sqlWrapper.getStorageLocation("MockPlayerName", "MyStorage")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "MyStorage")).thenThrow(new SQLException());
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getStorageLocation("MockPlayerId", "MyStorage");
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not find storage", message);
+        assertEquals(ChatColor.RED + "Could not process request", message);
     }
 
 
@@ -404,7 +398,26 @@ public class TPPCommandStoreTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not find storage", message);
+        assertEquals(ChatColor.RED + "Could not process request", message);
+    }
+
+    @Test
+    @DisplayName("Cannot teleport user's pets when database fails to find pet")
+    void cannotTeleportUsersPetsDbFailFindPet() throws SQLException {
+        String[] args = {"store", "MyPet"};
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MyPet")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
+
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.sqlWrapper, never()).getStorageLocation(anyString(), anyString());
+        verify(this.chunk, never()).load();
+        verify(this.horse, never()).teleport(any(Location.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not process request", message);
     }
 
 
@@ -453,7 +466,7 @@ public class TPPCommandStoreTest {
             when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(null);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(new ArrayList<>());
 
             String[] args = {"store", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -479,7 +492,7 @@ public class TPPCommandStoreTest {
             when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(null);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(new ArrayList<>());
 
             String[] args = {"store", "f:MockPlayerName", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
