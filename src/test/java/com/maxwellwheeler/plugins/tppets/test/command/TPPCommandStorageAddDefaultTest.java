@@ -90,7 +90,7 @@ public class TPPCommandStorageAddDefaultTest {
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not add sever storage location", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Could not add server storage location", capturedMessageOutput);
     }
 
     @Test
@@ -102,12 +102,12 @@ public class TPPCommandStorageAddDefaultTest {
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not add storage location", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Could not add server storage location", capturedMessageOutput);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class TPPCommandStorageAddDefaultTest {
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not add storage location", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Could not add server storage location", capturedMessageOutput);
     }
 
     @Test

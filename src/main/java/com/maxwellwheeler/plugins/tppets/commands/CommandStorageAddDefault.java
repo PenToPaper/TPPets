@@ -52,7 +52,7 @@ public class CommandStorageAddDefault extends Command {
                 this.sender.sendMessage(ChatColor.BLUE + "You have added server storage location " + ChatColor.WHITE + this.args[0]);
                 break;
             case DB_FAIL:
-                this.sender.sendMessage(ChatColor.RED + "Could not add sever storage location");
+                this.sender.sendMessage(ChatColor.RED + "Could not add server storage location");
                 break;
             case ALREADY_DONE:
                 this.sender.sendMessage(ChatColor.RED + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " already exists");
