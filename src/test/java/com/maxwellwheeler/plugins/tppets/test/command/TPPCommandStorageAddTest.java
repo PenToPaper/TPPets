@@ -298,7 +298,7 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
