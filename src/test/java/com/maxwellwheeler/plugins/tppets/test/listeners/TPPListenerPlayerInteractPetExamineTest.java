@@ -21,8 +21,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import static org.mockito.Mockito.*;
 
@@ -60,7 +58,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
         when(itemStack.getType()).thenReturn(Material.BONE);
         when(tpPets.getToolsManager()).thenReturn(this.toolsManager);
         when(this.toolsManager.isMaterialValidTool("get_owner", Material.BONE)).thenReturn(true);
-        when(this.sqlWrapper.getSpecificPet("MockHorseId", "MockPlayerId")).thenReturn(Collections.singletonList(horseStorage));
+        when(this.sqlWrapper.getSpecificPet("MockHorseId")).thenReturn(horseStorage);
     }
 
     @Test
@@ -68,7 +66,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
     void displaysPetOwner() throws SQLException {
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " and belongs to " + ChatColor.WHITE + "MockPlayerName");
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
     }
@@ -80,7 +78,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, never()).getSpecificPet(anyString());
         verify(this.player, never()).sendMessage(anyString());
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -92,7 +90,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, never()).getSpecificPet(anyString());
         verify(this.player, never()).sendMessage(anyString());
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -104,7 +102,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, never()).getSpecificPet(anyString());
         verify(this.player, never()).sendMessage(anyString());
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -117,7 +115,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, never()).getSpecificPet(anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This pet doesn't have an owner");
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -129,7 +127,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, never()).getSpecificPet(anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This pet doesn't have an owner");
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -141,7 +139,7 @@ public class TPPListenerPlayerInteractPetExamineTest {
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, never()).getSpecificPet(anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "This pet doesn't have an owner");
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -149,11 +147,11 @@ public class TPPListenerPlayerInteractPetExamineTest {
     @Test
     @DisplayName("Displays db fail if database fails")
     void displaysDbFailWhenDbFails() throws SQLException {
-        when(this.sqlWrapper.getSpecificPet("MockHorseId", "MockPlayerId")).thenReturn(null);
+        when(this.sqlWrapper.getSpecificPet("MockHorseId")).thenThrow(new SQLException());
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not get pet data");
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
@@ -161,11 +159,11 @@ public class TPPListenerPlayerInteractPetExamineTest {
     @Test
     @DisplayName("Displays db fail if database can't find the pet in the database")
     void displaysDbFailCantFindPet() throws SQLException {
-        when(this.sqlWrapper.getSpecificPet("MockHorseId", "MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getSpecificPet("MockHorseId")).thenReturn(null);
 
         this.listenerPlayerInteractPetExamine.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not get pet data");
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
     }
