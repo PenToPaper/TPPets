@@ -133,7 +133,7 @@ public abstract class SQLWrapper {
                 "loc_z INT NOT NULL, \n" +
                 "world_name VARCHAR(25) NOT NULL, \n" +
                 "PRIMARY KEY (user_id, effective_storage_name))";
-        String makeTableDefaultStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_server_storage_locations (\n" +
+        String makeTableServerStorageLocations = "CREATE TABLE IF NOT EXISTS tpp_server_storage_locations (\n" +
                 "storage_name VARCHAR(64) NOT NULL, \n" +
                 "effective_storage_name VARCHAR(64) NOT NULL, \n" +
                 "loc_x INT NOT NULL, \n" +
@@ -146,7 +146,7 @@ public abstract class SQLWrapper {
                 && this.createStatement(makeTableProtectedRegions)
                 && this.createStatement(makeTableAllowedPlayers)
                 && this.createStatement(makeTableUserStorageLocations)
-                && this.createStatement(makeTableDefaultStorageLocations)
+                && this.createStatement(makeTableServerStorageLocations)
                 && this.thisPlugin.getDatabaseUpdater().updateSchemaVersion(this);
     }
 
