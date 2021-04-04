@@ -60,7 +60,7 @@ public class TPPListenerEntityTamedEntityMountTest {
 
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(this.skeletonHorse, "MockPlayerId", "MockHorseName");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
         verify(this.skeletonHorse, times(1)).setTamed(true);
         verify(this.skeletonHorse, times(1)).setOwner(this.player);
@@ -77,7 +77,7 @@ public class TPPListenerEntityTamedEntityMountTest {
 
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(zombieHorse, "MockPlayerId", "MockHorseName");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
         verify(zombieHorse, times(1)).setTamed(true);
         verify(zombieHorse, times(1)).setOwner(this.player);
@@ -165,7 +165,7 @@ public class TPPListenerEntityTamedEntityMountTest {
 
         verify(this.sqlWrapper, never()).getNumPets(anyString());
         verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(this.skeletonHorse, "MockPlayerId", "MockHorseName");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
         verify(this.skeletonHorse, times(1)).setTamed(true);
         verify(this.skeletonHorse, times(1)).setOwner(this.player);
@@ -185,7 +185,7 @@ public class TPPListenerEntityTamedEntityMountTest {
 
         verify(this.sqlWrapper, never()).getNumPets(anyString());
         verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(this.skeletonHorse, "MockPlayerId", "MockHorseName");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + "MockHorseName" + ChatColor.BLUE + " [new name]");
         verify(this.skeletonHorse, times(1)).setTamed(true);
         verify(this.skeletonHorse, times(1)).setOwner(this.player);
@@ -274,7 +274,7 @@ public class TPPListenerEntityTamedEntityMountTest {
 
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(this.skeletonHorse, "MockPlayerId", "MockHorseName");
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.skeletonHorse, never()).setTamed(anyBoolean());
         verify(this.skeletonHorse, never()).setOwner(this.player);
