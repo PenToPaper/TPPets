@@ -298,7 +298,7 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockHorseName");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -312,6 +312,7 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         when(entityTameEvent.getEntity()).thenReturn(wolf);
 
         // Causes error and for pet to untame
+        when(this.sqlWrapper.generateUniquePetName("MockPlayerId", PetType.Pets.DOG)).thenReturn("MockDogName");
         when(this.sqlWrapper.insertPet(wolf, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
@@ -319,7 +320,7 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(wolf, "MockPlayerId", "MockDogName");
         verify(wolf, times(1)).setOwner(null);
         verify(wolf, times(1)).setTamed(false);
         verify(wolf, times(1)).setSitting(false);
@@ -341,7 +342,7 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(skeletonHorse, "MockPlayerId", "MockHorseName");
         verify(skeletonHorse, times(1)).setOwner(null);
         verify(skeletonHorse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, times(1)).setCancelled(true);
@@ -362,7 +363,7 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         verify(this.owner, times(1)).sendMessage(ChatColor.RED + "Could not tame this pet");
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
-        verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), "MockHorseName");
+        verify(this.sqlWrapper, times(1)).insertPet(zombieHorse, "MockPlayerId", "MockHorseName");
         verify(zombieHorse, times(1)).setOwner(null);
         verify(zombieHorse, never()).setTamed(anyBoolean());
         verify(entityTameEvent, times(1)).setCancelled(true);
