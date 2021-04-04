@@ -3,7 +3,6 @@ package com.maxwellwheeler.plugins.tppets.storage;
 import org.bukkit.entity.*;
 
 import java.util.Arrays;
-import java.util.Hashtable;
 
 /**
  * Class that classifies entities by the types we care about, CAT, DOG, and PARROT
@@ -20,19 +19,6 @@ public class PetType {
      */
     public enum Pets {
         CAT, DOG, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
-    }
-
-    private static final Hashtable<Pets, Class<?>[]> classTranslate;
-    
-    static {
-        classTranslate = new Hashtable<>();
-        classTranslate.put(Pets.CAT, new Class<?>[]{org.bukkit.entity.Cat.class});
-        classTranslate.put(Pets.DOG, new Class<?>[]{org.bukkit.entity.Wolf.class});
-        classTranslate.put(Pets.PARROT, new Class<?>[]{org.bukkit.entity.Parrot.class});
-        classTranslate.put(Pets.MULE, new Class<?>[]{org.bukkit.entity.Mule.class});
-        classTranslate.put(Pets.LLAMA, new Class<?>[]{org.bukkit.entity.Llama.class});
-        classTranslate.put(Pets.DONKEY, new Class<?>[]{org.bukkit.entity.Donkey.class});
-        classTranslate.put(Pets.HORSE, new Class<?>[]{org.bukkit.entity.Horse.class, org.bukkit.entity.SkeletonHorse.class, org.bukkit.entity.ZombieHorse.class});
     }
 
     /**
@@ -93,14 +79,5 @@ public class PetType {
      */
     public static Pets getPetFromIndex(int i) {
         return indexTranslation[i];
-    }
-
-    /**
-     * Returns a reference to the class type of the pet, primarily for the world.getEntitiesByClasses-type methods.
-     * @param pt The type of pets to get the class reference of
-     * @return A reference to the class
-     */
-    public static Class<?>[] getClassTranslate(Pets pt) {
-        return classTranslate.get(pt);
     }
 }
