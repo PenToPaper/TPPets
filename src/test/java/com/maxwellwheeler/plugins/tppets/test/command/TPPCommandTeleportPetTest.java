@@ -96,7 +96,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", petName, petName);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", petName)).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", petName)).thenReturn(pet);
 
             this.setAliases();
 
@@ -155,7 +155,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Permissions modifications
             when(this.tpPets.canTpThere(any())).thenReturn(false);
@@ -193,7 +193,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Permissions modifications
             when(this.player.hasPermission("tppets.horses")).thenReturn(false);
@@ -233,7 +233,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             this.setAliases();
 
@@ -270,7 +270,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             this.setAliases();
 
@@ -314,7 +314,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             this.setAliases();
 
@@ -386,7 +386,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Command aliases
             this.setAliases();
@@ -431,7 +431,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Command aliases
             this.setAliases();
@@ -472,7 +472,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Command aliases
             this.setAliases();
@@ -509,7 +509,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Command aliases
             this.setAliases();
@@ -555,7 +555,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Command aliases
             this.setAliases();
@@ -604,7 +604,7 @@ public class TPPCommandTeleportPetTest {
             PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(Collections.singletonList(pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Command aliases
             this.setAliases();

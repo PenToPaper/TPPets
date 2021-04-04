@@ -31,7 +31,7 @@ public class TPPCommandAllowListTest {
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
     private SQLWrapper sqlWrapper;
-    private List<PetStorage> petStorageList;
+    private PetStorage pet;
     private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
@@ -49,7 +49,7 @@ public class TPPCommandAllowListTest {
         List<String> altAlias = new ArrayList<>();
         altAlias.add("allowed");
         aliases.put("allowed", altAlias);
-        this.petStorageList = Collections.singletonList(new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName"));
+        this.pet = new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
         this.allowedPlayers = new Hashtable<>();
@@ -63,7 +63,7 @@ public class TPPCommandAllowListTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer(any(UUID.class))).thenReturn(this.guest);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allowed", "MockPetName"};
@@ -86,7 +86,7 @@ public class TPPCommandAllowListTest {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
             bukkit.when(() -> Bukkit.getOfflinePlayer(any(UUID.class))).thenReturn(this.guest);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allowed", "f:MockPlayerName", "MockPetName"};
@@ -230,7 +230,7 @@ public class TPPCommandAllowListTest {
     @Test
     @DisplayName("Fails to list players when db fails to find pet")
     void cannotListAllowedToPetDbSearchNoResults() throws SQLException {
-        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(null);
 
         String[] args = {"allowed", "MockPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);

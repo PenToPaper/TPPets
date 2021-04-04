@@ -20,7 +20,6 @@ import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class TPPCommandAllowRemoveTest {
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
-    private List<PetStorage> petStorageList;
+    private PetStorage pet;
     private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
@@ -57,7 +56,7 @@ public class TPPCommandAllowRemoveTest {
         List<String> altAlias = new ArrayList<>();
         altAlias.add("remove");
         aliases.put("remove", altAlias);
-        this.petStorageList = Collections.singletonList(new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName"));
+        this.pet = new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
         this.allowedPlayers = new Hashtable<>();
@@ -71,7 +70,7 @@ public class TPPCommandAllowRemoveTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
@@ -101,7 +100,7 @@ public class TPPCommandAllowRemoveTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
@@ -336,7 +335,7 @@ public class TPPCommandAllowRemoveTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(null);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -364,7 +363,7 @@ public class TPPCommandAllowRemoveTest {
             allowed.add("MockPlayerId");
             this.allowedPlayers.put("MockPetId", allowed);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
@@ -395,7 +394,7 @@ public class TPPCommandAllowRemoveTest {
             allowed.add("MockPlayerId");
             this.allowedPlayers.put("MockPetId", allowed);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
@@ -421,7 +420,7 @@ public class TPPCommandAllowRemoveTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(false);
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
@@ -447,7 +446,7 @@ public class TPPCommandAllowRemoveTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.petStorageList);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenThrow(new SQLException());
             when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 

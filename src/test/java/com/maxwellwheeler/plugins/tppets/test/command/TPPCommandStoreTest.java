@@ -21,7 +21,6 @@ import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -84,7 +83,7 @@ public class TPPCommandStoreTest {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
             when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "PetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -118,7 +117,7 @@ public class TPPCommandStoreTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -151,7 +150,7 @@ public class TPPCommandStoreTest {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -185,7 +184,7 @@ public class TPPCommandStoreTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(Collections.singletonList(this.pet));
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "f:MockPlayerName", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -456,6 +455,25 @@ public class TPPCommandStoreTest {
         assertEquals(ChatColor.RED + "Could not find default storage", message);
     }
 
+    @Test
+    @DisplayName("Cannot teleport user's pets with non-existent pet")
+    void cannotTeleportUsersPetsNonExistentPet() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(null);
+
+        String[] args = {"store", "PetName", "StorageName"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
+
+        verify(this.chunk, never()).load();
+        verify(this.horse, never()).teleport(any(Location.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not find pet: " + ChatColor.WHITE + "PetName", message);    }
+
 
     @Test
     @DisplayName("Reports generic inability to teleport pet to user")
@@ -463,17 +481,16 @@ public class TPPCommandStoreTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
-
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{});
 
             String[] args = {"store", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
 
-            verify(this.chunk, never()).load();
+            verify(this.chunk, times(1)).load();
             verify(this.horse, never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -487,19 +504,19 @@ public class TPPCommandStoreTest {
     @DisplayName("Reports generic inability to teleport pet to admin")
     void cannotAdminTeleportReportsError() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.world.getEntitiesByClasses(org.bukkit.entity.Tameable.class)).thenReturn(Collections.singletonList(this.horse));
-
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
-            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{});
 
             String[] args = {"store", "f:MockPlayerName", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
 
-            verify(this.chunk, never()).load();
+            verify(this.chunk, times(1)).load();
             verify(this.horse, never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 

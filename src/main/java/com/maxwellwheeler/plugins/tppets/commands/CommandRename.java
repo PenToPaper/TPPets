@@ -7,7 +7,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
-import java.util.List;
 
 public class CommandRename extends BaseCommand {
     public CommandRename(TPPets thisPlugin, CommandSender sender, String[] args) {
@@ -40,9 +39,9 @@ public class CommandRename extends BaseCommand {
                 return;
             }
 
-            List<PetStorage> pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+            PetStorage pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-            if (pet.size() == 0) {
+            if (pet == null) {
                 this.commandStatus = CommandStatus.NO_TARGET_PET;
                 return;
             }

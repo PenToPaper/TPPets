@@ -8,7 +8,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Collections;
 
 /**
  * Object used for store commands
@@ -67,14 +67,22 @@ class CommandStore extends TeleportCommand {
                 this.hasSpecificStorage = false;
             }
 
-            if (storageLocation != null) {
-                if (storePet(storageLocation)) {
-                    thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
-                } else {
-                    this.commandStatus = CommandStatus.CANT_TELEPORT;
-                }
-            } else {
+            if (storageLocation == null) {
                 this.commandStatus = CommandStatus.INVALID_NAME;
+                return;
+            }
+
+            PetStorage pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+
+            if (pet == null) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return;
+            }
+
+            if (storePet(storageLocation, pet)) {
+                thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
+            } else {
+                this.commandStatus = CommandStatus.CANT_TELEPORT;
             }
 
         } catch (SQLException exception) {
@@ -82,10 +90,9 @@ class CommandStore extends TeleportCommand {
         }
     }
 
-    private boolean storePet(StorageLocation storageLocation) throws SQLException {
-        List<PetStorage> petStorage = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+    private boolean storePet(StorageLocation storageLocation, PetStorage pet) throws SQLException {
         try {
-            return teleportPetsFromStorage(storageLocation.getLoc(), petStorage, true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
+            return teleportPetsFromStorage(storageLocation.getLoc(), Collections.singletonList(pet), true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
         } catch (SQLException ignored) {
             return true;
         }

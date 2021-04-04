@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class CommandAllowRemove extends BaseCommand {
     public CommandAllowRemove(TPPets thisPlugin, CommandSender sender, String[] args) {
@@ -44,21 +43,21 @@ public class CommandAllowRemove extends BaseCommand {
                 return;
             }
 
-            List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[1]);
+            PetStorage pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[1]);
 
-            if (petList.size() == 0) {
+            if (pet == null) {
                 this.commandStatus = CommandStatus.NO_PET;
                 return;
             }
 
             String trimmedPlayerId = UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString());
 
-            if (!this.thisPlugin.getAllowedPlayers().containsKey(petList.get(0).petId) || !this.thisPlugin.getAllowedPlayers().get(petList.get(0).petId).contains(trimmedPlayerId)) {
+            if (!this.thisPlugin.getAllowedPlayers().containsKey(pet.petId) || !this.thisPlugin.getAllowedPlayers().get(pet.petId).contains(trimmedPlayerId)) {
                 this.commandStatus = CommandStatus.ALREADY_DONE;
                 return;
             }
 
-            if (this.removePlayer(petList.get(0).petId, trimmedPlayerId)) {
+            if (this.removePlayer(pet.petId, trimmedPlayerId)) {
                 this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " removed permission from " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
                 this.commandStatus = CommandStatus.SUCCESS;
             } else {

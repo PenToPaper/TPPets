@@ -237,17 +237,16 @@ public abstract class SQLWrapper {
     }
 
     // TODO: Make return single PetStorage. List not needed anymore
-    public List<PetStorage> getSpecificPet(@NotNull String ownerId, @NotNull String petName) throws SQLException {
+    public PetStorage getSpecificPet(@NotNull String ownerId, @NotNull String petName) throws SQLException {
         String selectSpecificPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         try (Connection dbConn = this.getConnection();
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectSpecificPet), trimmedOwnerId, petName.toLowerCase());
              ResultSet resultSet = selectStatement.executeQuery()) {
-            List<PetStorage> ret = new ArrayList<>();
-            while (resultSet.next()) {
-                ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
+            if (resultSet.next()) {
+                return new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name"));
             }
-            return ret;
+            return null;
         }
     }
 

@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
 
 public class CommandTeleportPet extends TeleportCommand {
     private PetStorage pet;
@@ -94,14 +93,14 @@ public class CommandTeleportPet extends TeleportCommand {
             return false;
         }
 
-        List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+        PetStorage pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-        if (petList.size() == 0) {
+        if (pet == null) {
             this.commandStatus = CommandStatus.NO_PET;
             return false;
         }
 
-        this.pet = petList.get(0);
+        this.pet = pet;
         return true;
     }
 

@@ -38,15 +38,15 @@ public class CommandAllowList extends BaseCommand{
                 return;
             }
 
-            List<PetStorage> petList = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+            PetStorage pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-            if (petList.size() == 0) {
+            if (pet == null) {
                 this.commandStatus = CommandStatus.NO_PET;
                 return;
             }
 
             // TODO: Remove untrim and trim from UUIDs. Kinda a silly idea in the first place lol
-            List<String> playerUUIDs = this.thisPlugin.getAllowedPlayers().get(petList.get(0).petId);
+            List<String> playerUUIDs = this.thisPlugin.getAllowedPlayers().get(pet.petId);
 
             this.announceAllowedPlayers(playerUUIDs);
 

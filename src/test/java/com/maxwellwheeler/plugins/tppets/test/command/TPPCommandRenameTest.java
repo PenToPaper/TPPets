@@ -33,8 +33,6 @@ public class TPPCommandRenameTest {
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
-    private List<PetStorage> petList;
-    private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
 
@@ -46,9 +44,8 @@ public class TPPCommandRenameTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
-        this.petList = new ArrayList<>();
-        this.petList.add(new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorldName", "MockPlayerId", "OldPetName", "OldPetName"));
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        PetStorage pet = new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorldName", "MockPlayerId", "OldPetName", "OldPetName");
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("rename");
@@ -56,7 +53,7 @@ public class TPPCommandRenameTest {
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
 
-        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "OldPetName")).thenReturn(petList);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "OldPetName")).thenReturn(pet);
         when(this.sqlWrapper.renamePet("MockPlayerId", "OldPetName", "NewPetName")).thenReturn(true);
         when(this.sqlWrapper.isNameUnique("MockPlayerId", "NewPetName")).thenReturn(true);
     }
@@ -173,7 +170,7 @@ public class TPPCommandRenameTest {
     @Test
     @DisplayName("Cannot rename pet db fails to find pet")
     void cannotRenamePetDbNoPet() throws SQLException {
-        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "OldPetName")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "OldPetName")).thenReturn(null);
 
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
