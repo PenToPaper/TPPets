@@ -25,7 +25,6 @@ public class TPPSQLWrapperInsertPetTest {
     private TPPets tpPets;
     private Connection connection;
     private PreparedStatement preparedStatement;
-    private Location horseLocation;
     private Horse horse;
     private ArgumentCaptor<String> stringCaptor;
     private ArgumentCaptor<Integer> stringIndexCaptor;
@@ -44,12 +43,12 @@ public class TPPSQLWrapperInsertPetTest {
         this.stringIndexCaptor = ArgumentCaptor.forClass(Integer.class);
         this.intCaptor = ArgumentCaptor.forClass(Integer.class);
         this.intIndexCaptor = ArgumentCaptor.forClass(Integer.class);
-        this.horseLocation = MockFactory.getMockLocation(world, 10, 20, 30);
+        Location horseLocation = MockFactory.getMockLocation(world, 10, 20, 30);
         this.horse = MockFactory.getMockEntity("Mock-Pet-Id", org.bukkit.entity.Horse.class);
 
         when(world.getName()).thenReturn("MockWorldName");
         when(this.horse.getWorld()).thenReturn(world);
-        when(this.horse.getLocation()).thenReturn(this.horseLocation);
+        when(this.horse.getLocation()).thenReturn(horseLocation);
 
         when(this.connection.prepareStatement("INSERT INTO tpp_unloaded_pets(pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name, effective_pet_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")).thenReturn(this.preparedStatement);
         when(this.preparedStatement.executeUpdate()).thenReturn(1);
