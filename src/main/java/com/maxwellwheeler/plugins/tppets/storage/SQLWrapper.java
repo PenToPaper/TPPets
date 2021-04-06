@@ -179,7 +179,7 @@ public abstract class SQLWrapper {
     }
 
     public boolean insertPet(@NotNull Entity pet, @NotNull String ownerId, @NotNull String petName) throws SQLException {
-        if (!PetType.isPetTypeTracked(pet) || !this.isNameUnique(ownerId, petName)) {
+        if (!PetType.isPetTypeTracked(pet)) {
             return false;
         }
 
