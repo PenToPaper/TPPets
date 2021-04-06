@@ -203,17 +203,16 @@ public abstract class SQLWrapper {
     }
 
     public boolean updatePetLocation(@NotNull Entity entity) throws SQLException {
-        if (!PetType.isPetTracked(entity)) {
-            return false;
+        if (PetType.isPetTracked(entity)) {
+            String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
+
+            Tameable pet = (Tameable) entity;
+            String trimmedPetId = UUIDUtils.trimUUID(entity.getUniqueId());
+            String trimmedOwnerId = UUIDUtils.trimUUID(Objects.requireNonNull(pet.getOwner()).getUniqueId());
+
+            return this.updatePrepStatement(updatePetLocation, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedPetId, trimmedOwnerId);
         }
-
-        String updatePetLocation = "UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?";
-
-        Tameable pet = (Tameable) entity;
-        String trimmedPetId = UUIDUtils.trimUUID(entity.getUniqueId());
-        String trimmedOwnerId = UUIDUtils.trimUUID(Objects.requireNonNull(pet.getOwner()).getUniqueId());
-
-        return this.updatePrepStatement(updatePetLocation, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedPetId, trimmedOwnerId);
+        return false;
     }
 
     public boolean insertOrUpdatePetLocation(@NotNull Entity entity) throws SQLException {
