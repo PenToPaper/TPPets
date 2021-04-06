@@ -159,7 +159,7 @@ public abstract class SQLWrapper {
         try (Connection dbConn = this.getConnection();
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedOwnerId, petName.toLowerCase());
              ResultSet resultSet = selectStatement.executeQuery()) {
-            return resultSet.next();
+            return !resultSet.next();
         } catch (SQLException exception) {
             this.thisPlugin.getLogWrapper().logErrors("SQL Exception checking if pet name is unique: " + exception.getMessage());
             throw exception;
