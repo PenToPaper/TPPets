@@ -31,7 +31,7 @@ public class TPPSQLWrapperIsNameUniqueTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.resultSet = mock(ResultSet.class);
@@ -41,7 +41,6 @@ public class TPPSQLWrapperIsNameUniqueTest {
         when(this.connection.prepareStatement("SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?")).thenReturn(this.preparedStatement);
         when(this.resultSet.next()).thenReturn(true);
         when(this.preparedStatement.executeQuery()).thenReturn(this.resultSet);
-        when(this.tpPets.getLogWrapper()).thenReturn(this.logWrapper);
     }
 
     @Test
