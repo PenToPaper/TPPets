@@ -16,7 +16,7 @@ import java.sql.Statement;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TPPSQLWrapperInitializeTest {
+public class TPPSQLWrapperInitializeTableTest {
     private TPPets tpPets;
     private DBUpdater dbUpdater;
     private Connection connection;
