@@ -122,9 +122,7 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
 
-        assertThrows(SQLException.class, () -> {
-            mockSQLWrapper.generateUniquePetName("Mock-Owner-Id", PetType.Pets.HORSE);
-        });
+        assertThrows(SQLException.class, () -> mockSQLWrapper.generateUniquePetName("Mock-Owner-Id", PetType.Pets.HORSE));
 
         verify(this.connection, times(1)).close();
 
@@ -144,9 +142,7 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
 
-        assertThrows(SQLException.class, () -> {
-            mockSQLWrapper.generateUniquePetName("Mock-Owner-Id", PetType.Pets.HORSE);
-        });
+        assertThrows(SQLException.class, () -> mockSQLWrapper.generateUniquePetName("Mock-Owner-Id", PetType.Pets.HORSE));
 
         verify(this.connection, times(2)).close();
 
