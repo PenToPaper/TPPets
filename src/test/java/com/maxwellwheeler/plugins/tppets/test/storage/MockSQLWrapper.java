@@ -4,7 +4,6 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class MockSQLWrapper extends SQLWrapper {
     public Connection connection;
@@ -15,7 +14,7 @@ public class MockSQLWrapper extends SQLWrapper {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public Connection getConnection() {
         return connection;
     }
 }
