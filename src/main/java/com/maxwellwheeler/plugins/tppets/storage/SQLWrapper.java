@@ -152,6 +152,7 @@ public abstract class SQLWrapper {
 
     // Pet actions
 
+    // TODO: Can replace with call to getSpecificPet
     public boolean isNameUnique(@NotNull String ownerId, @NotNull String petName) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
