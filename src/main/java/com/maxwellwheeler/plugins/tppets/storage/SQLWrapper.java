@@ -437,7 +437,7 @@ public abstract class SQLWrapper {
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
                 // TODO: CONSIDER REFACTORING PROTECTEDREGION CONSTRUCTOR TO BE SIMILAR WHERE YOU HAVE TO SUPPLY THE REFERENCE YOURSELF?
-                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
                 return new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc);
             }
             return null;
@@ -452,7 +452,7 @@ public abstract class SQLWrapper {
              ResultSet resultSet = selectStatement.executeQuery()) {
             List<StorageLocation> ret = new ArrayList<>();
             if (resultSet.next()) {
-                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
                 ret.add(new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc));
             }
             return ret;
@@ -481,7 +481,7 @@ public abstract class SQLWrapper {
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
                 // TODO: Consider refactoring StorageLocation to include ServerStorageLocation as a separate class?
-                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
                 return new StorageLocation("server", resultSet.getString("storage_name"), retLoc);
             }
             return null;
@@ -496,7 +496,7 @@ public abstract class SQLWrapper {
             List<StorageLocation> ret = new ArrayList<>();
             while (resultSet.next()) {
                 // TODO: Consider refactoring StorageLocation to include constructor that lets us do everything in one line
-                Location retLoc = new Location(Bukkit.getServer().getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
                 ret.add(new StorageLocation(null, resultSet.getString("storage_name"), retLoc));
             }
             return ret;

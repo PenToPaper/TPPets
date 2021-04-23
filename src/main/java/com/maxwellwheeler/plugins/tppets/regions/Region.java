@@ -28,7 +28,7 @@ public abstract class Region {
      * @param maxZ The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point's Z location.
      */
     Region(String regionName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        this(regionName, worldName, Bukkit.getServer().getWorld(worldName), new Location(Bukkit.getServer().getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getServer().getWorld(worldName), maxX, maxY, maxZ));
+        this(regionName, worldName, Bukkit.getWorld(worldName), new Location(Bukkit.getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getWorld(worldName), maxX, maxY, maxZ));
     }
     
     /**
@@ -39,7 +39,7 @@ public abstract class Region {
      * @param maxLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
      */
     public Region(String regionName, String worldName, Location minLoc, Location maxLoc) {
-        this(regionName, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc);
+        this(regionName, worldName, Bukkit.getWorld(worldName), minLoc, maxLoc);
     }
     
     /**
