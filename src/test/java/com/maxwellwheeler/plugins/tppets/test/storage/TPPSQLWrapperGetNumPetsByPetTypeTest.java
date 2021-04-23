@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class TPPSQLWrapperGetNumPetsByPetTypeTest {
-    private TPPets tpPets;
     private Connection connection;
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
@@ -29,12 +28,12 @@ public class TPPSQLWrapperGetNumPetsByPetTypeTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.resultSet = mock(ResultSet.class);
 
-        this.mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
+        this.mockSQLWrapper = new MockSQLWrapper(tpPets, this.connection);
 
         when(this.connection.prepareStatement("SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?")).thenReturn(this.preparedStatement);
         when(this.resultSet.next()).thenReturn(true);
@@ -60,9 +59,7 @@ public class TPPSQLWrapperGetNumPetsByPetTypeTest {
     void getNumPetsByPetTypeThrowsExceptionWhenNoCount() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
-        Exception exception = assertThrows(SQLException.class, () -> {
-            this.mockSQLWrapper.getNumPetsByPetType("Mock-Owner-Id", PetType.Pets.HORSE);
-        });
+        Exception exception = assertThrows(SQLException.class, () -> this.mockSQLWrapper.getNumPetsByPetType("Mock-Owner-Id", PetType.Pets.HORSE));
 
         assertEquals("Could not select count", exception.getMessage());
 
@@ -79,9 +76,7 @@ public class TPPSQLWrapperGetNumPetsByPetTypeTest {
     void getNumPetsByPetTypeRethrowsExceptions() throws SQLException {
         when(this.resultSet.next()).thenThrow(new SQLException());
 
-        assertThrows(SQLException.class, () -> {
-            this.mockSQLWrapper.getNumPetsByPetType("Mock-Owner-Id", PetType.Pets.HORSE);
-        });
+        assertThrows(SQLException.class, () -> this.mockSQLWrapper.getNumPetsByPetType("Mock-Owner-Id", PetType.Pets.HORSE));
 
         verify(this.preparedStatement, times(1)).setString(1, "MockOwnerId");
         verify(this.preparedStatement, times(1)).setInt(2, 7);
