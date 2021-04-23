@@ -35,8 +35,8 @@ public class TPPSQLWrapperRemoveProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("removeLostRegion returns true")
-    void removeLostRegionReturnsTrue() throws SQLException {
+    @DisplayName("removeProtectedRegion returns true")
+    void removeProtectedRegionReturnsTrue() throws SQLException {
         assertTrue(this.mockSQLWrapper.removeProtectedRegion("MockRegionName"));
 
         verify(this.preparedStatement, times(1)).setString(1, "MockRegionName");
@@ -46,8 +46,8 @@ public class TPPSQLWrapperRemoveProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("removeLostRegion returns false when negative result from update")
-    void removeLostRegionReturnsFalse() throws SQLException {
+    @DisplayName("removeProtectedRegion returns false when negative result from update")
+    void removeProtectedRegionReturnsFalse() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenReturn(-1);
 
         assertFalse(this.mockSQLWrapper.removeProtectedRegion("MockRegionName"));
@@ -59,8 +59,8 @@ public class TPPSQLWrapperRemoveProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("removeLostRegion rethrows exceptions")
-    void removeLostRegionRethrowsExceptions() throws SQLException {
+    @DisplayName("removeProtectedRegion rethrows exceptions")
+    void removeProtectedRegionRethrowsExceptions() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> this.mockSQLWrapper.removeProtectedRegion("MockRegionName"));
