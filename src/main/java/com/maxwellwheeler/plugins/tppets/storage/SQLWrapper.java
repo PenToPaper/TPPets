@@ -279,9 +279,10 @@ public abstract class SQLWrapper {
 
     public int getNumPetsByPetType(String ownerId, PetType.Pets petType) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
+        int petTypeIndex = PetType.getIndexFromPet(petType);
         String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
         try (Connection dbConn = this.getConnection();
-             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getNumPets), trimmedOwnerId, petType);
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getNumPets), trimmedOwnerId, petTypeIndex);
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
                 return resultSet.getInt("count");
