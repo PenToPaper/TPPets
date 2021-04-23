@@ -277,20 +277,6 @@ public abstract class SQLWrapper {
         }
     }
 
-    public List<PetStorage> getPetFromOwnerWorld(@NotNull String ownerId, @NotNull String worldName) throws SQLException {
-        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
-        String selectPetsGeneric = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_world = ?";
-        try (Connection dbConn = this.getConnection();
-             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsGeneric), trimmedOwnerId, worldName);
-             ResultSet resultSet = selectStatement.executeQuery()) {
-            List<PetStorage> ret = new ArrayList<>();
-            while (resultSet.next()) {
-                ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
-            }
-            return ret;
-        }
-    }
-
     public int getNumPetsByPetType(String ownerId, PetType.Pets petType) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String getNumPets = "SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
