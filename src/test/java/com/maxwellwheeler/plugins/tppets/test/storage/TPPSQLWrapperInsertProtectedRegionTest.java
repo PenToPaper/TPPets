@@ -44,17 +44,17 @@ public class TPPSQLWrapperInsertProtectedRegionTest {
         this.intCaptor = ArgumentCaptor.forClass(Integer.class);
 
         World world = mock(World.class);
-        this.protectedRegion = new ProtectedRegion("LostName", "EnterMessage", "WorldName", world, new Location(world, 1, 2, 3), new Location(world, 4, 5, 6), "LostRegion", tpPets);
+        this.protectedRegion = new ProtectedRegion("ProtectedRegion", "EnterMessage", "WorldName", world, new Location(world, 1, 2, 3), new Location(world, 4, 5, 6), "ProtectedRegion", tpPets);
         this.mockSQLWrapper = new MockSQLWrapper(tpPets, this.connection);
 
-        when(tpPets.getLostRegion("LostName")).thenReturn(null);
+        when(tpPets.getProtectedRegion("ProtectedRegion")).thenReturn(null);
         when(this.connection.prepareStatement("INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")).thenReturn(this.preparedStatement);
         when(this.preparedStatement.executeUpdate()).thenReturn(1);
     }
 
     @Test
-    @DisplayName("insertLostRegion returns true")
-    void insertLostRegionReturnsTrue() throws SQLException {
+    @DisplayName("insertProtectedRegion returns true")
+    void insertProtectedRegionReturnsTrue() throws SQLException {
         assertTrue(this.mockSQLWrapper.insertProtectedRegion(this.protectedRegion));
 
         verify(this.preparedStatement, times(4)).setString(this.stringIndexCaptor.capture(), this.stringCaptor.capture());
@@ -66,7 +66,7 @@ public class TPPSQLWrapperInsertProtectedRegionTest {
         List<Integer> intIndexes = this.intIndexCaptor.getAllValues();
 
         assertEquals(1, stringIndexes.get(0));
-        assertEquals("LostName", strings.get(0));
+        assertEquals("ProtectedRegion", strings.get(0));
 
         assertEquals(2, stringIndexes.get(1));
         assertEquals("EnterMessage", strings.get(1));
@@ -93,7 +93,7 @@ public class TPPSQLWrapperInsertProtectedRegionTest {
         assertEquals("WorldName", strings.get(2));
 
         assertEquals(10, stringIndexes.get(3));
-        assertEquals("LostRegion", strings.get(3));
+        assertEquals("ProtectedRegion", strings.get(3));
 
         verify(this.preparedStatement, times(1)).executeUpdate();
         verify(this.preparedStatement, times(1)).close();
@@ -101,8 +101,8 @@ public class TPPSQLWrapperInsertProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("insertLostRegion returns false when no row inserted")
-    void insertLostRegionReturnsFalse() throws SQLException {
+    @DisplayName("insertProtectedRegion returns false when no row inserted")
+    void insertProtectedRegionReturnsFalse() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenReturn(0);
 
         assertFalse(this.mockSQLWrapper.insertProtectedRegion(this.protectedRegion));
@@ -115,8 +115,8 @@ public class TPPSQLWrapperInsertProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("insertLostRegion rethrows exceptions")
-    void insertLostRegionRethrowsExceptions() throws SQLException {
+    @DisplayName("insertProtectedRegion rethrows exceptions")
+    void insertProtectedRegionRethrowsExceptions() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> this.mockSQLWrapper.insertProtectedRegion(this.protectedRegion));
