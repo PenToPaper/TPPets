@@ -59,7 +59,7 @@ public class ProtectedRegion extends Region {
      * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
      */
     public ProtectedRegion(String regionName, String enterMessage, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo, int zTwo, String lfString, TPPets thisPlugin) {
-        this(regionName, enterMessage, worldName, new Location(Bukkit.getServer().getWorld(worldName), xOne, yOne, zOne), new Location(Bukkit.getServer().getWorld(worldName), xTwo, yTwo, zTwo), lfString, thisPlugin);
+        this(regionName, enterMessage, worldName, new Location(Bukkit.getWorld(worldName), xOne, yOne, zOne), new Location(Bukkit.getWorld(worldName), xTwo, yTwo, zTwo), lfString, thisPlugin);
     }
     
     /**
@@ -72,7 +72,7 @@ public class ProtectedRegion extends Region {
      * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
      */
     public ProtectedRegion(String regionName, String enterMessage, String worldName, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
-        this(regionName, enterMessage, worldName, Bukkit.getServer().getWorld(worldName), minLoc, maxLoc, lfString, thisPlugin);
+        this(regionName, enterMessage, worldName, Bukkit.getWorld(worldName), minLoc, maxLoc, lfString, thisPlugin);
     }
     
     /**
