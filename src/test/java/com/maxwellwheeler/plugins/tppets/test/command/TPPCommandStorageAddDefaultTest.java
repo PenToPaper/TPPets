@@ -60,12 +60,12 @@ public class TPPCommandStorageAddDefaultTest {
     @DisplayName("Adds storage locations to the database")
     void addStorageLocation() throws SQLException {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
-        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(true);
+        when(this.sqlWrapper.insertServerStorageLocation("default", this.adminLocation)).thenReturn(true);
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).insertServerStorageLocation(anyString(), any(Location.class));
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
@@ -80,12 +80,12 @@ public class TPPCommandStorageAddDefaultTest {
     @DisplayName("Reports database failure when database cannot add entry")
     void cannotAddStorageLocationDBCannotAdd() throws SQLException {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
-        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(false);
+        when(this.sqlWrapper.insertServerStorageLocation("default", this.adminLocation)).thenReturn(false);
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -97,12 +97,12 @@ public class TPPCommandStorageAddDefaultTest {
     @DisplayName("Reports database failure when database fails adding new entry")
     void cannotAddStorageLocationDBFailAdding() throws SQLException {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
-        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenThrow(new SQLException());
+        when(this.sqlWrapper.insertServerStorageLocation("default", this.adminLocation)).thenThrow(new SQLException());
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -114,12 +114,12 @@ public class TPPCommandStorageAddDefaultTest {
     @DisplayName("Reports database failure when database fails finding existing entry")
     void cannotAddStorageLocationDBFailGetting() throws SQLException {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenThrow(new SQLException());
-        when(this.sqlWrapper.addServerStorageLocation("default", this.adminLocation)).thenReturn(true);
+        when(this.sqlWrapper.insertServerStorageLocation("default", this.adminLocation)).thenReturn(true);
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -136,7 +136,7 @@ public class TPPCommandStorageAddDefaultTest {
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addServerStorageLocation(anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());

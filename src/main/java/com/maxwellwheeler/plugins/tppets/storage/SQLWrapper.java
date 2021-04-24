@@ -462,7 +462,7 @@ public abstract class SQLWrapper {
 
     // Server storage locations
 
-    public boolean addServerStorageLocation(@NotNull String storageName, @NotNull Location location) throws SQLException {
+    public boolean insertServerStorageLocation(@NotNull String storageName, @NotNull Location location) throws SQLException {
         if (location.getWorld() != null) {
             String insertServerStorage = "INSERT INTO tpp_server_storage_locations (storage_name, effective_storage_name, loc_x, loc_y, loc_z, world_name) VALUES (?, ?, ?, ?, ?, ?)";
             return this.insertPrepStatement(insertServerStorage, storageName, storageName.toLowerCase(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getWorld().getName());

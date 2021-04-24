@@ -31,7 +31,7 @@ public class CommandStorageAddDefault extends Command {
                 return;
             }
 
-            if (this.thisPlugin.getDatabase().addServerStorageLocation(this.args[0], this.sender.getLocation())) {
+            if (this.thisPlugin.getDatabase().insertServerStorageLocation(this.args[0], this.sender.getLocation())) {
                 this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has added server location " + this.args[0] + " " + TeleportCommand.formatLocation(this.sender.getLocation()));
                 this.commandStatus = CommandStatus.SUCCESS;
             } else {
