@@ -6,6 +6,8 @@ import org.bukkit.Location;
  * Represents a storage location from the database
  * @author GatheringExp
  */
+// TODO: ADD EFFECTIVE STORAGE NAME FIELD
+// TODO: ADD SERVER STORAGE LOCATION SUBCLASS
 public class StorageLocation {
     private String playerUUID;
     private String storageName;
