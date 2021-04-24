@@ -23,7 +23,7 @@ public class CommandStorageList extends Command {
     private void listStorage() {
         try {
 
-            List<StorageLocation> storageLocations = this.thisPlugin.getDatabase().getPlayerStorageLocations(this.commandFor.getUniqueId().toString());
+            List<StorageLocation> storageLocations = this.thisPlugin.getDatabase().getStorageLocations(this.commandFor.getUniqueId().toString());
             listAllStorages(this.sender, storageLocations);
 
         } catch (SQLException exception) {

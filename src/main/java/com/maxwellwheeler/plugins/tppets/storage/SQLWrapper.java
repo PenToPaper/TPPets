@@ -445,7 +445,7 @@ public abstract class SQLWrapper {
         }
     }
 
-    public List<StorageLocation> getPlayerStorageLocations(@NotNull String ownerId) throws SQLException {
+    public List<StorageLocation> getStorageLocations(@NotNull String ownerId) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String getStorageLocations = "SELECT * FROM tpp_user_storage_locations WHERE user_id = ?";
         try (Connection dbConn = this.getConnection();

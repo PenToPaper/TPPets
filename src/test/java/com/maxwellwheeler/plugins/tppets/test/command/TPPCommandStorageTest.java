@@ -76,7 +76,7 @@ public class TPPCommandStorageTest {
         String[] args = {"storage", "list"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getPlayerStorageLocations(anyString());
+        verify(this.sqlWrapper, never()).getStorageLocations(anyString());
         verify(sender, never()).sendMessage(anyString());
     }
 
@@ -92,7 +92,7 @@ public class TPPCommandStorageTest {
             String[] args = {"storage", "f:MockPlayerName", "list"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getPlayerStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
             verify(sender, never()).sendMessage(anyString());
         }
     }
@@ -107,7 +107,7 @@ public class TPPCommandStorageTest {
             String[] args = {"storage", "f:MockPlayerName", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getPlayerStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -123,12 +123,12 @@ public class TPPCommandStorageTest {
             when(this.player.hasPlayedBefore()).thenReturn(false);
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
+            when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
 
             String[] args = {"storage", "f:MockPlayerName", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getPlayerStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -143,12 +143,12 @@ public class TPPCommandStorageTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getPlayerStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
+            when(this.sqlWrapper.getStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
 
             String[] args = {"storage", "f:MockPlayerName;", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getPlayerStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -163,12 +163,12 @@ public class TPPCommandStorageTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getPlayerStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
+            when(this.sqlWrapper.getStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
 
             String[] args = {"storage", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getPlayerStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();

@@ -68,12 +68,12 @@ public class TPPCommandStorageListTest {
     @Test
     @DisplayName("Lists storage locations from the database")
     void listStorageLocations() throws SQLException {
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
 
         String[] args = {"storage", "list"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getPlayerStorageLocations(anyString());
+        verify(this.sqlWrapper, times(1)).getStorageLocations(anyString());
 
         verify(this.player, times(6)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
@@ -91,12 +91,12 @@ public class TPPCommandStorageListTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
+            when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
 
             String[] args = {"storage", "f:MockPlayerName", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, times(1)).getPlayerStorageLocations(anyString());
+            verify(this.sqlWrapper, times(1)).getStorageLocations(anyString());
 
             verify(this.admin, times(6)).sendMessage(this.messageCaptor.capture());
             List<String> messages = this.messageCaptor.getAllValues();
@@ -112,12 +112,12 @@ public class TPPCommandStorageListTest {
     @Test
     @DisplayName("Lists empty storage location list from database")
     void listEmptyStorageLocations() throws SQLException {
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
 
         String[] args = {"storage", "list"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getPlayerStorageLocations(anyString());
+        verify(this.sqlWrapper, times(1)).getStorageLocations(anyString());
 
         verify(this.player, times(2)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
@@ -128,12 +128,12 @@ public class TPPCommandStorageListTest {
     @Test
     @DisplayName("Displays inability to find storage locations to user")
     void cantDisplayStorageLocationsDatabaseFailure() throws SQLException {
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenThrow(new SQLException());
 
         String[] args = {"storage", "list"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getPlayerStorageLocations(anyString());
+        verify(this.sqlWrapper, times(1)).getStorageLocations(anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();

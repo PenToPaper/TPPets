@@ -52,12 +52,12 @@ public class TPPSQLWrapperGetPlayerStorageLocationsTest {
     }
 
     @Test
-    @DisplayName("getPlayerStorageLocations returns accurate list")
-    void getPlayerStorageLocationsReturnsList() throws SQLException {
+    @DisplayName("getStorageLocations returns accurate list")
+    void getStorageLocationsReturnsList() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("WorldName")).thenReturn(this.world);
 
-            List<StorageLocation> storageLocations = this.mockSQLWrapper.getPlayerStorageLocations("Mock-Owner-Id");
+            List<StorageLocation> storageLocations = this.mockSQLWrapper.getStorageLocations("Mock-Owner-Id");
 
             assertNotNull(storageLocations);
             assertEquals(1, storageLocations.size());
@@ -79,11 +79,11 @@ public class TPPSQLWrapperGetPlayerStorageLocationsTest {
     }
 
     @Test
-    @DisplayName("getPlayerStorageLocations returns empty list when no storage locations found")
-    void getPlayerStorageLocationsReturnsEmptyList() throws SQLException {
+    @DisplayName("getStorageLocations returns empty list when no storage locations found")
+    void getStorageLocationsReturnsEmptyList() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
-        List<StorageLocation> storageLocations = this.mockSQLWrapper.getPlayerStorageLocations("Mock-Owner-Id");
+        List<StorageLocation> storageLocations = this.mockSQLWrapper.getStorageLocations("Mock-Owner-Id");
 
         assertNotNull(storageLocations);
         assertEquals(0, storageLocations.size());
@@ -96,11 +96,11 @@ public class TPPSQLWrapperGetPlayerStorageLocationsTest {
     }
 
     @Test
-    @DisplayName("getPlayerStorageLocations rethrows exceptions")
-    void getPlayerStorageLocationsRethrowsExceptions() throws SQLException {
+    @DisplayName("getStorageLocations rethrows exceptions")
+    void getStorageLocationsRethrowsExceptions() throws SQLException {
         when(this.resultSet.next()).thenThrow(new SQLException());
 
-        assertThrows(SQLException.class, () -> this.mockSQLWrapper.getPlayerStorageLocations("Mock-Owner-Id"));
+        assertThrows(SQLException.class, () -> this.mockSQLWrapper.getStorageLocations("Mock-Owner-Id"));
 
         verify(this.preparedStatement, times(1)).setString(1, "MockOwnerId");
         verify(this.preparedStatement, times(1)).executeQuery();

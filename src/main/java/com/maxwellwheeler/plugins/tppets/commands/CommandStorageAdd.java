@@ -64,7 +64,7 @@ public class CommandStorageAdd extends Command {
     }
 
     public boolean isNewStorageWithinLimit() throws SQLException {
-        return this.sender.hasPermission("tppets.bypassstoragelimit") || this.thisPlugin.getStorageLimit() < 0 || this.thisPlugin.getDatabase().getPlayerStorageLocations(this.commandFor.getUniqueId().toString()).size() < this.thisPlugin.getStorageLimit();
+        return this.sender.hasPermission("tppets.bypassstoragelimit") || this.thisPlugin.getStorageLimit() < 0 || this.thisPlugin.getDatabase().getStorageLocations(this.commandFor.getUniqueId().toString()).size() < this.thisPlugin.getStorageLimit();
     }
 
     private void displayStatus() {

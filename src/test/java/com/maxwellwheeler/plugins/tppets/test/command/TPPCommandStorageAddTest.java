@@ -63,7 +63,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Adds storage locations to the database")
     void addStorageLocation() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
         when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
@@ -89,7 +89,7 @@ public class TPPCommandStorageAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-            when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
             when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
 
             when(this.tpPets.getStorageLimit()).thenReturn(1);
@@ -113,7 +113,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Can't add storage locations without valid storage name")
     void cannotAddStorageLocationInvalidName() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
@@ -131,7 +131,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Can't add storage locations without any storage name")
     void cannotAddStorageLocationNoName() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
@@ -161,7 +161,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Can't add storage locations when over storage limit")
     void cannotAddStorageLocationOverLimit() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
 
         when(this.tpPets.getStorageLimit()).thenReturn(0);
 
@@ -182,7 +182,7 @@ public class TPPCommandStorageAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-            when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
             when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
 
             when(this.tpPets.getStorageLimit()).thenReturn(0);
@@ -208,7 +208,7 @@ public class TPPCommandStorageAddTest {
         StorageLocation existingLocation = mock(StorageLocation.class);
 
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(existingLocation);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
         when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
@@ -232,7 +232,7 @@ public class TPPCommandStorageAddTest {
             StorageLocation existingLocation = mock(StorageLocation.class);
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(existingLocation);
-            when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
             when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
 
             when(this.tpPets.getStorageLimit()).thenReturn(1);
@@ -252,7 +252,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Reports database cannot add storage to user")
     void reportsDatabaseCannotAdd() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
         when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(false);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
@@ -271,7 +271,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Reports database failure to get specific storage from user")
     void reportsDatabaseFailureToGetSpecificStorage() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenThrow(new SQLException());
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
         when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
@@ -290,7 +290,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Reports database failure to get all storage from user")
     void reportsDatabaseFailureToGetAllStorage() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenThrow(new SQLException());
         when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
@@ -309,7 +309,7 @@ public class TPPCommandStorageAddTest {
     @DisplayName("Reports database failure to add storage from user")
     void reportsDatabaseFailureToAddStorage() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
-        when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
         when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenThrow(new SQLException());
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
