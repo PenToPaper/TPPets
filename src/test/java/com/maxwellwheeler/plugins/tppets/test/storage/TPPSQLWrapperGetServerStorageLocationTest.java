@@ -55,7 +55,6 @@ public class TPPSQLWrapperGetServerStorageLocationTest {
         when(this.resultSet.getInt("loc_x")).thenReturn(1);
         when(this.resultSet.getInt("loc_y")).thenReturn(2);
         when(this.resultSet.getInt("loc_z")).thenReturn(3);
-        when(this.resultSet.getString("user_id")).thenReturn("MockOwnerId");
         when(this.resultSet.getString("storage_name")).thenReturn("StorageName");
     }
 
