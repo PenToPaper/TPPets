@@ -452,7 +452,7 @@ public abstract class SQLWrapper {
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getStorageLocations), trimmedOwnerId);
              ResultSet resultSet = selectStatement.executeQuery()) {
             List<StorageLocation> ret = new ArrayList<>();
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
                 ret.add(new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc));
             }
