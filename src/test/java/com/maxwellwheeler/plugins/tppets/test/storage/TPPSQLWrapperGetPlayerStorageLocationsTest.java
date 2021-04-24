@@ -96,8 +96,8 @@ public class TPPSQLWrapperGetPlayerStorageLocationsTest {
     }
 
     @Test
-    @DisplayName("getLostRegions rethrows exceptions")
-    void getLostRegionsRethrowsExceptions() throws SQLException {
+    @DisplayName("getPlayerStorageLocations rethrows exceptions")
+    void getPlayerStorageLocationsRethrowsExceptions() throws SQLException {
         when(this.resultSet.next()).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> this.mockSQLWrapper.getPlayerStorageLocations("Mock-Owner-Id"));
