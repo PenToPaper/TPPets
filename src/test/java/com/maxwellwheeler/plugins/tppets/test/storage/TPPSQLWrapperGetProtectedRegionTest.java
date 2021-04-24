@@ -55,8 +55,8 @@ public class TPPSQLWrapperGetProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("getLostRegions returns accurate hashtable")
-    void getLostRegionsReturnsHashtable() throws SQLException {
+    @DisplayName("getProtectedRegion returns region object")
+    void getProtectedRegionReturnsRegion() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("WorldName")).thenReturn(this.world);
 
@@ -87,8 +87,8 @@ public class TPPSQLWrapperGetProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("getLostRegions returns empty hashtable if no results")
-    void getLostRegionsReturnsEmptyHashtable() throws SQLException {
+    @DisplayName("getProtectedRegion returns null if no protected region present")
+    void getProtectedRegionReturnsNull() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
         ProtectedRegion protectedRegion = this.mockSQLWrapper.getProtectedRegion("ProtectedName");
@@ -103,8 +103,8 @@ public class TPPSQLWrapperGetProtectedRegionTest {
     }
 
     @Test
-    @DisplayName("getLostRegions rethrows exceptions")
-    void getLostRegionsRethrowsExceptions() throws SQLException {
+    @DisplayName("getProtectedRegion rethrows exceptions")
+    void getProtectedRegionRethrowsExceptions() throws SQLException {
         when(this.resultSet.next()).thenThrow(new SQLException());
 
         assertThrows(SQLException.class, () -> this.mockSQLWrapper.getProtectedRegion("ProtectedName"));
