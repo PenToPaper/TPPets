@@ -64,14 +64,14 @@ public class TPPCommandStorageAddTest {
     void addStorageLocation() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
         when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-        when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
+        when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
@@ -90,14 +90,14 @@ public class TPPCommandStorageAddTest {
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
             when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-            when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
+            when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
 
             when(this.tpPets.getStorageLimit()).thenReturn(1);
 
             String[] args = {"storage", "f:MockPlayerName", "add", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+            verify(this.sqlWrapper, times(1)).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -120,7 +120,7 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add", "StorageName;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -138,7 +138,7 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -153,7 +153,7 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
         verify(this.player, never()).sendMessage(anyString());
     }
 
@@ -168,7 +168,7 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -183,14 +183,14 @@ public class TPPCommandStorageAddTest {
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
             when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-            when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
+            when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
 
             when(this.tpPets.getStorageLimit()).thenReturn(0);
 
             String[] args = {"storage", "f:MockPlayerName", "add", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+            verify(this.sqlWrapper, times(1)).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -209,14 +209,14 @@ public class TPPCommandStorageAddTest {
 
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(existingLocation);
         when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-        when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
+        when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -233,14 +233,14 @@ public class TPPCommandStorageAddTest {
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(existingLocation);
             when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-            when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
+            when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.adminLocation)).thenReturn(true);
 
             when(this.tpPets.getStorageLimit()).thenReturn(1);
 
             String[] args = {"storage", "f:MockPlayerName", "add", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+            verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -253,14 +253,14 @@ public class TPPCommandStorageAddTest {
     void reportsDatabaseCannotAdd() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
         when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-        when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(false);
+        when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(false);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -272,14 +272,14 @@ public class TPPCommandStorageAddTest {
     void reportsDatabaseFailureToGetSpecificStorage() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenThrow(new SQLException());
         when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-        when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
+        when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -291,14 +291,14 @@ public class TPPCommandStorageAddTest {
     void reportsDatabaseFailureToGetAllStorage() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
         when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenThrow(new SQLException());
-        when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
+        when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenReturn(true);
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -310,14 +310,14 @@ public class TPPCommandStorageAddTest {
     void reportsDatabaseFailureToAddStorage() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
         when(this.sqlWrapper.getPlayerStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
-        when(this.sqlWrapper.addStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenThrow(new SQLException());
+        when(this.sqlWrapper.insertStorageLocation("MockPlayerId", "StorageName", this.playerLocation)).thenThrow(new SQLException());
 
         when(this.tpPets.getStorageLimit()).thenReturn(1);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).addStorageLocation(anyString(), anyString(), any(Location.class));
+        verify(this.sqlWrapper, times(1)).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();

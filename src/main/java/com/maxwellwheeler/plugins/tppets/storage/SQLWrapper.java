@@ -414,7 +414,7 @@ public abstract class SQLWrapper {
 
     // Storage locations
 
-    public boolean addStorageLocation(@NotNull String ownerId, @NotNull String storageName, Location location) throws SQLException {
+    public boolean insertStorageLocation(@NotNull String ownerId, @NotNull String storageName, Location location) throws SQLException {
         if (location.getWorld() != null) {
             String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
             String insertStorage = "INSERT INTO tpp_user_storage_locations (user_id, storage_name, effective_storage_name, loc_x, loc_y, loc_z, world_name) VALUES (?, ?, ?, ?, ?, ?, ?)";
