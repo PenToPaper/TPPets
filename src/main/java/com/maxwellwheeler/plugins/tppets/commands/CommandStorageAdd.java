@@ -55,7 +55,7 @@ public class CommandStorageAdd extends Command {
             return;
         }
 
-        if (this.thisPlugin.getDatabase().addStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0], this.sender.getLocation())) {
+        if (this.thisPlugin.getDatabase().insertStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0], this.sender.getLocation())) {
             this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getUniqueId().toString() + " has added location " + this.args[0] + " " + TeleportCommand.formatLocation(this.sender.getLocation()) + " for " + this.commandFor.getName());
             this.commandStatus = CommandStatus.SUCCESS;
         } else {
