@@ -116,4 +116,16 @@ public class TPPSQLWrapperInsertStorageLocationTest {
         verify(this.preparedStatement, times(1)).close();
         verify(this.connection, times(1)).close();
     }
+
+    @Test
+    @DisplayName("insertLostRegion returns false if passed location has no world")
+    void insertLostRegionReturnsFalseNoWorld() throws SQLException {
+        assertFalse(this.mockSQLWrapper.insertStorageLocation("Mock-Owner-Id", "StorageName", new Location(null, 1, 2, 3)));
+
+        verify(this.preparedStatement, never()).setString(anyInt(), anyString());
+        verify(this.preparedStatement, never()).setInt(anyInt(), anyInt());
+        verify(this.preparedStatement, never()).executeUpdate();
+        verify(this.preparedStatement, never()).close();
+        verify(this.connection, never()).close();
+    }
 }
