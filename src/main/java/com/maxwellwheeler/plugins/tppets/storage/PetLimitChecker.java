@@ -11,15 +11,6 @@ import java.sql.SQLException;
  *
  */
 public class PetLimitChecker {
-    /**
-     * Enum representing the results of when a pet is attempting to be tamed.
-     * @author GatheringExp
-     *
-     */
-    public enum RuleRestriction {
-        ALLOWED, TOTAL, DOG, CAT, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
-    }
-
     private final TPPets thisPlugin;
     private final int totalLimit;
     private final int dogLimit;
@@ -85,33 +76,6 @@ public class PetLimitChecker {
         return totalLimit;
     }
 
-    /**
-     * Links the enum {@link RuleRestriction} with the enum {@link PetType.Pets}
-     * @param pt The {@link PetType.Pets} enum value
-     * @return The rule restriction represented by pt
-     */
-    private RuleRestriction enumLink(PetType.Pets pt) {
-        switch (pt) {
-            case DOG:
-                return RuleRestriction.DOG;
-            case CAT:
-                return RuleRestriction.CAT;
-            case PARROT:
-                return RuleRestriction.PARROT;
-            case HORSE:
-                return RuleRestriction.HORSE;
-            case MULE:
-                return RuleRestriction.MULE;
-            case LLAMA:
-                return RuleRestriction.LLAMA;
-            case DONKEY:
-                return RuleRestriction.DONKEY;
-            case UNKNOWN:
-            default:
-                return RuleRestriction.UNKNOWN;
-        }
-    }
-
     public boolean isWithinTotalLimit(OfflinePlayer owner) throws SQLException {
         int numTotalPets = this.thisPlugin.getDatabase().getNumPets(owner.getUniqueId().toString());
         return isWithinLimit(this.totalLimit, numTotalPets);
@@ -128,7 +92,7 @@ public class PetLimitChecker {
      * @param within The integer being tested that should be under the limit.
      * @return True if within is below limit, false if otherwise
      */
-    public boolean isWithinLimit(int limit, int within) {
+    private boolean isWithinLimit(int limit, int within) {
         return limit < 0 || within < limit;
     }
 }
