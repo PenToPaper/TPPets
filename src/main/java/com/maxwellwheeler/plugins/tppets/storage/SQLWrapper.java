@@ -437,6 +437,7 @@ public abstract class SQLWrapper {
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
                 // TODO: CONSIDER REFACTORING PROTECTEDREGION CONSTRUCTOR TO BE SIMILAR WHERE YOU HAVE TO SUPPLY THE REFERENCE YOURSELF?
+                // TODO: MAY NEED TO CHECK IF BUKKIT WORLD EXISTS
                 Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
                 return new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc);
             }
