@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 
 import java.sql.*;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -674,5 +675,35 @@ public class TPPDBUpdaterOneToTwoTest {
         verify(this.twoToOneRemovePetNameColumnDropTable, times(1)).executeUpdate();
         verify(this.twoToOneDropAllowedPlayersTable, times(1)).executeUpdate();
         verify(this.twoToOneDropDbVersionTable, times(1)).executeUpdate();
+    }
+
+    @Test
+    @DisplayName("DBUpdater from two to one rethrows proper exception when exception thrown in update and revert")
+    void dbUpdaterTwoToOneRethrowsAttemptsRevert() throws SQLException {
+        SQLException updateException = new SQLException("Update");
+        SQLException revertException = new SQLException("Revert");
+
+        when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenThrow(updateException);
+        when(this.twoToOneDropAllowedPlayersTable.executeUpdate()).thenThrow(revertException);
+
+        SQLException exception = assertThrows(SQLException.class, () -> this.dbUpdater.update(this.sqlWrapper));
+
+        assertEquals(revertException, exception);
+
+        // 2 to 1
+        verify(this.twoToOneRemovePetNameColumnRenameTable, times(1)).executeUpdate();
+        verify(this.statement, times(1)).executeUpdate("CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
+                + "pet_id CHAR(32) PRIMARY KEY,\n"
+                + "pet_type TINYINT NOT NULL,\n"
+                + "pet_x INT NOT NULL,\n"
+                + "pet_y INT NOT NULL,\n"
+                + "pet_z INT NOT NULL,\n"
+                + "pet_world VARCHAR(25) NOT NULL,\n"
+                + "owner_id CHAR(32) NOT NULL"
+                + ");");
+        verify(this.twoToOneRemovePetNameColumnInsertData, times(1)).executeUpdate();
+        verify(this.twoToOneRemovePetNameColumnDropTable, times(1)).executeUpdate();
+        verify(this.twoToOneDropAllowedPlayersTable, times(1)).executeUpdate();
+        verify(this.twoToOneDropDbVersionTable, never()).executeUpdate();
     }
 }
