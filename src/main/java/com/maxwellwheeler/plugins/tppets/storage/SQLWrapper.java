@@ -13,10 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class SQLWrapper {
     protected final TPPets thisPlugin;

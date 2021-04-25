@@ -119,7 +119,7 @@ public class DBUpdater {
         }
 
         private boolean oneToTwoCreateDbVersionTable(SQLWrapper sqlWrapper) throws SQLException {
-            String createDbVersionTable = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY)";
+            String createDbVersionTable = "CREATE TABLE IF NOT EXISTS tpp_db_version (version INT PRIMARY KEY);";
             return sqlWrapper.createStatement(createDbVersionTable);
         }
 
@@ -136,7 +136,7 @@ public class DBUpdater {
                  ResultSet resultSet = preparedStatement.executeQuery()) {
                 Hashtable<String, Integer> numPetsByPlayer = new Hashtable<>();
                 while (resultSet.next()) {
-                    PetStorage pet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
+                    PetStorage pet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), null, null);
                     int currentOwnerPetCount = numPetsByPlayer.getOrDefault(pet.ownerId, 0);
 
                     if (!oneToTwoSetDefaultPetName(sqlWrapper, pet.petId, pet.petType, currentOwnerPetCount)) {
@@ -148,8 +148,8 @@ public class DBUpdater {
             return true;
         }
 
-        private void twoToOneRemovePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
-            String renameTableStatement = "ALTER TABLE tpp_unloaded_pets ADD pet_name VARCHAR(64)";
+        private boolean twoToOneRemovePetNameColumn(SQLWrapper sqlWrapper) throws SQLException {
+            String renameTableStatement = "ALTER TABLE tpp_unloaded_pets RENAME TO tpp_unloaded_pets_temp";
             String createVersionOneTableStatement = "CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
                     + "pet_id CHAR(32) PRIMARY KEY,\n"
                     + "pet_type TINYINT NOT NULL,\n"
@@ -162,15 +162,16 @@ public class DBUpdater {
             String insertOldDataStatement = "INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id FROM tpp_unloaded_pets_temp";
             String dropOldTableStatement = "DROP TABLE tpp_unloaded_pets_temp";
 
-            sqlWrapper.updatePrepStatement(renameTableStatement);
-            sqlWrapper.createStatement(createVersionOneTableStatement);
-            sqlWrapper.insertPrepStatement(insertOldDataStatement);
-            sqlWrapper.updatePrepStatement(dropOldTableStatement);
+            // Insert statement called in updatePrepStatement, because 0 lines returned is valid for this type of insert.
+            return sqlWrapper.updatePrepStatement(renameTableStatement)
+                    && sqlWrapper.createStatement(createVersionOneTableStatement)
+                    && sqlWrapper.updatePrepStatement(insertOldDataStatement)
+                    && sqlWrapper.updatePrepStatement(dropOldTableStatement);
         }
 
-        private void twoToOneDropAllowedPlayersTable(SQLWrapper sqlWrapper) throws SQLException {
+        private boolean twoToOneDropAllowedPlayersTable(SQLWrapper sqlWrapper) throws SQLException {
             String dropAllowedPlayersTable = "DROP TABLE IF EXISTS tpp_allowed_players";
-            sqlWrapper.updatePrepStatement(dropAllowedPlayersTable);
+            return sqlWrapper.updatePrepStatement(dropAllowedPlayersTable);
         }
 
         private void twoToOneDropDbVersionTable(SQLWrapper sqlWrapper) throws SQLException {
@@ -179,15 +180,20 @@ public class DBUpdater {
         }
 
         private void twoToOne(SQLWrapper sqlWrapper) throws SQLException {
-            twoToOneRemovePetNameColumn(sqlWrapper);
-            twoToOneDropAllowedPlayersTable(sqlWrapper);
-            twoToOneDropDbVersionTable(sqlWrapper);
+            if (twoToOneRemovePetNameColumn(sqlWrapper) && twoToOneDropAllowedPlayersTable(sqlWrapper)) {
+                twoToOneDropDbVersionTable(sqlWrapper);
+            }
         }
 
         private void run(SQLWrapper sqlWrapper) throws SQLException {
-            if (oneToTwoAddPetNameColumn(sqlWrapper) && oneToTwoFillPetName(sqlWrapper) && oneToTwoCreateAllowedPlayersTable(sqlWrapper) && oneToTwoCreateDbVersionTable(sqlWrapper)) {
-                setCurrentSchemaVersion(sqlWrapper, 2);
-                return;
+            try {
+                if (oneToTwoAddPetNameColumn(sqlWrapper) && oneToTwoCreateAllowedPlayersTable(sqlWrapper) && oneToTwoFillPetName(sqlWrapper) && oneToTwoCreateDbVersionTable(sqlWrapper)) {
+                    setCurrentSchemaVersion(sqlWrapper, 2);
+                    return;
+                }
+            } catch (SQLException exception) {
+                twoToOne(sqlWrapper);
+                throw exception;
             }
             twoToOne(sqlWrapper);
         }
