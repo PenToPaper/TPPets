@@ -386,7 +386,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two stops when renaming old table when removing pet name column")
+    @DisplayName("DBUpdater from two to one stops when renaming old table when removing pet name column")
     void dbUpdaterTwoToOneStopsWhenRenamingOldTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnRenameTable.executeUpdate()).thenReturn(-1);
@@ -411,7 +411,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two stops when creating new table when removing pet name column")
+    @DisplayName("DBUpdater from two to one stops when creating new table when removing pet name column")
     void dbUpdaterTwoToOneStopsWhenCreatingNewTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.statement.executeUpdate("CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
@@ -444,7 +444,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two stops when inserting data when removing pet name column")
+    @DisplayName("DBUpdater from two to one stops when inserting data when removing pet name column")
     void dbUpdaterTwoToOneStopsWhenInsertingDataRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnInsertData.executeUpdate()).thenReturn(-1);
@@ -469,7 +469,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two stops when dropping temp table when removing pet name column")
+    @DisplayName("DBUpdater from two to one stops when dropping temp table when removing pet name column")
     void dbUpdaterTwoToOneStopsWhenDroppingTempTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnDropTable.executeUpdate()).thenReturn(-1);
@@ -494,7 +494,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two stops when dropping allowed players table")
+    @DisplayName("DBUpdater from two to one stops when dropping allowed players table")
     void dbUpdaterTwoToOneStopsWhenDroppingAllowedPlayersTable() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneDropAllowedPlayersTable.executeUpdate()).thenReturn(-1);
@@ -519,7 +519,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two rethrows and stops when renaming old table when removing pet name column")
+    @DisplayName("DBUpdater from two to one rethrows and stops when renaming old table when removing pet name column")
     void dbUpdaterTwoToOneRethrowsWhenRenamingOldTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnRenameTable.executeUpdate()).thenThrow(new SQLException());
@@ -544,7 +544,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two rethrows and stops when creating new table when removing pet name column")
+    @DisplayName("DBUpdater from two to one rethrows and stops when creating new table when removing pet name column")
     void dbUpdaterTwoToOneRethrowsWhenCreatingNewTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.statement.executeUpdate("CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
@@ -577,7 +577,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two rethrows and stops when inserting data when removing pet name column")
+    @DisplayName("DBUpdater from two to one rethrows and stops when inserting data when removing pet name column")
     void dbUpdaterTwoToOneRethrowsWhenInsertingDataRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnInsertData.executeUpdate()).thenThrow(new SQLException());
@@ -602,7 +602,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two rethrows and stops when dropping temp table when removing pet name column")
+    @DisplayName("DBUpdater from two to one rethrows and stops when dropping temp table when removing pet name column")
     void dbUpdaterTwoToOneRethrowsWhenDroppingTempTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnDropTable.executeUpdate()).thenThrow(new SQLException());
@@ -627,7 +627,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two rethrows and stops when dropping allowed players table")
+    @DisplayName("DBUpdater from two to one rethrows and stops when dropping allowed players table")
     void dbUpdaterTwoToOneRethrowsWhenDroppingAllowedPlayersTable() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneDropAllowedPlayersTable.executeUpdate()).thenThrow(new SQLException());
@@ -652,7 +652,7 @@ public class TPPDBUpdaterOneToTwoTest {
     }
 
     @Test
-    @DisplayName("DBUpdater from one to two rethrows and stops when dropping allowed players table")
+    @DisplayName("DBUpdater from two to one rethrows and stops when dropping allowed players table")
     void dbUpdaterTwoToOneRethrowsWhenDroppingDbVersionTable() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneDropDbVersionTable.executeUpdate()).thenThrow(new SQLException());
