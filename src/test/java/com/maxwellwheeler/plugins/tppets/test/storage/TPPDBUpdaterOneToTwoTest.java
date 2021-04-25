@@ -387,7 +387,7 @@ public class TPPDBUpdaterOneToTwoTest {
 
     @Test
     @DisplayName("DBUpdater from one to two stops when renaming old table when removing pet name column")
-    void dbUpdaterOneToTwoStopsWhenRenamingOldTableRemovingPetNames() throws SQLException {
+    void dbUpdaterTwoToOneStopsWhenRenamingOldTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnRenameTable.executeUpdate()).thenReturn(-1);
 
@@ -412,7 +412,7 @@ public class TPPDBUpdaterOneToTwoTest {
 
     @Test
     @DisplayName("DBUpdater from one to two stops when creating new table when removing pet name column")
-    void dbUpdaterOneToTwoStopsWhenCreatingNewTableRemovingPetNames() throws SQLException {
+    void dbUpdaterTwoToOneStopsWhenCreatingNewTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.statement.executeUpdate("CREATE TABLE IF NOT EXISTS tpp_unloaded_pets (\n"
                 + "pet_id CHAR(32) PRIMARY KEY,\n"
@@ -445,7 +445,7 @@ public class TPPDBUpdaterOneToTwoTest {
 
     @Test
     @DisplayName("DBUpdater from one to two stops when inserting data when removing pet name column")
-    void dbUpdaterOneToTwoStopsWhenInsertingDataRemovingPetNames() throws SQLException {
+    void dbUpdaterTwoToOneStopsWhenInsertingDataRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnInsertData.executeUpdate()).thenReturn(-1);
 
@@ -470,7 +470,7 @@ public class TPPDBUpdaterOneToTwoTest {
 
     @Test
     @DisplayName("DBUpdater from one to two stops when dropping temp table when removing pet name column")
-    void dbUpdaterOneToTwoStopsWhenDroppingTempTableRemovingPetNames() throws SQLException {
+    void dbUpdaterTwoToOneStopsWhenDroppingTempTableRemovingPetNames() throws SQLException {
         when(this.oneToTwoAddPetNameColumn.executeUpdate()).thenReturn(-1);
         when(this.twoToOneRemovePetNameColumnDropTable.executeUpdate()).thenReturn(-1);
 
