@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Hashtable;
 
 /**
  * Used to update the database
@@ -212,6 +212,11 @@ public class DBUpdater {
             return sqlWrapper.updatePrepStatement(populateTableStatement);
         }
 
+        private boolean twoToThreeRenamePetWithId(SQLWrapper sqlWrapper, String petId, String petName) throws SQLException {
+            String updatePetName = "UPDATE tpp_unloaded_pets SET pet_name = ?, effective_pet_name = ? WHERE pet_id = ?";
+            return sqlWrapper.updatePrepStatement(updatePetName, petName, petName.toLowerCase(), petId);
+        }
+
         private boolean twoToThreeRemovePetsNamedAllList(SQLWrapper sqlWrapper) throws SQLException {
             String selectInvalidPets = "SELECT * FROM tpp_unloaded_pets WHERE effective_pet_name = \"all\" OR effective_pet_name = \"list\"";
             try (Connection dbConn = sqlWrapper.getConnection();
@@ -220,7 +225,7 @@ public class DBUpdater {
                 while (resultSet.next()) {
                     PetStorage invalidPet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
                     String generatedName = sqlWrapper.generateUniquePetName(invalidPet.ownerId, invalidPet.petType);
-                    if (!sqlWrapper.renamePet(invalidPet.ownerId, invalidPet.petName, generatedName)) {
+                    if (!twoToThreeRenamePetWithId(sqlWrapper, invalidPet.petId, generatedName)) {
                         return false;
                     }
                 }
@@ -243,7 +248,7 @@ public class DBUpdater {
                 while (resultSet.next()) {
                     PetStorage invalidPet = new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), null);
                     String generatedName = sqlWrapper.generateUniquePetName(invalidPet.ownerId, invalidPet.petType);
-                    if (!sqlWrapper.renamePet(invalidPet.ownerId, invalidPet.petName, generatedName)) {
+                    if (!twoToThreeRenamePetWithId(sqlWrapper, invalidPet.petId, generatedName)) {
                         return false;
                     }
                 }
@@ -266,10 +271,10 @@ public class DBUpdater {
             String insertOldDataStatement = "INSERT INTO tpp_unloaded_pets SELECT pet_id, pet_type, pet_x, pet_y, pet_z, pet_world, owner_id, pet_name FROM tpp_unloaded_pets_temp";
             String dropOldTableStatement = "DROP TABLE tpp_unloaded_pets_temp";
 
-            sqlWrapper.updatePrepStatement(renameTableStatement);
-            sqlWrapper.createStatement(createVersionOneTableStatement);
-            sqlWrapper.insertPrepStatement(insertOldDataStatement);
-            sqlWrapper.updatePrepStatement(dropOldTableStatement);
+            // updatePrepStatement used for insert statement because 0 results are fine
+            if (sqlWrapper.updatePrepStatement(renameTableStatement) && sqlWrapper.createStatement(createVersionOneTableStatement) && sqlWrapper.updatePrepStatement(insertOldDataStatement)) {
+                sqlWrapper.updatePrepStatement(dropOldTableStatement);
+            }
         }
 
         private void threeToTwo(SQLWrapper sqlWrapper) throws SQLException {
@@ -277,9 +282,14 @@ public class DBUpdater {
         }
 
         private void run(SQLWrapper sqlWrapper) throws SQLException {
-            if (twoToThreeAddEffectivePetNameColumn(sqlWrapper) && twoToThreePopulateEffectivePetNameColumn(sqlWrapper) && twoToThreeRemovePetsNamedAllList(sqlWrapper) && twoToThreeRenameDuplicates(sqlWrapper)) {
-                setCurrentSchemaVersion(sqlWrapper, 3);
-                return;
+            try {
+                if (twoToThreeAddEffectivePetNameColumn(sqlWrapper) && twoToThreePopulateEffectivePetNameColumn(sqlWrapper) && twoToThreeRemovePetsNamedAllList(sqlWrapper) && twoToThreeRenameDuplicates(sqlWrapper)) {
+                    setCurrentSchemaVersion(sqlWrapper, 3);
+                    return;
+                }
+            } catch (SQLException exception) {
+                threeToTwo(sqlWrapper);
+                throw exception;
             }
             threeToTwo(sqlWrapper);
         }
