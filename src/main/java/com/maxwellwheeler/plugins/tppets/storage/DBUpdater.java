@@ -323,9 +323,9 @@ public class DBUpdater {
             return sqlWrapper.createStatement(createServerStorageTable);
         }
 
-        private void fourToThreeDropUserStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
+        private boolean fourToThreeDropUserStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
             String dropUserStorageTable = "DROP TABLE IF EXISTS tpp_user_storage_locations";
-            sqlWrapper.updatePrepStatement(dropUserStorageTable);
+            return sqlWrapper.updatePrepStatement(dropUserStorageTable);
         }
 
         private void fourToThreeDropServerStorageLocations(SQLWrapper sqlWrapper) throws SQLException {
@@ -334,14 +334,20 @@ public class DBUpdater {
         }
 
         private void fourToThree(SQLWrapper sqlWrapper) throws SQLException {
-            fourToThreeDropUserStorageLocations(sqlWrapper);
-            fourToThreeDropServerStorageLocations(sqlWrapper);
+            if (fourToThreeDropUserStorageLocations(sqlWrapper)) {
+                fourToThreeDropServerStorageLocations(sqlWrapper);
+            }
         }
 
         private void run(SQLWrapper sqlWrapper) throws SQLException {
-            if (threeToFourCreateTppUserStorageLocations(sqlWrapper) && threeToFourCreateTppServerStorageLocations(sqlWrapper)) {
-                setCurrentSchemaVersion(sqlWrapper, 4);
-                return;
+            try {
+                if (threeToFourCreateTppUserStorageLocations(sqlWrapper) && threeToFourCreateTppServerStorageLocations(sqlWrapper)) {
+                    setCurrentSchemaVersion(sqlWrapper, 4);
+                    return;
+                }
+            } catch (SQLException exception) {
+                fourToThree(sqlWrapper);
+                throw exception;
             }
             fourToThree(sqlWrapper);
         }
