@@ -545,7 +545,7 @@ public class TPPDBUpdaterTwoToThreeTest {
 
     @Test
     @DisplayName("DBUpdater from three to two rethrows proper exception when exception thrown in update and revert")
-    void dbUpdaterTwoToOneRethrowsAttemptsRevert() throws SQLException {
+    void dbUpdaterTwoToThreeRethrowsAttemptsRevert() throws SQLException {
         SQLException updateException = new SQLException("Update");
         SQLException revertException = new SQLException("Revert");
 
