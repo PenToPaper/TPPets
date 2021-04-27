@@ -28,7 +28,7 @@ public class SQLiteWrapper extends SQLWrapper {
         this.dbName = dbName;
     }
 
-    private void makeDatabaseDirectory() throws SQLException {
+    public void makeDatabaseDirectory() throws SQLException {
         File dbDir = new File(this.dbPath);
         SQLException exception = new SQLException("Could not access database directory");
         try {
@@ -53,7 +53,7 @@ public class SQLiteWrapper extends SQLWrapper {
             return DriverManager.getConnection(getJDBCPath());
 
         } catch (SQLException exception) {
-            this.thisPlugin.getLogWrapper().logErrors("Can't connect to SQLite database:" + exception.getMessage());
+            this.thisPlugin.getLogWrapper().logErrors("Can't connect to SQLite database: " + exception.getMessage());
             throw exception;
         }
     }
