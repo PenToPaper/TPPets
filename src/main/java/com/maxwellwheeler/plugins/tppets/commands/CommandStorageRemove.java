@@ -27,7 +27,7 @@ public class CommandStorageRemove extends Command {
                 return;
             }
 
-            if (!ArgValidator.validateStorageName(this.args[0]) || this.thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), this.args[0]) == null) {
+            if (!ArgValidator.softValidateStorageName(this.args[0]) || this.thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), this.args[0]) == null) {
                 this.commandStatus = CommandStatus.ALREADY_DONE;
                 return;
             }

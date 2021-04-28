@@ -33,7 +33,7 @@ public abstract class Command {
 
     @SuppressWarnings("deprecation")
     public OfflinePlayer getOfflinePlayer(String username) {
-        if (ArgValidator.validateUsername(username)) {
+        if (ArgValidator.softValidateUsername(username)) {
             OfflinePlayer player = Bukkit.getOfflinePlayer(username);
             if (player.hasPlayedBefore()) {
                 return player;

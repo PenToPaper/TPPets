@@ -54,7 +54,7 @@ class CommandStore extends TeleportCommand {
 
                 this.hasSpecificStorage = true;
 
-                if (!ArgValidator.validateStorageName(this.args[1])) {
+                if (!ArgValidator.softValidateStorageName(this.args[1])) {
                     this.commandStatus = CommandStatus.INVALID_NAME;
                     return;
                 }

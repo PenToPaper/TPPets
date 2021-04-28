@@ -1,8 +1,5 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
-import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
-
-import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,11 +12,11 @@ public class ArgValidator {
     /**
      * Used to validate the number of arguments for commands with multiple arguments, and a certain number of them expected.
      * @param args The list of arguments.
-     * @param length The expected length.
+     * @param expected The expected length.
      * @return True if non-null values occupy the args array up to length, false if otherwise.
      */
-    public static boolean validateArgsLength(String[] args, int length) {
-        if (args.length >= length) {
+    public static boolean validateArgsLength(String[] args, int expected) {
+        if (args.length >= expected) {
             for (String arg : args) {
                 if (arg == null) {
                     return false;
@@ -36,17 +33,17 @@ public class ArgValidator {
      * @return True if pet name checks out, false otherwise
      */
     public static boolean softValidatePetName(String petName) {
-        Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(petName);
-        return nameMatcher.find() && !petName.equalsIgnoreCase("list") && !petName.toLowerCase().equals("all");
+        Matcher nameMatcher = Pattern.compile("\\A\\w{1,64}\\z").matcher(petName);
+        return nameMatcher.find();
     }
 
     public static boolean softValidateRegionName(String regionName) {
-        Matcher nameMatcher = Pattern.compile("^[\\w§ ]{1,64}$").matcher(regionName);
+        Matcher nameMatcher = Pattern.compile("\\A[\\w§ ]{1,64}\\z").matcher(regionName);
         return nameMatcher.find();
     }
 
     public static boolean softValidateRegionEnterMessage(String enterMessage) {
-        Matcher nameMatcher = Pattern.compile("^[\\w§ '.,!]{1,255}$").matcher(enterMessage);
+        Matcher nameMatcher = Pattern.compile("\\A[\\w§ '.,!]{1,255}\\z").matcher(enterMessage);
         return nameMatcher.find();
     }
 
@@ -56,8 +53,8 @@ public class ArgValidator {
      * @param storeName The storage name to check
      * @return If the storage name is valid
      */
-    public static boolean validateStorageName(String storeName) {
-        return validateServerStorageName(storeName) && !storeName.equalsIgnoreCase("default");
+    public static boolean softValidateStorageName(String storeName) {
+        return softValidateServerStorageName(storeName) && !storeName.equalsIgnoreCase("default");
     }
 
     /**
@@ -66,19 +63,9 @@ public class ArgValidator {
      * @param serverStoreName The storage name to check
      * @return If the storage name is valid
      */
-    public static boolean validateServerStorageName(String serverStoreName) {
-        Matcher nameMatcher = Pattern.compile("^\\w{1,64}$").matcher(serverStoreName);
+    public static boolean softValidateServerStorageName(String serverStoreName) {
+        Matcher nameMatcher = Pattern.compile("\\A\\w{1,64}\\z").matcher(serverStoreName);
         return nameMatcher.find();
-    }
-
-    /**
-     * Soft validates pet names and checks that pet name is unique.
-     * @param ownerUUID The pet owner's UUID, used for checking if pet names are unique to them
-     * @param petName The pet name to validate
-     * @return True if pet name checks out, false otherwise
-     */
-    public static boolean validatePetName(SQLWrapper sqlWrapper, String ownerUUID, String petName) throws SQLException {
-        return softValidatePetName(petName) && sqlWrapper.isNameUnique(ownerUUID, petName);
     }
 
     /**
@@ -86,8 +73,8 @@ public class ArgValidator {
      * @param userName The username to check
      * @return True if possible, false if not
      */
-    public static boolean validateUsername(String userName) {
-        Matcher nameMatcher = Pattern.compile("^\\w{3,16}$").matcher(userName);
+    public static boolean softValidateUsername(String userName) {
+        Matcher nameMatcher = Pattern.compile("\\A\\w{3,16}\\z").matcher(userName);
         return nameMatcher.find();
     }
 
@@ -101,7 +88,7 @@ public class ArgValidator {
         if (indexOfColon > 0) {
             String toEvaluate = argOne.substring(0,indexOfColon).toLowerCase();
             // f: or from: lead the string
-            if (toEvaluate.equals("f") || toEvaluate.equals("from")) {
+            if (toEvaluate.equalsIgnoreCase("f") || toEvaluate.equalsIgnoreCase("from")) {
                 return argOne.substring(indexOfColon+1);
             }
         }

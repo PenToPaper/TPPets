@@ -30,7 +30,7 @@ public class CommandStorageAdd extends Command {
             return;
         }
 
-        if (!ArgValidator.validateStorageName(this.args[0])) {
+        if (!ArgValidator.softValidateStorageName(this.args[0])) {
             this.commandStatus = CommandStatus.INVALID_NAME;
             return;
         }
