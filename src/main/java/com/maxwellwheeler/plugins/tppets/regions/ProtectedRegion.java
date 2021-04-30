@@ -102,7 +102,7 @@ public class ProtectedRegion extends Region {
      */
     public boolean tpToLostRegion(Entity ent) {
         EntityActions.setSitting(ent);
-        EntityActions.removePassenger(ent);
+        ent.eject();
         if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
             return ent.teleport(lfReference.getApproxCenter());
         }

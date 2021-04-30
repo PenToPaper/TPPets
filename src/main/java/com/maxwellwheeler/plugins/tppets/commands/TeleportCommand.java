@@ -76,7 +76,7 @@ public abstract class TeleportCommand extends BaseCommand {
         }
         EntityActions.setStanding(entity);
         if (kickPlayerOff) {
-            EntityActions.removePassenger(entity);
+            entity.eject();
         }
         entity.teleport(loc);
         if (setSitting) {

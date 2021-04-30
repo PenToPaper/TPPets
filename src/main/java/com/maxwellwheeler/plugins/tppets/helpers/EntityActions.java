@@ -29,12 +29,4 @@ public class EntityActions {
             sittableTemp.setSitting(false);
         }
     }
-
-    /**
-     * Removes any passengers on the entity
-     * @param ent The ent to remove passengers from
-     */
-    public static void removePassenger(Entity ent) {
-        ent.eject();
-    }
 }
