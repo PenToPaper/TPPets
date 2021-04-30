@@ -213,40 +213,9 @@ public class TPPMobDamageManagerTest {
     @Test
     @DisplayName("mobDamageManager allows environmental damage when disabled")
     void mobDamageManagerAllowsEnvironmentalDamage() {
-        EntityDamageEvent.DamageCause[] damageCauses = new EntityDamageEvent.DamageCause[]{
-                EntityDamageEvent.DamageCause.BLOCK_EXPLOSION,
-                EntityDamageEvent.DamageCause.CONTACT,
-                EntityDamageEvent.DamageCause.CRAMMING,
-                EntityDamageEvent.DamageCause.CUSTOM,
-                EntityDamageEvent.DamageCause.DRAGON_BREATH,
-                EntityDamageEvent.DamageCause.DROWNING,
-                EntityDamageEvent.DamageCause.DRYOUT,
-                EntityDamageEvent.DamageCause.ENTITY_ATTACK,
-                EntityDamageEvent.DamageCause.ENTITY_EXPLOSION,
-                EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK,
-                EntityDamageEvent.DamageCause.FALL,
-                EntityDamageEvent.DamageCause.FALLING_BLOCK,
-                EntityDamageEvent.DamageCause.FIRE,
-                EntityDamageEvent.DamageCause.FIRE_TICK,
-                EntityDamageEvent.DamageCause.FLY_INTO_WALL,
-                EntityDamageEvent.DamageCause.HOT_FLOOR,
-                EntityDamageEvent.DamageCause.LAVA,
-                EntityDamageEvent.DamageCause.LIGHTNING,
-                EntityDamageEvent.DamageCause.MAGIC,
-                EntityDamageEvent.DamageCause.MELTING,
-                EntityDamageEvent.DamageCause.POISON,
-                EntityDamageEvent.DamageCause.PROJECTILE,
-                EntityDamageEvent.DamageCause.STARVATION,
-                EntityDamageEvent.DamageCause.SUFFOCATION,
-                EntityDamageEvent.DamageCause.SUICIDE,
-                EntityDamageEvent.DamageCause.THORNS,
-                EntityDamageEvent.DamageCause.VOID,
-                EntityDamageEvent.DamageCause.WITHER
-        };
-
         MobDamageManager mobDamageManager = new MobDamageManager(this.tpPets, new ArrayList<>());
 
-        for (EntityDamageEvent.DamageCause damageCause : damageCauses) {
+        for (EntityDamageEvent.DamageCause damageCause : EntityDamageEvent.DamageCause.values()) {
             assertFalse(mobDamageManager.isPreventedEnvironmentalDamage(damageCause));
         }
     }
