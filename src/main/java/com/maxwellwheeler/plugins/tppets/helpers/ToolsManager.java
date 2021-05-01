@@ -8,7 +8,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 public class ToolsManager {
-    private Hashtable<String, List<Material>> customTools;
+    private final Hashtable<String, List<Material>> customTools;
 
     public ToolsManager(ConfigurationSection toolsConfig) {
         this.customTools = new Hashtable<>();
