@@ -38,7 +38,6 @@ public class PermissionChecker {
     }
 
     public static boolean hasPermissionToTeleportType(PetType.Pets petType, Player player) {
-        String test = "tppets." + petType.toString().toLowerCase() + "s";
-        return player.hasPermission(test);
+        return player.hasPermission("tppets." + petType.toString().toLowerCase() + "s");
     }
 }
