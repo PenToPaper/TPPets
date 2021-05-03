@@ -9,12 +9,12 @@ import java.util.logging.Level;
  * @author GatheringExp
  */
 public class LogWrapper {
-    private TPPets thisPlugin;
-    private boolean updatedPets;
-    private boolean successfulActions;
-    private boolean unsuccessfulActions;
-    private boolean preventedDamage;
-    private boolean errors;
+    private final TPPets thisPlugin;
+    private final boolean updatedPets;
+    private final boolean successfulActions;
+    private final boolean unsuccessfulActions;
+    private final boolean preventedDamage;
+    private final boolean errors;
 
     /**
      * General constructor with configuration options
@@ -39,8 +39,8 @@ public class LogWrapper {
      * @param message The message to log
      */
     public void logUpdatedPet(String message) {
-        if (updatedPets) {
-            thisPlugin.getLogger().info(message);
+        if (this.updatedPets) {
+            this.thisPlugin.getLogger().info(message);
         }
     }
 
@@ -49,8 +49,8 @@ public class LogWrapper {
      * @param message The message to log
      */
     public void logSuccessfulAction(String message) {
-        if (successfulActions) {
-            thisPlugin.getLogger().info(message);
+        if (this.successfulActions) {
+            this.thisPlugin.getLogger().info(message);
         }
     }
 
@@ -59,8 +59,8 @@ public class LogWrapper {
      * @param message The message to log
      */
     public void logUnsuccessfulAction(String message) {
-        if (unsuccessfulActions) {
-            thisPlugin.getLogger().info(message);
+        if (this.unsuccessfulActions) {
+            this.thisPlugin.getLogger().info(message);
         }
     }
 
@@ -69,8 +69,8 @@ public class LogWrapper {
      * @param message The message to log
      */
     public void logErrors(String message) {
-        if (errors) {
-            thisPlugin.getLogger().log(Level.SEVERE, message);
+        if (this.errors) {
+            this.thisPlugin.getLogger().log(Level.SEVERE, message);
         }
     }
 
@@ -79,43 +79,8 @@ public class LogWrapper {
      * @param message The message to log
      */
     public void logPreventedDamage(String message) {
-        if (preventedDamage) {
-            thisPlugin.getLogger().info(message);
+        if (this.preventedDamage) {
+            this.thisPlugin.getLogger().info(message);
         }
-    }
-
-    /**
-     * @return If the updatedPets logging config option is set
-     */
-    public boolean getUpdatedPets() {
-        return updatedPets;
-    }
-
-    /**
-     * @return If the successful actions logging config option is set
-     */
-    public boolean getSuccessfulActions() {
-        return successfulActions;
-    }
-
-    /**
-     * @return If the unsuccessful actions logging config option is set
-     */
-    public boolean getUnsuccessfulAction() {
-        return unsuccessfulActions;
-    }
-
-    /**
-     * @return If the error logging config option is set
-     */
-    public boolean getErrors() {
-        return errors;
-    }
-
-    /**
-     * @return If the prevented damage logging config option is set
-     */
-    public boolean getPreventedDamage() {
-        return preventedDamage;
     }
 }
