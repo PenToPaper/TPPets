@@ -9,12 +9,6 @@ import org.bukkit.World;
  *
  */
 public class LostAndFoundRegion extends Region {
-
-    @Override
-    public String toString() {
-        return String.format("zoneName = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", regionName, worldName, minLoc.getBlockX(), minLoc.getBlockY(), minLoc.getBlockZ(), maxLoc.getBlockX(), maxLoc.getBlockY(), maxLoc.getBlockZ());
-    }
-    
     /**
      * General constructor, just sends arguments to superclass.
      * @param regionName The zone's name.
@@ -29,17 +23,6 @@ public class LostAndFoundRegion extends Region {
     public LostAndFoundRegion(String regionName, String worldName, int minX, int minY, int minZ, int maxX, int maxY,
             int maxZ) {
         super(regionName, worldName, minX, minY, minZ, maxX, maxY, maxZ);
-    }
-    
-    /**
-     * General constructor, just sends arguments to superclass.
-     * @param regionName The zone's name.
-     * @param worldName The zone's world's name.
-     * @param minLoc A location object representing the region's minimum point.
-     * @param maxLoc A location object representing the region's maximum point.
-     */
-    public LostAndFoundRegion(String regionName, String worldName, Location minLoc, Location maxLoc) {
-        super(regionName, worldName, minLoc, maxLoc);
     }
     
     /**
@@ -69,6 +52,11 @@ public class LostAndFoundRegion extends Region {
      * @return Location data for the center of the lost and found region
      */
     public Location getApproxCenter() {
-        return new Location(minLoc.getWorld(), getMiddleInt(minLoc.getBlockX(), maxLoc.getBlockX()), getMiddleInt(minLoc.getBlockY(), maxLoc.getBlockY()), getMiddleInt(minLoc.getBlockZ(), maxLoc.getBlockZ()));
+        return new Location(this.minLoc.getWorld(), getMiddleInt(this.minLoc.getBlockX(), this.maxLoc.getBlockX()), getMiddleInt(this.minLoc.getBlockY(), this.maxLoc.getBlockY()), getMiddleInt(this.minLoc.getBlockZ(), this.maxLoc.getBlockZ()));
+    }
+
+    @Override
+    public String toString() {
+        return String.format("zoneName = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", this.regionName, this.worldName, this.minLoc.getBlockX(), this.minLoc.getBlockY(), this.minLoc.getBlockZ(), this.maxLoc.getBlockX(), this.maxLoc.getBlockY(), this.maxLoc.getBlockZ());
     }
 }

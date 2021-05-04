@@ -10,11 +10,11 @@ import org.bukkit.World;
  *
  */
 public abstract class Region {
-    protected String regionName;
-    protected String worldName;
-    protected World world;
-    protected Location minLoc;
-    protected Location maxLoc;
+    protected final String regionName;
+    protected final String worldName;
+    protected final World world;
+    protected final Location minLoc;
+    protected final Location maxLoc;
 
     /**
      * A general constructor, used primarily for regeneration of the regions from databases.
@@ -29,17 +29,6 @@ public abstract class Region {
      */
     Region(String regionName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         this(regionName, worldName, Bukkit.getWorld(worldName), new Location(Bukkit.getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getWorld(worldName), maxX, maxY, maxZ));
-    }
-    
-    /**
-     * The same style of constructor as Region(String zoneName, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ), but with the coordinates represented by Location objects that include the world.
-     * @param regionName The name of the zone.
-     * @param worldName The name of the world the zone is in. If worldName points to a non-existent world, world will be null but worldName will be what the world was.
-     * @param minLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
-     * @param maxLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
-     */
-    public Region(String regionName, String worldName, Location minLoc, Location maxLoc) {
-        this(regionName, worldName, Bukkit.getWorld(worldName), minLoc, maxLoc);
     }
     
     /**

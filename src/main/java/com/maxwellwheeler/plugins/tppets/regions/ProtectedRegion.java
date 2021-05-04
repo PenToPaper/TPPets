@@ -14,36 +14,17 @@ import org.bukkit.entity.Entity;
  *
  */
 public class ProtectedRegion extends Region {
-    private String enterMessage;
+    private final String enterMessage;
+
     /**
      * The name of the {@link LostAndFoundRegion} that this Protected Region is set to link to. This can't be null, but can potentially be an empty string.
      */
-    private String lfName;
+    private final String lfName;
+
     /**
      * The reference to the {@link LostAndFoundRegion} object that this Protected Region is linked to. This can be null.
      */
     private LostAndFoundRegion lfReference;
-    
-    /**
-     * Gets an up-to-date reference to the {@link LostAndFoundRegion} linked from the given lfName property.
-     * @param lfName The name of the {@link LostAndFoundRegion} to get the reference of.
-     * @return A {@link LostAndFoundRegion} reference.
-     */
-    private LostAndFoundRegion getLfReference (TPPets thisPlugin, String lfName) {
-        return thisPlugin.getLostRegion(lfName);
-    }
-    
-    /**
-     * Updates this Protected Region's local lfReference property based on its lfName property.
-     */
-    public void updateLFReference(TPPets thisPlugin) {
-        this.lfReference = getLfReference(thisPlugin, lfName);
-    }
-    
-    @Override
-    public String toString() {
-        return String.format("zoneName = %s; enterMessage = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", regionName, enterMessage, worldName, minLoc.getBlockX(), minLoc.getBlockY(), minLoc.getBlockZ(), maxLoc.getBlockX(), maxLoc.getBlockY(), maxLoc.getBlockZ());
-    }
     
     /**
      * General constructor, used to recreate regions from database entries.
@@ -59,20 +40,7 @@ public class ProtectedRegion extends Region {
      * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
      */
     public ProtectedRegion(String regionName, String enterMessage, String worldName, int xOne, int yOne, int zOne, int xTwo, int yTwo, int zTwo, String lfString, TPPets thisPlugin) {
-        this(regionName, enterMessage, worldName, new Location(Bukkit.getWorld(worldName), xOne, yOne, zOne), new Location(Bukkit.getWorld(worldName), xTwo, yTwo, zTwo), lfString, thisPlugin);
-    }
-    
-    /**
-     * General constructor, uses Location objects to represent the maximum and minimum of the cube.
-     * @param regionName The name of the Protected Region.
-     * @param enterMessage The message displayed when a player tries to type a /tpp [dogs/cats/birds] command in the region. This supports &#38;[#] color codes.
-     * @param worldName The name of the world the Protected Region is in.
-     * @param minLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
-     * @param maxLoc The Protected Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
-     * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
-     */
-    public ProtectedRegion(String regionName, String enterMessage, String worldName, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
-        this(regionName, enterMessage, worldName, Bukkit.getWorld(worldName), minLoc, maxLoc, lfString, thisPlugin);
+        this(regionName, enterMessage, worldName, Bukkit.getWorld(worldName), new Location(Bukkit.getWorld(worldName), xOne, yOne, zOne), new Location(Bukkit.getWorld(worldName), xTwo, yTwo, zTwo), lfString, thisPlugin);
     }
     
     /**
@@ -86,14 +54,10 @@ public class ProtectedRegion extends Region {
      * @param lfString A string representing the LostAndFound Region to be linked to this ProtectedRegion.
      */
     public ProtectedRegion(String regionName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
-        this(regionName, enterMessage, worldName, world, minLoc, maxLoc, lfString);
-        this.lfReference = getLfReference(thisPlugin, lfString);
-    }
-
-    public ProtectedRegion(String regionName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString) {
         super(regionName, worldName, world, minLoc, maxLoc);
-        this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
         this.lfName = lfString;
+        this.lfReference = getLfReference(thisPlugin, lfString);
+        this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
     }
     
     /**
@@ -103,8 +67,8 @@ public class ProtectedRegion extends Region {
     public boolean tpToLostRegion(Entity ent) {
         EntityActions.setSitting(ent);
         ent.eject();
-        if (lfReference != null && lfReference.getApproxCenter().getWorld() != null) {
-            return ent.teleport(lfReference.getApproxCenter());
+        if (this.lfReference != null && this.lfReference.getApproxCenter().getWorld() != null) {
+            return ent.teleport(this.lfReference.getApproxCenter());
         }
         return false;
     }
@@ -120,16 +84,33 @@ public class ProtectedRegion extends Region {
     public String getLfName() {
         return lfName;
     }
-    
-    public void setLfName(String lfString) {
-        this.lfName = lfString;
+
+    /**
+     * Gets an up-to-date reference to the {@link LostAndFoundRegion} linked from the given lfName property.
+     * @param lfName The name of the {@link LostAndFoundRegion} to get the reference of.
+     * @return A {@link LostAndFoundRegion} reference.
+     */
+    private LostAndFoundRegion getLfReference (TPPets thisPlugin, String lfName) {
+        return thisPlugin.getLostRegion(lfName);
     }
-    
+
     /**
      * Directly sets the lfReference of the Protected Region.
      * @param lfString lfReference's name. This can be null.
      */
     public void setLfReference(TPPets thisPlugin, String lfString) {
         this.lfReference = lfString == null ? null : getLfReference(thisPlugin, lfString);
+    }
+
+    /**
+     * Updates this Protected Region's local lfReference property based on its lfName property.
+     */
+    public void updateLFReference(TPPets thisPlugin) {
+        this.lfReference = getLfReference(thisPlugin, this.lfName);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("zoneName = %s; enterMessage = %s; worldName = %s; x1: %d; y1: %d; z1: %d; x2: %d; y2: %d; z2: %d", this.regionName, this.enterMessage, this.worldName, this.minLoc.getBlockX(), this.minLoc.getBlockY(), this.minLoc.getBlockZ(), this.maxLoc.getBlockX(), this.maxLoc.getBlockY(), this.maxLoc.getBlockZ());
     }
 }
