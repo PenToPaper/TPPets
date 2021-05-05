@@ -39,7 +39,7 @@ public abstract class Region {
      * @param minLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the minimum point.
      * @param maxLoc The Region is generated based on two points: the minimum and maximum of the cube. This is the maximum point.
      */
-    public Region(String regionName, String worldName, World world, Location minLoc, Location maxLoc) {
+    Region(String regionName, String worldName, World world, Location minLoc, Location maxLoc) {
         this.regionName = regionName;
         this.worldName = worldName;
         this.world = world;
