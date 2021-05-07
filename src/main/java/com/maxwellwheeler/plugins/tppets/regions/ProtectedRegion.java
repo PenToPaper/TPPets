@@ -56,7 +56,7 @@ public class ProtectedRegion extends Region {
     public ProtectedRegion(String regionName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
         super(regionName, worldName, world, minLoc, maxLoc);
         this.lfName = lfString;
-        this.lfReference = getLfReference(thisPlugin, lfString);
+        this.lfReference = thisPlugin.getLostRegion(lfString);
         this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
     }
     
@@ -85,28 +85,15 @@ public class ProtectedRegion extends Region {
         return lfName;
     }
 
-    /**
-     * Gets an up-to-date reference to the {@link LostAndFoundRegion} linked from the given lfName property.
-     * @param lfName The name of the {@link LostAndFoundRegion} to get the reference of.
-     * @return A {@link LostAndFoundRegion} reference.
-     */
-    private LostAndFoundRegion getLfReference (TPPets thisPlugin, String lfName) {
-        return thisPlugin.getLostRegion(lfName);
-    }
-
-    /**
-     * Directly sets the lfReference of the Protected Region.
-     * @param lfString lfReference's name. This can be null.
-     */
-    public void setLfReference(TPPets thisPlugin, String lfString) {
-        this.lfReference = lfString == null ? null : getLfReference(thisPlugin, lfString);
+    public void clearLfReference() {
+        this.lfReference = null;
     }
 
     /**
      * Updates this Protected Region's local lfReference property based on its lfName property.
      */
     public void updateLFReference(TPPets thisPlugin) {
-        this.lfReference = getLfReference(thisPlugin, this.lfName);
+        this.lfReference = thisPlugin.getLostRegion(this.lfName);
     }
 
     @Override

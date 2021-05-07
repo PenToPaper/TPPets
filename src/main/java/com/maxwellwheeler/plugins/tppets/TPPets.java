@@ -76,10 +76,7 @@ public class TPPets extends JavaPlugin {
         petIndex = new PetLimitChecker(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
     }
 
-    /**
-     * Initializes the {@link DBWrapper} based on config options mysql.enable, mysql.host, mysql.port, mysql.database, mysql.username, and mysql.password.
-     * If DBWrapper is false, it will use the SQLite connection rather than a MySQL one.
-     */
+
     private void initializeDBC() {
         if (!getConfig().getBoolean("mysql.enable")) {
             // Use SQLite connection
@@ -326,7 +323,7 @@ public class TPPets extends JavaPlugin {
         for (String key : protectedRegions.keySet()) {
             ProtectedRegion pr = protectedRegions.get(key);
             if (pr != null && pr.getLfName().equals(lfRegionName)) {
-                pr.setLfReference(this, null);
+                pr.clearLfReference();
             }
         }
     }

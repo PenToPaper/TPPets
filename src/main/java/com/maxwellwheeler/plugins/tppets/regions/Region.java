@@ -64,7 +64,7 @@ public abstract class Region {
      * @return True if location is within the region instance, false otherwise.
      */
     public boolean isInRegion(Location lc) {
-        return this.world != null && isBetween(this.minLoc.getBlockX(), lc.getBlockX(), this.maxLoc.getBlockX()) && isBetween(this.minLoc.getBlockY(), lc.getBlockY(), this.maxLoc.getBlockY()) && isBetween(this.minLoc.getBlockZ(), lc.getBlockZ(), this.maxLoc.getBlockZ());
+        return this.world != null && this.world.equals(lc.getWorld()) && isBetween(this.minLoc.getBlockX(), lc.getBlockX(), this.maxLoc.getBlockX()) && isBetween(this.minLoc.getBlockY(), lc.getBlockY(), this.maxLoc.getBlockY()) && isBetween(this.minLoc.getBlockZ(), lc.getBlockZ(), this.maxLoc.getBlockZ());
     }
     
     /**
