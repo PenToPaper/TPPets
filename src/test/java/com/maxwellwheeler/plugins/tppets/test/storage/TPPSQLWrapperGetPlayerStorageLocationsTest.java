@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -57,12 +57,12 @@ public class TPPSQLWrapperGetPlayerStorageLocationsTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("WorldName")).thenReturn(this.world);
 
-            List<StorageLocation> storageLocations = this.mockSQLWrapper.getStorageLocations("Mock-Owner-Id");
+            List<PlayerStorageLocation> storageLocations = this.mockSQLWrapper.getStorageLocations("Mock-Owner-Id");
 
             assertNotNull(storageLocations);
             assertEquals(1, storageLocations.size());
             assertNotNull(storageLocations.get(0));
-            assertEquals("MockOwnerId", storageLocations.get(0).getPlayerUUID());
+            assertEquals("MockOwnerId", storageLocations.get(0).getUserId());
             assertEquals("StorageName", storageLocations.get(0).getStorageName());
             assertNotNull(storageLocations.get(0).getLoc());
             assertEquals(this.world, storageLocations.get(0).getLoc().getWorld());
@@ -83,7 +83,7 @@ public class TPPSQLWrapperGetPlayerStorageLocationsTest {
     void getStorageLocationsReturnsEmptyList() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
-        List<StorageLocation> storageLocations = this.mockSQLWrapper.getStorageLocations("Mock-Owner-Id");
+        List<PlayerStorageLocation> storageLocations = this.mockSQLWrapper.getStorageLocations("Mock-Owner-Id");
 
         assertNotNull(storageLocations);
         assertEquals(0, storageLocations.size());

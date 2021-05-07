@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -34,7 +34,7 @@ public class TPPCommandStorageListDefaultTest {
     private SQLWrapper sqlWrapper;
     private Command command;
     private CommandTPP commandTPP;
-    private List<StorageLocation> storageLocations;
+    private List<ServerStorageLocation> storageLocations;
 
     // TODO: MAKE IT SO THAT MOCKS ARE NOT DESTROYED ON EACH TEST. JUST RESET THEM
     @BeforeEach
@@ -59,10 +59,10 @@ public class TPPCommandStorageListDefaultTest {
         // Database
         World worldOne = mock(World.class);
         when(worldOne.getName()).thenReturn("MockWorldOne");
-        StorageLocation locationOne = MockFactory.getStorageLocation("default", 100, 200, 300, worldOne);
+        ServerStorageLocation locationOne = MockFactory.getServerStorageLocation("default", 100, 200, 300, worldOne);
         World worldTwo = mock(World.class);
         when(worldTwo.getName()).thenReturn("MockWorldTwo");
-        StorageLocation locationTwo = MockFactory.getStorageLocation("default", 400, 500, 600, worldTwo);
+        ServerStorageLocation locationTwo = MockFactory.getServerStorageLocation("default", 400, 500, 600, worldTwo);
         this.storageLocations = new ArrayList<>();
         this.storageLocations.add(locationOne);
         this.storageLocations.add(locationTwo);

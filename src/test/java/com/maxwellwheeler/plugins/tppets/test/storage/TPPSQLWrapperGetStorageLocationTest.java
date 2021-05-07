@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -55,6 +55,7 @@ public class TPPSQLWrapperGetStorageLocationTest {
         when(this.resultSet.getInt("loc_z")).thenReturn(3);
         when(this.resultSet.getString("user_id")).thenReturn("MockOwnerId");
         when(this.resultSet.getString("storage_name")).thenReturn("StorageName");
+        when(this.resultSet.getString("effective_storage_name")).thenReturn("storagename");
     }
 
     @Test
@@ -63,11 +64,11 @@ public class TPPSQLWrapperGetStorageLocationTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("WorldName")).thenReturn(this.world);
 
-            StorageLocation storageLocation = this.mockSQLWrapper.getStorageLocation("Mock-Owner-Id", "StorageName");
+            PlayerStorageLocation storageLocation = this.mockSQLWrapper.getStorageLocation("Mock-Owner-Id", "StorageName");
 
             assertNotNull(storageLocation);
-            assertEquals("MockOwnerId", storageLocation.getPlayerUUID());
             assertEquals("StorageName", storageLocation.getStorageName());
+            assertEquals("storagename", storageLocation.getEffectiveStorageName());
             assertNotNull(storageLocation.getLoc());
             assertEquals(this.world, storageLocation.getLoc().getWorld());
             assertEquals(1, storageLocation.getLoc().getBlockX());
@@ -95,7 +96,7 @@ public class TPPSQLWrapperGetStorageLocationTest {
     void getStorageLocationReturnsNull() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
-        StorageLocation storageLocation = this.mockSQLWrapper.getStorageLocation("Mock-Owner-Id", "StorageName");
+        PlayerStorageLocation storageLocation = this.mockSQLWrapper.getStorageLocation("Mock-Owner-Id", "StorageName");
 
         assertNull(storageLocation);
 

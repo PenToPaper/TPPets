@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -56,6 +56,7 @@ public class TPPSQLWrapperGetServerStorageLocationTest {
         when(this.resultSet.getInt("loc_y")).thenReturn(2);
         when(this.resultSet.getInt("loc_z")).thenReturn(3);
         when(this.resultSet.getString("storage_name")).thenReturn("StorageName");
+        when(this.resultSet.getString("effective_storage_name")).thenReturn("storagename");
     }
 
     @Test
@@ -64,11 +65,11 @@ public class TPPSQLWrapperGetServerStorageLocationTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("WorldName")).thenReturn(this.world);
 
-            StorageLocation storageLocation = this.mockSQLWrapper.getServerStorageLocation("StorageName", this.world);
+            ServerStorageLocation storageLocation = this.mockSQLWrapper.getServerStorageLocation("StorageName", this.world);
 
             assertNotNull(storageLocation);
-            assertEquals("server", storageLocation.getPlayerUUID());
             assertEquals("StorageName", storageLocation.getStorageName());
+            assertEquals("storagename", storageLocation.getEffectiveStorageName());
             assertNotNull(storageLocation.getLoc());
             assertEquals(this.world, storageLocation.getLoc().getWorld());
             assertEquals(1, storageLocation.getLoc().getBlockX());
@@ -96,7 +97,7 @@ public class TPPSQLWrapperGetServerStorageLocationTest {
     void getServerStorageLocationReturnsNull() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
-        StorageLocation storageLocation = this.mockSQLWrapper.getServerStorageLocation("StorageName", this.world);
+        ServerStorageLocation storageLocation = this.mockSQLWrapper.getServerStorageLocation("StorageName", this.world);
 
         assertNull(storageLocation);
 

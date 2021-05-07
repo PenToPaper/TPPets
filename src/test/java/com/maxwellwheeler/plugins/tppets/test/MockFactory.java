@@ -2,9 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.*;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -97,16 +95,28 @@ public class MockFactory {
         return player;
     }
 
-    public static StorageLocation getStorageLocation(String locationName, int x, int y, int z, World world) {
-        StorageLocation storage = mock(StorageLocation.class);
+    public static PlayerStorageLocation getPlayerStorageLocation(String locationName, String userId, int x, int y, int z, World world) {
+        PlayerStorageLocation storage = mock(PlayerStorageLocation.class);
+        mockStorageLocation(storage, locationName, x, y, z, world);
+        when(storage.getUserId()).thenReturn(userId);
+        return storage;
+    }
+
+    public static ServerStorageLocation getServerStorageLocation(String locationName, int x, int y, int z, World world) {
+        ServerStorageLocation storage = mock(ServerStorageLocation.class);
+        mockStorageLocation(storage, locationName, x, y, z, world);
+        return storage;
+    }
+
+    private static void mockStorageLocation(StorageLocation storageLocation, String locationName, int x, int y, int z, World world) {
         Location location = mock(Location.class);
-        when(storage.getStorageName()).thenReturn(locationName);
-        when(storage.getLoc()).thenReturn(location);
+        when(storageLocation.getStorageName()).thenReturn(locationName);
+        when(storageLocation.getEffectiveStorageName()).thenReturn(locationName.toLowerCase());
+        when(storageLocation.getLoc()).thenReturn(location);
         when(location.getBlockX()).thenReturn(x);
         when(location.getBlockY()).thenReturn(y);
         when(location.getBlockZ()).thenReturn(z);
         when(location.getWorld()).thenReturn(world);
-        return storage;
     }
 
     public static ProtectedRegion getProtectedRegion(String regionName, String enterMessage, String worldName, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, String lfString, LostAndFoundRegion lfReference) {

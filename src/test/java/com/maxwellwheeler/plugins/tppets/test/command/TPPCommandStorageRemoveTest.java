@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -28,7 +28,7 @@ public class TPPCommandStorageRemoveTest {
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
-    private StorageLocation storageLocation;
+    private PlayerStorageLocation storageLocation;
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
@@ -40,7 +40,7 @@ public class TPPCommandStorageRemoveTest {
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.storage"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.storageother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
-        this.storageLocation = mock(StorageLocation.class);
+        this.storageLocation = mock(PlayerStorageLocation.class);
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);

@@ -1,7 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -27,10 +27,10 @@ public class CommandStorageListDefault extends Command {
         try {
 
             // Checks all worlds and stores their storage locations. Doing this first checks for database failures\
-            List<StorageLocation> allStorageLocations = new ArrayList<>();
+            List<ServerStorageLocation> allStorageLocations = new ArrayList<>();
 
             for (World world : Bukkit.getWorlds()) {
-                List<StorageLocation> storageLocations = this.thisPlugin.getDatabase().getServerStorageLocations(world);
+                List<ServerStorageLocation> storageLocations = this.thisPlugin.getDatabase().getServerStorageLocations(world);
 
                 allStorageLocations.addAll(storageLocations);
             }
@@ -42,11 +42,11 @@ public class CommandStorageListDefault extends Command {
         }
     }
 
-    private void listAllStorages(Player pl, List<StorageLocation> storageLocations) {
+    private void listAllStorages(Player pl, List<ServerStorageLocation> storageLocations) {
         // Loops through the stored storage locations if there's been no failure. Lists them to the user.
         this.sender.sendMessage(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE +  "Server's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------");
 
-        for (StorageLocation storageLocation: storageLocations) {
+        for (ServerStorageLocation storageLocation: storageLocations) {
             listIndividualStorage(pl, storageLocation);
         }
 
@@ -54,7 +54,7 @@ public class CommandStorageListDefault extends Command {
 
     }
 
-    private void listIndividualStorage(Player pl, StorageLocation storageLoc) {
+    private void listIndividualStorage(Player pl, ServerStorageLocation storageLoc) {
         if (storageLoc != null && storageLoc.getLoc().getWorld() != null) {
             pl.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + storageLoc.getStorageName());
             // TODO REFACTOR TeleportCommand.formatLocation and put it in here

@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
@@ -56,7 +56,7 @@ public class TPPCommandStorageRemoveDefaultTest {
     @Test
     @DisplayName("Removes default storage locations from the database")
     void removeStorageLocation() throws SQLException {
-        StorageLocation storageLocation = mock(StorageLocation.class);
+        ServerStorageLocation storageLocation = mock(ServerStorageLocation.class);
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
         when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
 
@@ -94,7 +94,7 @@ public class TPPCommandStorageRemoveDefaultTest {
     @Test
     @DisplayName("Reports database failure when database cannot remove entry")
     void cannotRemoveStorageLocationDbCannotRemove() throws SQLException {
-        StorageLocation storageLocation = mock(StorageLocation.class);
+        ServerStorageLocation storageLocation = mock(ServerStorageLocation.class);
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
         when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(false);
 
@@ -112,7 +112,7 @@ public class TPPCommandStorageRemoveDefaultTest {
     @Test
     @DisplayName("Reports database failure when database fails when removing entry")
     void cannotRemoveStorageLocationDbFailRemoving() throws SQLException {
-        StorageLocation storageLocation = mock(StorageLocation.class);
+        ServerStorageLocation storageLocation = mock(ServerStorageLocation.class);
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
         when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenThrow(new SQLException());
 

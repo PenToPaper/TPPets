@@ -3,7 +3,8 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
@@ -38,7 +39,8 @@ public class TPPCommandStoreTest {
     private SQLWrapper sqlWrapper;
     private Command command;
     private CommandTPP commandTPP;
-    private StorageLocation storageLocation;
+    private ServerStorageLocation serverStorageLocation;
+    private PlayerStorageLocation playerStorageLocation;
     private LogWrapper logWrapper;
     private PetStorage pet;
     private Chunk chunk;
@@ -69,7 +71,8 @@ public class TPPCommandStoreTest {
         this.commandTPP = new CommandTPP(aliases, tpPets);
 
         // Storage Location
-        this.storageLocation = MockFactory.getStorageLocation("StorageOne", 100, 200, 300, this.world);
+        this.serverStorageLocation = MockFactory.getServerStorageLocation("StorageOne", 100, 200, 300, this.world);
+        this.playerStorageLocation = MockFactory.getPlayerStorageLocation("StorageTwo", "MockPlayerId", 100, 200, 300, this.world);
         this.pet = new PetStorage("MockPetId", 7, 700, 800, 900, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(700, 900)).thenReturn(this.chunk);
@@ -82,7 +85,7 @@ public class TPPCommandStoreTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
+            when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.serverStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "PetName"};
@@ -116,7 +119,7 @@ public class TPPCommandStoreTest {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
+            when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.serverStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "f:MockPlayerName", "PetName"};
@@ -149,7 +152,7 @@ public class TPPCommandStoreTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "PetName", "StorageName"};
@@ -183,7 +186,7 @@ public class TPPCommandStoreTest {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
             String[] args = {"store", "f:MockPlayerName", "PetName", "StorageName"};
@@ -405,7 +408,7 @@ public class TPPCommandStoreTest {
     void cannotTeleportUsersPetsDbFailFindPet() throws SQLException {
         String[] args = {"store", "MyPet"};
         when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MyPet")).thenThrow(new SQLException());
-        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.storageLocation);
+        when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(this.serverStorageLocation);
 
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
@@ -458,7 +461,7 @@ public class TPPCommandStoreTest {
     @Test
     @DisplayName("Cannot teleport user's pets with non-existent pet")
     void cannotTeleportUsersPetsNonExistentPet() throws SQLException {
-        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
         when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(null);
 
         String[] args = {"store", "PetName", "StorageName"};
@@ -481,7 +484,7 @@ public class TPPCommandStoreTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
             when(this.chunk.getEntities()).thenReturn(new Entity[]{});
 
@@ -507,7 +510,7 @@ public class TPPCommandStoreTest {
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.storageLocation);
+            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
             when(this.chunk.getEntities()).thenReturn(new Entity[]{});
 

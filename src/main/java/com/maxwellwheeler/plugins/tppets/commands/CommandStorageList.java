@@ -1,7 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -23,7 +23,7 @@ public class CommandStorageList extends Command {
     private void listStorage() {
         try {
 
-            List<StorageLocation> storageLocations = this.thisPlugin.getDatabase().getStorageLocations(this.commandFor.getUniqueId().toString());
+            List<PlayerStorageLocation> storageLocations = this.thisPlugin.getDatabase().getStorageLocations(this.commandFor.getUniqueId().toString());
             listAllStorages(this.sender, storageLocations);
 
         } catch (SQLException exception) {
@@ -31,15 +31,15 @@ public class CommandStorageList extends Command {
         }
     }
 
-    private void listAllStorages(Player pl, List<StorageLocation> storageLocations) {
+    private void listAllStorages(Player pl, List<PlayerStorageLocation> storageLocations) {
         this.sender.sendMessage(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + commandFor.getName() + "'s Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------");
-        for (StorageLocation storageLocation : storageLocations) {
+        for (PlayerStorageLocation storageLocation : storageLocations) {
             this.listIndividualStorage(pl, storageLocation);
         }
         this.sender.sendMessage(ChatColor.GRAY + "----------------------------------------");
     }
 
-    private void listIndividualStorage(Player pl, StorageLocation storageLoc) {
+    private void listIndividualStorage(Player pl, PlayerStorageLocation storageLoc) {
         if (storageLoc != null && storageLoc.getLoc().getWorld() != null) {
             pl.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + storageLoc.getStorageName());
             // TODO REFACTOR TeleportCommand.formatLocation and put it in here

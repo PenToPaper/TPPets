@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -205,7 +205,7 @@ public class TPPCommandStorageAddTest {
     @Test
     @DisplayName("Does not add a storage location if one with the same name already exists")
     void addStorageLocationAlreadyExists() throws SQLException {
-        StorageLocation existingLocation = mock(StorageLocation.class);
+        PlayerStorageLocation existingLocation = mock(PlayerStorageLocation.class);
 
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(existingLocation);
         when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());
@@ -229,7 +229,7 @@ public class TPPCommandStorageAddTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            StorageLocation existingLocation = mock(StorageLocation.class);
+            PlayerStorageLocation existingLocation = mock(PlayerStorageLocation.class);
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(existingLocation);
             when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(new ArrayList<>());

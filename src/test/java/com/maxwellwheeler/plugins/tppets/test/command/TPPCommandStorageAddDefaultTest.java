@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
@@ -130,7 +130,7 @@ public class TPPCommandStorageAddDefaultTest {
     @Test
     @DisplayName("Does not add server storage location if it already exists")
     void cannotAddStorageLocationAlreadyExists() throws SQLException {
-        StorageLocation storageLocation = mock(StorageLocation.class);
+        ServerStorageLocation storageLocation = mock(ServerStorageLocation.class);
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
 
         String[] args = {"storage", "add", "default"};

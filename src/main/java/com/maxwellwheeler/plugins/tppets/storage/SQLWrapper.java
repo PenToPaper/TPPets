@@ -2,9 +2,7 @@ package com.maxwellwheeler.plugins.tppets.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.*;
 import org.jetbrains.annotations.NotNull;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -426,32 +424,36 @@ public abstract class SQLWrapper {
         return this.deletePrepStatement(removeStorage, trimmedOwnerId, storageName.toLowerCase());
     }
 
-    public StorageLocation getStorageLocation(@NotNull String ownerId, @NotNull String storageName) throws SQLException {
+    public PlayerStorageLocation getStorageLocation(@NotNull String ownerId, @NotNull String storageName) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String getStorageLocation = "SELECT * FROM tpp_user_storage_locations WHERE user_id = ? AND effective_storage_name = ? LIMIT 1";
         try (Connection dbConn = this.getConnection();
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getStorageLocation), trimmedOwnerId, storageName.toLowerCase());
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
-                // TODO: CONSIDER REFACTORING PROTECTEDREGION CONSTRUCTOR TO BE SIMILAR WHERE YOU HAVE TO SUPPLY THE REFERENCE YOURSELF?
-                // TODO: MAY NEED TO CHECK IF BUKKIT WORLD EXISTS
-                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
-                return new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc);
+                World world = Bukkit.getWorld(resultSet.getString("world_name"));
+                if (world != null) {
+                    Location loc = new Location(world, resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                    return new PlayerStorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), resultSet.getString("effective_storage_name"), loc);
+                }
             }
             return null;
         }
     }
 
-    public List<StorageLocation> getStorageLocations(@NotNull String ownerId) throws SQLException {
+    public List<PlayerStorageLocation> getStorageLocations(@NotNull String ownerId) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
         String getStorageLocations = "SELECT * FROM tpp_user_storage_locations WHERE user_id = ?";
         try (Connection dbConn = this.getConnection();
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getStorageLocations), trimmedOwnerId);
              ResultSet resultSet = selectStatement.executeQuery()) {
-            List<StorageLocation> ret = new ArrayList<>();
+            List<PlayerStorageLocation> ret = new ArrayList<>();
             while (resultSet.next()) {
-                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
-                ret.add(new StorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), retLoc));
+                World world = Bukkit.getWorld(resultSet.getString("world_name"));
+                if (world != null) {
+                    Location retLoc = new Location(world, resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                    ret.add(new PlayerStorageLocation(resultSet.getString("user_id"), resultSet.getString("storage_name"), resultSet.getString("effective_storage_name"), retLoc));
+                }
             }
             return ret;
         }
@@ -472,30 +474,28 @@ public abstract class SQLWrapper {
         return this.deletePrepStatement(removeServerStorage, storageName.toLowerCase(), world.getName());
     }
 
-    public StorageLocation getServerStorageLocation(@NotNull String storageName, @NotNull World world) throws SQLException {
+    public ServerStorageLocation getServerStorageLocation(@NotNull String storageName, @NotNull World world) throws SQLException {
         String getServerStorage = "SELECT * FROM tpp_server_storage_locations WHERE effective_storage_name = ? AND world_name = ? LIMIT 1";
         try (Connection dbConn = this.getConnection();
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getServerStorage), storageName.toLowerCase(), world.getName());
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
-                // TODO: Consider refactoring StorageLocation to include ServerStorageLocation as a separate class?
-                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
-                return new StorageLocation("server", resultSet.getString("storage_name"), retLoc);
+                Location retLoc = new Location(world, resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                return new ServerStorageLocation(resultSet.getString("storage_name"), resultSet.getString("effective_storage_name"), retLoc);
             }
             return null;
         }
     }
 
-    public List<StorageLocation> getServerStorageLocations(@NotNull World world) throws SQLException {
+    public List<ServerStorageLocation> getServerStorageLocations(@NotNull World world) throws SQLException {
         String getServerStorage = "SELECT * FROM tpp_server_storage_locations WHERE world_name = ?";
         try (Connection dbConn = this.getConnection();
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(getServerStorage), world.getName());
              ResultSet resultSet = selectStatement.executeQuery()) {
-            List<StorageLocation> ret = new ArrayList<>();
+            List<ServerStorageLocation> ret = new ArrayList<>();
             while (resultSet.next()) {
-                // TODO: Consider refactoring StorageLocation to include constructor that lets us do everything in one line
-                Location retLoc = new Location(Bukkit.getWorld(resultSet.getString("world_name")), resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
-                ret.add(new StorageLocation(null, resultSet.getString("storage_name"), retLoc));
+                Location retLoc = new Location(world, resultSet.getInt("loc_x"), resultSet.getInt("loc_y"), resultSet.getInt("loc_z"));
+                ret.add(new ServerStorageLocation(resultSet.getString("storage_name"), resultSet.getString("effective_storage_name"), retLoc));
             }
             return ret;
         }

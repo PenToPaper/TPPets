@@ -2,7 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -49,6 +49,7 @@ public class TPPSQLWrapperGetServerStorageLocationsTest {
         when(this.resultSet.getInt("loc_y")).thenReturn(2);
         when(this.resultSet.getInt("loc_z")).thenReturn(3);
         when(this.resultSet.getString("storage_name")).thenReturn("StorageName");
+        when(this.resultSet.getString("effective_storage_name")).thenReturn("storagename");
     }
 
     @Test
@@ -57,13 +58,13 @@ public class TPPSQLWrapperGetServerStorageLocationsTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getWorld("WorldName")).thenReturn(this.world);
 
-            List<StorageLocation> storageLocations = this.mockSQLWrapper.getServerStorageLocations(this.world);
+            List<ServerStorageLocation> storageLocations = this.mockSQLWrapper.getServerStorageLocations(this.world);
 
             assertNotNull(storageLocations);
             assertEquals(1, storageLocations.size());
             assertNotNull(storageLocations.get(0));
-            assertNull(storageLocations.get(0).getPlayerUUID());
             assertEquals("StorageName", storageLocations.get(0).getStorageName());
+            assertEquals("storagename", storageLocations.get(0).getEffectiveStorageName());
             assertNotNull(storageLocations.get(0).getLoc());
             assertEquals(this.world, storageLocations.get(0).getLoc().getWorld());
             assertEquals(1, storageLocations.get(0).getLoc().getBlockX());
@@ -83,7 +84,7 @@ public class TPPSQLWrapperGetServerStorageLocationsTest {
     void getServerStorageLocationsReturnsEmptyList() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
-        List<StorageLocation> storageLocations = this.mockSQLWrapper.getServerStorageLocations(this.world);
+        List<ServerStorageLocation> storageLocations = this.mockSQLWrapper.getServerStorageLocations(this.world);
 
         assertNotNull(storageLocations);
         assertEquals(0, storageLocations.size());

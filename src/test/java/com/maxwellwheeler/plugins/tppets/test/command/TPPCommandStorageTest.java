@@ -3,7 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -35,7 +35,7 @@ public class TPPCommandStorageTest {
     private SQLWrapper sqlWrapper;
     private Command command;
     private CommandTPP commandTPP;
-    private List<StorageLocation> storageLocations;
+    private List<PlayerStorageLocation> storageLocations;
 
     @BeforeEach
     public void beforeEach(){
@@ -60,8 +60,8 @@ public class TPPCommandStorageTest {
         // Database
         World world = mock(World.class);
         when(world.getName()).thenReturn("MockWorld");
-        StorageLocation locationOne = MockFactory.getStorageLocation("StorageOne", 100, 200, 300, world);
-        StorageLocation locationTwo = MockFactory.getStorageLocation("StorageTwo", 400, 500, 600, world);
+        PlayerStorageLocation locationOne = MockFactory.getPlayerStorageLocation("StorageOne", "MockPlayerId", 100, 200, 300, world);
+        PlayerStorageLocation locationTwo = MockFactory.getPlayerStorageLocation("StorageTwo", "MockPlayerId", 400, 500, 600, world);
         this.storageLocations = new ArrayList<>();
         this.storageLocations.add(locationOne);
         this.storageLocations.add(locationTwo);
