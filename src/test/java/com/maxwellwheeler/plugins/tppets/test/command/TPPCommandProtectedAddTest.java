@@ -3,9 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
-import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
+import com.maxwellwheeler.plugins.tppets.regions.*;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
@@ -35,6 +33,7 @@ public class TPPCommandProtectedAddTest {
     private LogWrapper logWrapper;
     private ArgumentCaptor<ProtectedRegion> regionCaptor;
     private TPPets tpPets;
+    private ProtectedRegionManager protectedRegionManager;
     private Command command;
     private CommandTPP commandTPP;
     private RegionSelectionManager regionSelectionManager;
@@ -59,8 +58,13 @@ public class TPPCommandProtectedAddTest {
         this.regionSelectionManager.setEndLocation(this.admin, new Location(this.world, 400, 500, 600));
         LostAndFoundRegion linkedLostRegion = new LostAndFoundRegion("LostRegionName", "MockWorldName", this.world, new Location(this.world, 100, 200, 300), new Location(this.world, 400, 500, 600));
 
+        LostRegionManager lostRegionManager = mock(LostRegionManager.class);
+        this.protectedRegionManager = mock(ProtectedRegionManager.class);
+
         when(this.world.getName()).thenReturn("MockWorldName");
-        when(this.tpPets.getLostRegion("LostRegionName")).thenReturn(linkedLostRegion);
+        when(this.tpPets.getLostRegionManager()).thenReturn(lostRegionManager);
+        when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
+        when(lostRegionManager.getLostRegion("LostRegionName")).thenReturn(linkedLostRegion);
         when(this.tpPets.getRegionSelectionManager()).thenReturn(this.regionSelectionManager);
         when(this.sqlWrapper.getProtectedRegion("ProtectedRegionName")).thenReturn(null);
         when(this.sqlWrapper.insertProtectedRegion(any(ProtectedRegion.class))).thenReturn(true);
@@ -97,7 +101,7 @@ public class TPPCommandProtectedAddTest {
         ProtectedRegion capturedInsert = this.regionCaptor.getValue();
         assertEqualsProtectedRegion(expectedRegion, capturedInsert);
 
-        verify(this.tpPets, times(1)).addProtectedRegion(this.regionCaptor.capture());
+        verify(this.protectedRegionManager, times(1)).addProtectedRegion(this.regionCaptor.capture());
         ProtectedRegion capturedCache = this.regionCaptor.getValue();
         assertEqualsProtectedRegion(expectedRegion, capturedCache);
 
@@ -118,7 +122,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -134,7 +138,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -150,7 +154,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -166,7 +170,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -184,7 +188,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -203,7 +207,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -221,7 +225,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -240,7 +244,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -258,7 +262,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -276,7 +280,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).insertProtectedRegion(any(ProtectedRegion.class));
-        verify(this.tpPets, never()).addProtectedRegion(any(ProtectedRegion.class));
+        verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());

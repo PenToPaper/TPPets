@@ -5,6 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import net.milkbowl.vault.permission.Permission;
@@ -32,6 +33,8 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private TPPets tpPets;
+    private ProtectedRegionManager protectedRegionManager;
+
     private PlayerMoveEvent playerMoveEvent;
     private ListenerProtectedRegion playerMoveListenerProtectedRegion;
 
@@ -49,6 +52,7 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
         this.protectedRegion = MockFactory.getProtectedRegion("ProtectedRegionName", "Enter Message", "MockWorldName", world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", lostAndFoundRegion);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, this.playerLocation, new String[]{});
         this.playerMoveListenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);
+        this.protectedRegionManager = mock(ProtectedRegionManager.class);
 
         this.nearbyEntityLocations = new ArrayList<>();
         Location entityInPrLocation = MockFactory.getMockLocation(world, 102, 203, 304);
@@ -70,7 +74,8 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
         this.nearbyEntities.add(entity3);
 
         when(this.playerMoveEvent.getTo()).thenReturn(this.playerLocation);
-        when(this.tpPets.getProtectedRegionWithin(this.playerLocation)).thenReturn(this.protectedRegion);
+        when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
+        when(this.protectedRegionManager.getProtectedRegionAt(this.playerLocation)).thenReturn(this.protectedRegion);
         when(this.playerMoveEvent.getPlayer()).thenReturn(this.player);
         when(this.player.getNearbyEntities(10, 10, 10)).thenReturn(this.nearbyEntities);
         when(this.protectedRegion.isInRegion(this.nearbyEntityLocations.get(0))).thenReturn(true);
@@ -99,7 +104,7 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
     @Test
     @DisplayName("Doesn't teleport pets away when player is not in the protected region")
     void cannotTeleportScannedPetsAwayWhenPlayerNotInPr() throws SQLException {
-        when(this.tpPets.getProtectedRegionWithin(this.playerLocation)).thenReturn(null);
+        when(this.protectedRegionManager.getProtectedRegionAt(this.playerLocation)).thenReturn(null);
 
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 

@@ -3,12 +3,12 @@ package com.maxwellwheeler.plugins.tppets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.*;
 import com.maxwellwheeler.plugins.tppets.listeners.*;
-import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.*;
 import net.milkbowl.vault.permission.Permission;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,11 +25,11 @@ import java.util.Set;
  *
  */
 public class TPPets extends JavaPlugin {
-    private Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<>();
-    private Hashtable<String, LostAndFoundRegion> lostRegions = new Hashtable<>();
     private Hashtable<String, List<String>> commandAliases = new Hashtable<>();
     private Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
 
+    private LostRegionManager lostRegionManager = null;
+    private ProtectedRegionManager protectedRegionManager = null;
     private final ToolsManager toolsManager = new ToolsManager(getConfig().getConfigurationSection("tools"));
     private final RegionSelectionManager regionSelectionManager = new RegionSelectionManager();
     private final MobDamageManager mobDamageManager = new MobDamageManager(this, getConfig().getStringList("protect_pets_from"));
@@ -74,6 +74,24 @@ public class TPPets extends JavaPlugin {
      */
     private void initializePetIndex() {
         petIndex = new PetLimitChecker(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
+    }
+
+    private void initializeProtectedRegionManager() {
+        try {
+            this.protectedRegionManager = new ProtectedRegionManager(this);
+        } catch (SQLException exception) {
+            getLogWrapper().logErrors("Database cannot fetch protected regions. Plugin cannot run.");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
+    private void initializeLostRegionManager() {
+        try {
+            this.lostRegionManager = new LostRegionManager(this);
+        } catch (SQLException exception) {
+            getLogWrapper().logErrors("Database cannot fetch lost regions. Plugin cannot run.");
+            getServer().getPluginManager().disablePlugin(this);
+        }
     }
 
 
@@ -158,24 +176,6 @@ public class TPPets extends JavaPlugin {
     }
     
     /**
-     * Initializes protected regions in a list
-     */
-    private void initializeProtectedRegions() {
-        try {
-            this.protectedRegions = this.database.getProtectedRegions();
-        } catch (SQLException ignored) {}
-    }
-    
-    /**
-     * Initializes protected regions in a list
-     */
-    private void initializeLostRegions() {
-        try {
-            this.lostRegions = this.database.getLostRegions();
-        } catch (SQLException ignored) {}
-    }
-    
-    /**
      * Checks if vault (soft dependency) is enabled
      */
     private void initializeVault() {
@@ -203,7 +203,10 @@ public class TPPets extends JavaPlugin {
     private void initializeAllowedPlayers() {
         try {
             this.allowedPlayers = this.database.getAllAllowedPlayers();
-        } catch (SQLException ignored) {}
+        } catch (SQLException exception) {
+            getLogWrapper().logErrors("Database cannot fetch allowed players. Plugin cannot run.");
+            getServer().getPluginManager().disablePlugin(this);
+        }
     }
     
     @Override
@@ -227,8 +230,8 @@ public class TPPets extends JavaPlugin {
 
         // Database pulling
         getLogWrapper().logSuccessfulAction("Getting data from database.");
-        initializeLostRegions();
-        initializeProtectedRegions();
+        initializeLostRegionManager();
+        initializeProtectedRegionManager();
         initializePetIndex();
         
         // Register events + commands
@@ -245,106 +248,7 @@ public class TPPets extends JavaPlugin {
         initializeCommandAliases();
         this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));
 
-        initializeLostRegions();
         initializeVault();
-    }
-    
-    /*
-     * PROTECTED REGIONS
-     * 
-     */
-    
-    /**
-     * Adds protected region to list in memory of protected regions actively being protected
-     * @param pr The {@link ProtectedRegion} to be added.
-     */
-    public void addProtectedRegion (ProtectedRegion pr) {
-        protectedRegions.put(pr.getRegionName(), pr);
-    }
-    
-    /**
-     * 
-     * @param lc The location to be checked
-     * @return {@link ProtectedRegion} that the location is in, null otherwise
-     */
-    public ProtectedRegion getProtectedRegionWithin(Location lc) {
-        for (String key : protectedRegions.keySet()) { 
-            if (protectedRegions.get(key).isInRegion(lc)) {
-                return protectedRegions.get(key);
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * 
-     * @param lc The location to be checked
-     * @return if location is in a {@link ProtectedRegion}
-     */
-    public boolean isInProtectedRegion(Location lc) {
-        return getProtectedRegionWithin(lc) != null;
-    }
-
-    /**
-     * Returns a protected region with a given name
-     * @param name Name of {@link ProtectedRegion}
-     * @return the referenced {@link ProtectedRegion}, null otherwise.
-     */
-    public ProtectedRegion getProtectedRegion(String name) {
-        return protectedRegions.get(name);
-    }
-
-    /**
-     * Removes a protected region from memory, but not from disk.
-     * @param name Name of the protected region
-     */
-    public void removeProtectedRegion(String name) {
-        protectedRegions.remove(name);
-    }
-    
-    /**
-     * Updates the lfReference property of {@link ProtectedRegion}s that have {@link LostAndFoundRegion} of name lfRegionName
-     * @param lfRegionName {@link LostAndFoundRegion}'s name that should be refreshed within all {@link ProtectedRegion}s.
-     */
-    public void updateLFReference(String lfRegionName) {
-        for (String key : protectedRegions.keySet()) {
-            ProtectedRegion pr = protectedRegions.get(key);
-            if (pr != null && pr.getLfName().equals(lfRegionName)) {
-                pr.updateLFReference(this);
-            }
-        }
-    }
-    
-    /**
-     * Removes all lfRefernece properties of {@link ProtectedRegion}s that have name lfRegionName
-     * @param lfRegionName The name of the {@link LostAndFoundRegion} that is being removed
-     */
-    public void removeLFReference(String lfRegionName) {
-        for (String key : protectedRegions.keySet()) {
-            ProtectedRegion pr = protectedRegions.get(key);
-            if (pr != null && pr.getLfName().equals(lfRegionName)) {
-                pr.clearLfReference();
-            }
-        }
-    }
-    
-    /*
-     * LOST REGIONS
-     * 
-     */
-    
-    /**
-     * Tests if a location is in a lost region
-     * @param lc Location to be tested.
-     * @return Boolean representing if the location is in a lost region.
-     */
-    public boolean isInLostRegion(Location lc) {
-        for (String lfKey : lostRegions.keySet()) {
-            if (lostRegions.get(lfKey).isInRegion(lc)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public boolean isAllowedToPet(String petUUID, String playerUUID) {
@@ -352,25 +256,10 @@ public class TPPets extends JavaPlugin {
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         return this.getAllowedPlayers().containsKey(trimmedPetUUID) && this.getAllowedPlayers().get(trimmedPetUUID).contains(trimmedPlayerUUID);
     }
-    
-    /**
-     * Adds {@link LostAndFoundRegion} to active {@link LostAndFoundRegion} list
-     * @param lfr {@link LostAndFoundRegion} to add.
-     */
-    public void addLostRegion(LostAndFoundRegion lfr) {
-        lostRegions.put(lfr.getRegionName(), lfr);
-    }
-    
-    /**
-     * Removes {@link LostAndFoundRegion} from active {@link LostAndFoundRegion} list
-     */
-    public void removeLostRegion(String regionName) {
-        lostRegions.remove(regionName);
-    }
 
-    // TODO: ADD JAVADOC
+    // TODO: MOVE TO PERMISSION CHECKER
     public boolean canTpThere(Player pl) {
-        ProtectedRegion tempPr = getProtectedRegionWithin(pl.getLocation());
+        ProtectedRegion tempPr = protectedRegionManager.getProtectedRegionAt(pl.getLocation());
         boolean ret = pl.hasPermission("tppets.tpanywhere") || tempPr == null;
         if (!ret) {
             pl.sendMessage(tempPr.getEnterMessage());
@@ -389,19 +278,15 @@ public class TPPets extends JavaPlugin {
     public SQLWrapper getDatabase() {
         return database;
     }
-    
-    public Hashtable<String, ProtectedRegion> getProtectedRegions() {
-        return protectedRegions;
-    }
-    
-    public Hashtable<String, LostAndFoundRegion> getLostRegions() {
-        return lostRegions;
+
+    public ProtectedRegionManager getProtectedRegionManager() {
+        return this.protectedRegionManager;
     }
 
-    public LostAndFoundRegion getLostRegion(String name) {
-        return lostRegions.get(name);
+    public LostRegionManager getLostRegionManager() {
+        return this.lostRegionManager;
     }
-    
+
     public Permission getPerms() {
         return perms;
     }

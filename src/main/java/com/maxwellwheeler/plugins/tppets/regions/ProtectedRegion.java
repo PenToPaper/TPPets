@@ -56,7 +56,7 @@ public class ProtectedRegion extends Region {
     public ProtectedRegion(String regionName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
         super(regionName, worldName, world, minLoc, maxLoc);
         this.lfName = lfString;
-        this.lfReference = thisPlugin.getLostRegion(lfString);
+        this.lfReference = thisPlugin.getLostRegionManager().getLostRegion(lfString);
         this.enterMessage = ChatColor.translateAlternateColorCodes('&', enterMessage);
     }
     
@@ -85,15 +85,11 @@ public class ProtectedRegion extends Region {
         return lfName;
     }
 
-    public void clearLfReference() {
-        this.lfReference = null;
-    }
-
     /**
      * Updates this Protected Region's local lfReference property based on its lfName property.
      */
     public void updateLFReference(TPPets thisPlugin) {
-        this.lfReference = thisPlugin.getLostRegion(this.lfName);
+        this.lfReference = thisPlugin.getLostRegionManager().getLostRegion(this.lfName);
     }
 
     @Override

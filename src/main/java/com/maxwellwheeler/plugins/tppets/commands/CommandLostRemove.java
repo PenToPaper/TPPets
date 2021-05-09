@@ -41,8 +41,8 @@ public class CommandLostRemove extends Command {
             }
 
             if (this.thisPlugin.getDatabase().removeLostRegion(this.args[0])) {
-                this.thisPlugin.removeLFReference(this.args[0]);
-                this.thisPlugin.removeLostRegion(this.args[0]);
+                this.thisPlugin.getLostRegionManager().removeLostRegion(this.args[0]);
+                this.thisPlugin.getProtectedRegionManager().updateLFReferences(this.args[0]);
                 this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed lost and found region " + this.args[0]);
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;

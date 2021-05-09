@@ -33,7 +33,6 @@ public class TPPCommandStorageAddDefaultTest {
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
-    private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
     private World world;
@@ -47,7 +46,7 @@ public class TPPCommandStorageAddDefaultTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");

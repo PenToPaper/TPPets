@@ -4,6 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import net.milkbowl.vault.permission.Permission;
@@ -26,6 +27,7 @@ public class TPPListenerProtectedRegionEntityTeleportIntoPrTest {
     private Wolf wolf;
     private Location teleportingTo;
     private TPPets tpPets;
+    private ProtectedRegionManager protectedRegionManager;
     private EntityTeleportEvent entityTeleportEvent;
     private ListenerProtectedRegion listenerProtectedRegion;
 
@@ -41,11 +43,13 @@ public class TPPListenerProtectedRegionEntityTeleportIntoPrTest {
         this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
         this.entityTeleportEvent = mock(EntityTeleportEvent.class);
         this.listenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);
+        this.protectedRegionManager = mock(ProtectedRegionManager.class);
 
+        when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
         when(this.entityTeleportEvent.getEntity()).thenReturn(this.wolf);
         when(this.entityTeleportEvent.getTo()).thenReturn(this.teleportingTo);
         when(world.getName()).thenReturn("MockWorldName");
-        when(this.tpPets.getProtectedRegionWithin(this.teleportingTo)).thenReturn(this.protectedRegion);
+        when(this.protectedRegionManager.getProtectedRegionAt(this.teleportingTo)).thenReturn(this.protectedRegion);
         when(this.tpPets.getVaultEnabled()).thenReturn(false);
     }
 
@@ -72,7 +76,7 @@ public class TPPListenerProtectedRegionEntityTeleportIntoPrTest {
     @Test
     @DisplayName("Doesn't cancel teleport when pet isn't teleporting to protected region")
     void cannotCancelTeleportWhenPetNotGoingToPr() {
-        when(this.tpPets.getProtectedRegionWithin(this.teleportingTo)).thenReturn(null);
+        when(this.protectedRegionManager.getProtectedRegionAt(this.teleportingTo)).thenReturn(null);
 
         this.listenerProtectedRegion.entityTeleportIntoPr(this.entityTeleportEvent);
 

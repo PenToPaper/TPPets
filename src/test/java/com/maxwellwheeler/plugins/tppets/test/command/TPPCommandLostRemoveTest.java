@@ -4,6 +4,8 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.ChatColor;
@@ -29,7 +31,8 @@ public class TPPCommandLostRemoveTest {
     private ArgumentCaptor<String> stringCaptor;
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
-    private TPPets tpPets;
+    private LostRegionManager lostRegionManager;
+    private ProtectedRegionManager protectedRegionManager;
     private Command command;
     private CommandTPP commandTPP;
 
@@ -39,15 +42,20 @@ public class TPPCommandLostRemoveTest {
         this.stringCaptor = ArgumentCaptor.forClass(String.class);
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("lost");
         aliases.put("lost", altAlias);
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
+        this.lostRegionManager = mock(LostRegionManager.class);
+        this.protectedRegionManager = mock(ProtectedRegionManager.class);
 
         World world = mock(World.class);
+
+        when(tpPets.getLostRegionManager()).thenReturn(this.lostRegionManager);
+        when(tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
 
         when(this.sqlWrapper.getLostRegion("LostRegionName")).thenReturn(new LostAndFoundRegion("LostRegionName", "MockWorldName", world, new Location(world, 100, 200, 300), new Location(world, 400, 500, 600)));
         when(this.sqlWrapper.removeLostRegion("LostRegionName")).thenReturn(true);
@@ -61,8 +69,8 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.sqlWrapper, times(1)).removeLostRegion(this.stringCaptor.capture());
         verify(this.sqlWrapper, times(1)).getLostRegion(this.stringCaptor.capture());
-        verify(this.tpPets, times(1)).removeLFReference(this.stringCaptor.capture());
-        verify(this.tpPets, times(1)).removeLostRegion(this.stringCaptor.capture());
+        verify(this.protectedRegionManager, times(1)).updateLFReferences(this.stringCaptor.capture());
+        verify(this.lostRegionManager, times(1)).removeLostRegion(this.stringCaptor.capture());
 
         List<String> capturedRegionNames = this.stringCaptor.getAllValues();
         assertEquals("LostRegionName", capturedRegionNames.get(0));
@@ -87,8 +95,8 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
-        verify(this.tpPets, never()).removeLFReference(anyString());
-        verify(this.tpPets, never()).removeLostRegion(anyString());
+        verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
+        verify(this.lostRegionManager, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -104,8 +112,8 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
-        verify(this.tpPets, never()).removeLFReference(anyString());
-        verify(this.tpPets, never()).removeLostRegion(anyString());
+        verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
+        verify(this.lostRegionManager, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.stringCaptor.capture());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -123,8 +131,8 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
-        verify(this.tpPets, never()).removeLFReference(anyString());
-        verify(this.tpPets, never()).removeLostRegion(anyString());
+        verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
+        verify(this.lostRegionManager, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -142,8 +150,8 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
-        verify(this.tpPets, never()).removeLFReference(anyString());
-        verify(this.tpPets, never()).removeLostRegion(anyString());
+        verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
+        verify(this.lostRegionManager, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -161,8 +169,8 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.sqlWrapper, times(1)).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
-        verify(this.tpPets, never()).removeLFReference(anyString());
-        verify(this.tpPets, never()).removeLostRegion(anyString());
+        verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
+        verify(this.lostRegionManager, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
@@ -180,8 +188,8 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.sqlWrapper, times(1)).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
-        verify(this.tpPets, never()).removeLFReference(anyString());
-        verify(this.tpPets, never()).removeLostRegion(anyString());
+        verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
+        verify(this.lostRegionManager, never()).removeLostRegion(anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());

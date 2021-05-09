@@ -41,7 +41,7 @@ public class CommandProtectedRemove extends Command {
             }
 
             if (this.thisPlugin.getDatabase().removeProtectedRegion(this.args[0])) {
-                this.thisPlugin.removeProtectedRegion(this.args[0]);
+                this.thisPlugin.getProtectedRegionManager().removeProtectedRegion(this.args[0]);
                 this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed protected region " + this.args[0]);
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;

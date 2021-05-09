@@ -32,7 +32,7 @@ public class CommandProtectedList extends Command {
                 return;
             }
 
-            ProtectedRegion pr = this.thisPlugin.getProtectedRegion(this.args[0]);
+            ProtectedRegion pr = this.thisPlugin.getProtectedRegionManager().getProtectedRegion(this.args[0]);
 
             if (pr == null) {
                 this.commandStatus = CommandStatus.NO_REGION;
@@ -42,7 +42,7 @@ public class CommandProtectedList extends Command {
             prs = Collections.singletonList(pr);
 
         } else {
-            prs = this.thisPlugin.getProtectedRegions().values();
+            prs = this.thisPlugin.getProtectedRegionManager().getProtectedRegions();
         }
 
         this.listAllRegions(prs);

@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.regions;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
+import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ public class TPPProtectedRegionTest {
     private World world;
     private ProtectedRegion protectedRegion;
     private TPPets tpPets;
+    private LostRegionManager lostRegionManager;
     private LostAndFoundRegion lostAndFoundRegion;
 
     @BeforeEach
@@ -31,9 +33,11 @@ public class TPPProtectedRegionTest {
 
         this.tpPets = mock(TPPets.class);
 
+        this.lostRegionManager = mock(LostRegionManager.class);
         this.lostAndFoundRegion = new LostAndFoundRegion("LFRName", "WorldName", this.world, min, max);
 
-        when(this.tpPets.getLostRegion("LFRName")).thenReturn(this.lostAndFoundRegion);
+        when(this.tpPets.getLostRegionManager()).thenReturn(this.lostRegionManager);
+        when(this.lostRegionManager.getLostRegion("LFRName")).thenReturn(this.lostAndFoundRegion);
 
         this.protectedRegion = new ProtectedRegion("PRName", "EnterMessage", "WorldName", this.world, min, max, "LFRName", this.tpPets);
     }
@@ -63,7 +67,8 @@ public class TPPProtectedRegionTest {
         Wolf wolf = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Wolf.class);
         when(wolf.teleport(any(Location.class))).thenReturn(true);
 
-        this.protectedRegion.clearLfReference();
+        when(this.lostRegionManager.getLostRegion("LFRName")).thenReturn(null);
+        this.protectedRegion.updateLFReference(this.tpPets);
 
         assertFalse(this.protectedRegion.tpToLostRegion(wolf));
         verify(wolf, times(1)).setSitting(true);
@@ -77,7 +82,7 @@ public class TPPProtectedRegionTest {
         LostAndFoundRegion noCenterLFR = mock(LostAndFoundRegion.class);
         Location worldLess = new Location(null, 10, 20, 30);
         when(noCenterLFR.getApproxCenter()).thenReturn(worldLess);
-        when(this.tpPets.getLostRegion("LFRName")).thenReturn(noCenterLFR);
+        when(this.lostRegionManager.getLostRegion("LFRName")).thenReturn(noCenterLFR);
 
         this.protectedRegion.updateLFReference(this.tpPets);
 

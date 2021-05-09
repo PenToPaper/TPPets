@@ -30,7 +30,7 @@ public class ListenerProtectedRegion implements Listener {
     @EventHandler(priority= EventPriority.LOW)
     public void onPlayerMove(PlayerMoveEvent event) {
         // 1) Get any protected region the player is in
-        ProtectedRegion pr = this.thisPlugin.getProtectedRegionWithin(event.getTo());
+        ProtectedRegion pr = this.thisPlugin.getProtectedRegionManager().getProtectedRegionAt(event.getTo());
 
         // 2) If the player isn't in one, return without doing anything
         if (pr == null || pr.getLfReference() == null || pr.getWorld() == null) {
@@ -53,7 +53,7 @@ public class ListenerProtectedRegion implements Listener {
     @EventHandler (priority=EventPriority.LOW)
     public void entityTeleportIntoPr(EntityTeleportEvent event) {
         if (PetType.isPetTracked(event.getEntity())) {
-            ProtectedRegion protectedRegion = this.thisPlugin.getProtectedRegionWithin(event.getTo());
+            ProtectedRegion protectedRegion = this.thisPlugin.getProtectedRegionManager().getProtectedRegionAt(event.getTo());
             Tameable pet = (Tameable) event.getEntity();
 
             // If pet is teleporting to a protected region
@@ -67,7 +67,7 @@ public class ListenerProtectedRegion implements Listener {
     // TODO: CHANGELOG THAT THIS ISN'T LOGGED ANYMORE
     @EventHandler (priority=EventPriority.LOW)
     public void entityTeleportOutLfr(EntityTeleportEvent event) {
-        if (PetType.isPetTracked(event.getEntity()) && this.thisPlugin.isInLostRegion(event.getFrom())) {
+        if (PetType.isPetTracked(event.getEntity()) && this.thisPlugin.getLostRegionManager().getLostRegionAt(event.getFrom()) != null) {
             EntityActions.setSitting(event.getEntity());
             event.setCancelled(true);
         }

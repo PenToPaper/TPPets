@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
+import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
@@ -38,6 +39,9 @@ public class TPPSQLWrapperGetProtectedRegionTest {
         this.world = mock(World.class);
 
         this.mockSQLWrapper = new MockSQLWrapper(tpPets, this.connection);
+
+        LostRegionManager lostRegionManager = mock(LostRegionManager.class);
+        when(tpPets.getLostRegionManager()).thenReturn(lostRegionManager);
 
         when(this.connection.prepareStatement("SELECT * FROM tpp_protected_regions WHERE zone_name = ?")).thenReturn(this.preparedStatement);
         when(this.preparedStatement.executeQuery()).thenReturn(this.resultSet);

@@ -59,7 +59,7 @@ public class CommandProtectedAdd extends Command {
 
             ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
             if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
-                this.thisPlugin.addProtectedRegion(protectedRegion);
+                this.thisPlugin.getProtectedRegionManager().addProtectedRegion(protectedRegion);
                 this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added protected region " + protectedRegion.getRegionName());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;

@@ -2,7 +2,9 @@ package com.maxwellwheeler.plugins.tppets.test.storage;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
+import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Location;
@@ -43,11 +45,16 @@ public class TPPSQLWrapperInsertProtectedRegionTest {
         this.intIndexCaptor = ArgumentCaptor.forClass(Integer.class);
         this.intCaptor = ArgumentCaptor.forClass(Integer.class);
 
+        LostRegionManager lostRegionManager = mock(LostRegionManager.class);
+        when(tpPets.getLostRegionManager()).thenReturn(lostRegionManager);
+
         World world = mock(World.class);
         this.protectedRegion = new ProtectedRegion("ProtectedRegion", "EnterMessage", "WorldName", world, new Location(world, 1, 2, 3), new Location(world, 4, 5, 6), "ProtectedRegion", tpPets);
         this.mockSQLWrapper = new MockSQLWrapper(tpPets, this.connection);
 
-        when(tpPets.getProtectedRegion("ProtectedRegion")).thenReturn(null);
+        ProtectedRegionManager protectedRegionManager = mock(ProtectedRegionManager.class);
+        when(tpPets.getProtectedRegionManager()).thenReturn(protectedRegionManager);
+        when(protectedRegionManager.getProtectedRegion("ProtectedRegion")).thenReturn(null);
         when(this.connection.prepareStatement("INSERT INTO tpp_protected_regions(zone_name, enter_message, min_x, min_y, min_z, max_x, max_y, max_z, world_name, lf_zone_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")).thenReturn(this.preparedStatement);
         when(this.preparedStatement.executeUpdate()).thenReturn(1);
     }

@@ -32,7 +32,7 @@ public class CommandLostList extends Command {
                 return;
             }
 
-            LostAndFoundRegion lfr = this.thisPlugin.getLostRegion(this.args[0]);
+            LostAndFoundRegion lfr = this.thisPlugin.getLostRegionManager().getLostRegion(this.args[0]);
 
             if (lfr == null) {
                 this.commandStatus = CommandStatus.NO_REGION;
@@ -42,7 +42,7 @@ public class CommandLostList extends Command {
             lfrs = Collections.singletonList(lfr);
 
         } else {
-            lfrs = this.thisPlugin.getLostRegions().values();
+            lfrs = this.thisPlugin.getLostRegionManager().getLostRegions();
         }
 
         this.listAllRegions(lfrs);

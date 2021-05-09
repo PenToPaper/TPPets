@@ -49,8 +49,8 @@ public class CommandLostAdd extends Command {
 
             LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion(this.args[0], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation());
             if (this.thisPlugin.getDatabase().insertLostRegion(lostAndFoundRegion)) {
-                this.thisPlugin.addLostRegion(lostAndFoundRegion);
-                this.thisPlugin.updateLFReference(lostAndFoundRegion.getRegionName());
+                this.thisPlugin.getLostRegionManager().addLostRegion(lostAndFoundRegion);
+                this.thisPlugin.getProtectedRegionManager().updateLFReferences(lostAndFoundRegion.getRegionName());
                 this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added lost and found region " + lostAndFoundRegion.getRegionName());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
