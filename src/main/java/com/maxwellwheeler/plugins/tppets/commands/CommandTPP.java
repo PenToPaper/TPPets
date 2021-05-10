@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -39,12 +40,12 @@ public class CommandTPP implements CommandExecutor {
      * @return True if command was valid, false if not
      */
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (ArgValidator.validateArgsLength(args, 1)) {
             // Translates the command entered to any of the aliases specified in the config
-            String realCommand = "";
-            for (String commands : commandAliases.keySet()) {
-                if (commandAliases.get(commands).contains(args[0].toLowerCase())) {
+            String realCommand = args[0].toLowerCase();
+            for (String commands : this.commandAliases.keySet()) {
+                if (this.commandAliases.get(commands).contains(args[0].toLowerCase())) {
                     realCommand = commands;
                     break;
                 }
@@ -84,7 +85,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "rename":
                     if (sender.hasPermission("tppets.rename")) {
-                        CommandRename renamePet = new CommandRename(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandRename renamePet = new CommandRename(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         renamePet.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -92,7 +93,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "allow":
                     if (sender.hasPermission("tppets.allowguests")) {
-                        CommandAllowAdd allowPlayer = new CommandAllowAdd(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandAllowAdd allowPlayer = new CommandAllowAdd(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         allowPlayer.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -101,7 +102,7 @@ public class CommandTPP implements CommandExecutor {
                 case "remove":
                     // TODO: DOCUMENT THIS PERMISSION NAME CHANGE
                     if (sender.hasPermission("tppets.allowguests")) {
-                        CommandAllowRemove removePlayer = new CommandAllowRemove(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandAllowRemove removePlayer = new CommandAllowRemove(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         removePlayer.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -109,7 +110,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "allowed":
                     if (sender.hasPermission("tppets.allowguests")) {
-                        CommandAllowList listAllow = new CommandAllowList(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandAllowList listAllow = new CommandAllowList(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         listAllow.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -117,7 +118,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "store":
                     if (sender.hasPermission("tppets.store")) {
-                        CommandStore store = new CommandStore(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandStore store = new CommandStore(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         store.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -125,7 +126,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "storage":
                     if (sender.hasPermission("tppets.storage")) {
-                        CommandStorage storage = new CommandStorage(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandStorage storage = new CommandStorage(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         storage.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -133,7 +134,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "position1":
                     if (sender.hasPermission("tppets.protected") || sender.hasPermission("tppets.lost")) {
-                        CommandPosition1 position1 = new CommandPosition1(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandPosition1 position1 = new CommandPosition1(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         position1.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -141,7 +142,7 @@ public class CommandTPP implements CommandExecutor {
                     break;
                 case "position2":
                     if (sender.hasPermission("tppets.protected") || sender.hasPermission("tppets.lost")) {
-                        CommandPosition2 position2 = new CommandPosition2(thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        CommandPosition2 position2 = new CommandPosition2(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         position2.processCommand();
                     } else {
                         permissionMessage(sender);
@@ -164,14 +165,15 @@ public class CommandTPP implements CommandExecutor {
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[ Commands ]" + ChatColor.DARK_GRAY + "--------------");
         if (sender.hasPermission("tppets.dogs") || sender.hasPermission("tppets.cats") || sender.hasPermission("tppets.birds") || sender.hasPermission("tppets.horses") || sender.hasPermission("tppets.mules") || sender.hasPermission("tppets.llamas") || sender.hasPermission("tppets.donkeys")) {
-            sender.sendMessage(ChatColor.WHITE + "/tpp dogs/cats/birds/horses/mules/donkeys/llamas all" + ChatColor.BLUE + "  ->  Teleports your dogs to your location");
-            sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
-            sender.sendMessage(ChatColor.WHITE + "/tpp [pet type] f:[username] [pet name]" + ChatColor.BLUE + "  ->  Teleports [username]'s pet named [pet name] to your location");
+            sender.sendMessage(ChatColor.WHITE + "/tpp tp [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
+            sender.sendMessage(ChatColor.WHITE + "/tpp all [dogs/cats/etc]" + ChatColor.BLUE + "  ->  Teleports all [dogs/cats/etc] to your location");
+            sender.sendMessage(ChatColor.WHITE + "/tpp list [dogs/cats/etc]" + ChatColor.BLUE + "  ->  Lists your owned [dogs/cats/etc]");
+            sender.sendMessage(ChatColor.WHITE + "/tpp tp f:[username] [pet name]" + ChatColor.BLUE + "  ->  Teleports [username]'s pet named [pet name] to your location");
         }
         if (sender.hasPermission("tppets.allowguests")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp allow [username] [pet name]" + ChatColor.BLUE + "  ->  Allows [username] to use teleport and mount your pet named [pet name]");
             sender.sendMessage(ChatColor.WHITE + "/tpp remove [username] [pet name]" + ChatColor.BLUE + "  ->  Disallows [username] to use teleport and mount your pet named [pet name]");
-            sender.sendMessage(ChatColor.WHITE + "/tpp list [pet name]" + ChatColor.BLUE + "  ->  Lists all players who can teleport and mount pet named [pet name]");
+            sender.sendMessage(ChatColor.WHITE + "/tpp allowed [pet name]" + ChatColor.BLUE + "  ->  Lists all players who can teleport and mount pet named [pet name]");
         }
         if (sender.hasPermission("tppets.rename")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp rename [old name] [new name]" + ChatColor.BLUE + "  ->  Renames [old name] to [new name].");
@@ -187,7 +189,10 @@ public class CommandTPP implements CommandExecutor {
         }
         if (sender.hasPermission("tppets.lost")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp lost [add, remove, list]" + ChatColor.BLUE + "  ->  Creates a region where lost pets will be teleported to");
-
+        }
+        if (sender.hasPermission("tppets.lost") || sender.hasPermission("tppets.protected")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp position1" + ChatColor.BLUE + "  ->  Assigns your current location as the first position for region creation");
+            sender.sendMessage(ChatColor.WHITE + "/tpp position2" + ChatColor.BLUE + "  ->  Assigns your current location as the second position for region creation");
         }
         sender.sendMessage(ChatColor.DARK_GRAY + "-------------------------------------");
     }

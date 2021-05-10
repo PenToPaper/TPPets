@@ -9,12 +9,13 @@ import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.*;
 import net.milkbowl.vault.permission.Permission;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +26,7 @@ import java.util.Set;
  *
  */
 public class TPPets extends JavaPlugin {
-    private Hashtable<String, List<String>> commandAliases = new Hashtable<>();
+    private final Hashtable<String, List<String>> commandAliases = new Hashtable<>();
     private Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
 
     private LostRegionManager lostRegionManager = null;
@@ -50,7 +51,7 @@ public class TPPets extends JavaPlugin {
     
     private boolean allowTpBetweenWorlds;
     private boolean allowUntamingPets;
-    
+
     private PetLimitChecker petIndex;
     private int storageLimit;
 
@@ -62,18 +63,18 @@ public class TPPets extends JavaPlugin {
      */
 
     private void initializeLogWrapper() {
-        logWrapper = new LogWrapper(this, getConfig().getBoolean("logging.updated_pets", true), getConfig().getBoolean("logging.successful_actions", true), getConfig().getBoolean("logging.unsuccessful_actions", true), getConfig().getBoolean("logging.prevented_damage", true), getConfig().getBoolean("logging.errors", true));
+        this.logWrapper = new LogWrapper(this, getConfig().getBoolean("logging.updated_pets", true), getConfig().getBoolean("logging.successful_actions", true), getConfig().getBoolean("logging.unsuccessful_actions", true), getConfig().getBoolean("logging.prevented_damage", true), getConfig().getBoolean("logging.errors", true));
     }
 
     private void initializeStorageLimit() {
-        storageLimit = getConfig().getInt("storage_limit", 0);
+        this.storageLimit = getConfig().getInt("storage_limit", 0);
     }
 
     /**
      * Initializes the {@link PetLimitChecker} based on total_pet_limit, dog_limit, cat_limit, and bird_limit integers in the config.
      */
     private void initializePetIndex() {
-        petIndex = new PetLimitChecker(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
+        this.petIndex = new PetLimitChecker(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
     }
 
     private void initializeProtectedRegionManager() {
@@ -94,7 +95,6 @@ public class TPPets extends JavaPlugin {
         }
     }
 
-
     private void initializeDBC() {
         if (!getConfig().getBoolean("mysql.enable")) {
             // Use SQLite connection
@@ -106,7 +106,7 @@ public class TPPets extends JavaPlugin {
     }
 
     /**
-     * Updates the database if it can, otherwise turns database = null, negatively impacting virtually every aspect of this plugin
+     * Updates the database if it can, otherwise disables the plugin
      */
     private void updateDBC() {
         try {
@@ -123,7 +123,7 @@ public class TPPets extends JavaPlugin {
     }
 
     /**
-     * Creates the tables if they don't exist, using the DBWrapper
+     * Creates the tables if they don't exist, using the SQLWrapper
      */
     private void createTables() {
         try {
@@ -141,46 +141,45 @@ public class TPPets extends JavaPlugin {
      * Updates the spigot/bukkit config
      */
     private void updateConfig() {
-        configUpdater = new ConfigUpdater(this);
-        configUpdater.update();
+        this.configUpdater = new ConfigUpdater(this);
+        this.configUpdater.update();
     }
     
     /**
      * Loads configuration option tp_pets_between_worlds into memory.
      */
     private void initializeAllowTP() {
-        allowTpBetweenWorlds = getConfig().getBoolean("tp_pets_between_worlds");
+        this.allowTpBetweenWorlds = getConfig().getBoolean("tp_pets_between_worlds");
     }
     
     /**
      * Loads configuration option allow_untaming_pets into memory.
      */
     private void initializeAllowUntamingPets() {
-        allowUntamingPets = getConfig().getBoolean("allow_untaming_pets");
+        this.allowUntamingPets = getConfig().getBoolean("allow_untaming_pets");
     }
     
     /**
      * Initializes local variables of command aliases.
      */
     private void initializeCommandAliases() {
-        Set<String> configKeyList = getConfig().getConfigurationSection("command_aliases").getKeys(false);
-        for (String key : configKeyList) {
-            List<String> tempAliasList = getConfig().getStringList("command_aliases." + key);
-            List<String> lowercaseAliasList = new ArrayList<>();
-            for (String alias : tempAliasList) {
-                lowercaseAliasList.add(alias.toLowerCase());
+        ConfigurationSection commandAliases = getConfig().getConfigurationSection("command_aliases");
+        if (commandAliases != null) {
+            Set<String> configKeyList = commandAliases.getKeys(false);
+            for (String key : configKeyList) {
+                List<String> aliasList = commandAliases.getStringList(key);
+                aliasList.replaceAll(String::toLowerCase);
+                this.commandAliases.put(key.toLowerCase(), aliasList);
             }
-            lowercaseAliasList.add(key.toLowerCase());
-            commandAliases.put(key.toLowerCase(), lowercaseAliasList);
         }
+
     }
     
     /**
      * Checks if vault (soft dependency) is enabled
      */
     private void initializeVault() {
-        if (vaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault")) {
-            initializePermissions();
+        if (this.vaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault") && initializePermissions()) {
             getLogWrapper().logSuccessfulAction("Vault detected. Permission tppets.tpanywhere will work with online and offline players.");
         } else {
             getLogWrapper().logSuccessfulAction("Vault not detected on this server. Permission tppets.tpanywhere will only work with online players.");
@@ -189,12 +188,14 @@ public class TPPets extends JavaPlugin {
     
     /**
      * Initializes vault permissions object
-     * @return if the operation was successful
      */
     private boolean initializePermissions() {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = rsp.getProvider();
-        return perms != null;
+        if (rsp != null) {
+            this.perms = rsp.getProvider();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -205,6 +206,16 @@ public class TPPets extends JavaPlugin {
             this.allowedPlayers = this.database.getAllAllowedPlayers();
         } catch (SQLException exception) {
             getLogWrapper().logErrors("Database cannot fetch allowed players. Plugin cannot run.");
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
+    private void initializeCommandListener() {
+        PluginCommand tpp = this.getCommand("tpp");
+        if (tpp != null) {
+            tpp.setExecutor(new CommandTPP(this.commandAliases, this));
+        } else {
+            getLogWrapper().logErrors("Plugin could not access its root command. Plugin cannot run.");
             getServer().getPluginManager().disablePlugin(this);
         }
     }
@@ -246,11 +257,12 @@ public class TPPets extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ListenerEntityDamage(this), this);
         getServer().getPluginManager().registerEvents(new ListenerEntityDeath(this), this);
         initializeCommandAliases();
-        this.getCommand("tpp").setExecutor(new CommandTPP(commandAliases, this));
+        initializeCommandListener();
 
         initializeVault();
     }
 
+    // TODO: Consider moving to manager
     public boolean isAllowedToPet(String petUUID, String playerUUID) {
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
@@ -259,7 +271,7 @@ public class TPPets extends JavaPlugin {
 
     // TODO: MOVE TO PERMISSION CHECKER
     public boolean canTpThere(Player pl) {
-        ProtectedRegion tempPr = protectedRegionManager.getProtectedRegionAt(pl.getLocation());
+        ProtectedRegion tempPr = this.protectedRegionManager.getProtectedRegionAt(pl.getLocation());
         boolean ret = pl.hasPermission("tppets.tpanywhere") || tempPr == null;
         if (!ret) {
             pl.sendMessage(tempPr.getEnterMessage());
@@ -302,11 +314,11 @@ public class TPPets extends JavaPlugin {
     public boolean getAllowTpBetweenWorlds() {
         return allowTpBetweenWorlds;
     }
-    
+
     public boolean getAllowUntamingPets() {
         return allowUntamingPets;
     }
-    
+
     public PetLimitChecker getPetIndex() {
         return petIndex;
     }
