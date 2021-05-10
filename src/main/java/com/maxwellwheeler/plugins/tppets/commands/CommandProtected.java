@@ -34,7 +34,9 @@ public class CommandProtected extends BaseCommand{
             case "list":
                 commandToRun = new CommandProtectedList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
                 break;
-            // TODO: READD RELINK COMMAND
+            case "relink":
+                commandToRun = new CommandProtectedRelink(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
+                break;
             default:
                 this.commandStatus = CommandStatus.SYNTAX_ERROR;
                 break;

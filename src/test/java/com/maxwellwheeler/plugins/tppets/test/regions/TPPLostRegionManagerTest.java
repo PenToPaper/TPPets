@@ -42,6 +42,12 @@ public class TPPLostRegionManagerTest {
     }
 
     @Test
+    @DisplayName("LostRegionManager getProtectedRegion returns null if no region with name exists")
+    void protectedRegionManagerGetProtectedRegionReturnsNull() {
+        assertNull(this.lostRegionManager.getLostRegion("InvalidName"));
+    }
+
+    @Test
     @DisplayName("LostRegionManager initializes based on database")
     void lostRegionManagerInitializes() {
         assertEquals(1, this.lostRegionManager.getLostRegions().size());

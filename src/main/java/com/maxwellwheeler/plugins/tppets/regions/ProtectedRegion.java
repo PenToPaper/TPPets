@@ -19,7 +19,7 @@ public class ProtectedRegion extends Region {
     /**
      * The name of the {@link LostAndFoundRegion} that this Protected Region is set to link to. This can't be null, but can potentially be an empty string.
      */
-    private final String lfName;
+    private String lfName;
 
     /**
      * The reference to the {@link LostAndFoundRegion} object that this Protected Region is linked to. This can be null.
@@ -90,6 +90,10 @@ public class ProtectedRegion extends Region {
      */
     public void updateLFReference(TPPets thisPlugin) {
         this.lfReference = thisPlugin.getLostRegionManager().getLostRegion(this.lfName);
+    }
+
+    public void setLfName(String lfName) {
+        this.lfName = lfName;
     }
 
     @Override

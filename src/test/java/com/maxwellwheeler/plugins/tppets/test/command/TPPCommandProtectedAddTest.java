@@ -9,6 +9,7 @@ import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class TPPCommandProtectedAddTest {
-    private org.bukkit.World world;
+    private World world;
     private Player admin;
     private ArgumentCaptor<String> stringCaptor;
     private SQLWrapper sqlWrapper;
@@ -51,7 +52,7 @@ public class TPPCommandProtectedAddTest {
         altAlias.add("protected");
         aliases.put("protected", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, tpPets);
+        this.commandTPP = new CommandTPP(aliases, this.tpPets);
         this.world = mock(org.bukkit.World.class);
         this.regionSelectionManager = new RegionSelectionManager();
         this.regionSelectionManager.setStartLocation(this.admin, new Location(this.world, 100, 200, 300));

@@ -49,6 +49,12 @@ public class TPPProtectedRegionManagerTest {
     }
 
     @Test
+    @DisplayName("ProtectedRegionManager getProtectedRegion returns null if no region with name exists")
+    void protectedRegionManagerGetProtectedRegionReturnsNull() {
+        assertNull(this.protectedRegionManager.getProtectedRegion("InvalidName"));
+    }
+
+    @Test
     @DisplayName("ProtectedRegionManager initializes based on database")
     void protectedRegionManagerInitializes() {
         assertEquals(1, this.protectedRegionManager.getProtectedRegions().size());

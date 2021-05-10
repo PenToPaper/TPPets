@@ -382,6 +382,11 @@ public abstract class SQLWrapper {
         return this.deletePrepStatement(removeProtectedRegion, regionName);
     }
 
+    public boolean relinkProtectedRegion(@NotNull String regionName, @NotNull String lostRegionName) throws SQLException {
+        String relinkProtectedRegion = "UPDATE tpp_protected_regions SET lf_zone_name = ? WHERE zone_name = ?";
+        return this.updatePrepStatement(relinkProtectedRegion, lostRegionName, regionName);
+    }
+
     public ProtectedRegion getProtectedRegion(@NotNull String regionName) throws SQLException {
         String selectProtectedRegion = "SELECT * FROM tpp_protected_regions WHERE zone_name = ?";
         try (Connection dbConn = this.getConnection();
