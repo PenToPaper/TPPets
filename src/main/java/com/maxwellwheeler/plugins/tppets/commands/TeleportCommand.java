@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -40,7 +41,7 @@ public abstract class TeleportCommand extends BaseCommand {
         boolean teleportResult = false;
         for (PetStorage petStorage : petStorageList) {
             World world = Bukkit.getWorld(petStorage.petWorld);
-            if (world != null && (thisPlugin.getAllowTpBetweenWorlds() || world.equals(sendTo.getWorld()))) {
+            if (world != null) {
                 Chunk petChunk = world.getChunkAt(petStorage.petX, petStorage.petZ);
                 petChunk.load();
                 Entity entity = getEntityInChunk(petChunk, petStorage);
@@ -85,6 +86,9 @@ public abstract class TeleportCommand extends BaseCommand {
         return true;
     }
 
+    protected boolean canTpToWorld(Player player, String petWorldName) {
+        return this.thisPlugin.getAllowTpBetweenWorlds() || player.getWorld().getName().equals(petWorldName) || player.hasPermission("tppets.tpanywhere");
+    }
 
     /**
      * Formats the location in a readable way

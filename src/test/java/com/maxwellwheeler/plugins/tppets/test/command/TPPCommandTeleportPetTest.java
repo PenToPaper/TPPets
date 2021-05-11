@@ -50,12 +50,13 @@ public class TPPCommandTeleportPetTest {
     @BeforeEach
     public void beforeEach(){
         this.world = mock(World.class);
+        when(this.world.getName()).thenReturn("MockWorld");
         this.worldList = new ArrayList<>();
         this.worldList.add(this.world);
         Location playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
         Location adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs", "tppets.teleportother"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(100, 100)).thenReturn(this.chunk);
@@ -248,6 +249,141 @@ public class TPPCommandTeleportPetTest {
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp tp [pet name]", capturedMessageOutput);
+        }
+    }
+
+    @Test
+    @DisplayName("Denies teleporting between worlds when config option set")
+    void teleportingWithoutTPBetweenWorlds() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+
+            // Entity instances
+            Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
+
+            // A list of both entities
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
+
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+
+            // Plugin database wrapper instance
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
+
+            this.setAliases();
+
+            // Putting player in different world
+            when(this.world.getName()).thenReturn("RandomName");
+
+            // Command object with no second argument
+            String[] args = {"tp", "HORSE0"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verify(this.chunk, never()).load();
+            verify(correctPet, never()).eject();
+            verify(correctPet, never()).teleport(any(Location.class));
+            verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+            verify(this.player).sendMessage(this.messageCaptor.capture());
+            String capturedMessageOutput = this.messageCaptor.getValue();
+            assertEquals(ChatColor.RED + "Can't teleport pet between worlds. Your pet is in " + ChatColor.WHITE + "MockWorld", capturedMessageOutput);
+        }
+    }
+
+    @Test
+    @DisplayName("Allows teleporting between worlds when config option set")
+    void teleportingWithTPBetweenWorlds() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+
+            // Entity instances
+            Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
+
+            // A list of both entities
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
+
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+
+            // Plugin database wrapper instance
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
+
+            this.setAliases();
+
+            // Putting player in different world
+            when(this.tpPets.getAllowTpBetweenWorlds()).thenReturn(true);
+            when(this.world.getName()).thenReturn("RandomName");
+
+            // Command object with no second argument
+            String[] args = {"tp", "HORSE0"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verify(this.chunk, times(1)).load();
+            verify(correctPet, times(1)).eject();
+            if (correctPet instanceof Sittable) {
+                verify((Sittable)correctPet, times(1)).setSitting(false);
+            }
+            verify(correctPet).teleport(this.teleportCaptor.capture());
+            Location capturedPetLocation = this.teleportCaptor.getValue();
+            assertEquals(100, capturedPetLocation.getX(), 0.5);
+            assertEquals(200, capturedPetLocation.getY(), 0.5);
+            assertEquals(300, capturedPetLocation.getZ(), 0.5);
+            verify(this.player).sendMessage(this.messageCaptor.capture());
+            String capturedMessageOutput = this.messageCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
+            verify(incorrectPet, times(0)).teleport(any(Location.class));
+        }
+    }
+
+    @Test
+    @DisplayName("Allows teleporting between worlds when player has tppets.tpanywhere")
+    void teleportingWithoutTPBetweenWorldsPlayerWithPermission() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+
+            // Entity instances
+            Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
+            Entity incorrectPet = MockFactory.getMockEntity("MockIncorrectPetId", org.bukkit.entity.Horse.class);
+
+            // A list of both entities
+            when(this.chunk.getEntities()).thenReturn(new Entity[]{correctPet, incorrectPet});
+
+            // PetStorage
+            PetStorage pet = new PetStorage("MockPetId", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+
+            // Plugin database wrapper instance
+            when(this.sqlWrapper.getSpecificPet("MockAdminId", "HORSE0")).thenReturn(pet);
+
+            this.setAliases();
+
+            // Putting player in different world
+            when(this.world.getName()).thenReturn("RandomName");
+
+            // Command object with no second argument
+            String[] args = {"tp", "HORSE0"};
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verify(this.chunk, times(1)).load();
+            verify(correctPet, times(1)).eject();
+            if (correctPet instanceof Sittable) {
+                verify((Sittable)correctPet, times(1)).setSitting(false);
+            }
+            verify(correctPet).teleport(this.teleportCaptor.capture());
+            Location capturedPetLocation = this.teleportCaptor.getValue();
+            assertEquals(400, capturedPetLocation.getX(), 0.5);
+            assertEquals(500, capturedPetLocation.getY(), 0.5);
+            assertEquals(600, capturedPetLocation.getZ(), 0.5);
+            verify(this.admin).sendMessage(this.messageCaptor.capture());
+            String capturedMessageOutput = this.messageCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
+            verify(incorrectPet, times(0)).teleport(any(Location.class));
         }
     }
 

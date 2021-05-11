@@ -20,7 +20,7 @@ public class CommandTeleportPet extends TeleportCommand {
     }
 
     protected boolean hasPermissionToTp(Player player, OfflinePlayer petOwner, String petUUID) {
-        return player.equals(petOwner) || player.hasPermission("tppets.teleportother") || thisPlugin.isAllowedToPet(petUUID, player.getUniqueId().toString());
+        return player.equals(petOwner) || player.hasPermission("tppets.teleportother") || this.thisPlugin.isAllowedToPet(petUUID, player.getUniqueId().toString());
     }
 
     @Override
@@ -48,41 +48,7 @@ public class CommandTeleportPet extends TeleportCommand {
         return true;
     }
 
-    public void processCommand() {
-        try {
-            if (this.commandStatus == CommandStatus.SUCCESS && initializePet() && isValidSyntax()) {
-                processCommandGeneric();
-            }
-        } catch (SQLException exception) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-        }
-
-        displayStatus();
-    }
-
-    private boolean isValidSyntax() {
-        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
-        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
-    }
-
-    private void processCommandGeneric() throws SQLException {
-        if (!PermissionChecker.hasPermissionToTeleportType(this.pet.petType, this.sender)) {
-            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-            return;
-        }
-
-        if (!this.thisPlugin.canTpThere(this.sender)) {
-            this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
-            return;
-        }
-
-        if (!this.teleportPetsFromStorage(this.sender.getLocation(), Collections.singletonList(this.pet), this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
-            this.commandStatus = CommandStatus.CANT_TELEPORT;
-        }
-    }
-
     private boolean initializePet() throws SQLException {
-        // TODO: toLowerCase?
         if (!ArgValidator.validateArgsLength(this.args, 1)) {
             this.commandStatus = CommandStatus.SYNTAX_ERROR;
             return false;
@@ -102,6 +68,44 @@ public class CommandTeleportPet extends TeleportCommand {
 
         this.pet = pet;
         return true;
+    }
+
+    private boolean isValidSyntax() {
+        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
+    }
+
+    public void processCommand() {
+        try {
+            if (this.commandStatus == CommandStatus.SUCCESS && initializePet() && isValidSyntax()) {
+                processCommandGeneric();
+            }
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
+        }
+
+        displayStatus();
+    }
+
+    private void processCommandGeneric() throws SQLException {
+        if (!PermissionChecker.hasPermissionToTeleportType(this.pet.petType, this.sender)) {
+            this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
+            return;
+        }
+
+        if (!this.thisPlugin.canTpThere(this.sender)) {
+            this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
+            return;
+        }
+
+        if (!canTpToWorld(this.sender, this.pet.petWorld)) {
+            this.commandStatus = CommandStatus.TP_BETWEEN_WORLDS;
+            return;
+        }
+
+        if (!this.teleportPetsFromStorage(this.sender.getLocation(), Collections.singletonList(this.pet), this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+            this.commandStatus = CommandStatus.CANT_TELEPORT;
+        }
     }
 
     private void displayStatus() {
@@ -126,6 +130,9 @@ public class CommandTeleportPet extends TeleportCommand {
                 break;
             case CANT_TELEPORT:
                 this.sender.sendMessage(ChatColor.RED + "Could not teleport pet");
+                break;
+            case TP_BETWEEN_WORLDS:
+                this.sender.sendMessage(ChatColor.RED + "Can't teleport pet between worlds. Your pet is in " + ChatColor.WHITE + this.pet.petWorld);
                 break;
             case CANT_TELEPORT_IN_PR:
                 break;
