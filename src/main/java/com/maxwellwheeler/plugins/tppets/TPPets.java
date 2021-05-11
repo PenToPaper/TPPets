@@ -9,6 +9,7 @@ import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.*;
 import net.milkbowl.vault.permission.Permission;
+import org.bukkit.Location;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -270,7 +271,7 @@ public class TPPets extends JavaPlugin {
     }
 
     // TODO: MOVE TO PERMISSION CHECKER
-    public boolean canTpThere(Player pl) {
+    public boolean canTpThere(Player pl, Location location) {
         ProtectedRegion tempPr = this.protectedRegionManager.getProtectedRegionAt(pl.getLocation());
         boolean ret = pl.hasPermission("tppets.tpanywhere") || tempPr == null;
         if (!ret) {

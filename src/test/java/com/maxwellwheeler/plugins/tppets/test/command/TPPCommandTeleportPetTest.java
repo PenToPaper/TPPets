@@ -35,7 +35,6 @@ import static org.mockito.Mockito.*;
 
 public class TPPCommandTeleportPetTest {
     private World world;
-    private List<World> worldList;
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
@@ -51,8 +50,6 @@ public class TPPCommandTeleportPetTest {
     public void beforeEach(){
         this.world = mock(World.class);
         when(this.world.getName()).thenReturn("MockWorld");
-        this.worldList = new ArrayList<>();
-        this.worldList.add(this.world);
         Location playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
         Location adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs"});
@@ -84,7 +81,6 @@ public class TPPCommandTeleportPetTest {
 
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", className);
@@ -143,7 +139,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -159,7 +154,7 @@ public class TPPCommandTeleportPetTest {
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
 
             // Permissions modifications
-            when(this.tpPets.canTpThere(any())).thenReturn(false);
+            when(this.tpPets.canTpThere(any(Player.class), any(Location.class))).thenReturn(false);
 
             this.setAliases();
 
@@ -181,7 +176,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -221,7 +215,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -258,7 +251,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -298,7 +290,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -346,7 +337,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -393,7 +383,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -438,7 +427,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -474,7 +462,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // Entity instances
             Entity correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);
@@ -507,7 +494,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
             Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
@@ -555,7 +541,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
             Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
@@ -596,7 +581,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
             Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
@@ -633,7 +617,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
             Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
@@ -675,7 +658,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
             Horse correctPet = MockFactory.getMockEntity("MockPetId", Horse.class);
@@ -725,7 +707,6 @@ public class TPPCommandTeleportPetTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // The correct pet Entity instance
             Horse correctPet = MockFactory.getMockEntity("MockPetId", org.bukkit.entity.Horse.class);

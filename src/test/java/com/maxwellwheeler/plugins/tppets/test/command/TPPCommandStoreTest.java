@@ -45,13 +45,15 @@ public class TPPCommandStoreTest {
     private PetStorage pet;
     private Chunk chunk;
     private Horse horse;
+    private TPPets tpPets;
 
     @BeforeEach
     public void beforeEach() {
         // Players
         this.world = mock(World.class);
+        when(this.world.getName()).thenReturn("MockWorld");
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, null, new String[]{"tppets.store"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.store", "tppets.teleportother"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.store", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
@@ -60,7 +62,7 @@ public class TPPCommandStoreTest {
         // Plugin
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
 
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -68,7 +70,7 @@ public class TPPCommandStoreTest {
         altAlias.add("store");
         aliases.put("store", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, tpPets);
+        this.commandTPP = new CommandTPP(aliases, this.tpPets);
 
         // Storage Location
         this.serverStorageLocation = MockFactory.getServerStorageLocation("StorageOne", 100, 200, 300, this.world);
@@ -296,6 +298,123 @@ public class TPPCommandStoreTest {
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
             assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp store [pet name] [storage name]", message);
+        }
+    }
+
+
+    @Test
+    @DisplayName("Cannot teleport pet into protected region")
+    void cannotTeleportIntoProtectedRegion() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
+
+        when(this.tpPets.canTpThere(any(Player.class), any(Location.class))).thenReturn(false);
+
+        String[] args = {"store", "PetName", "StorageName"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getStorageLocation("MockPlayerId", "StorageName");
+        verify(this.chunk, never()).load();
+        verify(this.horse, never()).teleport(any(Location.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.player, never()).sendMessage(anyString());
+    }
+
+
+    @Test
+    @DisplayName("Denies teleporting between worlds when config option set")
+    void teleportingWithoutTPBetweenWorlds() throws SQLException {
+        when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
+
+        // Putting player in different world
+        when(this.world.getName()).thenReturn("RandomName");
+
+        String[] args = {"store", "PetName", "StorageName"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getStorageLocation("MockPlayerId", "StorageName");
+        verify(this.chunk, never()).load();
+        verify(this.horse, never()).teleport(any(Location.class));
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Can't teleport pet between worlds. Your pet is in " + ChatColor.WHITE + this.pet.petWorld, message);
+    }
+
+
+    @Test
+    @DisplayName("Allows teleporting between worlds when config option set")
+    void teleportingWithTPBetweenWorlds() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+
+            when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
+
+            // Putting player in different world
+            when(this.world.getName()).thenReturn("RandomName");
+            when(this.tpPets.getAllowTpBetweenWorlds()).thenReturn(true);
+
+            String[] args = {"store", "PetName", "StorageName"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
+
+            verify(this.chunk, times(1)).load();
+
+            verify(this.horse).teleport(this.teleportCaptor.capture());
+            Location capturedPetLocation = this.teleportCaptor.getValue();
+            assertEquals(100, capturedPetLocation.getBlockX(), 0.5);
+            assertEquals(200, capturedPetLocation.getBlockY(), 0.5);
+            assertEquals(300, capturedPetLocation.getBlockZ(), 0.5);
+
+            verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
+            String capturedLogOutput = this.logCaptor.getValue();
+            assertEquals("Player MockPlayerName teleported their pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+
+            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+            String message = this.messageCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "Your pet has been stored successfully", message);
+        }
+    }
+
+
+    @Test
+    @DisplayName("Allows teleporting between worlds when player has tppets.tpanywhere")
+    void teleportingWithoutTPBetweenWorldsPlayerWithPermission() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+
+            when(this.sqlWrapper.getStorageLocation("MockAdminId", "StorageName")).thenReturn(this.playerStorageLocation);
+            when(this.sqlWrapper.getSpecificPet("MockAdminId", "PetName")).thenReturn(this.pet);
+
+            // Putting player in different world
+            when(this.world.getName()).thenReturn("RandomName");
+            when(this.tpPets.getAllowTpBetweenWorlds()).thenReturn(true);
+
+            String[] args = {"store", "PetName", "StorageName"};
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
+
+            verify(this.chunk, times(1)).load();
+
+            verify(this.horse).teleport(this.teleportCaptor.capture());
+            Location capturedPetLocation = this.teleportCaptor.getValue();
+            assertEquals(100, capturedPetLocation.getBlockX(), 0.5);
+            assertEquals(200, capturedPetLocation.getBlockY(), 0.5);
+            assertEquals(300, capturedPetLocation.getBlockZ(), 0.5);
+
+            verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
+            String capturedLogOutput = this.logCaptor.getValue();
+            assertEquals("Player MockAdminName teleported their pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+
+            verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+            String message = this.messageCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "Your pet has been stored successfully", message);
         }
     }
 

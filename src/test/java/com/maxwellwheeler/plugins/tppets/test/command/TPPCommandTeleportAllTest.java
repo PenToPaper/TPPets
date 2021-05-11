@@ -181,7 +181,7 @@ public class TPPCommandTeleportAllTest {
             this.setAliases();
 
             // Permissions modifications
-            when(this.tpPets.canTpThere(any())).thenReturn(false);
+            when(this.tpPets.canTpThere(any(Player.class), any(Location.class))).thenReturn(false);
 
             // Command object
             String[] args = {"all", "horse"};

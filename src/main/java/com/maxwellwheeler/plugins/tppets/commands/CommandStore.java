@@ -16,6 +16,7 @@ import java.sql.SQLException;
 
 class CommandStore extends TeleportCommand {
     private boolean hasSpecificStorage;
+    private PetStorage pet;
 
     /**
      * Generic constructor, needs to point to plugin for logging.
@@ -71,15 +72,25 @@ class CommandStore extends TeleportCommand {
                 return;
             }
 
-            PetStorage pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+            this.pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-            if (pet == null) {
+            if (this.pet == null) {
                 this.commandStatus = CommandStatus.NO_PET;
                 return;
             }
 
-            if (storePet(storageLocation, pet)) {
-                thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
+            if (!this.thisPlugin.canTpThere(this.sender, storageLocation.getLoc())) {
+                this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
+                return;
+            }
+
+            if (!canTpToWorld(this.sender, this.pet.petWorld)) {
+                this.commandStatus = CommandStatus.TP_BETWEEN_WORLDS;
+                return;
+            }
+
+            if (storePet(storageLocation, this.pet)) {
+                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
             } else {
                 this.commandStatus = CommandStatus.CANT_TELEPORT;
             }
@@ -101,6 +112,7 @@ class CommandStore extends TeleportCommand {
         // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, SYNTAX_ERROR, NO_PET, NO_STORAGE, CANNOT_TP
         switch (this.commandStatus) {
             case INVALID_SENDER:
+            case CANT_TELEPORT_IN_PR:
                 break;
             case SUCCESS:
                 this.sender.sendMessage((isForSelf() ? ChatColor.BLUE + "Your" : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE) + " pet has been stored successfully");
@@ -125,6 +137,9 @@ class CommandStore extends TeleportCommand {
                 break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not process request");
+                break;
+            case TP_BETWEEN_WORLDS:
+                this.sender.sendMessage(ChatColor.RED + "Can't teleport pet between worlds. Your pet is in " + ChatColor.WHITE + this.pet.petWorld);
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");

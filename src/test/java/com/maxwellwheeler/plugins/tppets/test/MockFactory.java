@@ -53,7 +53,7 @@ public class MockFactory {
     public static TPPets getMockPlugin(SQLWrapper sqlWrapper, LogWrapper logWrapper, boolean canTpThere, boolean allowTpBetweenWorlds, boolean isAllowedToPet) {
         TPPets tpPets = mock(TPPets.class);
         when(tpPets.getDatabase()).thenReturn(sqlWrapper);
-        when(tpPets.canTpThere(any())).thenReturn(canTpThere);
+        when(tpPets.canTpThere(any(Player.class), any(Location.class))).thenReturn(canTpThere);
         when(tpPets.getAllowTpBetweenWorlds()).thenReturn(allowTpBetweenWorlds);
         if (logWrapper != null) {
             when(tpPets.getLogWrapper()).thenReturn(logWrapper);

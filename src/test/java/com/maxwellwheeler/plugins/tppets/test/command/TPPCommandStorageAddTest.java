@@ -148,7 +148,7 @@ public class TPPCommandStorageAddTest {
     @Test
     @DisplayName("Can't add storage locations when you can't teleport pets there")
     void cannotAddStorageLocationCantTpThere() throws SQLException {
-        when(this.tpPets.canTpThere(this.player)).thenReturn(false);
+        when(this.tpPets.canTpThere(this.player, this.playerLocation)).thenReturn(false);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
