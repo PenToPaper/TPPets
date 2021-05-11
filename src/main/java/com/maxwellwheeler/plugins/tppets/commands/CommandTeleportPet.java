@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
-import java.util.Collections;
 
 public class CommandTeleportPet extends TeleportCommand {
     private PetStorage pet;
@@ -103,7 +102,7 @@ public class CommandTeleportPet extends TeleportCommand {
             return;
         }
 
-        if (!this.teleportPetsFromStorage(this.sender.getLocation(), Collections.singletonList(this.pet), this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+        if (!this.teleportPetsFromStorage(this.sender.getLocation(), this.pet, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
             this.commandStatus = CommandStatus.CANT_TELEPORT;
         }
     }

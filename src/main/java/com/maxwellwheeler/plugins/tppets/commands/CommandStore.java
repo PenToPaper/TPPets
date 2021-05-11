@@ -8,7 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
-import java.util.Collections;
 
 /**
  * Object used for store commands
@@ -92,7 +91,7 @@ class CommandStore extends TeleportCommand {
 
     private boolean storePet(StorageLocation storageLocation, PetStorage pet) throws SQLException {
         try {
-            return teleportPetsFromStorage(storageLocation.getLoc(), Collections.singletonList(pet), true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
+            return teleportPetsFromStorage(storageLocation.getLoc(), pet, true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
         } catch (SQLException ignored) {
             return true;
         }

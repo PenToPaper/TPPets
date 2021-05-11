@@ -9,55 +9,18 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommandTeleportAll extends TeleportCommand {
     private PetType.Pets petType;
     private List<PetStorage> petList;
+    private final List<PetStorage> errorPetList = new ArrayList<>();
 
     public CommandTeleportAll(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
-    public void processCommand() {
-        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
-            processCommandGeneric();
-        }
-
-        displayStatus();
-    }
-
-    private boolean isValidSyntax() {
-        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
-        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
-    }
-
-    private void processCommandGeneric() {
-        try {
-            if (!initializePetList()) {
-                return;
-            }
-
-            if (!PermissionChecker.hasPermissionToTeleportType(this.petType, this.sender)) {
-                this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-                return;
-            }
-
-            if (!this.thisPlugin.canTpThere(this.sender)) {
-                this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
-                return;
-            }
-
-            if (!this.teleportPetsFromStorage(this.sender.getLocation(), this.petList, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
-                this.commandStatus = CommandStatus.CANT_TELEPORT;
-            }
-
-        } catch (SQLException exception) {
-            this.commandStatus = CommandStatus.DB_FAIL;
-        }
-    }
-
-    // TODO: Implement tpPetsBetweenWorlds functionality
     private boolean initializePetList() throws SQLException {
         try {
             this.petType = PetType.Pets.valueOf(this.args[0].toUpperCase());
@@ -76,6 +39,51 @@ public class CommandTeleportAll extends TeleportCommand {
             return false;
         }
         return true;
+    }
+
+    private boolean isValidSyntax() {
+        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
+    }
+
+    public void processCommand() {
+        if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
+            processCommandGeneric();
+        }
+
+        displayStatus();
+    }
+
+    private void processCommandGeneric() {
+        try {
+            if (!initializePetList()) {
+                return;
+            }
+
+            if (!PermissionChecker.hasPermissionToTeleportType(this.petType, this.sender)) {
+                this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
+                return;
+            }
+
+            if (!this.thisPlugin.canTpThere(this.sender)) {
+                this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
+                return;
+            }
+
+            teleportAllPets();
+
+        } catch (SQLException exception) {
+            this.commandStatus = CommandStatus.DB_FAIL;
+        }
+    }
+
+    private void teleportAllPets() throws SQLException {
+        for (PetStorage petStorage : this.petList) {
+            if (!canTpToWorld(this.sender, petStorage.petWorld) || !teleportPetsFromStorage(this.sender.getLocation(), petStorage, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+                this.commandStatus = CommandStatus.CANT_TELEPORT;
+                this.errorPetList.add(petStorage);
+            }
+        }
     }
 
     private void displayStatus() {
@@ -101,7 +109,7 @@ public class CommandTeleportAll extends TeleportCommand {
                 this.sender.sendMessage(ChatColor.RED + "Could not get any pets");
                 break;
             case CANT_TELEPORT:
-                this.sender.sendMessage(ChatColor.RED + "Could not teleport pets");
+                this.sender.sendMessage(ChatColor.RED + "Teleported all pets except: " + ChatColor.WHITE + getErrorPetNames());
                 break;
             case CANT_TELEPORT_IN_PR:
                 break;
@@ -109,5 +117,14 @@ public class CommandTeleportAll extends TeleportCommand {
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
         }
+    }
+
+    private String getErrorPetNames() {
+        StringBuilder errorPetNames = new StringBuilder();
+        for (PetStorage errorPet : this.errorPetList) {
+            errorPetNames.append(errorPet.petName).append(", ");
+        }
+        errorPetNames.delete(errorPetNames.lastIndexOf(", "), errorPetNames.length());
+        return errorPetNames.toString();
     }
 }

@@ -56,7 +56,7 @@ public class TPPCommandTeleportAllTest {
         this.playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
         this.adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, this.playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, this.adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, this.adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(anyInt(), anyInt())).thenReturn(this.chunk);
@@ -368,39 +368,8 @@ public class TPPCommandTeleportAllTest {
     }
 
     @Test
-    @DisplayName("Reports teleporting error to user")
-    void cannotTeleportTeleportError() throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
-
-            // Chunk
-            when(this.chunk.getEntities()).thenReturn(new Entity[]{});
-
-            // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet0");
-            PetStorage pet2 = new PetStorage("MockPetId2", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet0");
-            List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
-
-            // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
-
-            this.setAliases();
-
-            // Command object
-            String[] args = {"all", "horse"};
-            this.commandTPP.onCommand(this.player, this.command, "", args);
-
-            verify(this.chunk, times(3)).load();
-            checkPlayerResponse(this.player, ChatColor.RED + "Could not teleport pets", this.messageCaptor);
-        }
-    }
-
-    @Test
-    @DisplayName("Does not report teleporting error to user if some pets were successfully teleported")
-    void cannotTeleportTeleportErrorUnreported() throws SQLException {
+    @DisplayName("Reports teleporting error to user if some pets could not be found")
+    void cannotFindSomePets() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
@@ -428,7 +397,122 @@ public class TPPCommandTeleportAllTest {
             verify(this.chunk, times(3)).load();
             checkPetIsTeleported(entities[0], this.playerLocation, this.teleportCaptor);
             checkPetIsNotTeleported(entities[1]);
+            checkPlayerResponse(this.player, ChatColor.RED + "Teleported all pets except: " + ChatColor.WHITE + "CorrectPet0, CorrectPet1", this.messageCaptor);
+        }
+    }
+
+    @Test
+    @DisplayName("Reports teleporting error to user if some pets were in a different world")
+    void teleportingWithoutTPBetweenWorlds() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+
+            // A list of both entities
+            Entity[] entities = getEntityList(new String[]{"MockPetId0", "MockPetId1", "MockPetId2"}, org.bukkit.entity.Horse.class);
+            when(this.chunk.getEntities()).thenReturn(entities);
+
+            // PetStorage
+            PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("MockPetId2", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+
+            // Plugin database wrapper instance
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+
+            this.setAliases();
+
+            // Putting player in different world
+            when(this.world.getName()).thenReturn("RandomName");
+
+            // Command object
+            String[] args = {"all", "horse"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verify(this.chunk, never()).load();
+            checkPetIsNotTeleported(entities[0]);
+            checkPetIsNotTeleported(entities[1]);
+            checkPetIsNotTeleported(entities[2]);
+            checkPlayerResponse(this.player, ChatColor.RED + "Teleported all pets except: " + ChatColor.WHITE + "CorrectPet0, CorrectPet1, CorrectPet2", this.messageCaptor);
+        }
+    }
+
+    @Test
+    @DisplayName("Allows teleporting between worlds with config option")
+    void teleportingWithTPBetweenWorlds() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+
+            // A list of both entities
+            Entity[] entities = getEntityList(new String[]{"MockPetId0", "MockPetId1", "MockPetId2"}, org.bukkit.entity.Horse.class);
+            when(this.chunk.getEntities()).thenReturn(entities);
+
+            // PetStorage
+            PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("MockPetId2", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+
+            // Plugin database wrapper instance
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+
+            this.setAliases();
+
+            // Putting player in different world
+            when(this.tpPets.getAllowTpBetweenWorlds()).thenReturn(true);
+            when(this.world.getName()).thenReturn("RandomName");
+
+            // Command object
+            String[] args = {"all", "horse"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verify(this.chunk, times(3)).load();
+            checkPetIsTeleported(entities[0], this.playerLocation, this.teleportCaptor);
+            checkPetIsTeleported(entities[1], this.playerLocation, this.teleportCaptor);
+            checkPetIsTeleported(entities[2], this.playerLocation, this.teleportCaptor);
             checkPlayerResponse(this.player, ChatColor.BLUE + "Your " + ChatColor.WHITE + "horses " + ChatColor.BLUE + "have been teleported to you", this.messageCaptor);
+        }
+    }
+
+    @Test
+    @DisplayName("Allows teleporting between worlds if player has tppets.tpanywhere")
+    void teleportingWithoutTPBetweenWorldsPlayerWithPermission() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+
+            // A list of both entities
+            Entity[] entities = getEntityList(new String[]{"MockPetId0", "MockPetId1", "MockPetId2"}, org.bukkit.entity.Horse.class);
+            when(this.chunk.getEntities()).thenReturn(entities);
+
+            // PetStorage
+            PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockAdminId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockAdminId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("MockPetId2", 7, 200, 200, 200, "MockWorld", "MockAdminId", "CorrectPet2", "CorrectPet2");
+            List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+
+            // Plugin database wrapper instance
+            when(this.sqlWrapper.getAllPetsFromOwner("MockAdminId")).thenReturn(petList);
+
+            this.setAliases();
+
+            // Putting player in different world
+            when(this.world.getName()).thenReturn("RandomName");
+
+            // Command object
+            String[] args = {"all", "horse"};
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verify(this.chunk, times(3)).load();
+            checkPetIsTeleported(entities[0], this.adminLocation, this.teleportCaptor);
+            checkPetIsTeleported(entities[1], this.adminLocation, this.teleportCaptor);
+            checkPetIsTeleported(entities[2], this.adminLocation, this.teleportCaptor);
+            checkPlayerResponse(this.admin, ChatColor.BLUE + "Your " + ChatColor.WHITE + "horses " + ChatColor.BLUE + "have been teleported to you", this.messageCaptor);
         }
     }
 

@@ -13,13 +13,11 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
-import java.util.List;
 
 /**
  * Object used for store commands
  * @author GatheringExp
  */
-// TODO: REFACTOR
 public abstract class TeleportCommand extends BaseCommand {
     /**
      * Generic constructor, takes TPPets plugin instance.
@@ -37,21 +35,18 @@ public abstract class TeleportCommand extends BaseCommand {
      * @return True if the pet was found and teleported, false otherwise
      */
 
-    protected boolean teleportPetsFromStorage(Location sendTo, List<PetStorage> petStorageList, boolean setSitting, boolean kickPlayerOff) throws SQLException {
-        boolean teleportResult = false;
-        for (PetStorage petStorage : petStorageList) {
-            World world = Bukkit.getWorld(petStorage.petWorld);
-            if (world != null) {
-                Chunk petChunk = world.getChunkAt(petStorage.petX, petStorage.petZ);
-                petChunk.load();
-                Entity entity = getEntityInChunk(petChunk, petStorage);
-                if (entity != null && teleportPet(sendTo, entity, setSitting, kickPlayerOff)) {
-                    thisPlugin.getDatabase().updatePetLocation(entity);
-                    teleportResult = true;
-                }
+    protected boolean teleportPetsFromStorage(Location sendTo, PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) throws SQLException {
+        World world = Bukkit.getWorld(petStorage.petWorld);
+        if (world != null) {
+            Chunk petChunk = world.getChunkAt(petStorage.petX, petStorage.petZ);
+            petChunk.load();
+            Entity entity = getEntityInChunk(petChunk, petStorage);
+            if (entity != null && teleportPet(sendTo, entity, setSitting, kickPlayerOff)) {
+                this.thisPlugin.getDatabase().updatePetLocation(entity);
+                return true;
             }
         }
-        return teleportResult;
+        return false;
     }
 
     protected Entity getEntityInChunk(Chunk chunk, PetStorage petStorage) {
