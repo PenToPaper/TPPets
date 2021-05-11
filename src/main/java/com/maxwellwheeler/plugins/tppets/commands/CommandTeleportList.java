@@ -79,7 +79,7 @@ public class CommandTeleportList extends TeleportCommand {
     private void announcePetsFromList() {
         this.sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + this.commandFor.getName() + "'s " + this.petType.toString().toLowerCase() + ChatColor.BLUE + " names ]" + ChatColor.DARK_GRAY + "---------");
         for (int i = 0; i < this.petList.size(); i++) {
-            this.sender.sendMessage(ChatColor.WHITE + "  " + (i + 1) + ") " + this.petList.get(i).petName);
+            this.sender.sendMessage(ChatColor.WHITE + "  " + (i + 1) + ") " + this.petList.get(i).petName + (canTpToWorld(this.sender, this.petList.get(i).petWorld) ? "" : ChatColor.RED + " (In: " + this.petList.get(i).petWorld + ")"));
         }
         this.sender.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
     }

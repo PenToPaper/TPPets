@@ -34,7 +34,6 @@ import static org.mockito.Mockito.*;
 
 public class TPPCommandTeleportListTest {
     private World world;
-    private List<World> worldList;
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
@@ -47,10 +46,8 @@ public class TPPCommandTeleportListTest {
     public void beforeEach() {
         this.world = mock(World.class);
         when(this.world.getName()).thenReturn("MockWorld");
-        this.worldList = new ArrayList<>();
-        this.worldList.add(this.world);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, null, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
@@ -84,192 +81,229 @@ public class TPPCommandTeleportListTest {
     @ParameterizedTest
     @MethodSource("petTypeProvider")
     void listsValidPets(PetType.Pets petType) throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+        // PetStorage
+        PetStorage pet0 = new PetStorage("MockPetId0", PetType.getIndexFromPet(petType), 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+        PetStorage pet1 = new PetStorage("MockPetId1", PetType.getIndexFromPet(petType), 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+        PetStorage pet2 = new PetStorage("MockPetId2", PetType.getIndexFromPet(petType), 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+        List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
-            // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0", PetType.getIndexFromPet(petType), 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1", PetType.getIndexFromPet(petType), 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2", PetType.getIndexFromPet(petType), 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
-            List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+        // Plugin database wrapper instance
+        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
-            // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+        this.setAliases();
 
-            this.setAliases();
+        // Command object
+        String[] args = {"list", petType.toString().toLowerCase()};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            // Command object
-            String[] args = {"list", petType.toString().toLowerCase()};
-            this.commandTPP.onCommand(this.player, this.command, "", args);
+        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
 
-            verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
-
-            verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
-            List<String> messages = this.messageCaptor.getAllValues();
-            assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's " + petType.toString().toLowerCase() + ChatColor.BLUE + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
-            assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
-            assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
-            assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
-            assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
-        }
+        verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
+        List<String> messages = this.messageCaptor.getAllValues();
+        assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's " + petType.toString().toLowerCase() + ChatColor.BLUE + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
+        assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
+        assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
+        assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
+        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
     }
 
     @Test
-    @DisplayName("Cannot list when pet type is not specified")
-    void listsValidPets() throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+    @DisplayName("Displays which pets are in another world if cannot tp_pets_between_worlds false")
+    void listsPetsInAnotherWorldDenyTpBetweenWorlds() throws SQLException {
+        // PetStorage
+        PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+        PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+        PetStorage pet2 = new PetStorage("MockPetId2", 7, 200, 200, 200, "NotMockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+        List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
-            this.setAliases();
+        // Plugin database wrapper instance
+        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
 
-            // Player who owns the pet
-            bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
+        this.setAliases();
 
-            // Command sender
-            CommandSender sender = mock(CommandSender.class);
+        // Command object
+        String[] args = {"list", "horse"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            // Command object
-            String[] args = {"list", "horse"};
-            this.commandTPP.onCommand(sender, this.command, "", args);
+        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
 
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
-            verify(sender, never()).sendMessage(this.messageCaptor.capture());
-        }
+        verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
+        List<String> messages = this.messageCaptor.getAllValues();
+        assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's horse" + ChatColor.BLUE + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
+        assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
+        assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
+        assertEquals(ChatColor.WHITE + "  3) CorrectPet2" + ChatColor.RED + " (In: NotMockWorld)", messages.get(3));
+        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+    }
+
+    @Test
+    @DisplayName("Doesn't display which pets are in another world if cannot tp_pets_between_worlds true")
+    void listsPetsInAnotherWorldAllowTpBetweenWorlds() throws SQLException {
+        // PetStorage
+        PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+        PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+        PetStorage pet2 = new PetStorage("MockPetId2", 7, 200, 200, 200, "NotMockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+        List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+
+        // Plugin database wrapper instance
+        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+
+        when(this.tpPets.getAllowTpBetweenWorlds()).thenReturn(true);
+
+        this.setAliases();
+
+        // Command object
+        String[] args = {"list", "horse"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+
+        verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
+        List<String> messages = this.messageCaptor.getAllValues();
+        assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's horse" + ChatColor.BLUE + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
+        assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
+        assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
+        assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
+        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+    }
+
+    @Test
+    @DisplayName("Doesn't display which pets are in another world if player has tppets.tpanywhere")
+    void listsPetsInAnotherWorldDenyTpBetweenWorldsPlayerWithPermission() throws SQLException {
+        // PetStorage
+        PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+        PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+        PetStorage pet2 = new PetStorage("MockPetId2", 7, 200, 200, 200, "NotMockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+        List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+
+        // Plugin database wrapper instance
+        when(this.sqlWrapper.getAllPetsFromOwner("MockAdminId")).thenReturn(petList);
+
+        this.setAliases();
+
+        // Command object
+        String[] args = {"list", "horse"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+
+        verify(this.admin, times(5)).sendMessage(this.messageCaptor.capture());
+        List<String> messages = this.messageCaptor.getAllValues();
+        assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockAdminName's horse" + ChatColor.BLUE + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
+        assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
+        assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
+        assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
+        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+    }
+
+    @Test
+    @DisplayName("Cannot list when sender isn't player")
+    void cannotListSenderNotPlayer() throws SQLException {
+        this.setAliases();
+
+        // Command sender
+        CommandSender sender = mock(CommandSender.class);
+
+        // Command object
+        String[] args = {"list", "horse"};
+        this.commandTPP.onCommand(sender, this.command, "", args);
+
+        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+        verify(sender, never()).sendMessage(this.messageCaptor.capture());
     }
 
     @Test
     @DisplayName("Cannot list when sender is not player")
     void cannotListNoPetType() throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+        this.setAliases();
 
-            this.setAliases();
+        // Command object
+        String[] args = {"list"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            // Player who owns the pet
-            bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
-
-            // Command object
-            String[] args = {"list"};
-            this.commandTPP.onCommand(this.player, this.command, "", args);
-
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
-            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", message);
-        }
+        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", message);
     }
 
     @Test
     @DisplayName("Cannot list when database failure occurs")
     void cannotListDbFail() throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+        // Plugin database wrapper instance
+        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenThrow(new SQLException());
 
-            // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenThrow(new SQLException());
+        this.setAliases();
 
-            this.setAliases();
+        // Command object
+        String[] args = {"list", "horse"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            // Command object
-            String[] args = {"list", "horse"};
-            this.commandTPP.onCommand(this.player, this.command, "", args);
+        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
 
-            verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
-
-            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Could not allow user to pet", message);
-        }
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not allow user to pet", message);
     }
 
     @Test
     @DisplayName("Cannot list when database finds no pets")
     void cannotListNoPetsFound() throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+        // Plugin database wrapper instance
+        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(new ArrayList<>());
 
-            // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(new ArrayList<>());
+        this.setAliases();
 
-            this.setAliases();
+        // Command object
+        String[] args = {"list", "horse"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            // Command object
-            String[] args = {"list", "horse"};
-            this.commandTPP.onCommand(this.player, this.command, "", args);
+        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
 
-            verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
-
-            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Could not find any " + ChatColor.WHITE + "horses", message);
-        }
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Could not find any " + ChatColor.WHITE + "horses", message);
     }
 
     @Test
     @DisplayName("Cannot list with invalid pet type")
     void cannotListInvalidPetType() throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+        this.setAliases();
 
-            this.setAliases();
+        // Command object
+        String[] args = {"list", "invalidpettype"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            // Command object
-            String[] args = {"list", "invalidpettype"};
-            this.commandTPP.onCommand(this.player, this.command, "", args);
+        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
 
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
-
-            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", message);
-        }
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", message);
     }
 
     @Test
     @DisplayName("Cannot list without permission to pet type")
     void cannotListInsufficientPermissionsToPetType() throws SQLException {
-        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
+        this.setAliases();
 
-            this.setAliases();
+        // Permission Changes
+        when(this.player.hasPermission("tppets.horses")).thenReturn(false);
 
-            // Permission Changes
-            when(this.player.hasPermission("tppets.horses")).thenReturn(false);
+        // Command object
+        String[] args = {"list", "horse"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            // Command object
-            String[] args = {"list", "horse"};
-            this.commandTPP.onCommand(this.player, this.command, "", args);
+        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
 
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
-
-            verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "You don't have permission to do that", message);
-        }
+        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
+        String message = this.messageCaptor.getValue();
+        assertEquals(ChatColor.RED + "You don't have permission to do that", message);
     }
 
     @Test
     @DisplayName("Admin lists valid pets")
     void adminListsValidPets() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
-
             // PetStorage
             PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
             PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
@@ -304,10 +338,6 @@ public class TPPCommandTeleportListTest {
     @DisplayName("Cannot admin list valid pets when player has not played before")
     void cannotAdminListsValidPets() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
-
             // PetStorage
             PetStorage pet0 = new PetStorage("MockPetId0", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
             PetStorage pet1 = new PetStorage("MockPetId1", 7, 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
@@ -339,10 +369,6 @@ public class TPPCommandTeleportListTest {
     @DisplayName("Cannot admin list valid pets when admin is not a player")
     void cannotAdminSenderNotPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
-
             this.setAliases();
 
             // Player who owns the pet
@@ -364,10 +390,6 @@ public class TPPCommandTeleportListTest {
     @DisplayName("Cannot admin list valid pets when admin has insufficient permissions")
     void cannotAdminListInsufficientPermissions() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
-
             this.setAliases();
 
             // Player who owns the pet
@@ -392,10 +414,6 @@ public class TPPCommandTeleportListTest {
     @DisplayName("Cannot admin list valid pets when no pet type specified")
     void cannotAdminListNoPetType() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            //  Bukkit static mock
-            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
-
             this.setAliases();
 
             // Player who owns the pet
