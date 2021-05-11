@@ -231,7 +231,6 @@ public abstract class SQLWrapper {
         return this.updatePrepStatement(updatePetName, newName, newName.toLowerCase(), trimmedOwnerId, oldName.toLowerCase());
     }
 
-    // TODO: Make return single PetStorage. List not needed anymore
     public PetStorage getSpecificPet(@NotNull String ownerId, @NotNull String petName) throws SQLException {
         String selectSpecificPet = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
