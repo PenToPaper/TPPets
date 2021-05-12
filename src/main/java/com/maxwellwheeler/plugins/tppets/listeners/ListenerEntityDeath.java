@@ -21,7 +21,7 @@ public class ListenerEntityDeath implements Listener {
     public void onEntityDeathEvent(EntityDeathEvent event) {
         try {
             if (PetType.isPetTracked(event.getEntity())) {
-                this.thisPlugin.getDatabase().removePet(event.getEntity());
+                this.thisPlugin.getDatabase().removePet(event.getEntity().getUniqueId().toString());
             }
         } catch (SQLException ignored) {}
     }

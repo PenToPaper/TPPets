@@ -45,7 +45,7 @@ public class TPPListenerEntityDeathTest {
 
         this.listenerEntityDeath.onEntityDeathEvent(entityDeathEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
     }
 
     @Test
@@ -56,6 +56,6 @@ public class TPPListenerEntityDeathTest {
 
         this.listenerEntityDeath.onEntityDeathEvent(entityDeathEvent);
 
-        verify(this.sqlWrapper, never()).removePet(any(Entity.class));
+        verify(this.sqlWrapper, never()).removePet(anyString());
     }
 }

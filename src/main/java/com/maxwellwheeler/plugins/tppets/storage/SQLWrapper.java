@@ -188,14 +188,10 @@ public abstract class SQLWrapper {
         return this.insertPrepStatement(insertPet, trimmedPetId, petTypeIndex, pet.getLocation().getBlockX(), pet.getLocation().getBlockY(), pet.getLocation().getBlockZ(), pet.getWorld().getName(), trimmedOwnerId, petName, petName.toLowerCase());
     }
 
-    public boolean removePet(@NotNull Entity entity) throws SQLException {
-        if (PetType.isPetTracked(entity)) {
-            String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ?";
-            String trimmedPetId = UUIDUtils.trimUUID(entity.getUniqueId());
-
-            return this.deletePrepStatement(deletePet, trimmedPetId);
-        }
-        return false;
+    public boolean removePet(@NotNull String petId) throws SQLException {
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        String deletePet = "DELETE FROM tpp_unloaded_pets WHERE pet_id = ?";
+        return this.deletePrepStatement(deletePet, trimmedPetId);
     }
 
     public boolean updatePetLocation(@NotNull Entity entity) throws SQLException {

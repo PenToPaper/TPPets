@@ -8,8 +8,8 @@ import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
 
-public class CommandRename extends BaseCommand {
-    public CommandRename(TPPets thisPlugin, CommandSender sender, String[] args) {
+public class CommandRelease extends BaseCommand {
+    public CommandRelease(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
@@ -24,18 +24,18 @@ public class CommandRename extends BaseCommand {
     }
 
     private boolean isValidSyntax() {
-        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.renameother", 2)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(2));
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.untameother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
     private void processCommandGeneric() {
         try {
-            if (!ArgValidator.softValidatePetName(this.args[0])) {
-                this.commandStatus = CommandStatus.NO_PET;
+            if (!this.thisPlugin.getAllowUntamingPets() && !this.sender.hasPermission("tppets.untameother")) {
+                this.commandStatus = CommandStatus.NOT_ENABLED;
                 return;
             }
 
-            if (!ArgValidator.softValidatePetName(this.args[1])) {
-                this.commandStatus = CommandStatus.INVALID_NAME;
+            if (!ArgValidator.softValidatePetName(this.args[0])) {
+                this.commandStatus = CommandStatus.NO_PET;
                 return;
             }
 
@@ -46,17 +46,9 @@ public class CommandRename extends BaseCommand {
                 return;
             }
 
-            if (!this.thisPlugin.getDatabase().isNameUnique(this.commandFor.getUniqueId().toString(), this.args[1])) {
-                this.commandStatus = CommandStatus.PET_NAME_ALREADY_IN_USE;
-                return;
-            }
-
-            if (!this.thisPlugin.getDatabase().renamePet(this.commandFor.getUniqueId().toString(), this.args[0], this.args[1])) {
+            if (!this.thisPlugin.getDatabase().removePet(pet.petId)) {
                 this.commandStatus = CommandStatus.DB_FAIL;
-                return;
             }
-
-            this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " has changed " + this.commandFor.getName() + "'s pet named " + this.args[0] + " to " + this.args[1]);
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
@@ -69,13 +61,13 @@ public class CommandRename extends BaseCommand {
             case INVALID_SENDER:
                 break;
             case SUCCESS:
-                this.sender.sendMessage((this.isForSelf() ? ChatColor.BLUE + "Your pet " : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE + " pet ") + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " has been renamed to " + ChatColor.WHITE + this.args[1]);
+                this.sender.sendMessage((this.isForSelf() ? ChatColor.BLUE + "Your pet " : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE + " pet ") + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " has been released");
                 break;
             case INSUFFICIENT_PERMISSIONS:
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
                 break;
             case DB_FAIL:
-                this.sender.sendMessage(ChatColor.RED + "Could not rename pet");
+                this.sender.sendMessage(ChatColor.RED + "Could not release pet");
                 break;
             case NO_PLAYER:
                 this.sender.sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + ArgValidator.isForSomeoneElse(this.args[0]));
@@ -83,14 +75,11 @@ public class CommandRename extends BaseCommand {
             case NO_PET:
                 this.sender.sendMessage(ChatColor.RED + "Could not find pet named " + ChatColor.WHITE + this.args[0]);
                 break;
-            case INVALID_NAME:
-                this.sender.sendMessage(ChatColor.WHITE + this.args[1] + ChatColor.RED + " is an invalid name");
-                break;
-            case PET_NAME_ALREADY_IN_USE:
-                this.sender.sendMessage(ChatColor.RED + "Pet name " + ChatColor.WHITE + this.args[1] + ChatColor.RED + " is already in use");
+            case NOT_ENABLED:
+                this.sender.sendMessage(ChatColor.RED + "You can't release pets");
                 break;
             case SYNTAX_ERROR:
-                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp rename [old name] [new name]");
+                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp release [pet name]");
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");

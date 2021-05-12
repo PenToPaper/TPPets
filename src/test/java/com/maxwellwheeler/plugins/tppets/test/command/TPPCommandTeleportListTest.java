@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class TPPCommandTeleportListTest {
-    private World world;
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
@@ -44,10 +43,10 @@ public class TPPCommandTeleportListTest {
 
     @BeforeEach
     public void beforeEach() {
-        this.world = mock(World.class);
-        when(this.world.getName()).thenReturn("MockWorld");
-        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, null, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
+        World world = mock(World.class);
+        when(world.getName()).thenReturn("MockWorld");
+        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, null, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", world, null, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
@@ -203,6 +202,7 @@ public class TPPCommandTeleportListTest {
 
         // Command sender
         CommandSender sender = mock(CommandSender.class);
+        when(sender.hasPermission("tppets.horses")).thenReturn(true);
 
         // Command object
         String[] args = {"list", "horse"};
@@ -376,6 +376,8 @@ public class TPPCommandTeleportListTest {
 
             // Sender
             CommandSender sender = mock(CommandSender.class);
+            when(sender.hasPermission("tppets.llamas")).thenReturn(true);
+            when(sender.hasPermission("tppets.teleportother")).thenReturn(true);
 
             // Command object
             String[] args = {"list", "f:MockPlayerName", "horse"};

@@ -80,6 +80,7 @@ public class TPPCommandRenameTest {
     @DisplayName("Cannot rename pet not a player")
     void cannotRenamePetNotPlayer() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
+        when(sender.hasPermission("tppets.rename")).thenReturn(true);
 
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(sender, this.command, "", args);

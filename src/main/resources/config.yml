@@ -19,6 +19,7 @@ command_aliases:
   lost: [lostandfound, laf, lf, l]
   tp: [teleport, find, get]
   rename: [setname]
+  release: [untame]
   allow: [add]
   remove: [take]
   allowed: [permitted, guests, guest, g]

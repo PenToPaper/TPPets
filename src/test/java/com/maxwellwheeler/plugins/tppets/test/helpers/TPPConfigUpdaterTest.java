@@ -90,6 +90,7 @@ public class TPPConfigUpdaterTest {
         verify(this.fileConfiguration, times(1)).set("command_aliases.all", new String[]{"findall", "getall"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.position1", new String[]{"1", "pos1", "startpos", "start"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.position2", new String[]{"2", "pos2", "endpos", "end"});
+        verify(this.fileConfiguration, times(1)).set("command_aliases.release", new String[]{"untame"});
 
         verify(this.fileConfiguration, times(1)).set("command_aliases.dogs", null);
         verify(this.fileConfiguration, times(1)).set("command_aliases.cats", null);
@@ -145,6 +146,7 @@ public class TPPConfigUpdaterTest {
         verify(this.fileConfiguration, times(1)).set("command_aliases.all", new String[]{"findall", "getall"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.position1", new String[]{"1", "pos1", "startpos", "start"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.position2", new String[]{"2", "pos2", "endpos", "end"});
+        verify(this.fileConfiguration, times(1)).set("command_aliases.release", new String[]{"untame"});
 
         verify(this.fileConfiguration, times(1)).set("command_aliases.dogs", null);
         verify(this.fileConfiguration, times(1)).set("command_aliases.cats", null);
@@ -200,6 +202,7 @@ public class TPPConfigUpdaterTest {
         verify(this.fileConfiguration, times(1)).set("command_aliases.all", new String[]{"findall", "getall"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.position1", new String[]{"1", "pos1", "startpos", "start"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.position2", new String[]{"2", "pos2", "endpos", "end"});
+        verify(this.fileConfiguration, times(1)).set("command_aliases.release", new String[]{"untame"});
 
         verify(this.fileConfiguration, times(1)).set("command_aliases.dogs", null);
         verify(this.fileConfiguration, times(1)).set("command_aliases.cats", null);

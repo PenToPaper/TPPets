@@ -41,7 +41,7 @@ public class ListenerPlayerInteractPetRelease implements Listener {
                 return INSUFFICIENT_PERMISSIONS;
             }
 
-            if (!this.thisPlugin.getDatabase().removePet(pet)) {
+            if (!this.thisPlugin.getDatabase().removePet(pet.getUniqueId().toString())) {
                 return DB_FAIL;
             }
 

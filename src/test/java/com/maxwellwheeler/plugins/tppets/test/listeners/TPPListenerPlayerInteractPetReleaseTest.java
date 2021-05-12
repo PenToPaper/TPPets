@@ -58,7 +58,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
         when(itemStack.getType()).thenReturn(Material.SHEARS);
         when(this.tpPets.getToolsManager()).thenReturn(this.toolsManager);
         when(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS)).thenReturn(true);
-        when(this.sqlWrapper.removePet(this.horse)).thenReturn(true);
+        when(this.sqlWrapper.removePet("MockHorseId")).thenReturn(true);
     }
 
     @Test
@@ -66,7 +66,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     void releasesPet() throws SQLException {
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
@@ -83,7 +83,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
@@ -96,11 +96,11 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     void releasesStandablePet() throws SQLException {
         Wolf wolf = MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(wolf);
-        when(this.sqlWrapper.removePet(wolf)).thenReturn(true);
+        when(this.sqlWrapper.removePet("MockWolfId")).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(wolf);
+        verify(this.sqlWrapper, times(1)).removePet("MockWolfId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockWolfId");
         verify(wolf, times(1)).setSitting(false);
@@ -114,11 +114,11 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     void releasesSkeletonHorsePet() throws SQLException {
         SkeletonHorse skeletonHorse = MockFactory.getTamedMockEntity("MockSkeletonHorseId", SkeletonHorse.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(skeletonHorse);
-        when(this.sqlWrapper.removePet(skeletonHorse)).thenReturn(true);
+        when(this.sqlWrapper.removePet("MockSkeletonHorseId")).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(skeletonHorse);
+        verify(this.sqlWrapper, times(1)).removePet("MockSkeletonHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockSkeletonHorseId");
         verify(skeletonHorse, times(1)).setOwner(null);
@@ -131,11 +131,11 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     void releasesZombieHorsePet() throws SQLException {
         ZombieHorse zombieHorse = MockFactory.getTamedMockEntity("MockZombieHorseId", ZombieHorse.class, this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(zombieHorse);
-        when(this.sqlWrapper.removePet(zombieHorse)).thenReturn(true);
+        when(this.sqlWrapper.removePet("MockZombieHorseId")).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(zombieHorse);
+        verify(this.sqlWrapper, times(1)).removePet("MockZombieHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockZombieHorseId");
         verify(zombieHorse, times(1)).setOwner(null);
@@ -195,7 +195,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, never()).removePet(this.horse);
+        verify(this.sqlWrapper, never()).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "You can't release pets");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
@@ -211,7 +211,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
         verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
@@ -284,11 +284,11 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     @Test
     @DisplayName("Displays db fail if database fails")
     void displaysDbFailWhenDbFails() throws SQLException {
-        when(this.sqlWrapper.removePet(this.horse)).thenReturn(false);
+        when(this.sqlWrapper.removePet("MockHorseId")).thenReturn(false);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
-        verify(this.sqlWrapper, times(1)).removePet(this.horse);
+        verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not release pet");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());

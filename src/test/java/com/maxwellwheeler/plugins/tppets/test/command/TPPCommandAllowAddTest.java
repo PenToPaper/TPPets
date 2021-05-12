@@ -131,6 +131,8 @@ public class TPPCommandAllowAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             CommandSender sender = mock(CommandSender.class);
+            when(sender.hasPermission("tppets.allowguests")).thenReturn(true);
+            when(sender.hasPermission("tppets.allowother")).thenReturn(true);
 
             String[] args = {"allow", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
@@ -216,6 +218,7 @@ public class TPPCommandAllowAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             CommandSender sender = mock(CommandSender.class);
+            when(sender.hasPermission("tppets.allowguests")).thenReturn(true);
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
