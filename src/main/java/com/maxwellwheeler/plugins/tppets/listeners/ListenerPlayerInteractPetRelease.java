@@ -27,6 +27,10 @@ public class ListenerPlayerInteractPetRelease implements Listener {
 
     private EventStatus onPlayerReleasePet(PlayerInteractEntityEvent event) {
         try {
+            if (!this.thisPlugin.getAllowUntamingPets() && !event.getPlayer().hasPermission("tppets.untameother")) {
+                return NOT_ENABLED;
+            }
+
             if (!PetType.isPetTracked(event.getRightClicked())) {
                 return NO_OWNER;
             }
@@ -64,6 +68,9 @@ public class ListenerPlayerInteractPetRelease implements Listener {
                 break;
             case INSUFFICIENT_PERMISSIONS:
                 examiningPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that");
+                break;
+            case NOT_ENABLED:
+                examiningPlayer.sendMessage(ChatColor.RED + "You can't release pets");
                 break;
             default:
                 examiningPlayer.sendMessage(ChatColor.RED + "An unknown error occurred");

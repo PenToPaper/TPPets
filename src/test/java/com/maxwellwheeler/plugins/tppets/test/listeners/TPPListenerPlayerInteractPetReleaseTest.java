@@ -30,6 +30,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     private ToolsManager toolsManager;
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
+    private TPPets tpPets;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
@@ -38,15 +39,16 @@ public class TPPListenerPlayerInteractPetReleaseTest {
         this.logWrapper = mock(LogWrapper.class);
         this.toolsManager = mock(ToolsManager.class);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.player);
 
         EquipmentSlot playerHand = EquipmentSlot.HAND;
-        this.listenerPlayerInteractPetRelease = new ListenerPlayerInteractPetRelease(tpPets);
+        this.listenerPlayerInteractPetRelease = new ListenerPlayerInteractPetRelease(this.tpPets);
 
         PlayerInventory playerInventory = mock(PlayerInventory.class);
         ItemStack itemStack = mock(ItemStack.class);
 
+        when(this.tpPets.getAllowUntamingPets()).thenReturn(true);
         when(this.playerInteractEntityEvent.getHand()).thenReturn(playerHand);
         when(this.playerInteractEntityEvent.getPlayer()).thenReturn(this.player);
         when(this.playerInteractEntityEvent.getRightClicked()).thenReturn(this.horse);
@@ -54,7 +56,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
         when(this.player.getInventory()).thenReturn(playerInventory);
         when(playerInventory.getItemInMainHand()).thenReturn(itemStack);
         when(itemStack.getType()).thenReturn(Material.SHEARS);
-        when(tpPets.getToolsManager()).thenReturn(this.toolsManager);
+        when(this.tpPets.getToolsManager()).thenReturn(this.toolsManager);
         when(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS)).thenReturn(true);
         when(this.sqlWrapper.removePet(this.horse)).thenReturn(true);
     }
@@ -184,6 +186,37 @@ public class TPPListenerPlayerInteractPetReleaseTest {
         verify(this.horse, never()).setOwner(any());
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
+    }
+
+    @Test
+    @DisplayName("Doesn't allow releasing pets if config option set")
+    void doesNotReleasePetsNoConfigOption() throws SQLException {
+        when(this.tpPets.getAllowUntamingPets()).thenReturn(false);
+
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+
+        verify(this.sqlWrapper, never()).removePet(this.horse);
+        verify(this.player, times(1)).sendMessage(ChatColor.RED + "You can't release pets");
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
+        verify(this.horse, never()).setOwner(any());
+        verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.playerInteractEntityEvent, never()).setCancelled(anyBoolean());
+    }
+
+    @Test
+    @DisplayName("Allows overriding config option with tppets.untameother")
+    void releasesOverridingConfigOption() throws SQLException {
+        when(this.player.hasPermission("tppets.untameother")).thenReturn(true);
+        when(this.tpPets.getAllowUntamingPets()).thenReturn(false);
+
+        this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
+
+        verify(this.sqlWrapper, times(1)).removePet(this.horse);
+        verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
+        verify(this.horse, times(1)).setOwner(null);
+        verify(this.horse, times(1)).setTamed(false);
+        verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
     }
 
     @Test
