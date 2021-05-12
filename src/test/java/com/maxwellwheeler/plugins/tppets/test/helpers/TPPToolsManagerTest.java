@@ -23,14 +23,14 @@ public class TPPToolsManagerTest {
         this.configurationSection = mock(ConfigurationSection.class);
 
         Set<String> toolsConfigKeys = new HashSet<>();
-        toolsConfigKeys.add("untame_pets");
+        toolsConfigKeys.add("release_pets");
         toolsConfigKeys.add("get_owner");
 
-        List<String> untamePets = Arrays.asList("SHEARS", "APPLE");
+        List<String> releasePets = Arrays.asList("SHEARS", "APPLE");
         List<String> getOwner = Arrays.asList("BONE", "BAMBOO");
 
         when(this.configurationSection.getKeys(false)).thenReturn(toolsConfigKeys);
-        when(this.configurationSection.getStringList("untame_pets")).thenReturn(untamePets);
+        when(this.configurationSection.getStringList("release_pets")).thenReturn(releasePets);
         when(this.configurationSection.getStringList("get_owner")).thenReturn(getOwner);
 
         this.toolsManager = new ToolsManager(this.configurationSection);
@@ -39,9 +39,9 @@ public class TPPToolsManagerTest {
     @Test
     @DisplayName("Initializes correct tool table")
     void initializesToolTable() {
-        assertTrue(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS));
-        assertTrue(this.toolsManager.isMaterialValidTool("untame_pets", Material.APPLE));
-        assertFalse(this.toolsManager.isMaterialValidTool("untame_pets", Material.BELL));
+        assertTrue(this.toolsManager.isMaterialValidTool("release_pets", Material.SHEARS));
+        assertTrue(this.toolsManager.isMaterialValidTool("release_pets", Material.APPLE));
+        assertFalse(this.toolsManager.isMaterialValidTool("release_pets", Material.BELL));
         assertTrue(this.toolsManager.isMaterialValidTool("get_owner", Material.BONE));
         assertTrue(this.toolsManager.isMaterialValidTool("get_owner", Material.BAMBOO));
         assertFalse(this.toolsManager.isMaterialValidTool("get_owner", Material.BELL));
@@ -50,13 +50,13 @@ public class TPPToolsManagerTest {
     @Test
     @DisplayName("Doesn't attempt to initialize invalid materials")
     void doesntInitializeInvalidMaterials() {
-        List<String> untamePets = Arrays.asList("INVALIDMATERIAL", "OTHERINVALIDMATERIAL", "APPLE");
+        List<String> releasePets = Arrays.asList("INVALIDMATERIAL", "OTHERINVALIDMATERIAL", "APPLE");
 
-        when(this.configurationSection.getStringList("untame_pets")).thenReturn(untamePets);
+        when(this.configurationSection.getStringList("release_pets")).thenReturn(releasePets);
 
         this.toolsManager = new ToolsManager(this.configurationSection);
 
-        assertTrue(this.toolsManager.isMaterialValidTool("untame_pets", Material.APPLE));
+        assertTrue(this.toolsManager.isMaterialValidTool("release_pets", Material.APPLE));
     }
 
     @Test

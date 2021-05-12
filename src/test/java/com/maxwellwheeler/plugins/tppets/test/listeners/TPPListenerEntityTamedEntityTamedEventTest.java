@@ -311,7 +311,7 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
         Wolf wolf = MockFactory.getTamedMockEntity("MockWolfId", Wolf.class, this.owner);
         when(entityTameEvent.getEntity()).thenReturn(wolf);
 
-        // Causes error and for pet to untame
+        // Causes error and for pet to release
         when(this.sqlWrapper.generateUniquePetName("MockPlayerId", PetType.Pets.DOG)).thenReturn("MockDogName");
         when(this.sqlWrapper.insertPet(wolf, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
@@ -328,13 +328,13 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     }
 
     @Test
-    @DisplayName("Doesn't untame skeleton horses")
+    @DisplayName("Doesn't release skeleton horses")
     void entityTamingDoesntUntameSkeletonHorse() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
         SkeletonHorse skeletonHorse = MockFactory.getTamedMockEntity("MockHorseId", SkeletonHorse.class, this.owner);
         when(entityTameEvent.getEntity()).thenReturn(skeletonHorse);
 
-        // Causes error and for pet to untame
+        // Causes error and for pet to release
         when(this.sqlWrapper.insertPet(skeletonHorse, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);
@@ -349,13 +349,13 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
     }
 
     @Test
-    @DisplayName("Doesn't untame zombie horses")
-    void entityTamingDoesntUntameZombieHorse() throws SQLException {
+    @DisplayName("Doesn't release zombie horses")
+    void entityTamingDoesNotReleaseZombieHorse() throws SQLException {
         EntityTameEvent entityTameEvent = getEntityTameEvent();
         ZombieHorse zombieHorse = MockFactory.getTamedMockEntity("MockHorseId", ZombieHorse.class, this.owner);
         when(entityTameEvent.getEntity()).thenReturn(zombieHorse);
 
-        // Causes error and for pet to untame
+        // Causes error and for pet to release
         when(this.sqlWrapper.insertPet(zombieHorse, "MockPlayerId", "MockHorseName")).thenThrow(new SQLException());
 
         this.listenerEntityTamed.onEntityTameEvent(entityTameEvent);

@@ -27,7 +27,7 @@ public class ListenerPlayerInteractPetRelease implements Listener {
 
     private EventStatus onPlayerReleasePet(PlayerInteractEntityEvent event) {
         try {
-            if (!this.thisPlugin.getAllowUntamingPets() && !event.getPlayer().hasPermission("tppets.untameother")) {
+            if (!this.thisPlugin.getAllowUntamingPets() && !event.getPlayer().hasPermission("tppets.releaseother")) {
                 return NOT_ENABLED;
             }
 
@@ -47,7 +47,7 @@ public class ListenerPlayerInteractPetRelease implements Listener {
 
             releasePetEntity(pet);
             event.setCancelled(true);
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + event.getPlayer().getName() + " untamed entity " + event.getRightClicked().getUniqueId().toString());
+            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + event.getPlayer().getName() + " released entity " + event.getRightClicked().getUniqueId().toString());
             return SUCCESS;
 
         } catch (SQLException exception) {
@@ -87,11 +87,11 @@ public class ListenerPlayerInteractPetRelease implements Listener {
     }
 
     private boolean isPetReleaseEvent(PlayerInteractEntityEvent event) {
-        return event.getHand().equals(EquipmentSlot.HAND) && event.getPlayer().isSneaking() && this.thisPlugin.getToolsManager().isMaterialValidTool("untame_pets", event.getPlayer().getInventory().getItemInMainHand().getType());
+        return event.getHand().equals(EquipmentSlot.HAND) && event.getPlayer().isSneaking() && this.thisPlugin.getToolsManager().isMaterialValidTool("release_pets", event.getPlayer().getInventory().getItemInMainHand().getType());
     }
 
     private boolean doesPlayerHavePermissionToRelease(Player releasingPlayer, Tameable pet) {
-        return releasingPlayer.equals(pet.getOwner()) || releasingPlayer.hasPermission("tppets.untameother");
+        return releasingPlayer.equals(pet.getOwner()) || releasingPlayer.hasPermission("tppets.releaseother");
     }
 
     @EventHandler(priority= EventPriority.LOW)

@@ -98,11 +98,11 @@ public class ConfigUpdater {
     }
 
     private void threeToFourIntelligentlyUpdateProtectPetsFrom() {
-        List<?> oldProtectPetsFrom = this.thisPlugin.getConfig().getList("protect_pets_from");
+        List<String> oldProtectPetsFrom = this.thisPlugin.getConfig().getStringList("protect_pets_from");
         List<String> newProtectPetsFrom = new ArrayList<>();
         String[] defaultProtectPetsFrom = new String[] {"GuestDamage", "StrangerDamage", "OwnerDamage", "EnvironmentalDamage", "MobDamage"};
 
-        if (oldProtectPetsFrom == null) {
+        if (oldProtectPetsFrom.size() == 0) {
             this.thisPlugin.getConfig().set("protect_pets_from", defaultProtectPetsFrom);
             return;
         }
@@ -121,11 +121,21 @@ public class ConfigUpdater {
         this.thisPlugin.getConfig().set("protect_pets_from", newProtectPetsFrom);
     }
 
+    private void threeToFourIntelligentlyUpdateReleaseTool() {
+        List<String> oldReleaseTools = this.thisPlugin.getConfig().getStringList("tools.untame_pets");
+        if (oldReleaseTools.size() == 0) {
+            this.thisPlugin.getConfig().set("tools.release_pets", new String[]{"SHEARS"});
+        } else {
+            this.thisPlugin.getConfig().set("tools.release_pets", oldReleaseTools.toArray());
+        }
+    }
+
     /**
      * Updates the schema from three to four
      */
     private void threeToFour() {
         threeToFourIntelligentlyUpdateProtectPetsFrom();
+        threeToFourIntelligentlyUpdateReleaseTool();
 
         this.thisPlugin.getConfig().set("tools.select_region", new String[]{"BLAZE_ROD"});
         this.thisPlugin.getConfig().set("command_aliases.tp", new String[]{"teleport", "find", "get"});

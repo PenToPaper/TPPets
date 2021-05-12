@@ -19,10 +19,10 @@ permissions:
     default: op
     children:
       tppets.mountother: true
-      tppets.renameall: true
+      tppets.renameother: true
       tppets.allowother: true
       tppets.teleportother: true
-      tppets.untameall: true
+      tppets.untameother: true
       tppets.bypassprotection: true
       tppets.bypasslimit: true
       tppets.tpanywhere: true
@@ -68,9 +68,9 @@ permissions:
   tppets.teleportother:
     default: op
     description: Allows user to teleport pets owned by someone else to their location.
-  tppets.untameother:
+  tppets.releaseother:
     default: op
-    description: Allows user to untame pets that they don't own.
+    description: Allows user to release pets that they don't own.
   tppets.bypassprotection:
     default: op
     description: Allows user to damage pets that they don't own.

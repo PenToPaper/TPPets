@@ -16,7 +16,7 @@ public class ListenerPetPosition implements Listener {
         this.thisPlugin = thisPlugin;
     }
 
-    // Doesn't untame pets that the player currently owns, as that would be mean
+    // Doesn't release pets that the player currently owns, as that would be mean
     @EventHandler(priority= EventPriority.MONITOR)
     public void onChunkUnload(ChunkUnloadEvent event) {
         for (Entity entity : event.getChunk().getEntities()) {

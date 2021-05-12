@@ -57,7 +57,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
         when(playerInventory.getItemInMainHand()).thenReturn(itemStack);
         when(itemStack.getType()).thenReturn(Material.SHEARS);
         when(this.tpPets.getToolsManager()).thenReturn(this.toolsManager);
-        when(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS)).thenReturn(true);
+        when(this.toolsManager.isMaterialValidTool("release_pets", Material.SHEARS)).thenReturn(true);
         when(this.sqlWrapper.removePet("MockHorseId")).thenReturn(true);
     }
 
@@ -68,24 +68,24 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
     }
 
     @Test
-    @DisplayName("Releases pet with tppets.untameother")
+    @DisplayName("Releases pet with tppets.releaseother")
     void releasesPetUntameOther() throws SQLException {
         OfflinePlayer offlinePlayer = mock(OfflinePlayer.class);
         when(this.horse.getOwner()).thenReturn(offlinePlayer);
-        when(this.player.hasPermission("tppets.untameother")).thenReturn(true);
+        when(this.player.hasPermission("tppets.releaseother")).thenReturn(true);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -102,7 +102,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockWolfId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockWolfId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockWolfId");
         verify(wolf, times(1)).setSitting(false);
         verify(wolf, times(1)).setOwner(null);
         verify(wolf, times(1)).setTamed(false);
@@ -120,7 +120,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockSkeletonHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockSkeletonHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockSkeletonHorseId");
         verify(skeletonHorse, times(1)).setOwner(null);
         verify(skeletonHorse, never()).setTamed(anyBoolean());
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -137,7 +137,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockZombieHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockZombieHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockZombieHorseId");
         verify(zombieHorse, times(1)).setOwner(null);
         verify(zombieHorse, never()).setTamed(anyBoolean());
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -176,7 +176,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     @Test
     @DisplayName("Doesn't attempt to release pet if player isn't clicking with the correct material")
     void doesNotAttemptToReleaseInvalidMaterial() throws SQLException {
-        when(this.toolsManager.isMaterialValidTool("untame_pets", Material.SHEARS)).thenReturn(false);
+        when(this.toolsManager.isMaterialValidTool("release_pets", Material.SHEARS)).thenReturn(false);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
@@ -204,16 +204,16 @@ public class TPPListenerPlayerInteractPetReleaseTest {
     }
 
     @Test
-    @DisplayName("Allows overriding config option with tppets.untameother")
+    @DisplayName("Allows overriding config option with tppets.releaseother")
     void releasesOverridingConfigOption() throws SQLException {
-        when(this.player.hasPermission("tppets.untameother")).thenReturn(true);
+        when(this.player.hasPermission("tppets.releaseother")).thenReturn(true);
         when(this.tpPets.getAllowUntamingPets()).thenReturn(false);
 
         this.listenerPlayerInteractPetRelease.onPlayerInteractEntity(this.playerInteractEntityEvent);
 
         verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName untamed entity MockHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);

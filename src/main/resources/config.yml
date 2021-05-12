@@ -11,7 +11,7 @@ llama_limit: -1
 donkey_limit: -1
 storage_limit: 5
 tools:
-  untame_pets: [SHEARS]
+  release_pets: [SHEARS]
   get_owner: [BONE]
   select_region: [BLAZE_ROD]
 command_aliases:

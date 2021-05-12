@@ -24,12 +24,12 @@ public class CommandRelease extends BaseCommand {
     }
 
     private boolean isValidSyntax() {
-        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.untameother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.releaseother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
     private void processCommandGeneric() {
         try {
-            if (!this.thisPlugin.getAllowUntamingPets() && !this.sender.hasPermission("tppets.untameother")) {
+            if (!this.thisPlugin.getAllowUntamingPets() && !this.sender.hasPermission("tppets.releaseother")) {
                 this.commandStatus = CommandStatus.NOT_ENABLED;
                 return;
             }

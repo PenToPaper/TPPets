@@ -34,7 +34,7 @@ public class TPPCommandReleaseTest {
     @BeforeEach
     public void beforeEach() throws SQLException {
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.dogs"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.dogs", "tppets.untameother"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.dogs", "tppets.releaseother"});
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
@@ -102,10 +102,10 @@ public class TPPCommandReleaseTest {
     }
 
     @Test
-    @DisplayName("Can release pet when not enabled if player has tppets.untameother")
+    @DisplayName("Can release pet when not enabled if player has tppets.releaseother")
     void overridesConfigWithPermission() throws SQLException {
         when(this.tpPets.getAllowUntamingPets()).thenReturn(false);
-        when(this.player.hasPermission("tppets.untameother")).thenReturn(true);
+        when(this.player.hasPermission("tppets.releaseother")).thenReturn(true);
 
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -199,7 +199,7 @@ public class TPPCommandReleaseTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             CommandSender sender = mock(CommandSender.class);
             when(sender.hasPermission("tppets.dogs")).thenReturn(true);
-            when(sender.hasPermission("tppets.untameother")).thenReturn(true);
+            when(sender.hasPermission("tppets.releaseother")).thenReturn(true);
 
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
@@ -216,7 +216,7 @@ public class TPPCommandReleaseTest {
     @DisplayName("Admin cannot release pet insufficient permissions")
     void adminCannotReleasePetInsufficientPermissions() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
-            when(this.admin.hasPermission("tppets.untameother")).thenReturn(false);
+            when(this.admin.hasPermission("tppets.releaseother")).thenReturn(false);
 
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 

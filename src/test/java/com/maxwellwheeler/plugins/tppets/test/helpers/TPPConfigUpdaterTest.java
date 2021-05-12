@@ -13,6 +13,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +42,12 @@ public class TPPConfigUpdaterTest {
         when(this.tpPets.getConfig()).thenReturn(this.fileConfiguration);
 
         when(this.fileConfiguration.getInt("schema_version", 1)).thenReturn(1);
-        doReturn(Arrays.asList("PlayerDamage", "OwnerDamage", "EnvironmentalDamage", "MobDamage")).when(this.fileConfiguration).getList("protect_pets_from");
+
+        List<String> protectList = Arrays.asList("PlayerDamage", "OwnerDamage", "EnvironmentalDamage", "MobDamage");
+        when(this.fileConfiguration.getStringList("protect_pets_from")).thenReturn(protectList);
+
+        List<String> releaseTools = Arrays.asList("APPLE", "BELL");
+        when(this.fileConfiguration.getStringList("tools.untame_pets")).thenReturn(releaseTools);
 
         this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
     }
@@ -85,6 +91,7 @@ public class TPPConfigUpdaterTest {
 
         // 3 to 4
         verify(this.fileConfiguration, times(1)).set("tools.select_region", new String[]{"BLAZE_ROD"});
+        verify(this.fileConfiguration, times(1)).set("tools.release_pets", new String[]{"APPLE", "BELL"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.tp", new String[]{"teleport", "find", "get"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.allowed", new String[]{"permitted", "guests", "guest", "g"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.all", new String[]{"findall", "getall"});
@@ -141,6 +148,7 @@ public class TPPConfigUpdaterTest {
 
         // 3 to 4
         verify(this.fileConfiguration, times(1)).set("tools.select_region", new String[]{"BLAZE_ROD"});
+        verify(this.fileConfiguration, times(1)).set("tools.release_pets", new String[]{"APPLE", "BELL"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.tp", new String[]{"teleport", "find", "get"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.allowed", new String[]{"permitted", "guests", "guest", "g"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.all", new String[]{"findall", "getall"});
@@ -197,6 +205,7 @@ public class TPPConfigUpdaterTest {
 
         // 3 to 4
         verify(this.fileConfiguration, times(1)).set("tools.select_region", new String[]{"BLAZE_ROD"});
+        verify(this.fileConfiguration, times(1)).set("tools.release_pets", new String[]{"APPLE", "BELL"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.tp", new String[]{"teleport", "find", "get"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.allowed", new String[]{"permitted", "guests", "guest", "g"});
         verify(this.fileConfiguration, times(1)).set("command_aliases.all", new String[]{"findall", "getall"});
@@ -221,7 +230,7 @@ public class TPPConfigUpdaterTest {
     @DisplayName("Updates from 3 to 4 assign protect_pets_from based on previous value of OwnerDamage")
     void threeToFourOwnerDamage() {
         when(this.fileConfiguration.getInt("schema_version", 1)).thenReturn(3);
-        doReturn(Collections.singletonList("OwnerDamage")).when(this.fileConfiguration).getList("protect_pets_from");
+        when(this.fileConfiguration.getStringList("protect_pets_from")).thenReturn(Collections.singletonList("OwnerDamage"));
 
         this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
 
@@ -237,7 +246,7 @@ public class TPPConfigUpdaterTest {
     @DisplayName("Updates from 3 to 4 assign protect_pets_from based on previous value of EnvironmentalDamage")
     void threeToFourEnvironmentalDamage() {
         when(this.fileConfiguration.getInt("schema_version", 1)).thenReturn(3);
-        doReturn(Collections.singletonList("EnvironmentalDamage")).when(this.fileConfiguration).getList("protect_pets_from");
+        when(this.fileConfiguration.getStringList("protect_pets_from")).thenReturn(Collections.singletonList("EnvironmentalDamage"));
 
         this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
 
@@ -253,7 +262,7 @@ public class TPPConfigUpdaterTest {
     @DisplayName("Updates from 3 to 4 assign protect_pets_from based on previous value of MobDamage")
     void threeToFourMobDamage() {
         when(this.fileConfiguration.getInt("schema_version", 1)).thenReturn(3);
-        doReturn(Collections.singletonList("MobDamage")).when(this.fileConfiguration).getList("protect_pets_from");
+        when(this.fileConfiguration.getStringList("protect_pets_from")).thenReturn(Collections.singletonList("MobDamage"));
 
         this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
 
@@ -269,7 +278,7 @@ public class TPPConfigUpdaterTest {
     @DisplayName("Updates from 3 to 4 assign protect_pets_from based on previous value of PlayerDamage")
     void threeToFourPlayerDamage() {
         when(this.fileConfiguration.getInt("schema_version", 1)).thenReturn(3);
-        doReturn(Collections.singletonList("PlayerDamage")).when(this.fileConfiguration).getList("protect_pets_from");
+        when(this.fileConfiguration.getStringList("protect_pets_from")).thenReturn(Collections.singletonList("PlayerDamage"));
 
         this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
 
@@ -283,14 +292,27 @@ public class TPPConfigUpdaterTest {
 
     @Test
     @DisplayName("Updates from 3 to 4 assign protect_pets_from if value missing entirely")
-    void threeToFourNoPrevValue() {
+    void threeToFourNoProtectPetsPrevValue() {
         when(this.fileConfiguration.getInt("schema_version", 1)).thenReturn(3);
-        doReturn(null).when(this.fileConfiguration).getList("protect_pets_from");
+        when(this.fileConfiguration.getStringList("protect_pets_from")).thenReturn(new ArrayList<>());
 
         this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
 
         this.configUpdater.update();
 
         verify(this.fileConfiguration, times(1)).set("protect_pets_from", new String[]{"GuestDamage", "StrangerDamage", "OwnerDamage", "EnvironmentalDamage", "MobDamage"});
+    }
+
+    @Test
+    @DisplayName("Updates from 3 to 4 assign tools.release_pets if value missing entirely")
+    void threeToFourNoReleaseToolPrevValue() {
+        when(this.fileConfiguration.getInt("schema_version", 1)).thenReturn(3);
+        when(this.fileConfiguration.getStringList("tools.untame_pets")).thenReturn(new ArrayList<>());
+
+        this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
+
+        this.configUpdater.update();
+
+        verify(this.fileConfiguration, times(1)).set("tools.release_pets", new String[]{"SHEARS"});
     }
 }
