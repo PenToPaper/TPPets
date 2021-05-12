@@ -26,7 +26,7 @@ public class TPPSQLWrapperInitializeTableTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.dbUpdater = mock(DBUpdater.class);
         this.connection = mock(Connection.class);
         this.statement = mock(Statement.class);

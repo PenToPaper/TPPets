@@ -26,7 +26,7 @@ public class TPPPetLimitCheckerTest {
     public void beforeEach() throws SQLException {
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false);
         this.petLimitChecker = new PetLimitChecker(this.tpPets, 2, 1, 1, 1, 1, 1, 1, 3);
         this.owner = MockFactory.getMockOfflinePlayer("MockPlayerId", "MockPlayerName");
 

@@ -28,7 +28,7 @@ public class TPPSQLiteWrapperTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
 
         this.sqLiteWrapper = mock(SQLiteWrapper.class, withSettings().useConstructor("DbPath", "DbName", this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
 

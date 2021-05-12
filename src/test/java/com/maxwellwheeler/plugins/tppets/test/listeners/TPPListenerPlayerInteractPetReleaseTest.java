@@ -38,7 +38,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
         this.logWrapper = mock(LogWrapper.class);
         this.toolsManager = mock(ToolsManager.class);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.player);
 
         EquipmentSlot playerHand = EquipmentSlot.HAND;

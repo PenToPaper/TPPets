@@ -44,7 +44,7 @@ public class TPPCommandAllowListTest {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.allowguests", "tppets.allowother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.sqlWrapper = mock(SQLWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, null, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, null, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("allowed");

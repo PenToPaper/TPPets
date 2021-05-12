@@ -39,7 +39,7 @@ public class TPPCommandProtectedListTest {
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("protected");

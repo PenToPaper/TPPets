@@ -30,7 +30,7 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.getAllPetsStatement = mock(PreparedStatement.class);
         this.isNameUniqueStatement = mock(PreparedStatement.class);

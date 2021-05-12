@@ -30,7 +30,7 @@ public class TPPSQLWrapperInsertOrUpdatePetLocationTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         Connection connection = mock(Connection.class);
 
         OfflinePlayer owner = MockFactory.getMockOfflinePlayer("Mock-Owner-Id", "MockOwnerName");

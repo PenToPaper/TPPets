@@ -35,7 +35,7 @@ public class TPPConfigUpdaterTest {
 
         LogWrapper logWrapper = mock(LogWrapper.class);
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.fileConfiguration = mock(FileConfiguration.class);
 
         when(this.tpPets.getConfig()).thenReturn(this.fileConfiguration);

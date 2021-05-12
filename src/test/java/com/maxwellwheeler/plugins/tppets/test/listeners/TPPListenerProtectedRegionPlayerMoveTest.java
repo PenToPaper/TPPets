@@ -48,7 +48,7 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.playerMoveEvent = mock(PlayerMoveEvent.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
         this.protectedRegion = MockFactory.getProtectedRegion("ProtectedRegionName", "Enter Message", "MockWorldName", world, 100, 200, 300, 400, 500, 600, "LostAndFoundRegionName", lostAndFoundRegion);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", world, this.playerLocation, new String[]{});
         this.playerMoveListenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);

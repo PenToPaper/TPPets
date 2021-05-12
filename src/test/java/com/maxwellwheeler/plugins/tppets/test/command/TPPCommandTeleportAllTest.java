@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
@@ -46,6 +47,7 @@ public class TPPCommandTeleportAllTest {
     private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
+    private ProtectedRegionManager protectedRegionManager;
 
     @BeforeEach
     public void beforeEach() {
@@ -63,7 +65,10 @@ public class TPPCommandTeleportAllTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
+        this.protectedRegionManager = mock(ProtectedRegionManager.class);
+        when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(true);
+        when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
         this.command = mock(Command.class);
     }
 
@@ -181,7 +186,7 @@ public class TPPCommandTeleportAllTest {
             this.setAliases();
 
             // Permissions modifications
-            when(this.tpPets.canTpThere(any(Player.class), any(Location.class))).thenReturn(false);
+            when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(false);
 
             // Command object
             String[] args = {"all", "horse"};

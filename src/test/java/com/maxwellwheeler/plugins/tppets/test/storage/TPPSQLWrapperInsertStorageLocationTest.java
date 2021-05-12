@@ -33,7 +33,7 @@ public class TPPSQLWrapperInsertStorageLocationTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.world = mock(World.class);

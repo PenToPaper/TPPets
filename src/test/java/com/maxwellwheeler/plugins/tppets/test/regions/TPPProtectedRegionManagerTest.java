@@ -10,6 +10,7 @@ import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ public class TPPProtectedRegionManagerTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.world = mock(World.class);
 
         this.lostRegionManager = mock(LostRegionManager.class);
@@ -97,6 +98,30 @@ public class TPPProtectedRegionManagerTest {
         assertNull(this.protectedRegionManager.getProtectedRegionAt(new Location(this.world, 99, 200, 300)));
         assertNull(this.protectedRegionManager.getProtectedRegionAt(new Location(this.world, 100, 199, 300)));
         assertNull(this.protectedRegionManager.getProtectedRegionAt(new Location(this.world, 100, 200, 299)));
+    }
+
+    @Test
+    @DisplayName("ProtectedRegionManager canTpThere returns correctly and sends enter message to the player")
+    void protectedRegionManagerCanTpThere() {
+        Player player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
+        Player admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.tpanywhere"});
+
+        // In protected region
+        assertFalse(this.protectedRegionManager.canTpThere(player, new Location(this.world, 101, 201, 301)));
+        assertFalse(this.protectedRegionManager.canTpThere(player, new Location(this.world, 199, 299, 399)));
+
+        // On region border
+        assertFalse(this.protectedRegionManager.canTpThere(player, new Location(this.world, 100, 200, 300)));
+        assertFalse(this.protectedRegionManager.canTpThere(player, new Location(this.world, 200, 300, 400)));
+
+        // Not in region
+        assertTrue(this.protectedRegionManager.canTpThere(player, new Location(this.world, 99, 200, 300)));
+        assertTrue(this.protectedRegionManager.canTpThere(player, new Location(this.world, 100, 199, 300)));
+        assertTrue(this.protectedRegionManager.canTpThere(player, new Location(this.world, 100, 200, 299)));
+
+        // In region, but with permission
+        assertTrue(this.protectedRegionManager.canTpThere(admin, new Location(this.world, 101, 201, 301)));
+        assertTrue(this.protectedRegionManager.canTpThere(admin, new Location(this.world, 199, 299, 399)));
     }
 
     @Test

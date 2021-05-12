@@ -39,7 +39,7 @@ public class TPPListenerPetAccessInventoryClickTest {
 
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.thisPlugin = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, true, false, false);
+        this.thisPlugin = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
 
         when(this.player.hasPermission("tppets.mountother")).thenReturn(false);
 

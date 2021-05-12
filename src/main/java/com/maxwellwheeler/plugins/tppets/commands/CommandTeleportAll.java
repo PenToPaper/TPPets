@@ -65,7 +65,7 @@ public class CommandTeleportAll extends TeleportCommand {
                 return;
             }
 
-            if (!this.thisPlugin.canTpThere(this.sender, this.sender.getLocation())) {
+            if (!this.thisPlugin.getProtectedRegionManager().canTpThere(this.sender, this.sender.getLocation())) {
                 this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
                 return;
             }

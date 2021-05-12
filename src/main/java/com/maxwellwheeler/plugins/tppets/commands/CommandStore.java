@@ -79,7 +79,7 @@ class CommandStore extends TeleportCommand {
                 return;
             }
 
-            if (!this.thisPlugin.canTpThere(this.sender, storageLocation.getLoc())) {
+            if (!this.thisPlugin.getProtectedRegionManager().canTpThere(this.sender, storageLocation.getLoc())) {
                 this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
                 return;
             }

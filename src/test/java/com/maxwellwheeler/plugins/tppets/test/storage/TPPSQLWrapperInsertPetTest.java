@@ -36,7 +36,7 @@ public class TPPSQLWrapperInsertPetTest {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
         World world = mock(World.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.stringCaptor = ArgumentCaptor.forClass(String.class);

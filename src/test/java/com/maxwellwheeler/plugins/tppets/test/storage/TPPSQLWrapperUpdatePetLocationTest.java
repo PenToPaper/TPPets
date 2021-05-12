@@ -38,7 +38,7 @@ public class TPPSQLWrapperUpdatePetLocationTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         World world = mock(World.class);
         OfflinePlayer owner = MockFactory.getMockOfflinePlayer("Mock-Owner-Id", "MockOwnerName");
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.stringCaptor = ArgumentCaptor.forClass(String.class);

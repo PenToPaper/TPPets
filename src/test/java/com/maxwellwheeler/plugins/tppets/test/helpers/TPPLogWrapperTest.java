@@ -21,7 +21,7 @@ public class TPPLogWrapperTest {
     @BeforeEach
     public void beforeEach() {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, null, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, null, false, false);
         this.logWrapperEnabled = new LogWrapper(tpPets, true, true, true, true, true);
         this.logWrapperDisabled = new LogWrapper(tpPets, false, false, false, false, false);
         this.logger = mock(Logger.class);

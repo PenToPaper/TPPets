@@ -13,7 +13,6 @@ import org.bukkit.entity.Tameable;
 
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -50,10 +49,9 @@ public class MockFactory {
         return loc;
     }
 
-    public static TPPets getMockPlugin(SQLWrapper sqlWrapper, LogWrapper logWrapper, boolean canTpThere, boolean allowTpBetweenWorlds, boolean isAllowedToPet) {
+    public static TPPets getMockPlugin(SQLWrapper sqlWrapper, LogWrapper logWrapper, boolean allowTpBetweenWorlds, boolean isAllowedToPet) {
         TPPets tpPets = mock(TPPets.class);
         when(tpPets.getDatabase()).thenReturn(sqlWrapper);
-        when(tpPets.canTpThere(any(Player.class), any(Location.class))).thenReturn(canTpThere);
         when(tpPets.getAllowTpBetweenWorlds()).thenReturn(allowTpBetweenWorlds);
         if (logWrapper != null) {
             when(tpPets.getLogWrapper()).thenReturn(logWrapper);

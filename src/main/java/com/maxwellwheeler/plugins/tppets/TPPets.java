@@ -4,15 +4,12 @@ import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.*;
 import com.maxwellwheeler.plugins.tppets.listeners.*;
 import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
-import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.RegionSelectionManager;
 import com.maxwellwheeler.plugins.tppets.storage.*;
 import net.milkbowl.vault.permission.Permission;
-import org.bukkit.Location;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -268,16 +265,6 @@ public class TPPets extends JavaPlugin {
         String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
         String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
         return this.getAllowedPlayers().containsKey(trimmedPetUUID) && this.getAllowedPlayers().get(trimmedPetUUID).contains(trimmedPlayerUUID);
-    }
-
-    // TODO: MOVE TO PERMISSION CHECKER
-    public boolean canTpThere(Player pl, Location location) {
-        ProtectedRegion tempPr = this.protectedRegionManager.getProtectedRegionAt(pl.getLocation());
-        boolean ret = pl.hasPermission("tppets.tpanywhere") || tempPr == null;
-        if (!ret) {
-            pl.sendMessage(tempPr.getEnterMessage());
-        }
-        return ret;
     }
 
     /*

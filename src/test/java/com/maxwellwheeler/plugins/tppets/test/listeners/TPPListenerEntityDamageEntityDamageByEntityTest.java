@@ -43,7 +43,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
 
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
 
         this.listenerEntityDamage = new ListenerEntityDamage(this.tpPets);
 

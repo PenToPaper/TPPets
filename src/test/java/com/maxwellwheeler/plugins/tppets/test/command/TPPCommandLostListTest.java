@@ -38,7 +38,7 @@ public class TPPCommandLostListTest {
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, true);
         this.lostRegionManager = mock(LostRegionManager.class);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();

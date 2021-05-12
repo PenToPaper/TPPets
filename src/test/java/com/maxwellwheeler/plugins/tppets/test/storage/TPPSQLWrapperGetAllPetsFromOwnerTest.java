@@ -29,7 +29,7 @@ public class TPPSQLWrapperGetAllPetsFromOwnerTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.resultSet = mock(ResultSet.class);

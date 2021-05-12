@@ -42,7 +42,7 @@ public class TPPListenerPetPositionTest {
         this.sqlWrapper = mock(SQLWrapper.class);
 
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
 
         this.listenerPetPosition = new ListenerPetPosition(tpPets);
         this.chunkUnloadEvent = mock(ChunkUnloadEvent.class);

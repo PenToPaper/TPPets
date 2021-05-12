@@ -34,7 +34,7 @@ public class TPPListenerPetAccessEntityMountTest {
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", org.bukkit.entity.Horse.class, this.owner);
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
         this.listenerPetAccess = new ListenerPetAccess(tpPets);
 
         when(tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);

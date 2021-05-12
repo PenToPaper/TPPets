@@ -4,6 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -34,6 +35,7 @@ public class TPPCommandStorageAddTest {
     private ArgumentCaptor<String> messageCaptor;
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
+    private ProtectedRegionManager protectedRegionManager;
     private ArgumentCaptor<String> logCaptor;
     private TPPets tpPets;
     private Command command;
@@ -50,7 +52,10 @@ public class TPPCommandStorageAddTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false,true);
+        this.protectedRegionManager = mock(ProtectedRegionManager.class);
+        when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(true);
+        when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
@@ -148,7 +153,7 @@ public class TPPCommandStorageAddTest {
     @Test
     @DisplayName("Can't add storage locations when you can't teleport pets there")
     void cannotAddStorageLocationCantTpThere() throws SQLException {
-        when(this.tpPets.canTpThere(this.player, this.playerLocation)).thenReturn(false);
+        when(this.protectedRegionManager.canTpThere(this.player, this.playerLocation)).thenReturn(false);
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);

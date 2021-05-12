@@ -26,7 +26,7 @@ public class TPPMySQLWrapperTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
 
         this.mySQLWrapper = new MySQLWrapper("111.111.111.111", 10, "TPPets", "Username", "Password", this.tpPets);
     }

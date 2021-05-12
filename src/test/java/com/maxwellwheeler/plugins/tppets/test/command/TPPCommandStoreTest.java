@@ -4,6 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
@@ -41,6 +42,7 @@ public class TPPCommandStoreTest {
     private CommandTPP commandTPP;
     private ServerStorageLocation serverStorageLocation;
     private PlayerStorageLocation playerStorageLocation;
+    private ProtectedRegionManager protectedRegionManager;
     private LogWrapper logWrapper;
     private PetStorage pet;
     private Chunk chunk;
@@ -62,7 +64,10 @@ public class TPPCommandStoreTest {
         // Plugin
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
+        this.protectedRegionManager = mock(ProtectedRegionManager.class);
+        when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(true);
+        when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
 
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
@@ -308,7 +313,7 @@ public class TPPCommandStoreTest {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
         when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
-        when(this.tpPets.canTpThere(any(Player.class), any(Location.class))).thenReturn(false);
+        when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(false);
 
         String[] args = {"store", "PetName", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);

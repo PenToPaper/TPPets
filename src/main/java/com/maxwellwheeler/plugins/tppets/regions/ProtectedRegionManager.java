@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.regions;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
@@ -36,6 +37,15 @@ public class ProtectedRegionManager {
             }
         }
         return null;
+    }
+
+    public boolean canTpThere(Player pl, Location location) {
+        ProtectedRegion tempPr = getProtectedRegionAt(location);
+        if (!pl.hasPermission("tppets.tpanywhere") && tempPr != null) {
+            pl.sendMessage(tempPr.getEnterMessage());
+            return false;
+        }
+        return true;
     }
 
     public void updateLFReferences(String lfRegionName) {

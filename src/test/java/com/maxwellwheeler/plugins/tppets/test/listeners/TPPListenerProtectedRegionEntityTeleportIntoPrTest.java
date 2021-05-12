@@ -40,7 +40,7 @@ public class TPPListenerProtectedRegionEntityTeleportIntoPrTest {
         this.teleportingTo = MockFactory.getMockLocation(world, 100, 200, 300);
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.entityTeleportEvent = mock(EntityTeleportEvent.class);
         this.listenerProtectedRegion = new ListenerProtectedRegion(this.tpPets);
         this.protectedRegionManager = mock(ProtectedRegionManager.class);

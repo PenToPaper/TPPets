@@ -46,7 +46,7 @@ public class TPPDBUpdaterThreeToFourTest {
     public void beforeEach() throws SQLException {
         this.logWrapper = mock(LogWrapper.class);
 
-        TPPets tpPets = MockFactory.getMockPlugin(null, this.logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(null, this.logWrapper, false, false);
         this.sqlWrapper = mock(SQLWrapper.class, Mockito.withSettings()
                 .useConstructor(tpPets)
                 .defaultAnswer(CALLS_REAL_METHODS)

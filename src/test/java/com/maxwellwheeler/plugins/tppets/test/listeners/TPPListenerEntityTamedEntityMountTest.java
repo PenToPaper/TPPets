@@ -30,7 +30,7 @@ public class TPPListenerEntityTamedEntityMountTest {
         this.skeletonHorse = MockFactory.getMockEntity("MockHorseId", org.bukkit.entity.SkeletonHorse.class);
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false);
 
         PetLimitChecker petIndex = new PetLimitChecker(tpPets, 1, 1, 1, 1, 1, 1, 1, 1);
         when(tpPets.getPetIndex()).thenReturn(petIndex);

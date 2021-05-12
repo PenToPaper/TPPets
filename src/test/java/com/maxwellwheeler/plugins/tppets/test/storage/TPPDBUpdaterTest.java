@@ -29,7 +29,7 @@ public class TPPDBUpdaterTest {
     public void beforeEach() throws SQLException {
         LogWrapper logWrapper = mock(LogWrapper.class);
 
-        tpPets = MockFactory.getMockPlugin(null, logWrapper, false, false, false);
+        tpPets = MockFactory.getMockPlugin(null, logWrapper, false, false);
         this.sqlWrapper = mock(SQLWrapper.class, Mockito.withSettings()
                 .useConstructor(tpPets)
                 .defaultAnswer(Mockito.CALLS_REAL_METHODS)

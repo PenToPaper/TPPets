@@ -34,7 +34,7 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
     public void beforeEach() {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         ToolsManager toolsManager = mock(ToolsManager.class);
         this.playerInteractEvent = mock(PlayerInteractEvent.class);
         Block blockClicked = mock(Block.class);

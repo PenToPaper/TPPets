@@ -27,7 +27,7 @@ public class TPPListenerEntityDeathTest {
 
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false, false);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false);
 
         this.listenerEntityDeath = new ListenerEntityDeath(tpPets);
     }

@@ -47,7 +47,7 @@ public class TPPCommandStorageTest {
         // Plugin
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
 
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();

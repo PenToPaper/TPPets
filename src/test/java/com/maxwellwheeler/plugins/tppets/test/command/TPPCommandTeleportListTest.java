@@ -51,7 +51,7 @@ public class TPPCommandTeleportListTest {
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, true, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
         this.command = mock(Command.class);
     }
 

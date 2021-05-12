@@ -34,7 +34,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
         this.sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false, false);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false);
         PetLimitChecker petIndex = new PetLimitChecker(this.tpPets, 1, 1, 1, 1, 1, 1, 1, 1);
 
         this.listenerEntityTamed = new ListenerEntityTamed(this.tpPets);
