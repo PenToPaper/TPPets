@@ -149,7 +149,7 @@ public class CommandTPP implements CommandExecutor {
                     }
                     break;
                 case "release":
-                    if (sender.hasPermission("tppets.dogs") || sender.hasPermission("tppets.cats") || sender.hasPermission("tppets.birds") || sender.hasPermission("tppets.horses") || sender.hasPermission("tppets.mules") || sender.hasPermission("tppets.llamas") || sender.hasPermission("tppets.donkeys")) {
+                    if (sender.hasPermission("tppets.dogs") || sender.hasPermission("tppets.cats") || sender.hasPermission("tppets.parrots") || sender.hasPermission("tppets.horses") || sender.hasPermission("tppets.mules") || sender.hasPermission("tppets.llamas") || sender.hasPermission("tppets.donkeys")) {
                         CommandRelease commandRelease = new CommandRelease(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                         commandRelease.processCommand();
                     } else {
@@ -172,7 +172,7 @@ public class CommandTPP implements CommandExecutor {
      */
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[ Commands ]" + ChatColor.DARK_GRAY + "--------------");
-        if (sender.hasPermission("tppets.dogs") || sender.hasPermission("tppets.cats") || sender.hasPermission("tppets.birds") || sender.hasPermission("tppets.horses") || sender.hasPermission("tppets.mules") || sender.hasPermission("tppets.llamas") || sender.hasPermission("tppets.donkeys")) {
+        if (sender.hasPermission("tppets.dogs") || sender.hasPermission("tppets.cats") || sender.hasPermission("tppets.parrots") || sender.hasPermission("tppets.horses") || sender.hasPermission("tppets.mules") || sender.hasPermission("tppets.llamas") || sender.hasPermission("tppets.donkeys")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp tp [pet name]" + ChatColor.BLUE + "  ->  Teleports the pet with [pet name] to your location");
             sender.sendMessage(ChatColor.WHITE + "/tpp all [dogs/cats/etc]" + ChatColor.BLUE + "  ->  Teleports all [dogs/cats/etc] to your location");
             sender.sendMessage(ChatColor.WHITE + "/tpp list [dogs/cats/etc]" + ChatColor.BLUE + "  ->  Lists your owned [dogs/cats/etc]");

@@ -54,8 +54,8 @@ public class TPPCommandTeleportPetTest {
         when(this.world.getName()).thenReturn("MockWorld");
         Location playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
         Location adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
-        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.birds", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
+        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(100, 100)).thenReturn(this.chunk);

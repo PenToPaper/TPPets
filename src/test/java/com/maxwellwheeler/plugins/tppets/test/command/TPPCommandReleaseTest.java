@@ -49,7 +49,7 @@ public class TPPCommandReleaseTest {
         altAlias.add("release");
         aliases.put("release", altAlias);
         this.command = mock(Command.class);
-        this.commandTPP = new CommandTPP(aliases, tpPets);
+        this.commandTPP = new CommandTPP(aliases, this.tpPets);
     }
 
     @Test
