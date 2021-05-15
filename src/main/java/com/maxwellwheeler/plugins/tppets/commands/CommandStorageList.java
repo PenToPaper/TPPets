@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import java.sql.SQLException;
 import java.util.List;
 
-public class CommandStorageList extends Command {
+public class CommandStorageList extends StorageListCommand {
     CommandStorageList(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
@@ -24,26 +24,10 @@ public class CommandStorageList extends Command {
         try {
 
             List<PlayerStorageLocation> storageLocations = this.thisPlugin.getDatabase().getStorageLocations(this.commandFor.getUniqueId().toString());
-            listAllStorages(this.sender, storageLocations);
+            listAllStorages(this.sender, this.commandFor.getName(), storageLocations);
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
-        }
-    }
-
-    private void listAllStorages(Player pl, List<PlayerStorageLocation> storageLocations) {
-        this.sender.sendMessage(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + commandFor.getName() + "'s Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------");
-        for (PlayerStorageLocation storageLocation : storageLocations) {
-            this.listIndividualStorage(pl, storageLocation);
-        }
-        this.sender.sendMessage(ChatColor.GRAY + "----------------------------------------");
-    }
-
-    private void listIndividualStorage(Player pl, PlayerStorageLocation storageLoc) {
-        if (storageLoc != null && storageLoc.getLoc().getWorld() != null) {
-            pl.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + storageLoc.getStorageName());
-            // TODO REFACTOR TeleportCommand.formatLocation and put it in here
-            pl.sendMessage(ChatColor.BLUE + "    location: " + ChatColor.WHITE + storageLoc.getLoc().getBlockX() + ", " + storageLoc.getLoc().getBlockY() + ", " + storageLoc.getLoc().getBlockZ() + ", " + storageLoc.getLoc().getWorld().getName());
         }
     }
 
