@@ -30,7 +30,6 @@ public class CommandAllowAdd extends BaseCommand {
     }
 
     private void processCommandGeneric() {
-        // TODO: Make pet names case-insensitive
         // TODO: Make sure errors are properly logged
         try {
             OfflinePlayer playerToAllow = this.getOfflinePlayer(this.args[0]);
