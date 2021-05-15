@@ -213,7 +213,7 @@ public abstract class SQLWrapper {
             if (getSpecificPet(entity.getUniqueId().toString()) != null) {
                 return updatePetLocation(entity);
             } else {
-                String ownerId = pet.getOwner().getUniqueId().toString();
+                String ownerId = Objects.requireNonNull(pet.getOwner()).getUniqueId().toString();
                 String petName = generateUniquePetName(ownerId, PetType.getEnumByEntity(entity));
                 return insertPet(entity, ownerId, petName);
             }
