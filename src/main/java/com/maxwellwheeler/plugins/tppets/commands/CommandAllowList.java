@@ -45,7 +45,6 @@ public class CommandAllowList extends BaseCommand{
                 return;
             }
 
-            // TODO: Remove untrim and trim from UUIDs. Kinda a silly idea in the first place lol
             List<String> playerUUIDs = this.thisPlugin.getAllowedPlayers().get(pet.petId);
 
             this.announceAllowedPlayers(playerUUIDs);
