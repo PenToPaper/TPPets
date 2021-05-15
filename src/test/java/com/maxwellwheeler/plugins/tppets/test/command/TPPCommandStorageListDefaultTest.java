@@ -90,10 +90,10 @@ public class TPPCommandStorageListDefaultTest {
             verify(this.admin, times(6)).sendMessage(this.messageCaptor.capture());
             List<String> messages = this.messageCaptor.getAllValues();
             assertEquals(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE +  "Server's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------", messages.get(0));
-            assertEquals(ChatColor.BLUE + "name: " + ChatColor.WHITE + "default", messages.get(1));
-            assertEquals(ChatColor.BLUE + "    location: " + ChatColor.WHITE + "100, 200, 300, MockWorldOne", messages.get(2));
-            assertEquals(ChatColor.BLUE + "name: " + ChatColor.WHITE + "default", messages.get(3));
-            assertEquals(ChatColor.BLUE + "    location: " + ChatColor.WHITE + "400, 500, 600, MockWorldTwo", messages.get(4));
+            assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "default", messages.get(1));
+            assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "100, 200, 300, MockWorldOne", messages.get(2));
+            assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "default", messages.get(3));
+            assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "400, 500, 600, MockWorldTwo", messages.get(4));
             assertEquals(ChatColor.GRAY + "----------------------------------------", messages.get(5));
         }
     }

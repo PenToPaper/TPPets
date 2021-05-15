@@ -78,10 +78,10 @@ public class TPPCommandStorageListTest {
         verify(this.player, times(6)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
         assertEquals(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------", messages.get(0));
-        assertEquals(ChatColor.BLUE + "name: " + ChatColor.WHITE + "StorageOne", messages.get(1));
-        assertEquals(ChatColor.BLUE + "    location: " + ChatColor.WHITE + "100, 200, 300, MockWorld", messages.get(2));
-        assertEquals(ChatColor.BLUE + "name: " + ChatColor.WHITE + "StorageTwo", messages.get(3));
-        assertEquals(ChatColor.BLUE + "    location: " + ChatColor.WHITE + "400, 500, 600, MockWorld", messages.get(4));
+        assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageOne", messages.get(1));
+        assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "100, 200, 300, MockWorld", messages.get(2));
+        assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageTwo", messages.get(3));
+        assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "400, 500, 600, MockWorld", messages.get(4));
         assertEquals(ChatColor.GRAY + "----------------------------------------", messages.get(5));
     }
 
@@ -101,10 +101,10 @@ public class TPPCommandStorageListTest {
             verify(this.admin, times(6)).sendMessage(this.messageCaptor.capture());
             List<String> messages = this.messageCaptor.getAllValues();
             assertEquals(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------", messages.get(0));
-            assertEquals(ChatColor.BLUE + "name: " + ChatColor.WHITE + "StorageOne", messages.get(1));
-            assertEquals(ChatColor.BLUE + "    location: " + ChatColor.WHITE + "100, 200, 300, MockWorld", messages.get(2));
-            assertEquals(ChatColor.BLUE + "name: " + ChatColor.WHITE + "StorageTwo", messages.get(3));
-            assertEquals(ChatColor.BLUE + "    location: " + ChatColor.WHITE + "400, 500, 600, MockWorld", messages.get(4));
+            assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageOne", messages.get(1));
+            assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "100, 200, 300, MockWorld", messages.get(2));
+            assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageTwo", messages.get(3));
+            assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "400, 500, 600, MockWorld", messages.get(4));
             assertEquals(ChatColor.GRAY + "----------------------------------------", messages.get(5));
         }
     }

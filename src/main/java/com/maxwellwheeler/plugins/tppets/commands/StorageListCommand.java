@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-public abstract class StorageListCommand extends Command{
+abstract class StorageListCommand extends Command{
     StorageListCommand(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
@@ -25,8 +25,8 @@ public abstract class StorageListCommand extends Command{
 
     protected void listIndividualStorage(Player pl, StorageLocation storageLoc) {
         if (storageLoc != null && storageLoc.getLoc().getWorld() != null) {
-            pl.sendMessage(ChatColor.BLUE + "name: " + ChatColor.WHITE + storageLoc.getStorageName());
-            pl.sendMessage(ChatColor.BLUE + "    location: " + ChatColor.WHITE + storageLoc.getLoc().getBlockX() + ", " + storageLoc.getLoc().getBlockY() + ", " + storageLoc.getLoc().getBlockZ() + ", " + storageLoc.getLoc().getWorld().getName());
+            pl.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.WHITE + storageLoc.getStorageName());
+            pl.sendMessage(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + storageLoc.getLoc().getBlockX() + ", " + storageLoc.getLoc().getBlockY() + ", " + storageLoc.getLoc().getBlockZ() + ", " + storageLoc.getLoc().getWorld().getName());
         }
     }
 }
