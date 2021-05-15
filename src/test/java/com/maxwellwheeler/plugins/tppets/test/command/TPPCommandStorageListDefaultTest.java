@@ -36,7 +36,6 @@ public class TPPCommandStorageListDefaultTest {
     private CommandTPP commandTPP;
     private List<ServerStorageLocation> storageLocations;
 
-    // TODO: MAKE IT SO THAT MOCKS ARE NOT DESTROYED ON EACH TEST. JUST RESET THEM
     @BeforeEach
     public void beforeEach() {
         // Players
