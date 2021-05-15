@@ -54,7 +54,6 @@ public class CommandTPP implements CommandExecutor {
             switch(realCommand) {
                 case "tp":
                     // Permission check done within object, since the object needs to determine which pet type is being used
-                    // TODO: MAKE ALL AND LIST NO LONGER PROTECTED
                     CommandTeleportPet commandTeleportPet = new CommandTeleportPet(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
                     commandTeleportPet.processCommand();
                     break;
