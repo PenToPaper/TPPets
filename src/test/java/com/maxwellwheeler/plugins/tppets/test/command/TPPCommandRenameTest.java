@@ -55,7 +55,7 @@ public class TPPCommandRenameTest {
 
         when(this.sqlWrapper.getSpecificPet("MockPlayerId", "OldPetName")).thenReturn(pet);
         when(this.sqlWrapper.renamePet("MockPlayerId", "OldPetName", "NewPetName")).thenReturn(true);
-        when(this.sqlWrapper.isNameUnique("MockPlayerId", "NewPetName")).thenReturn(true);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "NewPetName")).thenReturn(null);
     }
 
     @Test
@@ -64,7 +64,9 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "NewPetName");
         verify(this.sqlWrapper, times(1)).renamePet(anyString(), anyString(), anyString());
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
@@ -188,12 +190,14 @@ public class TPPCommandRenameTest {
     @Test
     @DisplayName("Cannot rename pet if pet name already exists")
     void cannotRenamePetNameNotUnique() throws SQLException {
-        when(this.sqlWrapper.isNameUnique("MockPlayerId", "NewPetName")).thenReturn(false);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "NewPetName")).thenReturn(new PetStorage("PetId", 7, 1, 2, 3, "PetWorld", "OwnerId", "PetName", "PetName"));
 
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "NewPetName");
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
@@ -205,12 +209,14 @@ public class TPPCommandRenameTest {
     @Test
     @DisplayName("Cannot rename pet if db fails to find if name is unique")
     void cannotRenameDbFailsDeterminingUnique() throws SQLException {
-        when(this.sqlWrapper.isNameUnique("MockPlayerId", "NewPetName")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "NewPetName")).thenThrow(new SQLException());
 
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "NewPetName");
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
@@ -227,7 +233,9 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
+        verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "NewPetName");
         verify(this.sqlWrapper, times(1)).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
@@ -245,7 +253,9 @@ public class TPPCommandRenameTest {
             String[] args = {"rename", "f:MockPlayerName", "OldPetName", "NewPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
+            verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
+            verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "NewPetName");
             verify(this.sqlWrapper, times(1)).renamePet(anyString(), anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());

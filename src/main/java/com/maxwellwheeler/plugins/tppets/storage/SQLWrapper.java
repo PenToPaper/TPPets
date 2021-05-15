@@ -147,19 +147,8 @@ public abstract class SQLWrapper {
 
     // Pet actions
 
-    // TODO: Can replace with call to getSpecificPet
     public boolean isNameUnique(@NotNull String ownerId, @NotNull String petName) throws SQLException {
-        String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
-        String selectIsNameUnique = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?";
-
-        try (Connection dbConn = this.getConnection();
-             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectIsNameUnique), trimmedOwnerId, petName.toLowerCase());
-             ResultSet resultSet = selectStatement.executeQuery()) {
-            return !resultSet.next();
-        } catch (SQLException exception) {
-            this.thisPlugin.getLogWrapper().logErrors("SQL Exception checking if pet name is unique: " + exception.getMessage());
-            throw exception;
-        }
+        return this.getSpecificPet(ownerId, petName) == null;
     }
 
     public String generateUniquePetName(@NotNull String ownerId, @NotNull PetType.Pets petType) throws SQLException {
@@ -169,7 +158,7 @@ public abstract class SQLWrapper {
 
         do {
             ret = petType.toString() + lastIndexChecked++;
-        } while (!this.isNameUnique(ownerId, ret));
+        } while (this.getSpecificPet(ownerId, ret) != null);
 
         return ret;
     }

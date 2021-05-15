@@ -46,7 +46,7 @@ public class CommandRename extends BaseCommand {
                 return;
             }
 
-            if (!this.thisPlugin.getDatabase().isNameUnique(this.commandFor.getUniqueId().toString(), this.args[1])) {
+            if (this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[1]) != null) {
                 this.commandStatus = CommandStatus.PET_NAME_ALREADY_IN_USE;
                 return;
             }
