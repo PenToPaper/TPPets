@@ -16,25 +16,29 @@ public class GuestManager {
     }
 
     public void addGuest(@NotNull String petId, @NotNull String playerId) {
-        if (!this.guests.containsKey(petId)) {
-            this.guests.put(petId, new ArrayList<>());
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        if (!this.guests.containsKey(trimmedPetId)) {
+            this.guests.put(trimmedPetId, new ArrayList<>());
         }
-        this.guests.get(petId).add(UUIDUtils.trimUUID(playerId));
+        this.guests.get(trimmedPetId).add(UUIDUtils.trimUUID(playerId));
     }
 
     public void removeGuest(@NotNull String petId, @NotNull String playerId) {
-        if (this.guests.containsKey(petId)) {
-            this.guests.get(petId).remove(UUIDUtils.trimUUID(playerId));
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        if (this.guests.containsKey(trimmedPetId)) {
+            this.guests.get(trimmedPetId).remove(UUIDUtils.trimUUID(playerId));
         }
     }
 
     public boolean isGuest(@NotNull String petId, @NotNull String playerId) {
-        return this.guests.containsKey(petId) && this.guests.get(petId).contains(UUIDUtils.trimUUID(playerId));
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        return this.guests.containsKey(trimmedPetId) && this.guests.get(trimmedPetId).contains(UUIDUtils.trimUUID(playerId));
     }
 
     public List<String> getGuestsToPet(@NotNull String petId) {
-        if (this.guests.containsKey(petId)) {
-            return this.guests.get(petId);
+        String trimmedPetId = UUIDUtils.trimUUID(petId);
+        if (this.guests.containsKey(trimmedPetId)) {
+            return this.guests.get(trimmedPetId);
         }
         return new ArrayList<>();
     }
