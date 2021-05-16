@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.*;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
@@ -53,10 +54,16 @@ public class MockFactory {
         TPPets tpPets = mock(TPPets.class);
         when(tpPets.getDatabase()).thenReturn(sqlWrapper);
         when(tpPets.getAllowTpBetweenWorlds()).thenReturn(allowTpBetweenWorlds);
+
         if (logWrapper != null) {
             when(tpPets.getLogWrapper()).thenReturn(logWrapper);
         }
-        when(tpPets.isAllowedToPet(anyString(), anyString())).thenReturn(isAllowedToPet);
+
+        GuestManager guestManager = mock(GuestManager.class);
+        if (isAllowedToPet) {
+            when(guestManager.isGuest(anyString(), anyString())).thenReturn(true);
+        }
+        when(tpPets.getGuestManager()).thenReturn(guestManager);
 
         return tpPets;
     }

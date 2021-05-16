@@ -45,7 +45,7 @@ public class CommandAllowList extends BaseCommand{
                 return;
             }
 
-            List<String> playerUUIDs = this.thisPlugin.getAllowedPlayers().get(pet.petId);
+            List<String> playerUUIDs = this.thisPlugin.getGuestManager().getGuestsToPet(pet.petId);
 
             this.announceAllowedPlayers(playerUUIDs);
 

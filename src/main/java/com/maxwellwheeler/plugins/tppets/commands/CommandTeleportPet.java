@@ -19,7 +19,7 @@ public class CommandTeleportPet extends TeleportCommand {
     }
 
     protected boolean hasPermissionToTp(Player player, OfflinePlayer petOwner, String petUUID) {
-        return player.equals(petOwner) || player.hasPermission("tppets.teleportother") || this.thisPlugin.isAllowedToPet(petUUID, player.getUniqueId().toString());
+        return player.equals(petOwner) || player.hasPermission("tppets.teleportother") || this.thisPlugin.getGuestManager().isGuest(petUUID, player.getUniqueId().toString());
     }
 
     @Override

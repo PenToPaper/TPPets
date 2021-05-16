@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
@@ -18,12 +19,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 
 public class TPPCommandAllowListTest {
     private OfflinePlayer guest;
@@ -32,19 +35,17 @@ public class TPPCommandAllowListTest {
     private ArgumentCaptor<String> messageCaptor;
     private SQLWrapper sqlWrapper;
     private PetStorage pet;
-    private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
-    private Hashtable<String, List<String>> allowedPlayers;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws SQLException {
         this.guest = MockFactory.getMockOfflinePlayer("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "MockGuestName");
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.allowguests"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.allowguests", "tppets.allowother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.sqlWrapper = mock(SQLWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, null, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, null, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("allowed");
@@ -52,9 +53,14 @@ public class TPPCommandAllowListTest {
         this.pet = new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
-        this.allowedPlayers = new Hashtable<>();
-        this.allowedPlayers.put("MockPetId", new ArrayList<>());
-        this.allowedPlayers.get("MockPetId").add("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+
+        Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
+        allowedPlayers.put("MockPetId", new ArrayList<>());
+        allowedPlayers.get("MockPetId").add("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+
+        when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(allowedPlayers);
+        GuestManager guestManager = new GuestManager(this.sqlWrapper);
+        when(tpPets.getGuestManager()).thenReturn(guestManager);
     }
 
     @Test
@@ -64,7 +70,6 @@ public class TPPCommandAllowListTest {
             bukkit.when(() -> Bukkit.getOfflinePlayer(any(UUID.class))).thenReturn(this.guest);
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allowed", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -87,7 +92,6 @@ public class TPPCommandAllowListTest {
             bukkit.when(() -> Bukkit.getOfflinePlayer(any(UUID.class))).thenReturn(this.guest);
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"allowed", "f:MockPlayerName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);

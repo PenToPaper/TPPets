@@ -25,10 +25,10 @@ import java.util.Set;
  */
 public class TPPets extends JavaPlugin {
     private final Hashtable<String, List<String>> commandAliases = new Hashtable<>();
-    private Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
 
     private LostRegionManager lostRegionManager = null;
     private ProtectedRegionManager protectedRegionManager = null;
+    private GuestManager guestManager = null;
     private final ToolsManager toolsManager = new ToolsManager(getConfig().getConfigurationSection("tools"));
     private final RegionSelectionManager regionSelectionManager = new RegionSelectionManager();
     private final MobDamageManager mobDamageManager = new MobDamageManager(this, getConfig().getStringList("protect_pets_from"));
@@ -199,11 +199,11 @@ public class TPPets extends JavaPlugin {
     /**
      * Initializes allowed players {@link Hashtable}
      */
-    private void initializeAllowedPlayers() {
+    private void initializeGuestManager() {
         try {
-            this.allowedPlayers = this.database.getAllAllowedPlayers();
+            this.guestManager = new GuestManager(this.database);
         } catch (SQLException exception) {
-            getLogWrapper().logErrors("Database cannot fetch allowed players. Plugin cannot run.");
+            getLogWrapper().logErrors("Database cannot fetch guests. Plugin cannot run.");
             getServer().getPluginManager().disablePlugin(this);
         }
     }
@@ -235,7 +235,7 @@ public class TPPets extends JavaPlugin {
         initializeDBC();
         updateDBC();
         createTables();
-        initializeAllowedPlayers();
+        initializeGuestManager();
 
         // Database pulling
         getLogWrapper().logSuccessfulAction("Getting data from database.");
@@ -258,13 +258,6 @@ public class TPPets extends JavaPlugin {
         initializeCommandListener();
 
         initializeVault();
-    }
-
-    // TODO: Consider moving to manager
-    public boolean isAllowedToPet(String petUUID, String playerUUID) {
-        String trimmedPetUUID = UUIDUtils.trimUUID(petUUID);
-        String trimmedPlayerUUID = UUIDUtils.trimUUID(playerUUID);
-        return this.getAllowedPlayers().containsKey(trimmedPetUUID) && this.getAllowedPlayers().get(trimmedPetUUID).contains(trimmedPlayerUUID);
     }
 
     /*
@@ -319,8 +312,8 @@ public class TPPets extends JavaPlugin {
         return configUpdater;
     }
 
-    public Hashtable<String, List<String>> getAllowedPlayers() {
-        return allowedPlayers;
+    public GuestManager getGuestManager() {
+        return guestManager;
     }
 
     public int getStorageLimit() {

@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
@@ -639,7 +640,9 @@ public class TPPCommandTeleportPetTest {
             this.setAliases();
 
             // Permissions adjustments
-            when(this.tpPets.isAllowedToPet(anyString(), anyString())).thenReturn(false);
+            when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+            GuestManager guestManager = new GuestManager(this.sqlWrapper);
+            when(this.tpPets.getGuestManager()).thenReturn(guestManager);
             when(this.admin.hasPermission("tppets.teleportother")).thenReturn(false);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(this.player);
 

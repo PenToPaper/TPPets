@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
@@ -37,13 +38,12 @@ public class TPPCommandAllowRemoveTest {
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
     private PetStorage pet;
-    private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
-    private Hashtable<String, List<String>> allowedPlayers;
+    private GuestManager guestManager;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws SQLException {
         this.guest = MockFactory.getMockOfflinePlayer("MockGuestId", "MockGuestName");
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.allowguests"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.allowguests", "tppets.allowother"});
@@ -51,7 +51,7 @@ public class TPPCommandAllowRemoveTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("remove");
@@ -59,9 +59,14 @@ public class TPPCommandAllowRemoveTest {
         this.pet = new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
-        this.allowedPlayers = new Hashtable<>();
-        this.allowedPlayers.put("MockPetId", new ArrayList<>());
-        this.allowedPlayers.get("MockPetId").add("MockGuestId");
+
+        Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
+        allowedPlayers.put("MockPetId", new ArrayList<>());
+        allowedPlayers.get("MockPetId").add("MockGuestId");
+
+        when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(allowedPlayers);
+        this.guestManager = new GuestManager(this.sqlWrapper);
+        when(tpPets.getGuestManager()).thenReturn(this.guestManager);
     }
 
     @Test
@@ -72,14 +77,11 @@ public class TPPCommandAllowRemoveTest {
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(0, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
             verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
 
@@ -102,14 +104,11 @@ public class TPPCommandAllowRemoveTest {
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(0, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
             verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
 
@@ -135,9 +134,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -156,9 +154,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -180,9 +177,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -203,9 +199,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -226,9 +221,8 @@ public class TPPCommandAllowRemoveTest {
         String[] args = {"remove", "MockGuestName", "MockPetName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
-        assertEquals(1, this.allowedPlayers.size());
-        assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-        assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+        assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+        assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
         verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -245,9 +239,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "MockGuestName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -269,9 +262,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -292,9 +284,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "MockGuestName", "MockPetName;"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -316,9 +307,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -340,9 +330,8 @@ public class TPPCommandAllowRemoveTest {
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -355,23 +344,17 @@ public class TPPCommandAllowRemoveTest {
 
     @Test
     @DisplayName("Fails to remove player when player already isn't allowed to pet")
-    void cannotRemovePlayerFromPetDbSearchAlreadyDone() throws SQLException {
+    void cannotRemovePlayerFromPetAlreadyDone() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
-            List<String> allowed = new ArrayList<>();
-            allowed.add("MockPlayerId");
-            this.allowedPlayers.put("MockPetId", allowed);
-
+            this.guestManager.removeGuest("MockPetId", "MockGuestId");
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -390,19 +373,13 @@ public class TPPCommandAllowRemoveTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            List<String> allowed = new ArrayList<>();
-            allowed.add("MockPlayerId");
-            this.allowedPlayers.put("MockPetId", allowed);
-
+            this.guestManager.removeGuest("MockPetId", "MockGuestId");
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
             verify(this.sqlWrapper, never()).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -422,14 +399,12 @@ public class TPPCommandAllowRemoveTest {
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(false);
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -448,14 +423,12 @@ public class TPPCommandAllowRemoveTest {
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
             when(this.sqlWrapper.removeAllowedPlayer("MockPetId", "MockGuestId")).thenThrow(new SQLException());
-            when(this.tpPets.getAllowedPlayers()).thenReturn(this.allowedPlayers);
 
             String[] args = {"remove", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            assertEquals(1, this.allowedPlayers.size());
-            assertTrue(this.allowedPlayers.containsKey("MockPetId"));
-            assertEquals(1, this.allowedPlayers.get("MockPetId").size());
+            assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
+            assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
             verify(this.sqlWrapper, times(1)).removeAllowedPlayer(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());

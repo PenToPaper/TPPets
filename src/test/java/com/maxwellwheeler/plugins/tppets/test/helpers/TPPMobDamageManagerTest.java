@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.helpers;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.MobDamageManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
@@ -13,9 +14,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Hashtable;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -33,7 +36,7 @@ public class TPPMobDamageManagerTest {
     private Horse horse;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
@@ -46,7 +49,11 @@ public class TPPMobDamageManagerTest {
         this.blockProjectileSource = mock(BlockProjectileSource.class);
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", org.bukkit.entity.Horse.class, this.owner);
 
-        when(this.tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);
+        when(sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        GuestManager guestManager = new GuestManager(sqlWrapper);
+        guestManager.addGuest("MockHorseId", "MockGuestId");
+
+        when(this.tpPets.getGuestManager()).thenReturn(guestManager);
     }
 
     private Projectile getProjectileFromSource(ProjectileSource source) {

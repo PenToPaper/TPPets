@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerPetAccess;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
@@ -14,6 +15,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.spigotmc.event.entity.EntityMountEvent;
 
+import java.sql.SQLException;
+import java.util.Hashtable;
+
 import static org.mockito.Mockito.*;
 
 public class TPPListenerPetAccessEntityMountTest {
@@ -26,7 +30,7 @@ public class TPPListenerPetAccessEntityMountTest {
     private ListenerPetAccess listenerPetAccess;
 
     @BeforeEach
-    public void beforeEach() {
+    public void beforeEach() throws SQLException {
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.mountother"});
         this.owner = MockFactory.getMockPlayer("MockOwnerId", "MockOwnerName", null, null, new String[]{});
         this.guest = MockFactory.getMockPlayer("MockGuestId", "MockGuestName", null, null, new String[]{});
@@ -37,7 +41,11 @@ public class TPPListenerPetAccessEntityMountTest {
         TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
         this.listenerPetAccess = new ListenerPetAccess(tpPets);
 
-        when(tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);
+        when(sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        GuestManager guestManager = new GuestManager(sqlWrapper);
+        guestManager.addGuest("MockHorseId", "MockGuestId");
+
+        when(tpPets.getGuestManager()).thenReturn(guestManager);
     }
 
     EntityMountEvent getEntityMountEvent(Player player, Horse pet) {

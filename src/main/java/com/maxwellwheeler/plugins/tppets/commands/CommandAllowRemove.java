@@ -2,14 +2,12 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
-import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class CommandAllowRemove extends BaseCommand {
     public CommandAllowRemove(TPPets thisPlugin, CommandSender sender, String[] args) {
@@ -50,36 +48,21 @@ public class CommandAllowRemove extends BaseCommand {
                 return;
             }
 
-            String trimmedPlayerId = UUIDUtils.trimUUID(playerToAllow.getUniqueId().toString());
-
-            if (!this.thisPlugin.getAllowedPlayers().containsKey(pet.petId) || !this.thisPlugin.getAllowedPlayers().get(pet.petId).contains(trimmedPlayerId)) {
+            if (!this.thisPlugin.getGuestManager().isGuest(pet.petId, playerToAllow.getUniqueId().toString())) {
                 this.commandStatus = CommandStatus.ALREADY_DONE;
                 return;
             }
 
-            if (this.removePlayer(pet.petId, trimmedPlayerId)) {
+            if (this.thisPlugin.getDatabase().removeAllowedPlayer(pet.petId, playerToAllow.getUniqueId().toString())) {
                 this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " removed permission from " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
-                this.commandStatus = CommandStatus.SUCCESS;
+                this.thisPlugin.getGuestManager().removeGuest(pet.petId, playerToAllow.getUniqueId().toString());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
             }
+
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
         }
-    }
-
-    private boolean removePlayer(String petId, String playerId) throws SQLException {
-        if (this.thisPlugin.getDatabase().removeAllowedPlayer(petId, playerId)) {
-            // Technically shouldn't need the following if block, but it's a good failsafe
-            if (!this.thisPlugin.getAllowedPlayers().containsKey(petId)) {
-                this.thisPlugin.getAllowedPlayers().put(petId, new ArrayList<>());
-            }
-            this.thisPlugin.getAllowedPlayers().get(petId).remove(playerId);
-
-            return true;
-        }
-
-        return false;
     }
 
     private void displayStatus() {

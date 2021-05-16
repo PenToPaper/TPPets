@@ -24,7 +24,7 @@ public class ListenerPetAccess implements Listener {
     }
 
     private boolean doesAccessorHavePermission(HumanEntity player, Tameable pet) {
-        return player.hasPermission("tppets.mountother") || Objects.equals(pet.getOwner(), player) || this.thisPlugin.isAllowedToPet(pet.getUniqueId().toString(), player.getUniqueId().toString());
+        return player.hasPermission("tppets.mountother") || Objects.equals(pet.getOwner(), player) || this.thisPlugin.getGuestManager().isGuest(pet.getUniqueId().toString(), player.getUniqueId().toString());
     }
 
     private boolean handleInventoryAccess(InventoryHolder inventoryHolder, HumanEntity accessor) {

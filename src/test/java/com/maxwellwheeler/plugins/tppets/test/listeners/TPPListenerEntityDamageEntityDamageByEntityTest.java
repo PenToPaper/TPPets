@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.helpers.MobDamageManager;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerEntityDamage;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Hashtable;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
@@ -48,8 +50,13 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage = new ListenerEntityDamage(this.tpPets);
 
         MobDamageManager mobDamageManager = new MobDamageManager(this.tpPets, Arrays.asList("OwnerDamage", "GuestDamage", "StrangerDamage", "EnvironmentalDamage", "MobDamage"));
-        when(this.tpPets.isAllowedToPet("MockHorseId", "MockGuestId")).thenReturn(true);
         when(this.tpPets.getMobDamageManager()).thenReturn(mobDamageManager);
+
+        when(sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        GuestManager guestManager = new GuestManager(sqlWrapper);
+        guestManager.addGuest("MockHorseId", "MockGuestId");
+
+        when(this.tpPets.getGuestManager()).thenReturn(guestManager);
     }
 
     private Projectile getMockProjectile(ProjectileSource damager) {

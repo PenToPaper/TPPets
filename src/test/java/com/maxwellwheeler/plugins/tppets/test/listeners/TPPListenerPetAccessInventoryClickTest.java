@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.listeners;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.listeners.ListenerPetAccess;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
@@ -17,6 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
+import java.util.Hashtable;
+
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -26,8 +30,9 @@ public class TPPListenerPetAccessInventoryClickTest {
     private Player guest;
     private LogWrapper logWrapper;
     private Inventory inventory;
-    private TPPets thisPlugin;
+    private TPPets tpPets;
     private ListenerPetAccess petInventoryProtector;
+    private SQLWrapper sqlWrapper;
 
     @BeforeEach
     public void beforeEach() {
@@ -37,13 +42,13 @@ public class TPPListenerPetAccessInventoryClickTest {
         this.inventory = mock(LlamaInventory.class);
         when(this.inventory.getHolder()).thenReturn(donkey);
 
-        SQLWrapper sqlWrapper = mock(SQLWrapper.class);
+        this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
-        this.thisPlugin = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
 
         when(this.player.hasPermission("tppets.mountother")).thenReturn(false);
 
-        this.petInventoryProtector = new ListenerPetAccess(this.thisPlugin);
+        this.petInventoryProtector = new ListenerPetAccess(this.tpPets);
     }
 
     InventoryClickEvent getInventoryClickEvent(Player sender) {
@@ -94,8 +99,12 @@ public class TPPListenerPetAccessInventoryClickTest {
 
     @Test
     @DisplayName("Doesn't restrict inventory click events when player is explicitly allowed to the pet")
-    void inventoryClickEventAllowedPlayerExplicitlyAllowed() {
-        when(this.thisPlugin.isAllowedToPet("MockPetId", "MockGuestId")).thenReturn(true);
+    void inventoryClickEventAllowedPlayerExplicitlyAllowed() throws SQLException {
+        when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        GuestManager guestManager = new GuestManager(this.sqlWrapper);
+        guestManager.addGuest("MockPetId", "MockGuestId");
+
+        when(this.tpPets.getGuestManager()).thenReturn(guestManager);
 
         InventoryClickEvent inventoryClickEvent = getInventoryClickEvent(this.guest);
 

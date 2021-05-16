@@ -47,7 +47,7 @@ public class MobDamageManager {
     }
 
     private boolean entityIsGuest(Entity entity, Tameable pet) {
-        return this.thisPlugin.isAllowedToPet(pet.getUniqueId().toString(), entity.getUniqueId().toString());
+        return this.thisPlugin.getGuestManager().isGuest(pet.getUniqueId().toString(), entity.getUniqueId().toString());
     }
 
     private boolean entityIsOwner(Entity entity, Tameable pet) {
