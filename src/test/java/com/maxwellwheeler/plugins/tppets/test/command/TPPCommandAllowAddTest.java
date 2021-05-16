@@ -60,7 +60,7 @@ public class TPPCommandAllowAddTest {
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
 
-        when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        when(this.sqlWrapper.getAllGuests()).thenReturn(new Hashtable<>());
         this.guestManager = new GuestManager(this.sqlWrapper);
         when(tpPets.getGuestManager()).thenReturn(this.guestManager);
     }
@@ -72,7 +72,7 @@ public class TPPCommandAllowAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+            when(this.sqlWrapper.insertGuest("MockPetId", "MockGuestId")).thenReturn(true);
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -80,7 +80,7 @@ public class TPPCommandAllowAddTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
-            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).insertGuest(anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -100,7 +100,7 @@ public class TPPCommandAllowAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(true);
+            when(this.sqlWrapper.insertGuest("MockPetId", "MockGuestId")).thenReturn(true);
 
             String[] args = {"allow", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -108,7 +108,7 @@ public class TPPCommandAllowAddTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
-            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).insertGuest(anyString(), anyString());
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
@@ -136,7 +136,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
         }
     }
@@ -155,7 +155,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -179,7 +179,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -199,7 +199,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -222,7 +222,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
         }
     }
@@ -235,7 +235,7 @@ public class TPPCommandAllowAddTest {
 
         assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-        verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+        verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -257,7 +257,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -277,7 +277,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -300,7 +300,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -323,7 +323,7 @@ public class TPPCommandAllowAddTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -346,7 +346,7 @@ public class TPPCommandAllowAddTest {
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -370,7 +370,7 @@ public class TPPCommandAllowAddTest {
             String[] args = {"allow", "f:MockPlayerName", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, never()).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -387,14 +387,14 @@ public class TPPCommandAllowAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenReturn(false);
+            when(this.sqlWrapper.insertGuest("MockPetId", "MockGuestId")).thenReturn(false);
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -410,14 +410,14 @@ public class TPPCommandAllowAddTest {
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockGuestName")).thenReturn(this.guest);
 
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "MockPetName")).thenReturn(this.pet);
-            when(this.sqlWrapper.insertAllowedPlayer("MockPetId", "MockGuestId")).thenThrow(new SQLException());
+            when(this.sqlWrapper.insertGuest("MockPetId", "MockGuestId")).thenThrow(new SQLException());
 
             String[] args = {"allow", "MockGuestName", "MockPetName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
-            verify(this.sqlWrapper, times(1)).insertAllowedPlayer(anyString(), anyString());
+            verify(this.sqlWrapper, times(1)).insertGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());

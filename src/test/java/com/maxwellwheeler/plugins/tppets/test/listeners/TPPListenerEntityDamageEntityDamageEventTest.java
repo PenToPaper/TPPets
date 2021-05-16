@@ -40,7 +40,7 @@ public class TPPListenerEntityDamageEntityDamageEventTest {
         MobDamageManager mobDamageManager = new MobDamageManager(this.tpPets, Arrays.asList("OwnerDamage", "GuestDamage", "StrangerDamage", "EnvironmentalDamage", "MobDamage"));
         when(this.tpPets.getMobDamageManager()).thenReturn(mobDamageManager);
 
-        when(sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        when(sqlWrapper.getAllGuests()).thenReturn(new Hashtable<>());
         GuestManager guestManager = new GuestManager(sqlWrapper);
         guestManager.addGuest("MockHorseId", "MockGuestId");
 

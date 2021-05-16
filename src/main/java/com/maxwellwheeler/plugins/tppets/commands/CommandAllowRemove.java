@@ -53,7 +53,7 @@ public class CommandAllowRemove extends BaseCommand {
                 return;
             }
 
-            if (this.thisPlugin.getDatabase().removeAllowedPlayer(pet.petId, playerToAllow.getUniqueId().toString())) {
+            if (this.thisPlugin.getDatabase().removeGuest(pet.petId, playerToAllow.getUniqueId().toString())) {
                 this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " removed permission from " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
                 this.thisPlugin.getGuestManager().removeGuest(pet.petId, playerToAllow.getUniqueId().toString());
             } else {

@@ -41,7 +41,7 @@ public class TPPListenerPetAccessEntityMountTest {
         TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
         this.listenerPetAccess = new ListenerPetAccess(tpPets);
 
-        when(sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        when(sqlWrapper.getAllGuests()).thenReturn(new Hashtable<>());
         GuestManager guestManager = new GuestManager(sqlWrapper);
         guestManager.addGuest("MockHorseId", "MockGuestId");
 

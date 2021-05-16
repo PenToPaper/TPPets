@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class TPPSQLWrapperRemoveAllowedPlayerTest {
+public class TPPSQLWrapperRemoveGuestTest {
     private Connection connection;
     private PreparedStatement preparedStatement;
     private MockSQLWrapper mockSQLWrapper;
@@ -44,9 +44,9 @@ public class TPPSQLWrapperRemoveAllowedPlayerTest {
     }
 
     @Test
-    @DisplayName("removeAllowedPlayer returns true")
-    void removeAllowedPlayerReturnsTrue() throws SQLException {
-        assertTrue(this.mockSQLWrapper.removeAllowedPlayer("Mock-Pet-Id", "Mock-Player-Id"));
+    @DisplayName("removeGuest returns true")
+    void removeGuestReturnsTrue() throws SQLException {
+        assertTrue(this.mockSQLWrapper.removeGuest("Mock-Pet-Id", "Mock-Player-Id"));
 
         verify(this.preparedStatement, times(2)).setString(this.indexCaptor.capture(), this.stringCaptor.capture());
         List<String> values = this.stringCaptor.getAllValues();
@@ -64,11 +64,11 @@ public class TPPSQLWrapperRemoveAllowedPlayerTest {
     }
 
     @Test
-    @DisplayName("removeAllowedPlayer returns false if no rows deleted")
-    void removeAllowedPlayerReturnsFalse() throws SQLException {
+    @DisplayName("removeGuest returns false if no rows deleted")
+    void removeGuestReturnsFalse() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenReturn(-1);
 
-        assertFalse(this.mockSQLWrapper.removeAllowedPlayer("Mock-Pet-Id", "Mock-Player-Id"));
+        assertFalse(this.mockSQLWrapper.removeGuest("Mock-Pet-Id", "Mock-Player-Id"));
 
         verify(this.preparedStatement, times(2)).setString(anyInt(), anyString());
         verify(this.preparedStatement, times(1)).executeUpdate();
@@ -77,11 +77,11 @@ public class TPPSQLWrapperRemoveAllowedPlayerTest {
     }
 
     @Test
-    @DisplayName("removeAllowedPlayer rethrows exceptions")
-    void removeAllowedPlayerRethrowsExceptions() throws SQLException {
+    @DisplayName("removeGuest rethrows exceptions")
+    void removeGuestRethrowsExceptions() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenThrow(new SQLException());
 
-        assertThrows(SQLException.class, () -> this.mockSQLWrapper.removeAllowedPlayer("Mock-Pet-Id", "Mock-Player-Id"));
+        assertThrows(SQLException.class, () -> this.mockSQLWrapper.removeGuest("Mock-Pet-Id", "Mock-Player-Id"));
 
         verify(this.preparedStatement, times(2)).setString(anyInt(), anyString());
         verify(this.preparedStatement, times(1)).executeUpdate();

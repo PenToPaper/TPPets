@@ -12,7 +12,7 @@ public class GuestManager {
     private final Hashtable<String, List<String>> guests;
 
     public GuestManager(SQLWrapper sqlWrapper) throws SQLException {
-        this.guests = sqlWrapper.getAllAllowedPlayers();
+        this.guests = sqlWrapper.getAllGuests();
     }
 
     public void addGuest(@NotNull String petId, @NotNull String playerId) {

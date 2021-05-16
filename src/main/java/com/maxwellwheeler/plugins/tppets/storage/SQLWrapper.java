@@ -283,26 +283,26 @@ public abstract class SQLWrapper {
         }
     }
 
-    // Allowed players
+    // Guests
 
-    public boolean insertAllowedPlayer(@NotNull String petId, @NotNull String playerId) throws SQLException {
+    public boolean insertGuest(@NotNull String petId, @NotNull String playerId) throws SQLException {
         String trimmedPetId = UUIDUtils.trimUUID(petId);
         String trimmedPlayerId = UUIDUtils.trimUUID(playerId);
-        String insertAllowedPlayer = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
-        return this.insertPrepStatement(insertAllowedPlayer, trimmedPetId, trimmedPlayerId);
+        String insertGuest = "INSERT INTO tpp_allowed_players (pet_id, user_id) VALUES (?, ?)";
+        return this.insertPrepStatement(insertGuest, trimmedPetId, trimmedPlayerId);
     }
 
-    public boolean removeAllowedPlayer(@NotNull String petId, @NotNull String playerId) throws SQLException {
+    public boolean removeGuest(@NotNull String petId, @NotNull String playerId) throws SQLException {
         String trimmedPetId = UUIDUtils.trimUUID(petId);
         String trimmedPlayerId = UUIDUtils.trimUUID(playerId);
-        String deleteAllowedPlayer = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
-        return this.deletePrepStatement(deleteAllowedPlayer, trimmedPetId, trimmedPlayerId);
+        String deleteGuest = "DELETE FROM tpp_allowed_players WHERE pet_id = ? AND user_id = ?";
+        return this.deletePrepStatement(deleteGuest, trimmedPetId, trimmedPlayerId);
     }
 
-    public Hashtable<String, List<String>> getAllAllowedPlayers() throws SQLException {
-        String selectAllAllowedPlayers = "SELECT * FROM tpp_allowed_players ORDER BY pet_id";
+    public Hashtable<String, List<String>> getAllGuests() throws SQLException {
+        String selectGuests = "SELECT * FROM tpp_allowed_players ORDER BY pet_id";
         try (Connection dbConn = this.getConnection();
-             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectAllAllowedPlayers));
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectGuests));
              ResultSet resultSet = selectStatement.executeQuery()) {
             Hashtable<String, List<String>> ret = new Hashtable<>();
             while (resultSet.next()) {

@@ -54,11 +54,11 @@ public class TPPCommandAllowListTest {
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
 
-        Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
-        allowedPlayers.put("MockPetId", new ArrayList<>());
-        allowedPlayers.get("MockPetId").add("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        Hashtable<String, List<String>> guests = new Hashtable<>();
+        guests.put("MockPetId", new ArrayList<>());
+        guests.get("MockPetId").add("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 
-        when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(allowedPlayers);
+        when(this.sqlWrapper.getAllGuests()).thenReturn(guests);
         GuestManager guestManager = new GuestManager(this.sqlWrapper);
         when(tpPets.getGuestManager()).thenReturn(guestManager);
     }

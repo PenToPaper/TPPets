@@ -20,12 +20,12 @@ public class TPPGuestManagerTest {
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
 
-        Hashtable<String, List<String>> allowedPlayers = new Hashtable<>();
-        List<String> allowedPlayer = new ArrayList<>();
-        allowedPlayer.add("MockPlayerId");
-        allowedPlayers.put("MockPetId", allowedPlayer);
+        Hashtable<String, List<String>> guests = new Hashtable<>();
+        List<String> guest = new ArrayList<>();
+        guest.add("MockPlayerId");
+        guests.put("MockPetId", guest);
 
-        when(sqlWrapper.getAllAllowedPlayers()).thenReturn(allowedPlayers);
+        when(sqlWrapper.getAllGuests()).thenReturn(guests);
         this.guestManager = new GuestManager(sqlWrapper);
     }
 
@@ -40,7 +40,7 @@ public class TPPGuestManagerTest {
     @DisplayName("GuestManager constructor rethrows SQLExceptions from SQLWrapper")
     void guestManagerConstructorRethrows() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        when(sqlWrapper.getAllAllowedPlayers()).thenThrow(new SQLException("Message"));
+        when(sqlWrapper.getAllGuests()).thenThrow(new SQLException("Message"));
         SQLException exception = assertThrows(SQLException.class, () -> new GuestManager(sqlWrapper));
         assertEquals("Message", exception.getMessage());
     }

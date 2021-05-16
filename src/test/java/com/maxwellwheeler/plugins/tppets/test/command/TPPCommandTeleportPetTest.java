@@ -640,7 +640,7 @@ public class TPPCommandTeleportPetTest {
             this.setAliases();
 
             // Permissions adjustments
-            when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+            when(this.sqlWrapper.getAllGuests()).thenReturn(new Hashtable<>());
             GuestManager guestManager = new GuestManager(this.sqlWrapper);
             when(this.tpPets.getGuestManager()).thenReturn(guestManager);
             when(this.admin.hasPermission("tppets.teleportother")).thenReturn(false);

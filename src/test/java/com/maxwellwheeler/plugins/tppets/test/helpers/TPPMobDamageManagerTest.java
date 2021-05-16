@@ -49,7 +49,7 @@ public class TPPMobDamageManagerTest {
         this.blockProjectileSource = mock(BlockProjectileSource.class);
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", org.bukkit.entity.Horse.class, this.owner);
 
-        when(sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+        when(sqlWrapper.getAllGuests()).thenReturn(new Hashtable<>());
         GuestManager guestManager = new GuestManager(sqlWrapper);
         guestManager.addGuest("MockHorseId", "MockGuestId");
 

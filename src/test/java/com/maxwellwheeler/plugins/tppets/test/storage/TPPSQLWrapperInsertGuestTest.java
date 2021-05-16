@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TPPSQLWrapperInsertAllowedPlayerTest {
+public class TPPSQLWrapperInsertGuestTest {
     private Connection connection;
     private PreparedStatement preparedStatement;
     private MockSQLWrapper mockSQLWrapper;
@@ -42,9 +42,9 @@ public class TPPSQLWrapperInsertAllowedPlayerTest {
     }
 
     @Test
-    @DisplayName("insertAllowedPlayer returns true")
-    void insertAllowedPlayerReturnsTrue() throws SQLException {
-        assertTrue(this.mockSQLWrapper.insertAllowedPlayer("Mock-Pet-Id", "Mock-Player-Id"));
+    @DisplayName("insertGuest returns true")
+    void insertGuestReturnsTrue() throws SQLException {
+        assertTrue(this.mockSQLWrapper.insertGuest("Mock-Pet-Id", "Mock-Player-Id"));
 
         verify(this.preparedStatement, times(2)).setString(this.indexCaptor.capture(), this.stringCaptor.capture());
         List<String> values = this.stringCaptor.getAllValues();
@@ -62,11 +62,11 @@ public class TPPSQLWrapperInsertAllowedPlayerTest {
     }
 
     @Test
-    @DisplayName("insertAllowedPlayer returns false if no rows inserted")
-    void insertAllowedPlayerReturnsFalse() throws SQLException {
+    @DisplayName("insertGuest returns false if no rows inserted")
+    void insertGuestReturnsFalse() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenReturn(0);
 
-        assertFalse(this.mockSQLWrapper.insertAllowedPlayer("Mock-Pet-Id", "Mock-Player-Id"));
+        assertFalse(this.mockSQLWrapper.insertGuest("Mock-Pet-Id", "Mock-Player-Id"));
 
         verify(this.preparedStatement, times(2)).setString(anyInt(), anyString());
         verify(this.preparedStatement, times(1)).executeUpdate();
@@ -75,11 +75,11 @@ public class TPPSQLWrapperInsertAllowedPlayerTest {
     }
 
     @Test
-    @DisplayName("insertAllowedPlayer rethrows exceptions")
-    void insertAllowedPlayerRethrowsExceptions() throws SQLException {
+    @DisplayName("insertGuest rethrows exceptions")
+    void insertGuestRethrowsExceptions() throws SQLException {
         when(this.preparedStatement.executeUpdate()).thenThrow(new SQLException());
 
-        assertThrows(SQLException.class, () -> this.mockSQLWrapper.insertAllowedPlayer("Mock-Pet-Id", "Mock-Player-Id"));
+        assertThrows(SQLException.class, () -> this.mockSQLWrapper.insertGuest("Mock-Pet-Id", "Mock-Player-Id"));
 
         verify(this.preparedStatement, times(2)).setString(anyInt(), anyString());
         verify(this.preparedStatement, times(1)).executeUpdate();

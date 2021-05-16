@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TPPSQLWrapperGetAllAllowedPlayersTest {
+public class TPPSQLWrapperGetAllGuestsTest {
     private Connection connection;
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
@@ -43,17 +43,17 @@ public class TPPSQLWrapperGetAllAllowedPlayersTest {
     }
 
     @Test
-    @DisplayName("getAllAllowedPlayers returns a complete hashtable")
-    void getAllAllowedPlayersReturnsHashtable() throws SQLException {
-        Hashtable<String, List<String>> allowedPlayers = this.mockSQLWrapper.getAllAllowedPlayers();
+    @DisplayName("getAllGuests returns a complete hashtable")
+    void getAllGuestsReturnsHashtable() throws SQLException {
+        Hashtable<String, List<String>> guests = this.mockSQLWrapper.getAllGuests();
 
-        assertNotNull(allowedPlayers);
-        assertEquals(2, allowedPlayers.size());
-        assertEquals(2, allowedPlayers.get("MockPetId").size());
-        assertEquals("MockUserId", allowedPlayers.get("MockPetId").get(0));
-        assertEquals("MockUserId2", allowedPlayers.get("MockPetId").get(1));
-        assertEquals(1, allowedPlayers.get("MockPetId2").size());
-        assertEquals("MockUserId", allowedPlayers.get("MockPetId2").get(0));
+        assertNotNull(guests);
+        assertEquals(2, guests.size());
+        assertEquals(2, guests.get("MockPetId").size());
+        assertEquals("MockUserId", guests.get("MockPetId").get(0));
+        assertEquals("MockUserId2", guests.get("MockPetId").get(1));
+        assertEquals(1, guests.get("MockPetId2").size());
+        assertEquals("MockUserId", guests.get("MockPetId2").get(0));
 
         verify(this.preparedStatement, times(1)).executeQuery();
         verify(this.preparedStatement, times(1)).close();
@@ -62,14 +62,14 @@ public class TPPSQLWrapperGetAllAllowedPlayersTest {
     }
 
     @Test
-    @DisplayName("getAllAllowedPlayers returns an empty hashtable on no results")
-    void getAllAllowedPlayersReturnsEmptyHashtable() throws SQLException {
+    @DisplayName("getAllGuests returns an empty hashtable on no results")
+    void getAllGuestsReturnsEmptyHashtable() throws SQLException {
         when(this.resultSet.next()).thenReturn(false);
 
-        Hashtable<String, List<String>> allowedPlayers = this.mockSQLWrapper.getAllAllowedPlayers();
+        Hashtable<String, List<String>> guests = this.mockSQLWrapper.getAllGuests();
 
-        assertNotNull(allowedPlayers);
-        assertEquals(0, allowedPlayers.size());
+        assertNotNull(guests);
+        assertEquals(0, guests.size());
 
         verify(this.preparedStatement, times(1)).executeQuery();
         verify(this.preparedStatement, times(1)).close();
@@ -78,11 +78,11 @@ public class TPPSQLWrapperGetAllAllowedPlayersTest {
     }
 
     @Test
-    @DisplayName("getAllAllowedPlayers rethrows SQLExceptions")
-    void getAllAllowedPlayersRethrowsExceptions() throws SQLException {
+    @DisplayName("getAllGuests rethrows SQLExceptions")
+    void getAllGuestsRethrowsExceptions() throws SQLException {
         when(this.resultSet.next()).thenThrow(new SQLException());
 
-        assertThrows(SQLException.class, () -> this.mockSQLWrapper.getAllAllowedPlayers());
+        assertThrows(SQLException.class, () -> this.mockSQLWrapper.getAllGuests());
 
         verify(this.preparedStatement, times(1)).executeQuery();
         verify(this.preparedStatement, times(1)).close();

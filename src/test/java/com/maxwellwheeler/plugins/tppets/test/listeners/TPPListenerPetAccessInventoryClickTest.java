@@ -87,7 +87,7 @@ public class TPPListenerPetAccessInventoryClickTest {
 
     @Test
     @DisplayName("Doesn't restrict inventory click events when player owns the pet")
-    void inventoryClickEventAllowedPlayerOwnsPerms() {
+    void inventoryClickEventGuestOwnsPerms() {
         InventoryClickEvent inventoryClickEvent = getInventoryClickEvent(this.player);
 
         this.petInventoryProtector.onInventoryClick(inventoryClickEvent);
@@ -99,8 +99,8 @@ public class TPPListenerPetAccessInventoryClickTest {
 
     @Test
     @DisplayName("Doesn't restrict inventory click events when player is explicitly allowed to the pet")
-    void inventoryClickEventAllowedPlayerExplicitlyAllowed() throws SQLException {
-        when(this.sqlWrapper.getAllAllowedPlayers()).thenReturn(new Hashtable<>());
+    void inventoryClickEventGuestExplicitlyAllowed() throws SQLException {
+        when(this.sqlWrapper.getAllGuests()).thenReturn(new Hashtable<>());
         GuestManager guestManager = new GuestManager(this.sqlWrapper);
         guestManager.addGuest("MockPetId", "MockGuestId");
 

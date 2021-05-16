@@ -47,14 +47,14 @@ public class CommandAllowList extends BaseCommand{
 
             List<String> playerUUIDs = this.thisPlugin.getGuestManager().getGuestsToPet(pet.petId);
 
-            this.announceAllowedPlayers(playerUUIDs);
+            this.announceGuests(playerUUIDs);
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
         }
     }
 
-    private void announceAllowedPlayers(List<String> playerUUIDs) {
+    private void announceGuests(List<String> playerUUIDs) {
         this.sender.sendMessage(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  this.commandFor.getName() + "'s " + this.args[0] + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------");
 
         for (String playerUUID : playerUUIDs) {
