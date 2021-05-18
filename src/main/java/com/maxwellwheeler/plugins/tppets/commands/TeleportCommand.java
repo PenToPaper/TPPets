@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 
@@ -35,12 +36,12 @@ public abstract class TeleportCommand extends BaseCommand {
      * @return True if the pet was found and teleported, false otherwise
      */
 
-    protected boolean teleportPetsFromStorage(Location sendTo, PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) throws SQLException {
+    protected boolean teleportPetsFromStorage(Location sendTo, @NotNull PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) throws SQLException {
         World world = Bukkit.getWorld(petStorage.petWorld);
         if (world != null) {
-            Chunk petChunk = world.getChunkAt(petStorage.petX, petStorage.petZ);
+            Chunk petChunk = world.getChunkAt(petStorage.petX >> 4, petStorage.petZ >> 4);
             petChunk.load();
-            Entity entity = getEntityInChunk(petChunk, petStorage);
+            Entity entity = getEntityFromWorld(world, petStorage);
             if (entity != null && teleportPet(sendTo, entity, setSitting, kickPlayerOff)) {
                 this.thisPlugin.getDatabase().updatePetLocation(entity);
                 return true;
@@ -49,9 +50,11 @@ public abstract class TeleportCommand extends BaseCommand {
         return false;
     }
 
-    protected Entity getEntityInChunk(Chunk chunk, PetStorage petStorage) {
-        for (Entity entity : chunk.getEntities()) {
-            if (UUIDUtils.trimUUID(entity.getUniqueId()).equals(petStorage.petId)) {
+    protected Entity getEntityFromWorld(World world, PetStorage petStorage) {
+        // Internally, using the getEntitiesByClasses goes through this same loop. So this isn't a performance loss. It's actually more efficient because it only loops through it all once.
+        String petId = UUIDUtils.unTrimUUID(petStorage.petId);
+        for (Entity entity : world.getEntities()) {
+            if (entity.getUniqueId().toString().equals(petId)) {
                 return entity;
             }
         }
