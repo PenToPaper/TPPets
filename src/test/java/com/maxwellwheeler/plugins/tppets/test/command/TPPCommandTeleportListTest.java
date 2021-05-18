@@ -224,7 +224,7 @@ public class TPPCommandTeleportListTest {
         verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", message);
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp list [pet type]", message);
     }
 
     @Test
@@ -278,7 +278,7 @@ public class TPPCommandTeleportListTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", message);
+        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp list [pet type]", message);
     }
 
     @Test
@@ -429,7 +429,7 @@ public class TPPCommandTeleportListTest {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", message);
+            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp list [pet type]", message);
         }
     }
 }

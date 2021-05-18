@@ -98,7 +98,7 @@ public class CommandTeleportList extends TeleportCommand {
                 break;
             case SYNTAX_ERROR:
             case NO_PET_TYPE:
-                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]");
+                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp list [pet type]");
                 break;
             case NO_PET:
                 this.sender.sendMessage(ChatColor.RED + "Could not find any " + ChatColor.WHITE + this.petType.toString().toLowerCase() + "s");
