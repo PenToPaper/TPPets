@@ -104,7 +104,7 @@ public class ListenerEntityTamed implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityTameEvent(EntityTameEvent event) {
-        if (!event.isCancelled() && PetType.isPetTracked(event.getEntity()) && event.getOwner() instanceof OfflinePlayer) {
+        if (!event.isCancelled() && PetType.isPetTypeTracked(event.getEntity()) && event.getOwner() instanceof OfflinePlayer) {
             Tameable pet = (Tameable) event.getEntity();
             EventStatus eventStatus = onNewTamedEntity((OfflinePlayer) event.getOwner(), pet);
 
