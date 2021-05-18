@@ -210,7 +210,7 @@ public class TPPDBUpdaterOneToTwoTest {
 
         verifyRollback();
 
-        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement: Message");
+        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement - Message");
     }
 
     @Test
@@ -294,7 +294,7 @@ public class TPPDBUpdaterOneToTwoTest {
 
         verifyRollback();
 
-        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement: Message");
+        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement - Message");
     }
 
     @Test
@@ -383,7 +383,7 @@ public class TPPDBUpdaterOneToTwoTest {
 
         verifyRollback();
 
-        verify(this.logWrapper, times(1)).logErrors("Can't execute insert statement: Message");
+        verify(this.logWrapper, times(1)).logErrors("Can't execute insert statement - Message");
     }
 
     @Test

@@ -45,6 +45,7 @@ public class ConfigUpdater {
      */
     public void update() {
         int updatedVersion = 4;
+        int initialVersion = this.schemaVersion;
         if (this.schemaVersion != updatedVersion) {
             // Updates are necessary
             if (this.schemaVersion == 1) {
@@ -60,6 +61,7 @@ public class ConfigUpdater {
                 setSchemaVersion(4);
             }
             this.thisPlugin.saveConfig();
+            this.thisPlugin.getLogWrapper().logPluginInfo("Updated config version from version " + initialVersion + " to " + this.schemaVersion);
         }
     }
 

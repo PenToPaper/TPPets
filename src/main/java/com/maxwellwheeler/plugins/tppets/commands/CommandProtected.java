@@ -19,6 +19,7 @@ public class CommandProtected extends BaseCommand{
         }
 
         displayErrors();
+        logStatus();
     }
 
     public void processCommandGeneric() {
@@ -61,6 +62,12 @@ public class CommandProtected extends BaseCommand{
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus != CommandStatus.SUCCESS) {
+            logUnsuccessfulAction("protected", this.commandStatus.toString());
         }
     }
 }

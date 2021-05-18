@@ -24,12 +24,13 @@ public class TPPDBUpdaterTest {
     private PreparedStatement twoToThreeGetPetsNamedAllList;
     private ResultSet getProtectedRegionTable;
     private TPPets tpPets;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
-        LogWrapper logWrapper = mock(LogWrapper.class);
+        this.logWrapper = mock(LogWrapper.class);
 
-        tpPets = MockFactory.getMockPlugin(null, logWrapper, false, false);
+        tpPets = MockFactory.getMockPlugin(null, this.logWrapper, false, false);
         this.sqlWrapper = mock(SQLWrapper.class, Mockito.withSettings()
                 .useConstructor(tpPets)
                 .defaultAnswer(Mockito.CALLS_REAL_METHODS)
@@ -138,6 +139,9 @@ public class TPPDBUpdaterTest {
                 "loc_z INT NOT NULL, \n" +
                 "world_name VARCHAR(25) NOT NULL, \n" +
                 "PRIMARY KEY (user_id, effective_storage_name))");
+
+        // Update is logged
+        verify(this.logWrapper, times(1)).logPluginInfo("Updated database version from version 1 to 4");
     }
 
     @Test
@@ -165,5 +169,8 @@ public class TPPDBUpdaterTest {
                 "loc_z INT NOT NULL, \n" +
                 "world_name VARCHAR(25) NOT NULL, \n" +
                 "PRIMARY KEY (user_id, effective_storage_name))");
+
+        // Update is not logged
+        verify(this.logWrapper, never()).logPluginInfo(anyString());
     }
 }

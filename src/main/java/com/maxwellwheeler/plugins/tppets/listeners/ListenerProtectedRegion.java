@@ -15,6 +15,7 @@ import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class ListenerProtectedRegion implements Listener {
     private final TPPets thisPlugin;
@@ -30,7 +31,7 @@ public class ListenerProtectedRegion implements Listener {
     @EventHandler(priority= EventPriority.LOW)
     public void onPlayerMove(PlayerMoveEvent event) {
         // 1) Get any protected region the player is in
-        ProtectedRegion pr = this.thisPlugin.getProtectedRegionManager().getProtectedRegionAt(event.getTo());
+        ProtectedRegion pr = this.thisPlugin.getProtectedRegionManager().getProtectedRegionAt(Objects.requireNonNull(event.getTo()));
 
         // 2) If the player isn't in one, return without doing anything
         if (pr == null || pr.getLfReference() == null || pr.getWorld() == null) {
@@ -42,7 +43,7 @@ public class ListenerProtectedRegion implements Listener {
             // If the entity is near the player and tracked by TPPets
             if (pr.isInRegion(entity.getLocation()) && PetType.isPetTracked(entity) && !canPetBeInPr((Tameable) entity, pr.getWorld()) && pr.tpToLostRegion(entity)) {
                 try {
-                    this.thisPlugin.getLogWrapper().logSuccessfulAction("Teleported pet with UUID " + entity.getUniqueId().toString() + " away from " + pr.getRegionName() + " to " + pr.getLfReference().getRegionName());
+                    this.thisPlugin.getLogWrapper().logUpdatedPet("Pet " + entity.getUniqueId() + " teleported from " + pr.getRegionName() + " to " + pr.getLfReference().getRegionName() + ".");
                     this.thisPlugin.getDatabase().insertOrUpdatePetLocation(entity);
                 } catch (SQLException ignored) {}
             }
@@ -53,7 +54,7 @@ public class ListenerProtectedRegion implements Listener {
     @EventHandler (priority=EventPriority.LOW)
     public void entityTeleportIntoPr(EntityTeleportEvent event) {
         if (PetType.isPetTracked(event.getEntity())) {
-            ProtectedRegion protectedRegion = this.thisPlugin.getProtectedRegionManager().getProtectedRegionAt(event.getTo());
+            ProtectedRegion protectedRegion = this.thisPlugin.getProtectedRegionManager().getProtectedRegionAt(Objects.requireNonNull(event.getTo()));
             Tameable pet = (Tameable) event.getEntity();
 
             // If pet is teleporting to a protected region

@@ -19,6 +19,7 @@ public class CommandLost extends BaseCommand{
         }
 
         displayErrors();
+        logStatus();
     }
 
     public void processCommandGeneric() {
@@ -58,6 +59,12 @@ public class CommandLost extends BaseCommand{
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus != CommandStatus.SUCCESS) {
+            logUnsuccessfulAction("lost", this.commandStatus.toString());
         }
     }
 }

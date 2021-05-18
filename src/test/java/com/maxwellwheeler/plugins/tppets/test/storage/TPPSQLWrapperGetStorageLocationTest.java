@@ -30,12 +30,13 @@ public class TPPSQLWrapperGetStorageLocationTest {
     private MockSQLWrapper mockSQLWrapper;
     private ArgumentCaptor<String> preparedStringCaptor;
     private ArgumentCaptor<Integer> preparedIndexCaptor;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
+        this.logWrapper = mock(LogWrapper.class);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.resultSet = mock(ResultSet.class);
@@ -88,6 +89,7 @@ public class TPPSQLWrapperGetStorageLocationTest {
             verify(this.preparedStatement, times(1)).close();
             verify(this.resultSet, times(1)).close();
             verify(this.connection, times(1)).close();
+            verify(this.logWrapper, never()).logErrors(anyString());
         }
     }
 
@@ -105,12 +107,13 @@ public class TPPSQLWrapperGetStorageLocationTest {
         verify(this.preparedStatement, times(1)).close();
         verify(this.resultSet, times(1)).close();
         verify(this.connection, times(1)).close();
+        verify(this.logWrapper, never()).logErrors(anyString());
     }
 
     @Test
     @DisplayName("getStorageLocation rethrows exceptions")
     void getStorageLocationRethrowsExceptions() throws SQLException {
-        when(this.resultSet.next()).thenThrow(new SQLException());
+        when(this.resultSet.next()).thenThrow(new SQLException("Message"));
 
         assertThrows(SQLException.class, () -> this.mockSQLWrapper.getStorageLocation("Mock-Owner-Id", "StorageName"));
 
@@ -119,5 +122,6 @@ public class TPPSQLWrapperGetStorageLocationTest {
         verify(this.preparedStatement, times(1)).close();
         verify(this.resultSet, times(1)).close();
         verify(this.connection, times(1)).close();
+        verify(this.logWrapper, times(1)).logErrors("Can't execute select statement - Message");
     }
 }

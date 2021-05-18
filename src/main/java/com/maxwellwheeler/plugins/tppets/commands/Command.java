@@ -42,6 +42,14 @@ public abstract class Command {
         return null;
     }
 
+    protected void logSuccessfulAction(String commandType, String details) {
+        this.thisPlugin.getLogWrapper().logSuccessfulAction((this.sender == null ? "Unknown Sender" : this.sender.getName()) + " - " + commandType + (details == null ? "" : " - " + details));
+    }
+
+    protected void logUnsuccessfulAction(String commandType, String errorType) {
+        this.thisPlugin.getLogWrapper().logUnsuccessfulAction((this.sender == null ? "Unknown Sender" : this.sender.getName()) + " - " + commandType + " - " + errorType);
+    }
+
     public abstract void processCommand();
 
     public boolean isForSelf() {

@@ -51,7 +51,7 @@ public class TPPCommandPosition2Test {
     }
 
     @Test
-    @DisplayName("Position 2 is settable as first position through the com.maxwellwheeler.plugins.tppets.test.command")
+    @DisplayName("Position 2 is settable as first position through the command")
     void position2FirstPosition() {
         String[] args = {"position2"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -68,7 +68,7 @@ public class TPPCommandPosition2Test {
     }
 
     @Test
-    @DisplayName("Position 2 is settable as second position through the com.maxwellwheeler.plugins.tppets.test.command")
+    @DisplayName("Position 2 is settable as second position through the command")
     void position2SecondPosition() {
         this.regionSelectionManager.setStartLocation(this.admin, new Location(this.world, 400, 500, 600));
 

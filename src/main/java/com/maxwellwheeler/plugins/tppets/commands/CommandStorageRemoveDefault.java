@@ -17,6 +17,7 @@ public class CommandStorageRemoveDefault extends Command {
     public void processCommand() {
         removeDefaultStorage();
         displayStatus();
+        logStatus();
     }
 
     private void removeDefaultStorage() {
@@ -33,10 +34,7 @@ public class CommandStorageRemoveDefault extends Command {
 
             if (!this.thisPlugin.getDatabase().removeServerStorageLocation(this.args[0], this.sender.getWorld())) {
                 this.commandStatus = CommandStatus.DB_FAIL;
-                return;
             }
-
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed " + this.args[0] + " server location in world " + this.sender.getWorld().getName());
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
@@ -63,6 +61,14 @@ public class CommandStorageRemoveDefault extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("storage remove default", "removed " + this.args[0] + " from " + this.sender.getWorld().getName());
+        } else {
+            logUnsuccessfulAction("storage remove default", this.commandStatus.toString());
         }
     }
 }

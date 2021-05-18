@@ -91,7 +91,7 @@ public class TPPListenerProtectedRegionPlayerMoveTest {
         this.playerMoveListenerProtectedRegion.onPlayerMove(this.playerMoveEvent);
 
         verify(this.protectedRegion, times(1)).tpToLostRegion(this.nearbyEntities.get(0));
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Teleported pet with UUID MockInPrPet away from ProtectedRegionName to LostAndFoundRegionName");
+        verify(this.logWrapper, times(1)).logUpdatedPet("Pet MockInPrPet teleported from ProtectedRegionName to LostAndFoundRegionName.");
         verify(this.sqlWrapper, times(1)).insertOrUpdatePetLocation(this.nearbyEntities.get(0));
 
         verify(this.protectedRegion, never()).tpToLostRegion(this.nearbyEntities.get(1));

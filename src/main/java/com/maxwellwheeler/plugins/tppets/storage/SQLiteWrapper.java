@@ -53,7 +53,7 @@ public class SQLiteWrapper extends SQLWrapper {
             return DriverManager.getConnection(getJDBCPath());
 
         } catch (SQLException exception) {
-            this.thisPlugin.getLogWrapper().logErrors("Can't connect to SQLite database: " + exception.getMessage());
+            this.thisPlugin.getLogWrapper().logErrors("Can't connect to SQLite database - " + exception.getMessage());
             throw exception;
         }
     }

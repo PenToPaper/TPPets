@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.*;
@@ -88,6 +89,12 @@ public class TPPCommandProtectedAddTest {
         assertEquals(expectedPr.getEnterMessage(), actualPr.getEnterMessage());
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - protected add - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Adds a protected region")
     void addsProtectedRegion() throws SQLException {
@@ -108,7 +115,7 @@ public class TPPCommandProtectedAddTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.stringCaptor.capture());
         String capturedLogOutput = this.stringCaptor.getValue();
-        assertEquals("Player MockAdminName added protected region ProtectedRegionName", capturedLogOutput);
+        assertEquals("MockAdminName - protected add - added ProtectedRegionName", capturedLogOutput);
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
         String capturedMessage = this.stringCaptor.getValue();
@@ -120,6 +127,8 @@ public class TPPCommandProtectedAddTest {
     void cantAddProtectedRegionWithoutArgs() throws SQLException {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
@@ -137,6 +146,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName;", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_PR_NAME);
+
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
@@ -153,6 +164,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName;", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_LR_NAME);
+
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
@@ -168,6 +181,8 @@ public class TPPCommandProtectedAddTest {
     void cantAddProtectedRegionInvalidEnterMessage() throws SQLException {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here;"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_MESSAGE);
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
@@ -186,6 +201,8 @@ public class TPPCommandProtectedAddTest {
 
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_REGION);
 
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
@@ -206,6 +223,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_REGION);
+
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
@@ -223,6 +242,8 @@ public class TPPCommandProtectedAddTest {
 
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
@@ -243,6 +264,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
+
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
@@ -261,6 +284,8 @@ public class TPPCommandProtectedAddTest {
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).insertProtectedRegion(any(ProtectedRegion.class));
         verify(this.protectedRegionManager, never()).addProtectedRegion(any(ProtectedRegion.class));
@@ -278,6 +303,8 @@ public class TPPCommandProtectedAddTest {
 
         String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).insertProtectedRegion(any(ProtectedRegion.class));

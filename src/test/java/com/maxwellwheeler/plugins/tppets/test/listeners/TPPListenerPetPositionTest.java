@@ -29,6 +29,7 @@ public class TPPListenerPetPositionTest {
     private ArgumentCaptor<Entity> entityCaptor;
     private ChunkUnloadEvent chunkUnloadEvent;
     private ListenerPetPosition listenerPetPosition;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() {
@@ -40,9 +41,9 @@ public class TPPListenerPetPositionTest {
         this.entities = new Entity[]{entity1, entity2, entity3};
         this.entityCaptor = ArgumentCaptor.forClass(Entity.class);
         this.sqlWrapper = mock(SQLWrapper.class);
+        this.logWrapper = mock(LogWrapper.class);
 
-        LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
 
         this.listenerPetPosition = new ListenerPetPosition(tpPets);
         this.chunkUnloadEvent = mock(ChunkUnloadEvent.class);
@@ -53,7 +54,7 @@ public class TPPListenerPetPositionTest {
 
     @Test
     @DisplayName("Registers pet positions in the database on chunk unload events")
-    void listsSpecificLostAndFoundRegions() throws SQLException {
+    void registersPetPosition() throws SQLException {
         this.listenerPetPosition.onChunkUnload(this.chunkUnloadEvent);
 
         verify(this.sqlWrapper, times(3)).insertOrUpdatePetLocation(this.entityCaptor.capture());
@@ -61,5 +62,16 @@ public class TPPListenerPetPositionTest {
         assertEquals(this.entities[0], entitiesUpdated.get(0));
         assertEquals(this.entities[1], entitiesUpdated.get(1));
         assertEquals(this.entities[2], entitiesUpdated.get(2));
+    }
+
+    @Test
+    @DisplayName("Logs database errors")
+    void registersPetPositionLogsErrors() throws SQLException {
+        when(this.sqlWrapper.insertOrUpdatePetLocation(any(Entity.class))).thenThrow(new SQLException());
+
+        this.listenerPetPosition.onChunkUnload(this.chunkUnloadEvent);
+
+        verify(this.sqlWrapper, times(3)).insertOrUpdatePetLocation(any(Entity.class));
+        verify(this.logWrapper, times(3)).logErrors("SQL Error - updating pet location");
     }
 }

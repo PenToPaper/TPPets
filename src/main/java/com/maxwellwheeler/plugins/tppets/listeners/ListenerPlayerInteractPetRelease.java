@@ -47,7 +47,7 @@ public class ListenerPlayerInteractPetRelease implements Listener {
 
             releasePetEntity(pet);
             event.setCancelled(true);
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + event.getPlayer().getName() + " released entity " + event.getRightClicked().getUniqueId().toString());
+            this.thisPlugin.getLogWrapper().logSuccessfulAction(event.getPlayer().getName() + " - release tool - " + event.getRightClicked().getUniqueId());
             return SUCCESS;
 
         } catch (SQLException exception) {
@@ -55,7 +55,7 @@ public class ListenerPlayerInteractPetRelease implements Listener {
         }
     }
 
-    private void displayCommandStatus(Player examiningPlayer, EventStatus eventStatus) {
+    private void displayEventStatus(Player examiningPlayer, EventStatus eventStatus) {
         switch(eventStatus) {
             case SUCCESS:
                 examiningPlayer.sendMessage(ChatColor.BLUE + "Pet released!");
@@ -75,6 +75,12 @@ public class ListenerPlayerInteractPetRelease implements Listener {
             default:
                 examiningPlayer.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logEventStatus(Player examiningPlayer, EventStatus eventStatus) {
+        if (eventStatus != EventStatus.SUCCESS) {
+            this.thisPlugin.getLogWrapper().logUnsuccessfulAction(examiningPlayer.getName() + " - release tool - " + eventStatus.toString());
         }
     }
 
@@ -98,7 +104,8 @@ public class ListenerPlayerInteractPetRelease implements Listener {
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (isPetReleaseEvent(event)) {
             EventStatus status = onPlayerReleasePet(event);
-            displayCommandStatus(event.getPlayer(), status);
+            displayEventStatus(event.getPlayer(), status);
+            logEventStatus(event.getPlayer(), status);
         }
     }
 }

@@ -5,7 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-public class CommandPosition1 extends BaseCommand{
+public class CommandPosition1 extends BaseCommand {
     public CommandPosition1(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }

@@ -27,14 +27,15 @@ public class TPPListenerEntityTamedEntityBreedTest {
     private TPPets tpPets;
     private SQLWrapper sqlWrapper;
     private ListenerEntityTamed listenerEntityTamed;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         this.owner = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
         this.sqlWrapper = mock(SQLWrapper.class);
-        LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, false);
+        this.logWrapper = mock(LogWrapper.class);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
         PetLimitChecker petIndex = new PetLimitChecker(this.tpPets, 1, 1, 1, 1, 1, 1, 1, 1);
 
         this.listenerEntityTamed = new ListenerEntityTamed(this.tpPets);
@@ -64,6 +65,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).getNumPets("MockPlayerId");
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
         verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockPetName");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -82,6 +84,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
         verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
         verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockPetName");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -110,6 +113,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
         verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
         verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockPetName");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -139,6 +143,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
         verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
         verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockPetName");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -157,6 +162,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, never()).getNumPets("MockPlayerId");
         verify(this.sqlWrapper, never()).getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE);
         verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockPetName");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -174,6 +180,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, never()).getNumPets(anyString());
         verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -192,6 +199,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, never()).getNumPets(anyString());
         verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -210,6 +218,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, never()).getNumPets(anyString());
         verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
@@ -227,6 +236,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - TOTAL_LIMIT");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityBreedEvent, times(1)).setCancelled(true);
@@ -244,6 +254,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - TYPE_LIMIT");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityBreedEvent, times(1)).setCancelled(true);
@@ -261,6 +272,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, never()).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityBreedEvent, times(1)).setCancelled(true);
@@ -278,6 +290,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityBreedEvent, times(1)).setCancelled(true);
@@ -295,6 +308,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, never()).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityBreedEvent, times(1)).setCancelled(true);
@@ -312,6 +326,7 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).getNumPets(anyString());
         verify(this.sqlWrapper, times(1)).getNumPetsByPetType(anyString(), any(PetType.Pets.class));
         verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), anyString());
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(entityBreedEvent, times(1)).setCancelled(true);

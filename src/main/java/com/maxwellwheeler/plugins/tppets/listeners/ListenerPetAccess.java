@@ -33,7 +33,7 @@ public class ListenerPetAccess implements Listener {
 
             if (PetType.isPetTracked(pet) && !doesAccessorHavePermission(accessor, pet)) {
                 accessor.sendMessage(ChatColor.RED + "You don't have permission to do that");
-                this.thisPlugin.getLogWrapper().logUnsuccessfulAction("Player with UUID " + accessor.getUniqueId() + " was denied permission to access pet " + pet.getUniqueId());
+                this.thisPlugin.getLogWrapper().logUnsuccessfulAction(accessor.getName() + " - inventory - INSUFFICIENT_PERMISSIONS");
                 return true;
             }
         }
@@ -59,7 +59,7 @@ public class ListenerPetAccess implements Listener {
         if (!event.isCancelled() && event.getEntity() instanceof Player && PetType.isPetTracked(event.getMount()) && !doesAccessorHavePermission((Player) event.getEntity(), (Tameable) event.getMount())) {
             event.setCancelled(true);
             event.getEntity().sendMessage(ChatColor.RED + "You don't have permission to do that");
-            this.thisPlugin.getLogWrapper().logUnsuccessfulAction("Player with UUID " + event.getEntity().getUniqueId() + " was denied permission to mount pet " + event.getMount().getUniqueId());
+            this.thisPlugin.getLogWrapper().logUnsuccessfulAction(event.getEntity().getName() + " - mount - INSUFFICIENT_PERMISSIONS");
         }
     }
 }

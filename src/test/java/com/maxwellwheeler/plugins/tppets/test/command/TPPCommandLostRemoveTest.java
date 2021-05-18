@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
@@ -61,6 +62,12 @@ public class TPPCommandLostRemoveTest {
         when(this.sqlWrapper.removeLostRegion("LostRegionName")).thenReturn(true);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - lost remove - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Removes a lost and found region")
     void removesLostAndFoundRegion() throws SQLException {
@@ -80,7 +87,7 @@ public class TPPCommandLostRemoveTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.stringCaptor.capture());
         String capturedLogOutput = this.stringCaptor.getValue();
-        assertEquals("Player MockAdminName removed lost and found region LostRegionName", capturedLogOutput);
+        assertEquals("MockAdminName - lost remove - removed LostRegionName", capturedLogOutput);
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
         String capturedMessage = this.stringCaptor.getValue();
@@ -92,6 +99,8 @@ public class TPPCommandLostRemoveTest {
     void cannotRemoveLostAndFoundRegionWithoutName() throws SQLException {
         String[] args = {"lost", "remove"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
@@ -109,6 +118,8 @@ public class TPPCommandLostRemoveTest {
     void cannotRemoveLostAndFoundRegionInvalidName() throws SQLException {
         String[] args = {"lost", "remove", "LostRegionName;"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_NAME);
 
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
@@ -129,6 +140,8 @@ public class TPPCommandLostRemoveTest {
         String[] args = {"lost", "remove", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
         verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
@@ -147,6 +160,8 @@ public class TPPCommandLostRemoveTest {
 
         String[] args = {"lost", "remove", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, never()).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
@@ -167,6 +182,8 @@ public class TPPCommandLostRemoveTest {
         String[] args = {"lost", "remove", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
         verify(this.protectedRegionManager, never()).updateLFReferences(anyString());
@@ -185,6 +202,8 @@ public class TPPCommandLostRemoveTest {
 
         String[] args = {"lost", "remove", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).removeLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());

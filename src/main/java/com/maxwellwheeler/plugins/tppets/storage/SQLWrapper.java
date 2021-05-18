@@ -27,7 +27,7 @@ public abstract class SQLWrapper {
         try {
             return 1 <= executeUpdate(prepStatement, args);
         } catch (SQLException e) {
-            this.thisPlugin.getLogWrapper().logErrors("Can't execute insert statement: " + e.getMessage());
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute insert statement - " + e.getMessage());
             throw e;
         }
     }
@@ -36,7 +36,7 @@ public abstract class SQLWrapper {
         try {
             return 0 <= executeUpdate(prepStatement, args);
         } catch (SQLException e) {
-            this.thisPlugin.getLogWrapper().logErrors("Can't execute delete statement: " + e.getMessage());
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute delete statement - " + e.getMessage());
             throw e;
         }
     }
@@ -45,7 +45,7 @@ public abstract class SQLWrapper {
         try {
             return 0 <= executeUpdate(prepStatement, args);
         } catch (SQLException e) {
-            this.thisPlugin.getLogWrapper().logErrors("Can't execute update statement: " + e.getMessage());
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute update statement - " + e.getMessage());
             throw e;
         }
     }
@@ -67,7 +67,7 @@ public abstract class SQLWrapper {
             } else if (args[i] instanceof String) {
                 preparedStatement.setString(i + 1, (String) args[i]);
             } else {
-                throw new SQLException("Invalid argument to prepared statement");
+                throw new SQLException("Invalid argument type in prepared statement");
             }
         }
         return preparedStatement;
@@ -147,6 +147,7 @@ public abstract class SQLWrapper {
 
     // Pet actions
 
+    // TODO: Delete method
     public boolean isNameUnique(@NotNull String ownerId, @NotNull String petName) throws SQLException {
         return this.getSpecificPet(ownerId, petName) == null;
     }
@@ -226,6 +227,9 @@ public abstract class SQLWrapper {
                 return new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name"));
             }
             return null;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -239,6 +243,9 @@ public abstract class SQLWrapper {
                 return new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name"));
             }
             return null;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -253,6 +260,9 @@ public abstract class SQLWrapper {
                 ret.add(new PetStorage(resultSet.getString("pet_id"), resultSet.getInt("pet_type"), resultSet.getInt("pet_x"), resultSet.getInt("pet_y"), resultSet.getInt("pet_z"), resultSet.getString("pet_world"), resultSet.getString("owner_id"), resultSet.getString("pet_name"), resultSet.getString("effective_pet_name")));
             }
             return ret;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -267,6 +277,9 @@ public abstract class SQLWrapper {
                 return resultSet.getInt("count");
             }
             throw new SQLException("Could not select count");
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -280,6 +293,9 @@ public abstract class SQLWrapper {
                 return resultSet.getInt("count");
             }
             throw new SQLException("Could not select count");
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -314,6 +330,9 @@ public abstract class SQLWrapper {
                 ret.get(petId).add(playerId);
             }
             return ret;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -338,6 +357,9 @@ public abstract class SQLWrapper {
                 return new LostAndFoundRegion(resultSet.getString("zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"));
             }
             return null;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -351,6 +373,9 @@ public abstract class SQLWrapper {
                 ret.put(resultSet.getString("zone_name"), new LostAndFoundRegion(resultSet.getString("zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z")));
             }
             return ret;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -380,6 +405,9 @@ public abstract class SQLWrapper {
                 return new ProtectedRegion(resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getString("lf_zone_name"), this.thisPlugin);
             }
             return null;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -393,6 +421,9 @@ public abstract class SQLWrapper {
                 ret.put(resultSet.getString("zone_name"), new ProtectedRegion(resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getString("lf_zone_name"), this.thisPlugin));
             }
             return ret;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -427,6 +458,9 @@ public abstract class SQLWrapper {
                 }
             }
             return null;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -445,6 +479,9 @@ public abstract class SQLWrapper {
                 }
             }
             return ret;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -473,6 +510,9 @@ public abstract class SQLWrapper {
                 return new ServerStorageLocation(resultSet.getString("storage_name"), resultSet.getString("effective_storage_name"), retLoc);
             }
             return null;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 
@@ -487,6 +527,9 @@ public abstract class SQLWrapper {
                 ret.add(new ServerStorageLocation(resultSet.getString("storage_name"), resultSet.getString("effective_storage_name"), retLoc));
             }
             return ret;
+        } catch (SQLException exception) {
+            this.thisPlugin.getLogWrapper().logErrors("Can't execute select statement - " + exception.getMessage());
+            throw exception;
         }
     }
 }

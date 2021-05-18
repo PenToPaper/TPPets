@@ -18,6 +18,7 @@ public class CommandLostRemove extends Command {
     public void processCommand() {
         processCommandGeneric();
         displayStatus();
+        logStatus();
     }
 
     private void processCommandGeneric() {
@@ -43,7 +44,6 @@ public class CommandLostRemove extends Command {
             if (this.thisPlugin.getDatabase().removeLostRegion(this.args[0])) {
                 this.thisPlugin.getLostRegionManager().removeLostRegion(this.args[0]);
                 this.thisPlugin.getProtectedRegionManager().updateLFReferences(this.args[0]);
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed lost and found region " + this.args[0]);
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
             }
@@ -72,6 +72,14 @@ public class CommandLostRemove extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("lost remove", "removed " + this.args[0]);
+        } else {
+            logUnsuccessfulAction("lost remove", this.commandStatus.toString());
         }
     }
 }

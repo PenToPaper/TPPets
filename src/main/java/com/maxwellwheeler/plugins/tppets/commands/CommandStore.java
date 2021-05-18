@@ -33,6 +33,7 @@ class CommandStore extends TeleportCommand {
         }
 
         displayStatus();
+        logStatus();
     }
 
     private boolean isValidSyntax() {
@@ -89,9 +90,7 @@ class CommandStore extends TeleportCommand {
                 return;
             }
 
-            if (storePet(storageLocation, this.pet)) {
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " teleported " + (isForSelf() ? "their" : this.commandFor.getName() + "'s") + " pet " + this.args[0] + " to storage location at: " + formatLocation(storageLocation.getLoc()));
-            } else {
+            if (!storePet(storageLocation, this.pet)) {
                 this.commandStatus = CommandStatus.CANT_TELEPORT;
             }
 
@@ -144,6 +143,14 @@ class CommandStore extends TeleportCommand {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("store", "stored " + this.commandFor.getName() + "'s " + this.args[0] + " at " + (this.hasSpecificStorage ? this.args[1] : "default"));
+        } else {
+            logUnsuccessfulAction("store", this.commandStatus.toString());
         }
     }
 }

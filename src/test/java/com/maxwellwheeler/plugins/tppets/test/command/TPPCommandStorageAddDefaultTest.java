@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
@@ -40,6 +41,7 @@ public class TPPCommandStorageAddDefaultTest {
     @BeforeEach
     public void beforeEach() {
         this.world = mock(World.class);
+        when(this.world.getName()).thenReturn("MockWorld");
         this.adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, this.adminLocation, new String[]{"tppets.storage", "tppets.setdefaultstorage"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
@@ -55,6 +57,12 @@ public class TPPCommandStorageAddDefaultTest {
         this.commandTPP = new CommandTPP(aliases, tpPets);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - storage add default - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Adds storage locations to the database")
     void addStorageLocation() throws SQLException {
@@ -68,7 +76,7 @@ public class TPPCommandStorageAddDefaultTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
-        assertEquals("Player MockAdminName has added server location default x: 400, y: 500, z: 600", capturedLogOutput);
+        assertEquals("MockAdminName - storage add default - added default in MockWorld", capturedLogOutput);
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -83,6 +91,8 @@ public class TPPCommandStorageAddDefaultTest {
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -101,6 +111,8 @@ public class TPPCommandStorageAddDefaultTest {
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
@@ -118,6 +130,8 @@ public class TPPCommandStorageAddDefaultTest {
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, never()).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
@@ -134,6 +148,8 @@ public class TPPCommandStorageAddDefaultTest {
 
         String[] args = {"storage", "add", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, never()).insertServerStorageLocation(anyString(), any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());

@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
@@ -53,6 +54,12 @@ public class TPPCommandStorageRemoveTest {
         this.commandTPP = new CommandTPP(aliases, tpPets);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - storage remove - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Removes storage locations from the database")
     void removeStorageLocation() throws SQLException {
@@ -66,7 +73,7 @@ public class TPPCommandStorageRemoveTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
-        assertEquals("Player MockPlayerName has removed location StorageName from MockPlayerName", capturedLogOutput);
+        assertEquals("MockPlayerName - storage remove - removed StorageName from MockPlayerName", capturedLogOutput);
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -89,7 +96,7 @@ public class TPPCommandStorageRemoveTest {
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminName has removed location StorageName from MockPlayerName", capturedLogOutput);
+            assertEquals("MockAdminName - storage remove - removed StorageName from MockPlayerName", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -104,6 +111,8 @@ public class TPPCommandStorageRemoveTest {
 
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 
@@ -120,6 +129,8 @@ public class TPPCommandStorageRemoveTest {
 
         verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
+
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
         assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage remove [storage name]", capturedMessageOutput);
@@ -135,6 +146,8 @@ public class TPPCommandStorageRemoveTest {
 
             String[] args = {"storage", "f:MockPlayerName", "remove", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
 
             verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 
@@ -153,6 +166,8 @@ public class TPPCommandStorageRemoveTest {
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -169,6 +184,8 @@ public class TPPCommandStorageRemoveTest {
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).removeStorageLocation(anyString(), anyString());
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -184,6 +201,8 @@ public class TPPCommandStorageRemoveTest {
 
         String[] args = {"storage", "remove", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, never()).removeStorageLocation(anyString(), anyString());
 

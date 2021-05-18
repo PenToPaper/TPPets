@@ -178,9 +178,9 @@ public class TPPets extends JavaPlugin {
      */
     private void initializeVault() {
         if (this.vaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault") && initializePermissions()) {
-            getLogWrapper().logSuccessfulAction("Vault detected. Permission tppets.tpanywhere will work with online and offline players.");
+            getLogWrapper().logPluginInfo("Vault detected. Permission tppets.tpanywhere will work with online and offline players.");
         } else {
-            getLogWrapper().logSuccessfulAction("Vault not detected on this server. Permission tppets.tpanywhere will only work with online players.");
+            getLogWrapper().logPluginInfo("Vault not detected on this server. Permission tppets.tpanywhere will only work with online players.");
         }
     }
     
@@ -231,20 +231,20 @@ public class TPPets extends JavaPlugin {
         initializeAllowUntamingPets();
 
         // Database setup
-        getLogWrapper().logSuccessfulAction("Setting up database.");
+        getLogWrapper().logPluginInfo("Setting up database.");
         initializeDBC();
         updateDBC();
         createTables();
         initializeGuestManager();
 
         // Database pulling
-        getLogWrapper().logSuccessfulAction("Getting data from database.");
+        getLogWrapper().logPluginInfo("Getting data from database.");
         initializeLostRegionManager();
         initializeProtectedRegionManager();
         initializePetIndex();
         
         // Register events + commands
-        getLogWrapper().logSuccessfulAction("Registering commands and events.");
+        getLogWrapper().logPluginInfo("Registering commands and events.");
         getServer().getPluginManager().registerEvents(new ListenerPetPosition(this), this);
         getServer().getPluginManager().registerEvents(new ListenerPetAccess(this), this);
         getServer().getPluginManager().registerEvents(new ListenerProtectedRegion(this), this);

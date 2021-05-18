@@ -29,14 +29,15 @@ public class TPPConfigUpdaterTest {
 
     @Captor
     private ArgumentCaptor<List<String>> argumentCaptorStringList;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() {
         MockitoAnnotations.openMocks(this);
 
-        LogWrapper logWrapper = mock(LogWrapper.class);
+        this.logWrapper = mock(LogWrapper.class);
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
         this.fileConfiguration = mock(FileConfiguration.class);
 
         when(this.tpPets.getConfig()).thenReturn(this.fileConfiguration);
@@ -50,6 +51,12 @@ public class TPPConfigUpdaterTest {
         when(this.fileConfiguration.getStringList("tools.untame_pets")).thenReturn(releaseTools);
 
         this.configUpdater = mock(ConfigUpdater.class, withSettings().useConstructor(this.tpPets).defaultAnswer(CALLS_REAL_METHODS));
+    }
+
+    public void verifyLoggedPluginInfo(int startVersion, int endVersion) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logPluginInfo(logCaptor.capture());
+        assertEquals("Updated config version from version " + startVersion + " to " + endVersion, logCaptor.getValue());
     }
 
     void assertContainsInAnyOrder(List<String> actual, String... expected) {
@@ -110,6 +117,8 @@ public class TPPConfigUpdaterTest {
         verify(this.fileConfiguration, times(1)).set(eq("protect_pets_from"), this.argumentCaptorStringList.capture());
         List<String> protectPetsFromList = this.argumentCaptorStringList.getValue();
         assertContainsInAnyOrder(protectPetsFromList, "GuestDamage", "StrangerDamage", "OwnerDamage", "EnvironmentalDamage", "MobDamage");
+
+        verifyLoggedPluginInfo(1, 4);
     }
 
     @Test
@@ -167,6 +176,8 @@ public class TPPConfigUpdaterTest {
         verify(this.fileConfiguration, times(1)).set(eq("protect_pets_from"), this.argumentCaptorStringList.capture());
         List<String> protectPetsFromList = this.argumentCaptorStringList.getValue();
         assertContainsInAnyOrder(protectPetsFromList, "GuestDamage", "StrangerDamage", "OwnerDamage", "EnvironmentalDamage", "MobDamage");
+
+        verifyLoggedPluginInfo(2, 4);
     }
 
     @Test
@@ -224,6 +235,8 @@ public class TPPConfigUpdaterTest {
         verify(this.fileConfiguration, times(1)).set(eq("protect_pets_from"), this.argumentCaptorStringList.capture());
         List<String> protectPetsFromList = this.argumentCaptorStringList.getValue();
         assertContainsInAnyOrder(protectPetsFromList, "GuestDamage", "StrangerDamage", "OwnerDamage", "EnvironmentalDamage", "MobDamage");
+
+        verifyLoggedPluginInfo(3, 4);
     }
 
     @Test

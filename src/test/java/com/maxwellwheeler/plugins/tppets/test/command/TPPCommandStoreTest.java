@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
@@ -86,6 +87,12 @@ public class TPPCommandStoreTest {
         when(this.chunk.getEntities()).thenReturn(new Entity[]{this.horse});
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - store - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Teleports user's pets to default storage")
     void teleportsUsersPetsToDefaultStorage() throws SQLException {
@@ -110,7 +117,7 @@ public class TPPCommandStoreTest {
 
             verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockPlayerName teleported their pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+            assertEquals("MockPlayerName - store - stored MockPlayerName's PetName at default", capturedLogOutput);
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -144,7 +151,7 @@ public class TPPCommandStoreTest {
 
             verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminName teleported MockPlayerName's pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+            assertEquals("MockAdminName - store - stored MockPlayerName's PetName at default", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -177,7 +184,7 @@ public class TPPCommandStoreTest {
 
             verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockPlayerName teleported their pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+            assertEquals("MockPlayerName - store - stored MockPlayerName's PetName at StorageName", capturedLogOutput);
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -211,7 +218,7 @@ public class TPPCommandStoreTest {
 
             verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminName teleported MockPlayerName's pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+            assertEquals("MockAdminName - store - stored MockPlayerName's PetName at StorageName", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -232,6 +239,8 @@ public class TPPCommandStoreTest {
             String[] args = {"store", "f:PlayerName", "PetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
             verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
             verify(this.horse, never()).teleport(any(Location.class));
@@ -251,6 +260,8 @@ public class TPPCommandStoreTest {
 
             String[] args = {"store", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
 
             verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
@@ -274,6 +285,8 @@ public class TPPCommandStoreTest {
             String[] args = {"store", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
+
             verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
             verify(this.horse, never()).teleport(any(Location.class));
@@ -294,6 +307,8 @@ public class TPPCommandStoreTest {
 
             String[] args = {"store", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(this.chunk, never()).load();
@@ -318,6 +333,8 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "PetName", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT_IN_PR);
+
         verify(this.sqlWrapper, times(1)).getStorageLocation("MockPlayerId", "StorageName");
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
@@ -338,6 +355,8 @@ public class TPPCommandStoreTest {
 
         String[] args = {"store", "PetName", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.TP_BETWEEN_WORLDS);
 
         verify(this.sqlWrapper, times(1)).getStorageLocation("MockPlayerId", "StorageName");
         verify(this.chunk, never()).load();
@@ -378,7 +397,7 @@ public class TPPCommandStoreTest {
 
             verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockPlayerName teleported their pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+            assertEquals("MockPlayerName - store - stored MockPlayerName's PetName at StorageName", capturedLogOutput);
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -415,7 +434,7 @@ public class TPPCommandStoreTest {
 
             verify(this.logWrapper).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminName teleported their pet PetName to storage location at: x: 100, y: 200, z: 300", capturedLogOutput);
+            assertEquals("MockAdminName - store - stored MockAdminName's PetName at StorageName", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -433,6 +452,8 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "PetName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
         verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
@@ -446,6 +467,8 @@ public class TPPCommandStoreTest {
     void cannotTeleportUsersPetsNoPetName() throws SQLException {
         String[] args = {"store"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
         verify(this.chunk, never()).load();
@@ -464,6 +487,8 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "MyPet;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
+
         verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
@@ -480,6 +505,8 @@ public class TPPCommandStoreTest {
     void cannotTeleportUsersPetsInvalidStorageName() throws SQLException {
         String[] args = {"store", "MyPet", "MyStorage;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INVALID_NAME);
 
         verify(this.sqlWrapper, never()).getStorageLocation(anyString(), anyString());
         verify(this.chunk, never()).load();
@@ -499,6 +526,8 @@ public class TPPCommandStoreTest {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "MyStorage")).thenThrow(new SQLException());
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).getStorageLocation("MockPlayerId", "MyStorage");
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
@@ -516,6 +545,8 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "MyPet"};
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenThrow(new SQLException());
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, never()).getStorageLocation(anyString(), anyString());
         verify(this.chunk, never()).load();
@@ -536,6 +567,8 @@ public class TPPCommandStoreTest {
 
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, never()).getStorageLocation(anyString(), anyString());
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
@@ -555,6 +588,8 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "PetName", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INVALID_NAME);
+
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -573,6 +608,8 @@ public class TPPCommandStoreTest {
         String[] args = {"store", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INVALID_NAME);
+
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -590,6 +627,8 @@ public class TPPCommandStoreTest {
 
         String[] args = {"store", "PetName", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
 
         verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
 
@@ -614,6 +653,8 @@ public class TPPCommandStoreTest {
 
             String[] args = {"store", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT);
 
             verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
 
@@ -640,6 +681,8 @@ public class TPPCommandStoreTest {
 
             String[] args = {"store", "f:MockPlayerName", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.CANT_TELEPORT);
 
             verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
 

@@ -21,6 +21,7 @@ public class CommandAllowAdd extends BaseCommand {
         }
 
         displayStatus();
+        logStatus();
     }
 
     private boolean isValidSyntax() {
@@ -28,7 +29,6 @@ public class CommandAllowAdd extends BaseCommand {
     }
 
     private void processCommandGeneric() {
-        // TODO: Make sure errors are properly logged
         try {
             OfflinePlayer playerToAllow = this.getOfflinePlayer(this.args[0]);
 
@@ -55,7 +55,6 @@ public class CommandAllowAdd extends BaseCommand {
             }
 
             if (this.thisPlugin.getDatabase().insertGuest(pet.petId, playerToAllow.getUniqueId().toString())) {
-                this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " allowed " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
                 this.thisPlugin.getGuestManager().addGuest(pet.petId, playerToAllow.getUniqueId().toString());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
@@ -98,6 +97,14 @@ public class CommandAllowAdd extends BaseCommand {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("allow", this.args[0] + " to " + this.commandFor.getName() + "'s " + this.args[1]);
+        } else {
+            logUnsuccessfulAction("allow", this.commandStatus.toString());
         }
     }
 }

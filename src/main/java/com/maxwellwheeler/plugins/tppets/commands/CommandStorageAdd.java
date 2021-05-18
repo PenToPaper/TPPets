@@ -17,6 +17,7 @@ public class CommandStorageAdd extends Command {
     public void processCommand() {
         addStorage();
         displayStatus();
+        logStatus();
     }
 
     private void addStorage() {
@@ -56,7 +57,6 @@ public class CommandStorageAdd extends Command {
         }
 
         if (this.thisPlugin.getDatabase().insertStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0], this.sender.getLocation())) {
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getUniqueId().toString() + " has added location " + this.args[0] + " " + TeleportCommand.formatLocation(this.sender.getLocation()) + " for " + this.commandFor.getName());
             this.commandStatus = CommandStatus.SUCCESS;
         } else {
             this.commandStatus = CommandStatus.DB_FAIL;
@@ -94,6 +94,14 @@ public class CommandStorageAdd extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("storage add", "added " + this.args[0] + " for " + this.commandFor.getName());
+        } else {
+            logUnsuccessfulAction("storage add", this.commandStatus.toString());
         }
     }
 }

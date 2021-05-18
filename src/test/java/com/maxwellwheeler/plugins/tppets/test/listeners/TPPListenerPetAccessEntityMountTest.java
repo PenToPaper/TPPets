@@ -65,7 +65,7 @@ public class TPPListenerPetAccessEntityMountTest {
 
         verify(entityMountEvent, times(1)).setCancelled(true);
         verify(this.stranger, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
-        verify(this.logWrapper, times(1)).logUnsuccessfulAction("Player with UUID MockStrangerId was denied permission to mount pet MockHorseId");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockStrangerName - mount - INSUFFICIENT_PERMISSIONS");
     }
 
     @Test

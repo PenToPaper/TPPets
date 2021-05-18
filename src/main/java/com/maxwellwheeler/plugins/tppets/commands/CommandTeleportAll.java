@@ -52,6 +52,7 @@ public class CommandTeleportAll extends TeleportCommand {
         }
 
         displayStatus();
+        logStatus();
     }
 
     private void processCommandGeneric() {
@@ -126,5 +127,13 @@ public class CommandTeleportAll extends TeleportCommand {
         }
         errorPetNames.delete(errorPetNames.lastIndexOf(", "), errorPetNames.length());
         return errorPetNames.toString();
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("all", "teleported " + this.commandFor.getName() + "'s " + this.petType.toString().toLowerCase() + "s");
+        } else {
+            logUnsuccessfulAction("all", this.commandStatus.toString());
+        }
     }
 }

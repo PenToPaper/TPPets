@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
@@ -63,6 +64,12 @@ public class TPPCommandProtectedRemoveTest {
         when(this.sqlWrapper.removeProtectedRegion("ProtectedRegionName")).thenReturn(true);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - protected remove - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Removes a protected region")
     void removesProtectedRegion() throws SQLException {
@@ -80,7 +87,7 @@ public class TPPCommandProtectedRemoveTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.stringCaptor.capture());
         String capturedLogOutput = this.stringCaptor.getValue();
-        assertEquals("Player MockAdminName removed protected region ProtectedRegionName", capturedLogOutput);
+        assertEquals("MockAdminName - protected remove - removed ProtectedRegionName", capturedLogOutput);
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
         String capturedMessage = this.stringCaptor.getValue();
@@ -92,6 +99,8 @@ public class TPPCommandProtectedRemoveTest {
     void cannotRemoveProtectedRegionNoName() throws SQLException {
         String[] args = {"protected", "remove"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
@@ -108,6 +117,8 @@ public class TPPCommandProtectedRemoveTest {
     void cannotRemoveProtectedRegionInvalidName() throws SQLException {
         String[] args = {"protected", "remove", "ProtectedRegionName;"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_NAME);
 
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
@@ -127,6 +138,8 @@ public class TPPCommandProtectedRemoveTest {
         String[] args = {"protected", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.protectedRegionManager, never()).removeProtectedRegion(anyString());
@@ -144,6 +157,8 @@ public class TPPCommandProtectedRemoveTest {
 
         String[] args = {"protected", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
@@ -163,6 +178,8 @@ public class TPPCommandProtectedRemoveTest {
         String[] args = {"protected", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());
         verify(this.protectedRegionManager, never()).removeProtectedRegion(anyString());
@@ -180,6 +197,8 @@ public class TPPCommandProtectedRemoveTest {
 
         String[] args = {"protected", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, times(1)).getProtectedRegion(anyString());

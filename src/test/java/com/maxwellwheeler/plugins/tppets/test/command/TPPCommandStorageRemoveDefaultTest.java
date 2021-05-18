@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
@@ -30,7 +31,6 @@ public class TPPCommandStorageRemoveDefaultTest {
     private SQLWrapper sqlWrapper;
     private LogWrapper logWrapper;
     private ArgumentCaptor<String> logCaptor;
-    private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
     private World world;
@@ -44,13 +44,19 @@ public class TPPCommandStorageRemoveDefaultTest {
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
+        TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
         altAlias.add("storage");
         aliases.put("storage", altAlias);
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
+    }
+
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - storage remove default - " + commandStatus.toString(), logCaptor.getValue());
     }
 
     @Test
@@ -67,7 +73,7 @@ public class TPPCommandStorageRemoveDefaultTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
-        assertEquals("Player MockAdminName has removed default server location in world MockWorld", capturedLogOutput);
+        assertEquals("MockAdminName - storage remove default - removed default from MockWorld", capturedLogOutput);
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -82,6 +88,8 @@ public class TPPCommandStorageRemoveDefaultTest {
 
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -101,6 +109,8 @@ public class TPPCommandStorageRemoveDefaultTest {
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
@@ -119,6 +129,8 @@ public class TPPCommandStorageRemoveDefaultTest {
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
 
@@ -134,6 +146,8 @@ public class TPPCommandStorageRemoveDefaultTest {
 
         String[] args = {"storage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, never()).removeServerStorageLocation(anyString(), any(World.class));
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());

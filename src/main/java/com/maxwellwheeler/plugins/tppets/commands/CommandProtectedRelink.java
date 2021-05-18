@@ -17,6 +17,7 @@ public class CommandProtectedRelink extends Command {
     public void processCommand() {
         processCommandGeneric();
         displayStatus();
+        logStatus();
     }
 
     private void processCommandGeneric() {
@@ -46,7 +47,6 @@ public class CommandProtectedRelink extends Command {
             if (this.thisPlugin.getDatabase().relinkProtectedRegion(this.args[0], this.args[1])) {
                 protectedRegion.setLfName(this.args[1]);
                 protectedRegion.updateLFReference(this.thisPlugin);
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " relinked protected region " + protectedRegion.getRegionName() + " to " + protectedRegion.getLfName());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
             }
@@ -79,6 +79,14 @@ public class CommandProtectedRelink extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("protected relink", "relinked " + this.args[0] + " to " + this.args[1]);
+        } else {
+            logUnsuccessfulAction("protected relink", this.commandStatus.toString());
         }
     }
 }

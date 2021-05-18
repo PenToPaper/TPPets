@@ -203,7 +203,7 @@ public class TPPDBUpdaterThreeToFourTest {
 
         verifyRollback();
 
-        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement: Message");
+        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement - Message");
     }
 
     @Test
@@ -229,7 +229,7 @@ public class TPPDBUpdaterThreeToFourTest {
         verify(this.fourToThreeDropUserStorageLocations, times(1)).executeUpdate();
         verify(this.fourToThreeDropServerStorageLocations, never()).executeUpdate();
 
-        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement: Message");
+        verify(this.logWrapper, times(1)).logErrors("Can't execute update statement - Message");
     }
 
     @Test

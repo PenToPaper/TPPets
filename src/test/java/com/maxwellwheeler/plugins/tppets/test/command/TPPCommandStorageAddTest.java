@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
@@ -64,6 +65,12 @@ public class TPPCommandStorageAddTest {
         this.commandTPP = new CommandTPP(aliases, tpPets);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - storage add - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Adds storage locations to the database")
     void addStorageLocation() throws SQLException {
@@ -80,7 +87,7 @@ public class TPPCommandStorageAddTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
-        assertEquals("Player MockPlayerId has added location StorageName x: 100, y: 200, z: 300 for MockPlayerName", capturedLogOutput);
+        assertEquals("MockPlayerName - storage add - added StorageName for MockPlayerName", capturedLogOutput);
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -106,7 +113,7 @@ public class TPPCommandStorageAddTest {
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminId has added location StorageName x: 400, y: 500, z: 600 for MockPlayerName", capturedLogOutput);
+            assertEquals("MockAdminName - storage add - added StorageName for MockPlayerName", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -124,6 +131,8 @@ public class TPPCommandStorageAddTest {
 
         String[] args = {"storage", "add", "StorageName;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INVALID_NAME);
 
         verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
@@ -143,6 +152,8 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
+
         verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -158,6 +169,8 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT_IN_PR);
+
         verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
         verify(this.player, never()).sendMessage(anyString());
     }
@@ -172,6 +185,8 @@ public class TPPCommandStorageAddTest {
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.LIMIT_REACHED);
 
         verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
@@ -199,7 +214,7 @@ public class TPPCommandStorageAddTest {
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("Player MockAdminId has added location StorageName x: 400, y: 500, z: 600 for MockPlayerName", capturedLogOutput);
+            assertEquals("MockAdminName - storage add - added StorageName for MockPlayerName", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -220,6 +235,8 @@ public class TPPCommandStorageAddTest {
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
@@ -245,6 +262,8 @@ public class TPPCommandStorageAddTest {
             String[] args = {"storage", "f:MockPlayerName", "add", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
+
             verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
@@ -265,6 +284,8 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -283,6 +304,8 @@ public class TPPCommandStorageAddTest {
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
@@ -303,6 +326,8 @@ public class TPPCommandStorageAddTest {
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, never()).insertStorageLocation(anyString(), anyString(), any(Location.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
@@ -321,6 +346,8 @@ public class TPPCommandStorageAddTest {
 
         String[] args = {"storage", "add", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).insertStorageLocation(anyString(), anyString(), any(Location.class));
 

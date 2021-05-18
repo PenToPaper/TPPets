@@ -48,7 +48,7 @@ public class TPPMySQLWrapperTest {
 
         assertThrows(SQLException.class, () -> this.mySQLWrapper.getConnection());
 
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database: Invalid database credentials");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database - Invalid database credentials");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class TPPMySQLWrapperTest {
 
         assertThrows(SQLException.class, () -> this.mySQLWrapper.getConnection());
 
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database: Invalid database credentials");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database - Invalid database credentials");
     }
 
     @Test
@@ -68,7 +68,7 @@ public class TPPMySQLWrapperTest {
 
         assertThrows(SQLException.class, () -> this.mySQLWrapper.getConnection());
 
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database: Invalid database credentials");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database - Invalid database credentials");
     }
 
     @Test
@@ -78,7 +78,7 @@ public class TPPMySQLWrapperTest {
 
         assertThrows(SQLException.class, () -> this.mySQLWrapper.getConnection());
 
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database: Invalid database credentials");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database - Invalid database credentials");
     }
 
     @Test
@@ -88,7 +88,7 @@ public class TPPMySQLWrapperTest {
 
         assertThrows(SQLException.class, () -> this.mySQLWrapper.getConnection());
 
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database: Invalid database credentials");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database - Invalid database credentials");
     }
 
     @Test
@@ -98,7 +98,7 @@ public class TPPMySQLWrapperTest {
 
         assertThrows(SQLException.class, () -> this.mySQLWrapper.getConnection());
 
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database: Invalid database credentials");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database - Invalid database credentials");
     }
 
     @Test
@@ -112,7 +112,7 @@ public class TPPMySQLWrapperTest {
 
             driverManager.verify(times(1), () -> DriverManager.getConnection(this.connectionURL, "Username", "Password"));
 
-            verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database: Message");
+            verify(this.logWrapper, times(1)).logErrors("Can't connect to MySQL database - Message");
         }
     }
 }

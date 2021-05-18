@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
@@ -13,12 +14,14 @@ import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class TPPCommandProtectedRelinkTest {
@@ -54,6 +57,12 @@ public class TPPCommandProtectedRelinkTest {
         this.commandTPP = new CommandTPP(aliases, tpPets);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - protected relink - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Relinks existing protected regions to lost regions")
     void relinks() throws SQLException {
@@ -64,7 +73,7 @@ public class TPPCommandProtectedRelinkTest {
         verify(this.sqlWrapper, times(1)).relinkProtectedRegion("ProtectedRegion", "LostRegion");
         verify(this.protectedRegion, times(1)).setLfName("LostRegion");
         verify(this.protectedRegion, times(1)).updateLFReference(this.tpPets);
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player " + this.admin.getName() + " relinked protected region " + this.protectedRegion.getRegionName() + " to " + this.protectedRegion.getLfName());
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - protected relink - relinked ProtectedRegion to LostRegion");
     }
 
     @Test
@@ -72,6 +81,8 @@ public class TPPCommandProtectedRelinkTest {
     void doesNotRelinkNotEnoughArgs() throws SQLException {
         String[] args = {"protected", "relink", "ProtectedRegion"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp protected relink [protected region name] [lost and found region name]");
         verify(this.sqlWrapper, never()).relinkProtectedRegion(anyString(), anyString());
@@ -86,6 +97,8 @@ public class TPPCommandProtectedRelinkTest {
         String[] args = {"protected", "relink", "ProtectedRegion;", "LostRegion"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_PR_NAME);
+
         verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Invalid protected region name: " + ChatColor.WHITE + "ProtectedRegion;");
         verify(this.sqlWrapper, never()).relinkProtectedRegion(anyString(), anyString());
         verify(this.protectedRegion, never()).setLfName(anyString());
@@ -98,6 +111,8 @@ public class TPPCommandProtectedRelinkTest {
     void doesNotRelinkInvalidLfrName() throws SQLException {
         String[] args = {"protected", "relink", "ProtectedRegion", "LostRegion;"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_LR_NAME);
 
         verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Invalid lost and found region name: " + ChatColor.WHITE + "LostRegion;");
         verify(this.sqlWrapper, never()).relinkProtectedRegion(anyString(), anyString());
@@ -114,6 +129,8 @@ public class TPPCommandProtectedRelinkTest {
         String[] args = {"protected", "relink", "ProtectedRegion", "LostRegion"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_REGION);
+
         verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Can't find protected region: " + ChatColor.WHITE + "ProtectedRegion");
         verify(this.sqlWrapper, never()).relinkProtectedRegion(anyString(), anyString());
         verify(this.protectedRegion, never()).setLfName(anyString());
@@ -129,6 +146,8 @@ public class TPPCommandProtectedRelinkTest {
         String[] args = {"protected", "relink", "ProtectedRegion", "LostRegion"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Could not relink regions");
         verify(this.sqlWrapper, times(1)).relinkProtectedRegion("ProtectedRegion", "LostRegion");
         verify(this.protectedRegion, never()).setLfName(anyString());
@@ -143,6 +162,8 @@ public class TPPCommandProtectedRelinkTest {
 
         String[] args = {"protected", "relink", "ProtectedRegion", "LostRegion"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Could not relink regions");
         verify(this.sqlWrapper, times(1)).relinkProtectedRegion("ProtectedRegion", "LostRegion");

@@ -19,6 +19,7 @@ public class CommandProtectedAdd extends Command {
     public void processCommand() {
         processCommandGeneric();
         displayStatus();
+        logStatus();
     }
 
     private void processCommandGeneric() {
@@ -60,7 +61,6 @@ public class CommandProtectedAdd extends Command {
             ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
             if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
                 this.thisPlugin.getProtectedRegionManager().addProtectedRegion(protectedRegion);
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added protected region " + protectedRegion.getRegionName());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
             }
@@ -99,6 +99,14 @@ public class CommandProtectedAdd extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("protected add", "added " + this.args[0]);
+        } else {
+            logUnsuccessfulAction("protected add", this.commandStatus.toString());
         }
     }
 }

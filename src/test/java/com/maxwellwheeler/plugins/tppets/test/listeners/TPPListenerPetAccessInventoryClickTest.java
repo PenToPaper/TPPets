@@ -67,7 +67,7 @@ public class TPPListenerPetAccessInventoryClickTest {
         this.petInventoryProtector.onInventoryClick(inventoryClickEvent);
 
         verify(this.guest, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
-        verify(this.logWrapper, times(1)).logUnsuccessfulAction("Player with UUID MockGuestId was denied permission to access pet MockPetId");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockGuestName - inventory - INSUFFICIENT_PERMISSIONS");
         verify(inventoryClickEvent, times(1)).setCancelled(true);
     }
 

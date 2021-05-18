@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
@@ -23,10 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,6 +46,7 @@ public class TPPCommandTeleportAllTest {
     private Command command;
     private CommandTPP commandTPP;
     private ProtectedRegionManager protectedRegionManager;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() {
@@ -63,13 +62,19 @@ public class TPPCommandTeleportAllTest {
         this.chunk = mock(Chunk.class);
         when(this.world.getChunkAt(anyInt(), anyInt())).thenReturn(this.chunk);
         this.sqlWrapper = mock(SQLWrapper.class);
-        LogWrapper logWrapper = mock(LogWrapper.class);
+        this.logWrapper = mock(LogWrapper.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
         this.protectedRegionManager = mock(ProtectedRegionManager.class);
         when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(true);
         when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
         this.command = mock(Command.class);
+    }
+
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - all - " + commandStatus.toString(), logCaptor.getValue());
     }
 
     void setAliases() {
@@ -153,6 +158,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", petType.toString().toLowerCase()};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - all - teleported MockPlayerName's " + petType.toString().toLowerCase() + "s");
+
             verify(this.chunk, times(3)).load();
             checkPetIsTeleported(entities[0], this.playerLocation, this.teleportCaptor);
             checkPetIsTeleported(entities[1], this.playerLocation, this.teleportCaptor);
@@ -191,6 +198,8 @@ public class TPPCommandTeleportAllTest {
             // Command object
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT_IN_PR);
 
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
@@ -231,6 +240,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INSUFFICIENT_PERMISSIONS);
+
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
             checkPetIsNotTeleported(entities[1]);
@@ -266,6 +277,8 @@ public class TPPCommandTeleportAllTest {
             // Command object
             String[] args = {"all"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
@@ -303,6 +316,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", "notapet"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET_TYPE);
+
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
             checkPetIsNotTeleported(entities[1]);
@@ -333,6 +348,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
+
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
             checkPetIsNotTeleported(entities[1]);
@@ -362,6 +379,8 @@ public class TPPCommandTeleportAllTest {
             // Command object
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
@@ -399,6 +418,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT);
+
             verify(this.chunk, times(3)).load();
             checkPetIsTeleported(entities[0], this.playerLocation, this.teleportCaptor);
             checkPetIsNotTeleported(entities[1]);
@@ -435,6 +456,8 @@ public class TPPCommandTeleportAllTest {
             // Command object
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT);
 
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
@@ -475,6 +498,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - all - teleported MockPlayerName's horses");
+
             verify(this.chunk, times(3)).load();
             checkPetIsTeleported(entities[0], this.playerLocation, this.teleportCaptor);
             checkPetIsTeleported(entities[1], this.playerLocation, this.teleportCaptor);
@@ -513,6 +538,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - all - teleported MockAdminName's horses");
+
             verify(this.chunk, times(3)).load();
             checkPetIsTeleported(entities[0], this.adminLocation, this.teleportCaptor);
             checkPetIsTeleported(entities[1], this.adminLocation, this.teleportCaptor);
@@ -550,6 +577,8 @@ public class TPPCommandTeleportAllTest {
             // Command object
             String[] args = {"all", "f:MockPlayerName", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - all - teleported MockPlayerName's horses");
 
             verify(this.chunk, times(3)).load();
             checkPetIsTeleported(entities[0], this.adminLocation, this.teleportCaptor);
@@ -591,6 +620,8 @@ public class TPPCommandTeleportAllTest {
             String[] args = {"all", "f:MockPlayerName", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
+
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
             checkPetIsNotTeleported(entities[1]);
@@ -626,6 +657,8 @@ public class TPPCommandTeleportAllTest {
             // Command object
             String[] args = {"all", "f:MockPlayerName;", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);
@@ -666,6 +699,8 @@ public class TPPCommandTeleportAllTest {
             // Command object
             String[] args = {"all", "f:MockPlayerName", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
 
             verify(this.chunk, never()).load();
             checkPetIsNotTeleported(entities[0]);

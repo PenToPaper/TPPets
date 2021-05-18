@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
@@ -58,6 +59,12 @@ public class TPPCommandRenameTest {
         when(this.sqlWrapper.getSpecificPet("MockPlayerId", "NewPetName")).thenReturn(null);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - rename - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Renames a pet")
     void renamePet() throws SQLException {
@@ -71,7 +78,7 @@ public class TPPCommandRenameTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
-        assertEquals("MockPlayerName has changed MockPlayerName's pet named OldPetName to NewPetName", capturedLogOutput);
+        assertEquals("MockPlayerName - rename - renamed MockPlayerName's OldPetName to NewPetName", capturedLogOutput);
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
@@ -87,6 +94,8 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -98,6 +107,8 @@ public class TPPCommandRenameTest {
     void cannotRenamePetNoNewName() throws SQLException {
         String[] args = {"rename", "OldPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
@@ -114,6 +125,8 @@ public class TPPCommandRenameTest {
         String[] args = {"rename"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
+
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -129,6 +142,8 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName;", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
+
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -143,6 +158,8 @@ public class TPPCommandRenameTest {
     void cannotRenamePetInvalidNewName() throws SQLException {
         String[] args = {"rename", "OldPetName", "NewPetName;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INVALID_NAME);
 
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
@@ -161,6 +178,8 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -178,6 +197,8 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
+
         verify(this.sqlWrapper, times(1)).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -194,6 +215,8 @@ public class TPPCommandRenameTest {
 
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.PET_NAME_ALREADY_IN_USE);
 
         verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
@@ -214,6 +237,8 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "NewPetName");
@@ -232,6 +257,8 @@ public class TPPCommandRenameTest {
 
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
@@ -253,6 +280,7 @@ public class TPPCommandRenameTest {
             String[] args = {"rename", "f:MockPlayerName", "OldPetName", "NewPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+
             verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");
             verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "NewPetName");
@@ -260,7 +288,7 @@ public class TPPCommandRenameTest {
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("MockAdminName has changed MockPlayerName's pet named OldPetName to NewPetName", capturedLogOutput);
+            assertEquals("MockAdminName - rename - renamed MockPlayerName's OldPetName to NewPetName", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -277,6 +305,8 @@ public class TPPCommandRenameTest {
 
             String[] args = {"rename", "f:MockPlayerName", "OldPetName", "NewPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
@@ -301,6 +331,8 @@ public class TPPCommandRenameTest {
             String[] args = {"rename", "f:MockPlayerName", "OldPetName", "NewPetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -317,6 +349,8 @@ public class TPPCommandRenameTest {
 
             String[] args = {"rename", "f:MockPlayerName", "OldPetName", "NewPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
 
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
@@ -337,6 +371,8 @@ public class TPPCommandRenameTest {
             String[] args = {"rename", "f:MockPlayerName", "OldPetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
+
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(this.logCaptor.capture());
@@ -355,6 +391,8 @@ public class TPPCommandRenameTest {
 
             String[] args = {"rename", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).renamePet(anyString(), anyString(), anyString());

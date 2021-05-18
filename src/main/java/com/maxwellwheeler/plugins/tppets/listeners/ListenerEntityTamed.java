@@ -49,6 +49,8 @@ public class ListenerEntityTamed implements Listener {
                 ((Player)owner).sendMessage(ChatColor.BLUE + "You've tamed a pet! Its current name is " + ChatColor.WHITE + generatedName + ChatColor.BLUE + ". You can rename it with /tpp rename " + ChatColor.WHITE + generatedName + ChatColor.BLUE + " [new name]");
             }
 
+            this.thisPlugin.getLogWrapper().logSuccessfulAction(owner.getName() + " - tame - " + generatedName);
+
             return EventStatus.SUCCESS;
 
         } catch (SQLException ignored) {
@@ -94,6 +96,12 @@ public class ListenerEntityTamed implements Listener {
         }
     }
 
+    private void logStatus(AnimalTamer owner, EventStatus eventStatus) {
+        if (eventStatus != EventStatus.SUCCESS) {
+            this.thisPlugin.getLogWrapper().logUnsuccessfulAction(owner.getName() + " - tame - " + eventStatus.toString());
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityTameEvent(EntityTameEvent event) {
         if (!event.isCancelled() && PetType.isPetTracked(event.getEntity()) && event.getOwner() instanceof OfflinePlayer) {
@@ -104,8 +112,8 @@ public class ListenerEntityTamed implements Listener {
                 cancelTame(pet);
                 event.setCancelled(true);
                 displayStatus(event.getOwner(), pet, eventStatus);
+                logStatus(event.getOwner(), eventStatus);
             }
-
         }
     }
 
@@ -128,8 +136,8 @@ public class ListenerEntityTamed implements Listener {
                 cancelTame(pet);
                 event.setCancelled(true);
                 displayStatus(owner, pet, eventStatus);
+                logStatus(owner, eventStatus);
             }
-
         }
     }
 
@@ -150,8 +158,8 @@ public class ListenerEntityTamed implements Listener {
             } else {
                 event.setCancelled(true);
                 displayStatus(player, pet, eventStatus);
+                logStatus(player, eventStatus);
             }
-
         }
     }
 }

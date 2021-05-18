@@ -17,6 +17,7 @@ public class CommandStorageRemove extends Command {
     public void processCommand() {
         removeStorage();
         displayStatus();
+        logStatus();
     }
 
     private void removeStorage() {
@@ -27,17 +28,14 @@ public class CommandStorageRemove extends Command {
                 return;
             }
 
-            if (!ArgValidator.softValidateStorageName(this.args[0]) || this.thisPlugin.getDatabase().getStorageLocation(commandFor.getUniqueId().toString(), this.args[0]) == null) {
+            if (!ArgValidator.softValidateStorageName(this.args[0]) || this.thisPlugin.getDatabase().getStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0]) == null) {
                 this.commandStatus = CommandStatus.ALREADY_DONE;
                 return;
             }
 
-            if (!this.thisPlugin.getDatabase().removeStorageLocation(commandFor.getUniqueId().toString(), this.args[0])) {
+            if (!this.thisPlugin.getDatabase().removeStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0])) {
                 this.commandStatus = CommandStatus.DB_FAIL;
-                return;
             }
-
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " has removed location " + this.args[0] + " from " + commandFor.getName());
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
@@ -64,6 +62,14 @@ public class CommandStorageRemove extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("storage remove", "removed " + this.args[0] + " from " + this.commandFor.getName());
+        } else {
+            logUnsuccessfulAction("storage remove", this.commandStatus.toString());
         }
     }
 }

@@ -22,12 +22,13 @@ public class TPPSQLWrapperGetNumPetsTest {
     private PreparedStatement preparedStatement;
     private ResultSet resultSet;
     private MockSQLWrapper mockSQLWrapper;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        LogWrapper logWrapper = mock(LogWrapper.class);
-        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
+        this.logWrapper = mock(LogWrapper.class);
+        TPPets tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.resultSet = mock(ResultSet.class);
@@ -50,6 +51,7 @@ public class TPPSQLWrapperGetNumPetsTest {
         verify(this.preparedStatement, times(1)).close();
         verify(this.connection, times(1)).close();
         verify(this.resultSet, times(1)).close();
+        verify(this.logWrapper, never()).logErrors(anyString());
     }
 
     @Test
@@ -66,12 +68,13 @@ public class TPPSQLWrapperGetNumPetsTest {
         verify(this.preparedStatement, times(1)).close();
         verify(this.connection, times(1)).close();
         verify(this.resultSet, times(1)).close();
+        verify(this.logWrapper, times(1)).logErrors("Can't execute select statement - Could not select count");
     }
 
     @Test
     @DisplayName("getNumPets rethrows normal exceptions")
     void getNumPetsRethrowsExceptions() throws SQLException {
-        when(this.resultSet.next()).thenThrow(new SQLException());
+        when(this.resultSet.next()).thenThrow(new SQLException("Message"));
 
         assertThrows(SQLException.class, () -> this.mockSQLWrapper.getNumPets("Mock-Owner-Id"));
 
@@ -80,5 +83,6 @@ public class TPPSQLWrapperGetNumPetsTest {
         verify(this.preparedStatement, times(1)).close();
         verify(this.connection, times(1)).close();
         verify(this.resultSet, times(1)).close();
+        verify(this.logWrapper, times(1)).logErrors("Can't execute select statement - Message");
     }
 }

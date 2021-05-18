@@ -21,6 +21,7 @@ public class CommandRename extends BaseCommand {
         }
 
         displayStatus();
+        logStatus();
     }
 
     private boolean isValidSyntax() {
@@ -55,8 +56,6 @@ public class CommandRename extends BaseCommand {
                 this.commandStatus = CommandStatus.DB_FAIL;
                 return;
             }
-
-            this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " has changed " + this.commandFor.getName() + "'s pet named " + this.args[0] + " to " + this.args[1]);
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
@@ -95,6 +94,14 @@ public class CommandRename extends BaseCommand {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("rename", "renamed " + this.commandFor.getName() + "'s " + this.args[0] + " to " + this.args[1]);
+        } else {
+            logUnsuccessfulAction("rename", this.commandStatus.toString());
         }
     }
 }

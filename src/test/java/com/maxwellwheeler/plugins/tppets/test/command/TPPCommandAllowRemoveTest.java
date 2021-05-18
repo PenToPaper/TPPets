@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
@@ -69,6 +70,12 @@ public class TPPCommandAllowRemoveTest {
         when(tpPets.getGuestManager()).thenReturn(this.guestManager);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - remove - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Removes an existing player from a pet")
     void removesPlayerFromPet() throws SQLException {
@@ -87,7 +94,7 @@ public class TPPCommandAllowRemoveTest {
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("MockPlayerName removed permission from MockGuestName to use MockPlayerName's pet named MockPetName", capturedLogOutput);
+            assertEquals("MockPlayerName - remove - MockGuestName from MockPlayerName's MockPetName", capturedLogOutput);
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -114,7 +121,7 @@ public class TPPCommandAllowRemoveTest {
 
             verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
             String capturedLogOutput = this.logCaptor.getValue();
-            assertEquals("MockAdminName removed permission from MockGuestName to use MockPlayerName's pet named MockPetName", capturedLogOutput);
+            assertEquals("MockAdminName - remove - MockGuestName from MockPlayerName's MockPetName", capturedLogOutput);
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -137,6 +144,8 @@ public class TPPCommandAllowRemoveTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
+            verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(sender, never()).sendMessage(anyString());
@@ -156,6 +165,8 @@ public class TPPCommandAllowRemoveTest {
 
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
 
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -180,6 +191,8 @@ public class TPPCommandAllowRemoveTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
+
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -201,6 +214,8 @@ public class TPPCommandAllowRemoveTest {
 
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -224,6 +239,8 @@ public class TPPCommandAllowRemoveTest {
         assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
         assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
+        verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
         verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(sender, never()).sendMessage(anyString());
@@ -241,6 +258,8 @@ public class TPPCommandAllowRemoveTest {
 
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -265,6 +284,8 @@ public class TPPCommandAllowRemoveTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_TARGET_PLAYER);
+
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -286,6 +307,8 @@ public class TPPCommandAllowRemoveTest {
 
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
 
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -310,6 +333,8 @@ public class TPPCommandAllowRemoveTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -333,6 +358,8 @@ public class TPPCommandAllowRemoveTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
+
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -355,6 +382,8 @@ public class TPPCommandAllowRemoveTest {
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.ALREADY_DONE);
 
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
@@ -381,6 +410,8 @@ public class TPPCommandAllowRemoveTest {
 
             assertEquals(0, this.guestManager.getGuestsToPet("MockPetId").size());
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
+
             verify(this.sqlWrapper, never()).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -406,6 +437,8 @@ public class TPPCommandAllowRemoveTest {
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
             verify(this.sqlWrapper, times(1)).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
 
@@ -429,6 +462,8 @@ public class TPPCommandAllowRemoveTest {
 
             assertEquals(1, this.guestManager.getGuestsToPet("MockPetId").size());
             assertTrue(this.guestManager.isGuest("MockPetId", "MockGuestId"));
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
             verify(this.sqlWrapper, times(1)).removeGuest(anyString(), anyString());
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());

@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class TPPCommandReleaseTest {
@@ -30,14 +33,15 @@ public class TPPCommandReleaseTest {
     private Command command;
     private CommandTPP commandTPP;
     private TPPets tpPets;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.dogs"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.dogs", "tppets.releaseother"});
         this.sqlWrapper = mock(SQLWrapper.class);
-        LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, logWrapper, false, true);
+        this.logWrapper = mock(LogWrapper.class);
+        this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
         when(this.tpPets.getAllowUntamingPets()).thenReturn(true);
 
         PetStorage pet = new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorldName", "MockPlayerId", "PetName", "PetName");
@@ -52,12 +56,19 @@ public class TPPCommandReleaseTest {
         this.commandTPP = new CommandTPP(aliases, this.tpPets);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - release - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Releases a pet")
     void releasePet() throws SQLException {
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release - released MockPlayerName's PetName");
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "PetName");
         verify(this.sqlWrapper, times(1)).removePet("MockPetId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "PetName" + ChatColor.BLUE + " has been released");
@@ -72,6 +83,8 @@ public class TPPCommandReleaseTest {
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).removePet(anyString());
         verify(sender, never()).sendMessage(anyString());
@@ -82,6 +95,8 @@ public class TPPCommandReleaseTest {
     void cannotReleaseNoPet() throws SQLException {
         String[] args = {"release"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).removePet(anyString());
@@ -95,6 +110,8 @@ public class TPPCommandReleaseTest {
 
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NOT_ENABLED);
 
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).removePet(anyString());
@@ -110,6 +127,8 @@ public class TPPCommandReleaseTest {
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release - released MockPlayerName's PetName");
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "PetName");
         verify(this.sqlWrapper, times(1)).removePet("MockPetId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "PetName" + ChatColor.BLUE + " has been released");
@@ -120,6 +139,8 @@ public class TPPCommandReleaseTest {
     void cannotReleaseInvalidName() throws SQLException {
         String[] args = {"release", "PetName;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
 
         verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, never()).removePet(anyString());
@@ -134,6 +155,8 @@ public class TPPCommandReleaseTest {
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
+
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "PetName");
         verify(this.sqlWrapper, never()).removePet(anyString());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not find pet named " + ChatColor.WHITE + "PetName");
@@ -146,6 +169,8 @@ public class TPPCommandReleaseTest {
 
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "PetName");
         verify(this.sqlWrapper, never()).removePet(anyString());
@@ -160,6 +185,8 @@ public class TPPCommandReleaseTest {
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "PetName");
         verify(this.sqlWrapper, times(1)).removePet("MockPetId");
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not release pet");
@@ -172,6 +199,8 @@ public class TPPCommandReleaseTest {
 
         String[] args = {"release", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "PetName");
         verify(this.sqlWrapper, times(1)).removePet("MockPetId");
@@ -187,6 +216,8 @@ public class TPPCommandReleaseTest {
             String[] args = {"release", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - release - released MockPlayerName's PetName");
             verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "PetName");
             verify(this.sqlWrapper, times(1)).removePet("MockPetId");
             verify(this.admin, times(1)).sendMessage(ChatColor.WHITE + "MockPlayerName's" + ChatColor.BLUE + " pet " + ChatColor.WHITE + "PetName" + ChatColor.BLUE + " has been released");
@@ -206,6 +237,8 @@ public class TPPCommandReleaseTest {
             String[] args = {"release", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
+
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).removePet(anyString());
             verify(sender, never()).sendMessage(anyString());
@@ -223,6 +256,8 @@ public class TPPCommandReleaseTest {
             String[] args = {"release", "f:MockPlayerName", "PetName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
+
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).removePet(anyString());
             verify(this.admin, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
@@ -237,6 +272,8 @@ public class TPPCommandReleaseTest {
 
             String[] args = {"release", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).removePet(anyString());
@@ -253,6 +290,8 @@ public class TPPCommandReleaseTest {
 
             String[] args = {"release", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
             verify(this.sqlWrapper, never()).getSpecificPet(anyString(), anyString());
             verify(this.sqlWrapper, never()).removePet(anyString());

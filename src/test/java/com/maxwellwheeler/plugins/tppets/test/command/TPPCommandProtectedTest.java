@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
@@ -54,14 +55,22 @@ public class TPPCommandProtectedTest {
         when(tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - protected - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
-    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command without a player sender")
+    @DisplayName("Can't run protected region command without a player sender")
     void cantRunProtectedRegionNotPlayer() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
         when(sender.hasPermission("tppets.protected")).thenReturn(true);
 
         String[] args = {"protected", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(sender, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
 
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
@@ -71,11 +80,13 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command without com.maxwellwheeler.plugins.tppets.test.command type")
+    @DisplayName("Can't run protected region command without command type")
     void cantRunProtectedRegionNoCommandType() throws SQLException {
         String[] args = {"protected"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
+
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.protectedRegionManager, never()).removeProtectedRegion(anyString());
@@ -87,11 +98,13 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command without a valid com.maxwellwheeler.plugins.tppets.test.command type")
+    @DisplayName("Can't run protected region command without a valid command type")
     void cantRunProtectedRegionInvalidCommandType() throws SQLException {
         String[] args = {"protected", "invalidtype"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
+
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
         verify(this.protectedRegionManager, never()).removeProtectedRegion(anyString());
@@ -103,7 +116,7 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command with f:[username] who hasn't played")
+    @DisplayName("Can't run protected region command with f:[username] who hasn't played")
     void cantRunProtectedNoPlayer() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             OfflinePlayer player = MockFactory.getMockOfflinePlayer("MockPlayerId", "MockPlayerName");
@@ -112,6 +125,8 @@ public class TPPCommandProtectedTest {
 
             String[] args = {"protected", "f:MockPlayerName", "remove", "ProtectedRegionName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
             verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
             verify(this.sqlWrapper, never()).getProtectedRegion(anyString());
@@ -125,10 +140,12 @@ public class TPPCommandProtectedTest {
     }
 
     @Test
-    @DisplayName("Can't run protected region com.maxwellwheeler.plugins.tppets.test.command with invalid f:[username]")
+    @DisplayName("Can't run protected region command with invalid f:[username]")
     void cantRunProtectedRegionInvalidPlayer() throws SQLException {
         String[] args = {"protected", "f:MockPlayerName;", "remove", "ProtectedRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
         verify(this.sqlWrapper, never()).removeProtectedRegion(anyString());
         verify(this.sqlWrapper, never()).getProtectedRegion(anyString());

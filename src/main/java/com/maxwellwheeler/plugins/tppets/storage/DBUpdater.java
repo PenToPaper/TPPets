@@ -14,14 +14,17 @@ import java.util.Hashtable;
  *
  */
 public class DBUpdater {
+    private final TPPets thisPlugin;
     private int schemaVersion;
     private final int updatedVersion = 4;
 
     public DBUpdater(TPPets thisPlugin) throws SQLException {
+        this.thisPlugin = thisPlugin;
         this.schemaVersion = getSchemaVersionFromDB(thisPlugin.getDatabase());
     }
 
     public void update(SQLWrapper sqlWrapper) throws SQLException {
+        int initialVersion = this.schemaVersion;
         if (this.schemaVersion != this.updatedVersion) {
             if (this.schemaVersion == 1) {
                 OneToTwo oneToTwo = new OneToTwo();
@@ -34,6 +37,9 @@ public class DBUpdater {
             if (this.schemaVersion == 3) {
                 ThreeToFour threeToFour = new ThreeToFour();
                 threeToFour.run(sqlWrapper);
+            }
+            if (this.schemaVersion == this.updatedVersion) {
+                this.thisPlugin.getLogWrapper().logPluginInfo("Updated database version from version " + initialVersion + " to " + this.schemaVersion);
             }
         }
     }

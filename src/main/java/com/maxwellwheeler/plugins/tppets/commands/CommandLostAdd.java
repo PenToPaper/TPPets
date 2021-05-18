@@ -19,6 +19,7 @@ public class CommandLostAdd extends Command {
     public void processCommand() {
         processCommandGeneric();
         displayStatus();
+        logStatus();
     }
 
     private void processCommandGeneric() {
@@ -51,7 +52,6 @@ public class CommandLostAdd extends Command {
             if (this.thisPlugin.getDatabase().insertLostRegion(lostAndFoundRegion)) {
                 this.thisPlugin.getLostRegionManager().addLostRegion(lostAndFoundRegion);
                 this.thisPlugin.getProtectedRegionManager().updateLFReferences(lostAndFoundRegion.getRegionName());
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " added lost and found region " + lostAndFoundRegion.getRegionName());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
             }
@@ -83,6 +83,14 @@ public class CommandLostAdd extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("lost add", "added " + this.args[0]);
+        } else {
+            logUnsuccessfulAction("lost add", this.commandStatus.toString());
         }
     }
 }

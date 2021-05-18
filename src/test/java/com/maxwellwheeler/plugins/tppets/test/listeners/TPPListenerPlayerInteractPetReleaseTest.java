@@ -68,7 +68,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release tool - MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -85,7 +85,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release tool - MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -102,7 +102,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockWolfId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockWolfId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release tool - MockWolfId");
         verify(wolf, times(1)).setSitting(false);
         verify(wolf, times(1)).setOwner(null);
         verify(wolf, times(1)).setTamed(false);
@@ -120,7 +120,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockSkeletonHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockSkeletonHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release tool - MockSkeletonHorseId");
         verify(skeletonHorse, times(1)).setOwner(null);
         verify(skeletonHorse, never()).setTamed(anyBoolean());
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -137,7 +137,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockZombieHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockZombieHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release tool - MockZombieHorseId");
         verify(zombieHorse, times(1)).setOwner(null);
         verify(zombieHorse, never()).setTamed(anyBoolean());
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -197,6 +197,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, never()).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "You can't release pets");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - release tool - NOT_ENABLED");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
         verify(this.horse, never()).setTamed(anyBoolean());
@@ -213,7 +214,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Pet released!");
-        verify(this.logWrapper, times(1)).logSuccessfulAction("Player MockPlayerName released entity MockHorseId");
+        verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - release tool - MockHorseId");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
         verify(this.playerInteractEntityEvent, times(1)).setCancelled(true);
@@ -229,6 +230,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - release tool - NO_OWNER");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
         verify(this.horse, never()).setTamed(anyBoolean());
@@ -244,6 +246,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - release tool - NO_OWNER");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
         verify(this.horse, never()).setTamed(anyBoolean());
@@ -259,6 +262,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "This pet doesn't have an owner");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - release tool - NO_OWNER");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
         verify(this.horse, never()).setTamed(anyBoolean());
@@ -275,6 +279,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, never()).removePet(any());
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - release tool - INSUFFICIENT_PERMISSIONS");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
         verify(this.horse, never()).setTamed(anyBoolean());
@@ -290,6 +295,7 @@ public class TPPListenerPlayerInteractPetReleaseTest {
 
         verify(this.sqlWrapper, times(1)).removePet("MockHorseId");
         verify(this.player, times(1)).sendMessage(ChatColor.RED + "Could not release pet");
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - release tool - DB_FAIL");
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any());
         verify(this.horse, never()).setTamed(anyBoolean());

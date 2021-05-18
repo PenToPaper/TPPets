@@ -15,12 +15,12 @@ public class CommandRelease extends BaseCommand {
 
     @Override
     public void processCommand() {
-        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
             processCommandGeneric();
         }
 
         displayStatus();
+        logStatus();
     }
 
     private boolean isValidSyntax() {
@@ -56,7 +56,6 @@ public class CommandRelease extends BaseCommand {
     }
 
     private void displayStatus() {
-        // NO_TARGET_PET, INVALID_NAME, PET_NAME_ALREADY_IN_USE
         switch(this.commandStatus) {
             case INVALID_SENDER:
                 break;
@@ -84,6 +83,14 @@ public class CommandRelease extends BaseCommand {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("release", "released " + this.commandFor.getName() + "'s " + this.args[0]);
+        } else {
+            logUnsuccessfulAction("release", this.commandStatus.toString());
         }
     }
 }

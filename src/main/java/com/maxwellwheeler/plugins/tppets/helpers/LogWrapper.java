@@ -40,7 +40,7 @@ public class LogWrapper {
      */
     public void logUpdatedPet(String message) {
         if (this.updatedPets) {
-            this.thisPlugin.getLogger().info(message);
+            this.thisPlugin.getLogger().info("Updated Pet: " + message);
         }
     }
 
@@ -50,7 +50,7 @@ public class LogWrapper {
      */
     public void logSuccessfulAction(String message) {
         if (this.successfulActions) {
-            this.thisPlugin.getLogger().info(message);
+            this.thisPlugin.getLogger().info("Successful Action: " + message);
         }
     }
 
@@ -60,7 +60,7 @@ public class LogWrapper {
      */
     public void logUnsuccessfulAction(String message) {
         if (this.unsuccessfulActions) {
-            this.thisPlugin.getLogger().info(message);
+            this.thisPlugin.getLogger().info("Unsuccessful Action: " + message);
         }
     }
 
@@ -70,7 +70,7 @@ public class LogWrapper {
      */
     public void logErrors(String message) {
         if (this.errors) {
-            this.thisPlugin.getLogger().log(Level.SEVERE, message);
+            this.thisPlugin.getLogger().log(Level.SEVERE, "Error: " +  message);
         }
     }
 
@@ -80,7 +80,11 @@ public class LogWrapper {
      */
     public void logPreventedDamage(String message) {
         if (this.preventedDamage) {
-            this.thisPlugin.getLogger().info(message);
+            this.thisPlugin.getLogger().info("Prevented Damage: " + message);
         }
+    }
+
+    public void logPluginInfo(String message) {
+        this.thisPlugin.getLogger().info("TPPets Plugin: " + message);
     }
 }

@@ -14,11 +14,13 @@ import org.bukkit.projectiles.ProjectileSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Hashtable;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
@@ -32,20 +34,27 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
     private Horse horse;
     private ListenerEntityDamage listenerEntityDamage;
     private TPPets tpPets;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         this.owner = MockFactory.getMockPlayer("MockOwnerId", "MockOwnerName", null, null, new String[]{});
+        when(this.owner.getType()).thenReturn(EntityType.PLAYER);
         this.guest = MockFactory.getMockPlayer("MockGuestId", "MockGuestName", null, null, new String[]{});
+        when(this.guest.getType()).thenReturn(EntityType.PLAYER);
         this.stranger = MockFactory.getMockPlayer("MockStrangerId", "MockStrangerName", null, null, new String[]{});
+        when(this.stranger.getType()).thenReturn(EntityType.PLAYER);
         this.mob = MockFactory.getMockEntity("MockZombieId", Zombie.class);
+        when(this.mob.getType()).thenReturn(EntityType.ZOMBIE);
         this.environment = MockFactory.getMockEntity("MockMinecartId", org.bukkit.entity.Minecart.class);
+        when(this.environment.getType()).thenReturn(EntityType.MINECART);
         this.blockProjectileSource = mock(BlockProjectileSource.class);
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
+        when(this.horse.getType()).thenReturn(EntityType.HORSE);
 
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
+        this.logWrapper = mock(LogWrapper.class);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
 
         this.listenerEntityDamage = new ListenerEntityDamage(this.tpPets);
 
@@ -62,6 +71,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
     private Projectile getMockProjectile(ProjectileSource damager) {
         Projectile projectile = mock(Projectile.class);
         when(projectile.getShooter()).thenReturn(damager);
+        when(projectile.getType()).thenReturn(EntityType.ARROW);
         return projectile;
     }
 
@@ -70,6 +80,13 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         when(entityDamageByEntityEvent.getEntity()).thenReturn(damaged);
         when(entityDamageByEntityEvent.getDamager()).thenReturn(damager);
         return entityDamageByEntityEvent;
+    }
+
+    private void verifyLoggedPreventedDamage(EntityType entityType, String petId) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logPreventedDamage(logCaptor.capture());
+        assertEquals("Prevented " + entityType + " from damaging " + petId, logCaptor.getValue());
+
     }
 
     @Test
@@ -81,6 +98,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     // OwnerDamage
@@ -93,6 +111,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.PLAYER, "MockHorseId");
     }
 
     @Test
@@ -104,6 +123,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.ARROW, "MockHorseId");
     }
 
     @Test
@@ -117,6 +137,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -131,6 +152,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -143,6 +165,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -156,6 +179,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     // GuestDamage
@@ -168,6 +192,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.PLAYER, "MockHorseId");
     }
 
     @Test
@@ -179,6 +204,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.ARROW, "MockHorseId");
     }
 
     @Test
@@ -192,6 +218,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -206,6 +233,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -218,6 +246,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -231,6 +260,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     // StrangerDamage
@@ -243,6 +273,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.PLAYER, "MockHorseId");
     }
 
     @Test
@@ -254,6 +285,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.ARROW, "MockHorseId");
     }
 
     @Test
@@ -267,6 +299,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -281,6 +314,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -293,6 +327,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -306,6 +341,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     // MobDamage
@@ -318,6 +354,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.ZOMBIE, "MockHorseId");
     }
 
     @Test
@@ -329,6 +366,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.ARROW, "MockHorseId");
     }
 
     @Test
@@ -342,6 +380,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -356,6 +395,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     // EnvironmentalDamage
@@ -368,6 +408,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.MINECART, "MockHorseId");
     }
 
     @Test
@@ -379,6 +420,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, times(1)).setCancelled(true);
+        verifyLoggedPreventedDamage(EntityType.ARROW, "MockHorseId");
     }
 
     @Test
@@ -392,6 +434,7 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 
     @Test
@@ -406,5 +449,6 @@ public class TPPListenerEntityDamageEntityDamageByEntityTest {
         this.listenerEntityDamage.onEntityDamageByEntityEvent(entityDamageByEntityEvent);
 
         verify(entityDamageByEntityEvent, never()).setCancelled(anyBoolean());
+        verify(this.logWrapper, never()).logPreventedDamage(anyString());
     }
 }

@@ -44,7 +44,7 @@ public class MySQLWrapper extends SQLWrapper {
             }
             throw new SQLException("Invalid database credentials");
         } catch (SQLException exception) {
-            this.thisPlugin.getLogWrapper().logErrors("Can't connect to MySQL database: " + exception.getMessage());
+            this.thisPlugin.getLogWrapper().logErrors("Can't connect to MySQL database - " + exception.getMessage());
             throw exception;
         }
     }

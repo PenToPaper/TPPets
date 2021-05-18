@@ -30,11 +30,19 @@ public class TPPLogWrapperTest {
     }
 
     @Test
+    @DisplayName("LogWrapper always logs TPPets plugin info")
+    void logWrapperLogsPluginInfoWhenEnabled() {
+        this.logWrapperEnabled.logPluginInfo("Plugin Info");
+
+        verify(this.logger, times(1)).info("TPPets Plugin: Plugin Info");
+    }
+
+    @Test
     @DisplayName("LogWrapper logs updated pets if setting enabled")
     void logWrapperLogsUpdatedPetsWhenEnabled() {
         this.logWrapperEnabled.logUpdatedPet("Updated Pet");
 
-        verify(this.logger, times(1)).info("Updated Pet");
+        verify(this.logger, times(1)).info("Updated Pet: Updated Pet");
     }
 
     @Test
@@ -50,7 +58,7 @@ public class TPPLogWrapperTest {
     void logWrapperLogsSuccessfulActionsWhenEnabled() {
         this.logWrapperEnabled.logSuccessfulAction("Successful Action");
 
-        verify(this.logger, times(1)).info("Successful Action");
+        verify(this.logger, times(1)).info("Successful Action: Successful Action");
     }
 
     @Test
@@ -66,7 +74,7 @@ public class TPPLogWrapperTest {
     void logWrapperLogsUnsuccessfulActionsWhenEnabled() {
         this.logWrapperEnabled.logUnsuccessfulAction("Unsuccessful Action");
 
-        verify(this.logger, times(1)).info("Unsuccessful Action");
+        verify(this.logger, times(1)).info("Unsuccessful Action: Unsuccessful Action");
     }
 
     @Test
@@ -82,7 +90,7 @@ public class TPPLogWrapperTest {
     void logWrapperLogsErrorsWhenEnabled() {
         this.logWrapperEnabled.logErrors("Error");
 
-        verify(this.logger, times(1)).log(Level.SEVERE, "Error");
+        verify(this.logger, times(1)).log(Level.SEVERE, "Error: Error");
     }
 
     @Test
@@ -98,7 +106,7 @@ public class TPPLogWrapperTest {
     void logWrapperLogsPreventedDamageWhenEnabled() {
         this.logWrapperEnabled.logPreventedDamage("Prevented Damage");
 
-        verify(this.logger, times(1)).info("Prevented Damage");
+        verify(this.logger, times(1)).info("Prevented Damage: Prevented Damage");
     }
 
     @Test

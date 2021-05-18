@@ -22,7 +22,9 @@ public class ListenerPetPosition implements Listener {
         for (Entity entity : event.getChunk().getEntities()) {
             try {
                 this.thisPlugin.getDatabase().insertOrUpdatePetLocation(entity);
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+                this.thisPlugin.getLogWrapper().logErrors("SQL Error - updating pet location");
+            }
         }
     }
 }

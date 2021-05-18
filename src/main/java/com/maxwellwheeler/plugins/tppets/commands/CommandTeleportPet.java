@@ -84,6 +84,7 @@ public class CommandTeleportPet extends TeleportCommand {
         }
 
         displayStatus();
+        logStatus();
     }
 
     private void processCommandGeneric() throws SQLException {
@@ -138,6 +139,14 @@ public class CommandTeleportPet extends TeleportCommand {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("tp", "teleported " + this.commandFor.getName() + "'s " + this.pet.petName);
+        } else {
+            logUnsuccessfulAction("tp", this.commandStatus.toString());
         }
     }
 }

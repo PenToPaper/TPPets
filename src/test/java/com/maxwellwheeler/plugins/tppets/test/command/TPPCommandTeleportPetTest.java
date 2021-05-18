@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
@@ -70,6 +71,12 @@ public class TPPCommandTeleportPetTest {
         this.command = mock(Command.class);
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - tp - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     void setAliases() {
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
@@ -107,6 +114,7 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", petName};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tp - teleported MockPlayerName's " + petName);
 
             verify(this.chunk, times(1)).load();
             verify(correctPet, times(1)).eject();
@@ -168,6 +176,8 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT_IN_PR);
+
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
             verify(correctPet, never()).teleport(any(Location.class));
@@ -205,6 +215,8 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INSUFFICIENT_PERMISSIONS);
+
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
             verify(correctPet, never()).teleport(any(Location.class));
@@ -240,6 +252,8 @@ public class TPPCommandTeleportPetTest {
             // Command object with no second argument
             String[] args = {"tp"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
@@ -280,6 +294,8 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.TP_BETWEEN_WORLDS);
+
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
             verify(correctPet, never()).teleport(any(Location.class));
@@ -319,6 +335,8 @@ public class TPPCommandTeleportPetTest {
             // Command object with no second argument
             String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tp - teleported MockPlayerName's HORSE0");
 
             verify(this.chunk, times(1)).load();
             verify(correctPet, times(1)).eject();
@@ -366,6 +384,8 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - tp - teleported MockAdminName's HORSE0");
+
             verify(this.chunk, times(1)).load();
             verify(correctPet, times(1)).eject();
             if (correctPet instanceof Sittable) {
@@ -409,6 +429,7 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "HORSE0", "spare argument"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tp - teleported MockPlayerName's HORSE0");
 
             verify(this.chunk, times(1)).load();
             verify(correctPet, times(1)).eject();
@@ -452,6 +473,8 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "HORSE0;"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
+
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
             verify(correctPet, never()).teleport(any(Location.class));
@@ -483,6 +506,8 @@ public class TPPCommandTeleportPetTest {
             // Command object with no second argument
             String[] args = {"tp", "HORSE0"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
@@ -525,6 +550,8 @@ public class TPPCommandTeleportPetTest {
             // Command object
             String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - tp - teleported MockPlayerName's HORSE0");
 
             verify(this.chunk, times(1)).load();
             verify(correctPet, times(1)).eject();
@@ -571,6 +598,8 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
+
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
             verify(correctPet, never()).teleport(any(Location.class));
@@ -606,6 +635,8 @@ public class TPPCommandTeleportPetTest {
             // Command object
             String[] args = {"tp", "f:MockOwnerName;", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
@@ -650,6 +681,8 @@ public class TPPCommandTeleportPetTest {
             String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
+
             verify(this.chunk, never()).load();
             verify(correctPet, never()).eject();
             verify(correctPet, never()).teleport(any(Location.class));
@@ -693,6 +726,8 @@ public class TPPCommandTeleportPetTest {
             // Command object
             String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - tp - teleported MockPlayerName's HORSE0");
 
             verify(this.chunk, times(1)).load();
             // Not ejected because players shouldn't be able to kick other players off
@@ -744,6 +779,8 @@ public class TPPCommandTeleportPetTest {
             // Command object
             String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.CANT_TELEPORT);
 
             verify(this.chunk, times(1)).load();
             verify(correctPet, never()).eject();

@@ -1,6 +1,7 @@
 package com.maxwellwheeler.plugins.tppets.test.command;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
+import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion;
@@ -87,6 +88,12 @@ public class TPPCommandLostAddTest {
         assertEquals(expectedLfr.getMaxLoc().getWorld(), actualLfr.getMaxLoc().getWorld());
     }
 
+    public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
+        ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
+        verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
+        assertEquals(expectedPlayerName + " - lost add - " + commandStatus.toString(), logCaptor.getValue());
+    }
+
     @Test
     @DisplayName("Adds a lost and found region")
     void addsLostAndFoundRegion() throws SQLException {
@@ -111,7 +118,7 @@ public class TPPCommandLostAddTest {
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
-        assertEquals("Player MockAdminName added lost and found region LostRegionName", capturedLogOutput);
+        assertEquals("MockAdminName - lost add - added LostRegionName", capturedLogOutput);
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessage = this.messageCaptor.getValue();
@@ -123,6 +130,8 @@ public class TPPCommandLostAddTest {
     void cannotAddLostAndFoundRegionNoName() throws SQLException {
         String[] args = {"lost", "add"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
@@ -140,6 +149,8 @@ public class TPPCommandLostAddTest {
     void cannotAddLostAndFoundRegionInvalidName() throws SQLException {
         String[] args = {"lost", "add", "LostRegionName;"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INVALID_NAME);
 
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
@@ -159,6 +170,8 @@ public class TPPCommandLostAddTest {
 
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_REGION);
 
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
@@ -180,6 +193,8 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_REGION);
+
         verify(this.sqlWrapper, never()).getLostRegion(anyString());
         verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.lostRegionManager, never()).addLostRegion(any(LostAndFoundRegion.class));
@@ -198,6 +213,8 @@ public class TPPCommandLostAddTest {
 
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
         verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
@@ -218,6 +235,8 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
         verify(this.sqlWrapper, never()).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.lostRegionManager, never()).addLostRegion(any(LostAndFoundRegion.class));
@@ -237,6 +256,8 @@ public class TPPCommandLostAddTest {
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
+
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).insertLostRegion(any(LostAndFoundRegion.class));
         verify(this.lostRegionManager, never()).addLostRegion(any(LostAndFoundRegion.class));
@@ -255,6 +276,8 @@ public class TPPCommandLostAddTest {
 
         String[] args = {"lost", "add", "LostRegionName"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
 
         verify(this.sqlWrapper, times(1)).getLostRegion(anyString());
         verify(this.sqlWrapper, times(1)).insertLostRegion(any(LostAndFoundRegion.class));

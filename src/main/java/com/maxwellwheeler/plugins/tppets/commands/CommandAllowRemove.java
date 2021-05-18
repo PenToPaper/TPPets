@@ -21,6 +21,7 @@ public class CommandAllowRemove extends BaseCommand {
         }
 
         displayStatus();
+        logStatus();
     }
 
     private boolean isValidSyntax() {
@@ -54,7 +55,6 @@ public class CommandAllowRemove extends BaseCommand {
             }
 
             if (this.thisPlugin.getDatabase().removeGuest(pet.petId, playerToAllow.getUniqueId().toString())) {
-                this.thisPlugin.getLogWrapper().logSuccessfulAction(this.sender.getName() + " removed permission from " + this.args[0] + " to use " + this.commandFor.getName() + "'s pet named " + this.args[1]);
                 this.thisPlugin.getGuestManager().removeGuest(pet.petId, playerToAllow.getUniqueId().toString());
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
@@ -97,6 +97,14 @@ public class CommandAllowRemove extends BaseCommand {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("remove", this.args[0] + " from " + this.commandFor.getName() + "'s " + this.args[1]);
+        } else {
+            logUnsuccessfulAction("remove", this.commandStatus.toString());
         }
     }
 }

@@ -9,7 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-// Can re-implement logging of damage prevented if people want it, but seems excessive for now
 public class ListenerEntityDamage implements Listener {
     private final TPPets thisPlugin;
 
@@ -22,14 +21,16 @@ public class ListenerEntityDamage implements Listener {
         if (PetType.isPetTracked(event.getEntity())) {
             Tameable pet = (Tameable) event.getEntity();
             if (this.thisPlugin.getMobDamageManager().isPreventedEntityDamage(event.getDamager(), pet)) {
+                this.thisPlugin.getLogWrapper().logPreventedDamage("Prevented " + event.getDamager().getType() + " from damaging " + pet.getUniqueId());
                 event.setCancelled(true);
             }
         }
     }
 
-    @EventHandler (priority=EventPriority.LOW)
+    @EventHandler (priority = EventPriority.LOW)
     public void onEntityDamageEvent(EntityDamageEvent event) {
         if (PetType.isPetTracked(event.getEntity()) && this.thisPlugin.getMobDamageManager().isPreventedEnvironmentalDamage(event.getCause())) {
+            this.thisPlugin.getLogWrapper().logPreventedDamage("Prevented " + event.getCause() + " from damaging " + event.getEntity().getUniqueId());
             event.setCancelled(true);
         }
     }

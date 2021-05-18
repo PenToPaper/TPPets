@@ -18,6 +18,7 @@ public class CommandProtectedRemove extends Command {
     public void processCommand() {
         processCommandGeneric();
         displayStatus();
+        logStatus();
     }
 
     private void processCommandGeneric() {
@@ -42,7 +43,6 @@ public class CommandProtectedRemove extends Command {
 
             if (this.thisPlugin.getDatabase().removeProtectedRegion(this.args[0])) {
                 this.thisPlugin.getProtectedRegionManager().removeProtectedRegion(this.args[0]);
-                this.thisPlugin.getLogWrapper().logSuccessfulAction("Player " + this.sender.getName() + " removed protected region " + this.args[0]);
             } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
             }
@@ -72,6 +72,14 @@ public class CommandProtectedRemove extends Command {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus == CommandStatus.SUCCESS) {
+            logSuccessfulAction("protected remove", "removed " + this.args[0]);
+        } else {
+            logUnsuccessfulAction("protected remove", this.commandStatus.toString());
         }
     }
 }

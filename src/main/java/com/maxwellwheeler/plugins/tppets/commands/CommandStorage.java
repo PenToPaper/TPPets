@@ -39,6 +39,7 @@ public class CommandStorage extends BaseCommand {
         }
 
         displayErrors();
+        logStatus();
     }
 
     private boolean isValidSyntax() {
@@ -132,6 +133,12 @@ public class CommandStorage extends BaseCommand {
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
+        }
+    }
+
+    private void logStatus() {
+        if (this.commandStatus != CommandStatus.SUCCESS) {
+            logUnsuccessfulAction("storage", this.commandStatus.toString());
         }
     }
 }

@@ -136,8 +136,8 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
     }
 
     @Test
-    @DisplayName("generateUniquePetName throws SQLExceptions from isNameUnique")
-    void generateUniquePetNameRethrowsIsUniqueException() throws SQLException {
+    @DisplayName("generateUniquePetName throws SQLExceptions from getSpecificPet")
+    void generateUniquePetNameRethrowsGetSpecificPetException() throws SQLException {
         when(this.isNameUniqueResultSet.next()).thenThrow(new SQLException());
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);

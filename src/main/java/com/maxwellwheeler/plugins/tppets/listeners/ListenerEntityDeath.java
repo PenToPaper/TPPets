@@ -10,19 +10,20 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import java.sql.SQLException;
 
 public class ListenerEntityDeath implements Listener {
-    // TODO: Log database errors to console?
     private final TPPets thisPlugin;
 
     public ListenerEntityDeath(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 
-    @EventHandler(priority= EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathEvent(EntityDeathEvent event) {
         try {
-            if (PetType.isPetTracked(event.getEntity())) {
-                this.thisPlugin.getDatabase().removePet(event.getEntity().getUniqueId().toString());
+            if (PetType.isPetTracked(event.getEntity()) && this.thisPlugin.getDatabase().removePet(event.getEntity().getUniqueId().toString())) {
+                this.thisPlugin.getLogWrapper().logUpdatedPet("Pet " + event.getEntity().getUniqueId() + " has died. Removed from database.");
             }
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+            this.thisPlugin.getLogWrapper().logErrors("SQL Error - removing pet after death");
+        }
     }
 }

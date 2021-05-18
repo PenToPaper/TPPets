@@ -27,12 +27,13 @@ public class TPPSQLWrapperGetSpecificPetTest {
     private ArgumentCaptor<String> preparedStringCaptor;
     private ArgumentCaptor<Integer> preparedIndexCaptor;
     private ResultSet resultSet;
+    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() throws SQLException {
         SQLWrapper sqlWrapper = mock(SQLWrapper.class);
-        LogWrapper logWrapper = mock(LogWrapper.class);
-        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
+        this.logWrapper = mock(LogWrapper.class);
+        this.tpPets = MockFactory.getMockPlugin(sqlWrapper, this.logWrapper, false, false);
         this.connection = mock(Connection.class);
         this.preparedStatement = mock(PreparedStatement.class);
         this.resultSet = mock(ResultSet.class);
@@ -111,12 +112,13 @@ public class TPPSQLWrapperGetSpecificPetTest {
         verify(this.connection, times(1)).close();
         verify(this.preparedStatement, times(1)).close();
         verify(this.resultSet, times(1)).close();
+        verify(this.logWrapper, never()).logErrors(anyString());
     }
 
     @Test
     @DisplayName("getSpecificPet rethrows SQLExceptions")
     void getSpecificPetFromOwnerIdPetNameRethrowsSQLExceptions() throws SQLException {
-        when(this.resultSet.next()).thenThrow(new SQLException());
+        when(this.resultSet.next()).thenThrow(new SQLException("Message"));
         when(this.connection.prepareStatement("SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND effective_pet_name = ?")).thenReturn(this.preparedStatement);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
@@ -136,6 +138,7 @@ public class TPPSQLWrapperGetSpecificPetTest {
         verify(this.connection, times(1)).close();
         verify(this.preparedStatement, times(1)).close();
         verify(this.resultSet, times(1)).close();
+        verify(this.logWrapper, times(1)).logErrors("Can't execute select statement - Message");
     }
 
     @Test
@@ -186,7 +189,7 @@ public class TPPSQLWrapperGetSpecificPetTest {
     @DisplayName("getSpecificPet rethrows SQLExceptions")
     void getSpecificPetFromPetIdRethrowsSQLExceptions() throws SQLException {
         when(this.connection.prepareStatement("SELECT * FROM tpp_unloaded_pets WHERE pet_id = ?")).thenReturn(this.preparedStatement);
-        when(this.resultSet.next()).thenThrow(new SQLException());
+        when(this.resultSet.next()).thenThrow(new SQLException("Message"));
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
 
@@ -197,5 +200,6 @@ public class TPPSQLWrapperGetSpecificPetTest {
         verify(this.connection, times(1)).close();
         verify(this.preparedStatement, times(1)).close();
         verify(this.resultSet, times(1)).close();
+        verify(this.logWrapper, times(1)).logErrors("Can't execute select statement - Message");
     }
 }

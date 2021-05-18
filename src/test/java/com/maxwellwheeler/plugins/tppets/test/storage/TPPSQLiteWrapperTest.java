@@ -57,7 +57,7 @@ public class TPPSQLiteWrapperTest {
         assertEquals("Invalid database path", exception.getMessage());
 
         verify(this.sqLiteWrapper, never()).makeDatabaseDirectory();
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to SQLite database: Invalid database path");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to SQLite database - Invalid database path");
     }
 
     @Test
@@ -70,7 +70,7 @@ public class TPPSQLiteWrapperTest {
         assertEquals("Invalid database path", exception.getMessage());
 
         verify(this.sqLiteWrapper, never()).makeDatabaseDirectory();
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to SQLite database: Invalid database path");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to SQLite database - Invalid database path");
     }
 
     @Test
@@ -83,6 +83,6 @@ public class TPPSQLiteWrapperTest {
         assertEquals("Message", exception.getMessage());
 
         verify(this.sqLiteWrapper, times(1)).makeDatabaseDirectory();
-        verify(this.logWrapper, times(1)).logErrors("Can't connect to SQLite database: Message");
+        verify(this.logWrapper, times(1)).logErrors("Can't connect to SQLite database - Message");
     }
 }
