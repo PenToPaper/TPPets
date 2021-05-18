@@ -31,7 +31,7 @@ public class TPPets extends JavaPlugin {
     private GuestManager guestManager = null;
     private final ToolsManager toolsManager = new ToolsManager(getConfig().getConfigurationSection("tools"));
     private final RegionSelectionManager regionSelectionManager = new RegionSelectionManager();
-    private final MobDamageManager mobDamageManager = new MobDamageManager(this, getConfig().getStringList("protect_pets_from"));
+    private MobDamageManager mobDamageManager = null;
 
     // Database
     private SQLWrapper database;
@@ -73,6 +73,10 @@ public class TPPets extends JavaPlugin {
      */
     private void initializePetIndex() {
         this.petIndex = new PetLimitChecker(this, getConfig().getInt("total_pet_limit"), getConfig().getInt("dog_limit"), getConfig().getInt("cat_limit"), getConfig().getInt("bird_limit"), getConfig().getInt("horse_limit"), getConfig().getInt("mule_limit"), getConfig().getInt("llama_limit"), getConfig().getInt("donkey_limit"));
+    }
+
+    private void initializeMobDamageManager() {
+        this.mobDamageManager = new MobDamageManager(this, getConfig().getStringList("protect_pets_from"));
     }
 
     private void initializeProtectedRegionManager() {
@@ -223,12 +227,13 @@ public class TPPets extends JavaPlugin {
         // Config setup and pulling
         getConfig().options().copyDefaults(true);
         saveDefaultConfig();
-        updateConfig();
         initializeLogWrapper();
+        updateConfig();
         initializeStorageLimit();
         initializeCommandAliases();
         initializeAllowTP();
         initializeAllowUntamingPets();
+        initializeMobDamageManager();
 
         // Database setup
         getLogWrapper().logPluginInfo("Setting up database.");
