@@ -22,23 +22,23 @@ public class MobDamageManager {
     private void initializeStateFromList(List<String> protectPetsFrom) {
         if (protectPetsFrom.contains("OwnerDamage")) {
             this.preventOwnerDamage = true;
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Preventing owner damage...");
+            this.thisPlugin.getLogWrapper().logPluginInfo("Preventing owner damage...");
         }
         if (protectPetsFrom.contains("GuestDamage")) {
             this.preventGuestDamage = true;
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Preventing guest damage...");
+            this.thisPlugin.getLogWrapper().logPluginInfo("Preventing guest damage...");
         }
         if (protectPetsFrom.contains("StrangerDamage")) {
             this.preventStrangerDamage = true;
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Preventing stranger damage...");
+            this.thisPlugin.getLogWrapper().logPluginInfo("Preventing stranger damage...");
         }
         if (protectPetsFrom.contains("EnvironmentalDamage")) {
             this.preventEnvironmentalDamage = true;
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Preventing environmental damage...");
+            this.thisPlugin.getLogWrapper().logPluginInfo("Preventing environmental damage...");
         }
         if (protectPetsFrom.contains("MobDamage")) {
             this.preventMobDamage = true;
-            this.thisPlugin.getLogWrapper().logSuccessfulAction("Preventing mob damage...");
+            this.thisPlugin.getLogWrapper().logPluginInfo("Preventing mob damage...");
         }
     }
 
