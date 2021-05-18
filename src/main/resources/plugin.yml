@@ -1,10 +1,9 @@
 name: TPPets
-version: 2.3.0
+version: 2.4.0
 description: Teleport pets around the map, but not in areas you don't want
 load: POSTWORLD
 author: GatheringExp
 main: com.maxwellwheeler.plugins.tppets.TPPets
-depend: [WorldEdit]
 softdepend: [Vault]
 
 commands:
