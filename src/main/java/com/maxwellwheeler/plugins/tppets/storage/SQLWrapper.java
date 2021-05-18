@@ -147,11 +147,6 @@ public abstract class SQLWrapper {
 
     // Pet actions
 
-    // TODO: Delete method
-    public boolean isNameUnique(@NotNull String ownerId, @NotNull String petName) throws SQLException {
-        return this.getSpecificPet(ownerId, petName) == null;
-    }
-
     public String generateUniquePetName(@NotNull String ownerId, @NotNull PetType.Pets petType) throws SQLException {
         List<PetStorage> currentPetsList = this.getAllPetsFromOwner(ownerId);
         int lastIndexChecked = currentPetsList.size();
