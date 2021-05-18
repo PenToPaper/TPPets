@@ -50,7 +50,6 @@ public class ListenerProtectedRegion implements Listener {
         }
     }
 
-    // TODO: CHANGELOG THAT THIS ISN'T LOGGED ANYMORE
     @EventHandler (priority=EventPriority.LOW)
     public void entityTeleportIntoPr(EntityTeleportEvent event) {
         if (PetType.isPetTracked(event.getEntity())) {
@@ -65,7 +64,6 @@ public class ListenerProtectedRegion implements Listener {
         }
     }
 
-    // TODO: CHANGELOG THAT THIS ISN'T LOGGED ANYMORE
     @EventHandler (priority=EventPriority.LOW)
     public void entityTeleportOutLfr(EntityTeleportEvent event) {
         if (PetType.isPetTracked(event.getEntity()) && this.thisPlugin.getLostRegionManager().getLostRegionAt(event.getFrom()) != null) {
