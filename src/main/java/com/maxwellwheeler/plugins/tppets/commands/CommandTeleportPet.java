@@ -103,7 +103,7 @@ public class CommandTeleportPet extends TeleportCommand {
             return;
         }
 
-        if (!this.teleportPetsFromStorage(this.sender.getLocation(), this.pet, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+        if (!this.teleportPetFromStorage(this.sender.getLocation(), this.pet, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
             this.commandStatus = CommandStatus.CANT_TELEPORT;
         }
     }

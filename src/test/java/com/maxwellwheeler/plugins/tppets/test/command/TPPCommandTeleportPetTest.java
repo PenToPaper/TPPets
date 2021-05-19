@@ -13,7 +13,6 @@ import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sittable;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,26 +45,31 @@ public class TPPCommandTeleportPetTest {
     private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
+    private Server server;
 
     @BeforeEach
     public void beforeEach(){
         this.world = mock(World.class);
-        when(this.world.getName()).thenReturn("MockWorld");
         Location playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
         Location adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.chunk = mock(Chunk.class);
-        when(this.world.getChunkAt(6, 6)).thenReturn(this.chunk);
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
         this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
         this.protectedRegionManager = mock(ProtectedRegionManager.class);
+        this.command = mock(Command.class);
+        this.server = mock(Server.class);
+
+        when(this.tpPets.getServer()).thenReturn(this.server);
+        when(this.world.getName()).thenReturn("MockWorld");
+        when(this.world.getChunkAt(6, 6)).thenReturn(this.chunk);
         when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(true);
         when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
-        this.command = mock(Command.class);
+
     }
 
     public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
@@ -83,6 +87,15 @@ public class TPPCommandTeleportPetTest {
         this.commandTPP = new CommandTPP(aliases, this.tpPets);
     }
 
+    Entity[] getEntityList(String[] ids, Class<? extends Entity> className) {
+        Entity[] ret = new Entity[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            ret[i] = MockFactory.getMockEntity(ids[i], className);
+            when(this.server.getEntity(UUID.fromString(ids[i]))).thenReturn(ret[i]);
+        }
+        return ret;
+    }
+
     @ParameterizedTest
     @MethodSource("teleportsPetsProvider")
     void teleportsValidPets(PetType.Pets petType, Class<? extends Entity> className) throws SQLException {
@@ -92,17 +105,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Entity correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", className);
-
-            // The incorrect pet Entity instance
-            Entity incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", className);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, className);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", petName, petName);
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", petName, petName);
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", petName)).thenReturn(pet);
@@ -116,11 +123,11 @@ public class TPPCommandTeleportPetTest {
             verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tp - teleported MockPlayerName's " + petName);
 
             verify(this.chunk, times(1)).load();
-            verify(correctPet, times(1)).eject();
-            if (correctPet instanceof Sittable) {
-                verify((Sittable)correctPet, times(1)).setSitting(false);
+            verify(entities[0], times(1)).eject();
+            if (entities[0] instanceof Sittable) {
+                verify((Sittable)entities[0], times(1)).setSitting(false);
             }
-            verify(correctPet).teleport(this.teleportCaptor.capture());
+            verify(entities[0]).teleport(this.teleportCaptor.capture());
             Location capturedPetLocation = this.teleportCaptor.getValue();
             assertEquals(100, capturedPetLocation.getX(), 0.5);
             assertEquals(200, capturedPetLocation.getY(), 0.5);
@@ -128,7 +135,7 @@ public class TPPCommandTeleportPetTest {
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + petName + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
-            verify(incorrectPet, times(0)).teleport(any(Location.class));
+            verify(entities[1], times(0)).teleport(any(Location.class));
         }
     }
 
@@ -153,15 +160,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // Entity instances
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -178,8 +181,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.CANT_TELEPORT_IN_PR);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player, never()).sendMessage(anyString());
         }
@@ -192,15 +196,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // Entity instances
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -217,8 +217,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INSUFFICIENT_PERMISSIONS);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -233,15 +234,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // Entity instances
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -255,8 +252,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -271,15 +269,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // Entity instances
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -296,8 +290,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.TP_BETWEEN_WORLDS);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -312,17 +307,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // The incorrect pet Entity instance
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -340,11 +329,11 @@ public class TPPCommandTeleportPetTest {
             verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tp - teleported MockPlayerName's HORSE0");
 
             verify(this.chunk, times(1)).load();
-            verify(correctPet, times(1)).eject();
-            if (correctPet instanceof Sittable) {
-                verify((Sittable)correctPet, times(1)).setSitting(false);
+            verify(entities[0], times(1)).eject();
+            if (entities[0] instanceof Sittable) {
+                verify((Sittable)entities[0], times(1)).setSitting(false);
             }
-            verify(correctPet).teleport(this.teleportCaptor.capture());
+            verify(entities[0]).teleport(this.teleportCaptor.capture());
             Location capturedPetLocation = this.teleportCaptor.getValue();
             assertEquals(100, capturedPetLocation.getX(), 0.5);
             assertEquals(200, capturedPetLocation.getY(), 0.5);
@@ -352,7 +341,7 @@ public class TPPCommandTeleportPetTest {
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
-            verify(incorrectPet, times(0)).teleport(any(Location.class));
+            verify(entities[1], times(0)).teleport(any(Location.class));
         }
     }
 
@@ -363,17 +352,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // The incorrect pet Entity instance
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockAdminId", "HORSE0")).thenReturn(pet);
@@ -390,11 +373,11 @@ public class TPPCommandTeleportPetTest {
             verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - tp - teleported MockAdminName's HORSE0");
 
             verify(this.chunk, times(1)).load();
-            verify(correctPet, times(1)).eject();
-            if (correctPet instanceof Sittable) {
-                verify((Sittable)correctPet, times(1)).setSitting(false);
+            verify(entities[0], times(1)).eject();
+            if (entities[0] instanceof Sittable) {
+                verify((Sittable)entities[0], times(1)).setSitting(false);
             }
-            verify(correctPet).teleport(this.teleportCaptor.capture());
+            verify(entities[0]).teleport(this.teleportCaptor.capture());
             Location capturedPetLocation = this.teleportCaptor.getValue();
             assertEquals(400, capturedPetLocation.getX(), 0.5);
             assertEquals(500, capturedPetLocation.getY(), 0.5);
@@ -402,7 +385,7 @@ public class TPPCommandTeleportPetTest {
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
-            verify(incorrectPet, times(0)).teleport(any(Location.class));
+            verify(entities[1], times(0)).teleport(any(Location.class));
         }
     }
 
@@ -413,17 +396,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // The incorrect pet Entity instance
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -437,11 +414,11 @@ public class TPPCommandTeleportPetTest {
             verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tp - teleported MockPlayerName's HORSE0");
 
             verify(this.chunk, times(1)).load();
-            verify(correctPet, times(1)).eject();
-            if (correctPet instanceof Sittable) {
-                verify((Sittable)correctPet, times(1)).setSitting(false);
+            verify(entities[0], times(1)).eject();
+            if (entities[0] instanceof Sittable) {
+                verify((Sittable)entities[0], times(1)).setSitting(false);
             }
-            verify(correctPet).teleport(this.teleportCaptor.capture());
+            verify(entities[0]).teleport(this.teleportCaptor.capture());
             Location capturedPetLocation = this.teleportCaptor.getValue();
             assertEquals(100, capturedPetLocation.getX(), 0.5);
             assertEquals(200, capturedPetLocation.getY(), 0.5);
@@ -449,7 +426,7 @@ public class TPPCommandTeleportPetTest {
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
-            verify(incorrectPet, times(0)).teleport(any(Location.class));
+            verify(entities[1], times(0)).teleport(any(Location.class));
         }
     }
 
@@ -460,14 +437,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // Entity instances
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Collections.singletonList(correctPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -481,8 +455,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -497,11 +472,8 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // Entity instances
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Collections.singletonList(correctPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenThrow(new SQLException());
@@ -515,8 +487,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.player).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -531,17 +504,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // The incorrect pet Entity instance
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -559,8 +526,8 @@ public class TPPCommandTeleportPetTest {
             verify(this.logWrapper, times(1)).logSuccessfulAction("MockAdminName - tp - teleported MockPlayerName's HORSE0");
 
             verify(this.chunk, times(1)).load();
-            verify(correctPet, times(1)).eject();
-            verify(correctPet).teleport(this.teleportCaptor.capture());
+            verify(entities[0], times(1)).eject();
+            verify(entities[0]).teleport(this.teleportCaptor.capture());
             Location capturedPetLocation = this.teleportCaptor.getValue();
             assertEquals(400, capturedPetLocation.getX(), 0.5);
             assertEquals(500, capturedPetLocation.getY(), 0.5);
@@ -568,7 +535,7 @@ public class TPPCommandTeleportPetTest {
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.WHITE + "MockPlayerName's " + ChatColor.BLUE + "pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
-            verify(incorrectPet, times(0)).teleport(any(Location.class));
+            verify(entities[1], times(0)).teleport(any(Location.class));
 
         }
     }
@@ -580,14 +547,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Collections.singletonList(correctPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -606,8 +570,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -622,14 +587,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Collections.singletonList(correctPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -644,8 +606,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -660,14 +623,11 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Collections.singletonList(correctPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -689,8 +649,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
 
             verify(this.chunk, never()).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
@@ -705,18 +666,12 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-            when(correctPet.getPassengers()).thenReturn(new ArrayList<>());
-
-            // The incorrect pet Entity instance
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
+            when(entities[0].getPassengers()).thenReturn(new ArrayList<>());
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -736,8 +691,8 @@ public class TPPCommandTeleportPetTest {
 
             verify(this.chunk, times(1)).load();
             // Not ejected because players shouldn't be able to kick other players off
-            verify(correctPet, never()).eject();
-            verify(correctPet).teleport(this.teleportCaptor.capture());
+            verify(entities[0], never()).eject();
+            verify(entities[0]).teleport(this.teleportCaptor.capture());
             Location capturedPetLocation = this.teleportCaptor.getValue();
             assertEquals(400, capturedPetLocation.getX(), 0.5);
             assertEquals(500, capturedPetLocation.getY(), 0.5);
@@ -745,7 +700,7 @@ public class TPPCommandTeleportPetTest {
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();
             assertEquals(ChatColor.WHITE + "MockPlayerName's " + ChatColor.BLUE + "pet " + ChatColor.WHITE + "HORSE0" + ChatColor.BLUE + " has been teleported to you", capturedMessageOutput);
-            verify(incorrectPet, times(0)).teleport(any(Location.class));
+            verify(entities[1], times(0)).teleport(any(Location.class));
         }
     }
 
@@ -756,18 +711,12 @@ public class TPPCommandTeleportPetTest {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
 
-            // The correct pet Entity instance
-            Horse correctPet = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
-            when(correctPet.getPassengers()).thenReturn(new ArrayList<>());
-
-            // The incorrect pet Entity instance
-            Horse incorrectPet = MockFactory.getMockEntity("MockInco-rrec-tPet-IdMoc-kIncorrectP", Horse.class);
-
-            // A list of both entities
-            when(this.world.getEntities()).thenReturn(Arrays.asList(correctPet, incorrectPet));
+            // Entities in the world
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
+            when(entities[0].getPassengers()).thenReturn(Collections.singletonList(entities[1]));
 
             // PetStorage
-            PetStorage pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "HORSE0", "HORSE0");
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "HORSE0")).thenReturn(pet);
@@ -779,9 +728,6 @@ public class TPPCommandTeleportPetTest {
             when(this.admin.hasPermission("tppets.teleportother")).thenReturn(false);
             bukkit.when(() ->Bukkit.getOfflinePlayer("MockOwnerName")).thenReturn(this.player);
 
-            // Passenger adjustments. Entity list does not have size = 0
-            when(correctPet.getPassengers()).thenReturn(Collections.singletonList(correctPet));
-
             // Command object
             String[] args = {"tp", "f:MockOwnerName", "HORSE0"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
@@ -789,8 +735,9 @@ public class TPPCommandTeleportPetTest {
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.CANT_TELEPORT);
 
             verify(this.chunk, times(1)).load();
-            verify(correctPet, never()).eject();
-            verify(correctPet, never()).teleport(any(Location.class));
+            verify(entities[0], never()).eject();
+            verify(entities[0], never()).teleport(any(Location.class));
+            verify(entities[1], never()).teleport(any(Location.class));
             verify(this.logWrapper, never()).logSuccessfulAction(anyString());
             verify(this.admin).sendMessage(this.messageCaptor.capture());
             String capturedMessageOutput = this.messageCaptor.getValue();

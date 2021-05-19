@@ -2,9 +2,12 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
+import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Tameable;
 
 import java.sql.SQLException;
 
@@ -39,20 +42,35 @@ public class CommandRelease extends BaseCommand {
                 return;
             }
 
-            PetStorage pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+            PetStorage petStorage = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
 
-            if (pet == null) {
+            if (petStorage == null) {
                 this.commandStatus = CommandStatus.NO_PET;
                 return;
             }
 
-            if (!this.thisPlugin.getDatabase().removePet(pet.petId)) {
+            Entity pet = getPet(petStorage);
+
+            // Also tests if pet == null
+            if (!(pet instanceof Tameable)) {
+                this.commandStatus = CommandStatus.NO_ENTITY;
+                return;
+            }
+
+            if (this.thisPlugin.getDatabase().removePet(petStorage.petId)) {
+                EntityActions.releasePetEntity((Tameable) pet);
+            } else {
                 this.commandStatus = CommandStatus.DB_FAIL;
             }
 
         } catch (SQLException exception) {
             this.commandStatus = CommandStatus.DB_FAIL;
         }
+    }
+
+    private Entity getPet(PetStorage petStorage) {
+        loadChunkFromPetStorage(petStorage);
+        return getEntity(petStorage);
     }
 
     private void displayStatus() {
@@ -70,6 +88,9 @@ public class CommandRelease extends BaseCommand {
                 break;
             case NO_PLAYER:
                 this.sender.sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + ArgValidator.isForSomeoneElse(this.args[0]));
+                break;
+            case NO_ENTITY:
+                this.sender.sendMessage(ChatColor.RED + "Can't find pet");
                 break;
             case NO_PET:
                 this.sender.sendMessage(ChatColor.RED + "Could not find pet named " + ChatColor.WHITE + this.args[0]);

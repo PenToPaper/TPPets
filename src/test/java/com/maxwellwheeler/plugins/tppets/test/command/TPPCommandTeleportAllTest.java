@@ -33,7 +33,6 @@ import static org.mockito.Mockito.*;
 
 public class TPPCommandTeleportAllTest {
     private World world;
-    private List<World> worldList;
     private Location playerLocation;
     private Player player;
     private Location adminLocation;
@@ -45,30 +44,31 @@ public class TPPCommandTeleportAllTest {
     private TPPets tpPets;
     private Command command;
     private CommandTPP commandTPP;
+    private Server server;
     private ProtectedRegionManager protectedRegionManager;
     private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach() {
         this.world = mock(World.class);
+        this.server = mock(Server.class);
         when(this.world.getName()).thenReturn("MockWorld");
-        this.worldList = new ArrayList<>();
-        this.worldList.add(this.world);
         this.playerLocation = MockFactory.getMockLocation(this.world, 100, 200, 300);
         this.adminLocation = MockFactory.getMockLocation(this.world, 400, 500, 600);
         this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", this.world, this.playerLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs"});
         this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, this.adminLocation, new String[]{"tppets.donkeys", "tppets.llamas", "tppets.mules", "tppets.horses", "tppets.parrots", "tppets.cats", "tppets.dogs", "tppets.teleportother", "tppets.tpanywhere"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.chunk = mock(Chunk.class);
-        when(this.world.getChunkAt(anyInt(), anyInt())).thenReturn(this.chunk);
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
         this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
         this.protectedRegionManager = mock(ProtectedRegionManager.class);
+        this.command = mock(Command.class);
         when(this.protectedRegionManager.canTpThere(any(Player.class), any(Location.class))).thenReturn(true);
         when(this.tpPets.getProtectedRegionManager()).thenReturn(this.protectedRegionManager);
-        this.command = mock(Command.class);
+        when(this.tpPets.getServer()).thenReturn(this.server);
+        when(this.world.getChunkAt(anyInt(), anyInt())).thenReturn(this.chunk);
     }
 
     public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
@@ -113,6 +113,7 @@ public class TPPCommandTeleportAllTest {
         Entity[] ret = new Entity[ids.length];
         for (int i = 0; i < ids.length; i++) {
             ret[i] = MockFactory.getMockEntity(ids[i], className);
+            when(this.server.getEntity(UUID.fromString(ids[i]))).thenReturn(ret[i]);
         }
         return ret;
     }
@@ -137,16 +138,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, className);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, className);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -175,16 +174,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -216,16 +213,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -257,16 +252,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -295,16 +288,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -333,11 +324,9 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(new ArrayList<>());
@@ -365,11 +354,9 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // Plugin database wrapper instance
             when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenThrow(new SQLException());
@@ -397,16 +384,15 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
+            when(this.server.getEntity(UUID.fromString("CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC"))).thenReturn(entities[0]);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -433,16 +419,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -473,16 +457,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -514,16 +496,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -554,16 +534,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -595,16 +573,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -637,16 +613,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
@@ -675,16 +649,14 @@ public class TPPCommandTeleportAllTest {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             //  Bukkit static mock
             bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
-            bukkit.when(Bukkit::getWorlds).thenReturn(this.worldList);
 
             // A list of both entities
-            Entity[] entities = getEntityList(new String[]{"MockPetI-d0Mo-ckPe-tId0-MockPetId0Mo", "MockPetI-d1Mo-ckPe-tId1-MockPetId1Mo", "MockPetI-d2Mo-ckPe-tId2-MockPetId2Mo", "MockIncorrectPetId"}, org.bukkit.entity.Horse.class);
-            when(this.world.getEntities()).thenReturn(Arrays.asList(entities));
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // PetStorage
-            PetStorage pet0 = new PetStorage("MockPetId0MockPetId0MockPetId0Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
-            PetStorage pet1 = new PetStorage("MockPetId1MockPetId1MockPetId1Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
-            PetStorage pet2 = new PetStorage("MockPetId2MockPetId2MockPetId2Mo", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance

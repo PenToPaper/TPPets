@@ -22,10 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -49,6 +46,7 @@ public class TPPCommandStoreTest {
     private Chunk chunk;
     private Horse horse;
     private TPPets tpPets;
+    private Server server;
 
     @BeforeEach
     public void beforeEach() {
@@ -60,7 +58,7 @@ public class TPPCommandStoreTest {
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.teleportCaptor = ArgumentCaptor.forClass(Location.class);
         this.logCaptor = ArgumentCaptor.forClass(String.class);
-        this.horse = MockFactory.getMockEntity("MockPetI-dMoc-kPet-IdMo-ckPetIdMockP", Horse.class);
+        this.horse = MockFactory.getMockEntity("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", Horse.class);
 
         // Plugin
         this.sqlWrapper = mock(SQLWrapper.class);
@@ -81,10 +79,13 @@ public class TPPCommandStoreTest {
         // Storage Location
         this.serverStorageLocation = MockFactory.getServerStorageLocation("StorageOne", 100, 200, 300, this.world);
         this.playerStorageLocation = MockFactory.getPlayerStorageLocation("StorageTwo", "MockPlayerId", 100, 200, 300, this.world);
-        this.pet = new PetStorage("MockPetIdMockPetIdMockPetIdMockP", 7, 700, 800, 900, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
+        this.pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 700, 800, 900, "MockWorld", "MockPlayerId", "MockPetName", "MockPetName");
         this.chunk = mock(Chunk.class);
+
+        this.server = mock(Server.class);
+        when(this.tpPets.getServer()).thenReturn(this.server);
+        when(this.server.getEntity(UUID.fromString("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"))).thenReturn(this.horse);
         when(this.world.getChunkAt(43, 56)).thenReturn(this.chunk);
-        when(this.world.getEntities()).thenReturn(Collections.singletonList(this.horse));
     }
 
     public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
@@ -649,7 +650,7 @@ public class TPPCommandStoreTest {
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
-            when(this.world.getEntities()).thenReturn(Collections.emptyList());
+            when(this.server.getEntity(UUID.fromString("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"))).thenReturn(null);
 
             String[] args = {"store", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -677,7 +678,7 @@ public class TPPCommandStoreTest {
 
             when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(this.playerStorageLocation);
             when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
-            when(this.world.getEntities()).thenReturn(Collections.emptyList());
+            when(this.server.getEntity(UUID.fromString("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"))).thenReturn(null);
 
             String[] args = {"store", "f:MockPlayerName", "PetName", "StorageName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);

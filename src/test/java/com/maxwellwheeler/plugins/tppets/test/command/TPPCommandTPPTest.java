@@ -7,17 +7,20 @@ import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
-import org.bukkit.ChatColor;
+import org.bukkit.*;
 import org.bukkit.command.Command;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
@@ -44,34 +47,46 @@ public class TPPCommandTPPTest {
     @DisplayName("CommandTPP command aliases run each aliased command")
     void commandTPPAliases() throws SQLException {
         // Using CommandRelease
-        Player player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.dogs"});
-        when(this.tpPets.getAllowUntamingPets()).thenReturn(true);
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            World world = mock(World.class);
+            Chunk chunk = mock(Chunk.class);
+            when(world.getChunkAt(43, 56)).thenReturn(chunk);
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(world);
 
-        PetStorage pet = new PetStorage("MockPetId", 7, 100, 200, 300, "MockWorldName", "MockPlayerId", "PetName", "PetName");
-        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(pet);
-        when(this.sqlWrapper.removePet("MockPetId")).thenReturn(true);
+            Horse horse = MockFactory.getMockEntity("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", Horse.class);
+            Server server = mock(Server.class);
+            when(this.tpPets.getServer()).thenReturn(server);
+            when(server.getEntity(UUID.fromString("AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"))).thenReturn(horse);
 
-        // Base Command
-        this.commandTPP.onCommand(player, this.command, "", new String[]{"release", "PetName"});
+            Player player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.dogs"});
+            when(this.tpPets.getAllowUntamingPets()).thenReturn(true);
 
-        // Aliases
-        this.commandTPP.onCommand(player, this.command, "", new String[]{"release1", "PetName"});
-        this.commandTPP.onCommand(player, this.command, "", new String[]{"release2", "PetName"});
-        this.commandTPP.onCommand(player, this.command, "", new String[]{"release3", "PetName"});
+            PetStorage pet = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 700, 800, 900, "MockWorldName", "MockPlayerId", "PetName", "PetName");
+            when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(pet);
+            when(this.sqlWrapper.removePet("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")).thenReturn(true);
 
-        verify(this.sqlWrapper, times(4)).getSpecificPet("MockPlayerId", "PetName");
-        verify(this.sqlWrapper, times(4)).removePet("MockPetId");
-        verify(player, times(4)).sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "PetName" + ChatColor.BLUE + " has been released");
+            // Base Command
+            this.commandTPP.onCommand(player, this.command, "", new String[]{"release", "PetName"});
 
-        // Not aliases
-        reset(this.sqlWrapper);
-        reset(player);
+            // Aliases
+            this.commandTPP.onCommand(player, this.command, "", new String[]{"release1", "PetName"});
+            this.commandTPP.onCommand(player, this.command, "", new String[]{"release2", "PetName"});
+            this.commandTPP.onCommand(player, this.command, "", new String[]{"release3", "PetName"});
 
-        this.commandTPP.onCommand(player, this.command, "", new String[]{"notrelease", "PetName"});
+            verify(this.sqlWrapper, times(4)).getSpecificPet("MockPlayerId", "PetName");
+            verify(this.sqlWrapper, times(4)).removePet("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            verify(player, times(4)).sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "PetName" + ChatColor.BLUE + " has been released");
 
-        verify(this.sqlWrapper, never()).getSpecificPet("MockPlayerId", "PetName");
-        verify(this.sqlWrapper, never()).removePet("MockPetId");
-        verify(player, never()).sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "PetName" + ChatColor.BLUE + " has been released");
+            // Not aliases
+            reset(this.sqlWrapper);
+            reset(player);
+
+            this.commandTPP.onCommand(player, this.command, "", new String[]{"notrelease", "PetName"});
+
+            verify(this.sqlWrapper, never()).getSpecificPet("MockPlayerId", "PetName");
+            verify(this.sqlWrapper, never()).removePet("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            verify(player, never()).sendMessage(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "PetName" + ChatColor.BLUE + " has been released");
+        }
     }
 
     @Test

@@ -2,10 +2,17 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
+import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
+import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public abstract class Command {
     public Player sender;
@@ -39,6 +46,28 @@ public abstract class Command {
                 return player;
             }
         }
+        return null;
+    }
+
+    protected void loadChunkFromPetStorage(PetStorage petStorage) {
+        World world = Bukkit.getWorld(petStorage.petWorld);
+        if (world != null) {
+            Chunk petChunk = world.getChunkAt(petStorage.petX >> 4, petStorage.petZ >> 4);
+            petChunk.load();
+        }
+    }
+
+    protected Entity getEntity(PetStorage petStorage) {
+        try {
+            String petId = UUIDUtils.unTrimUUID(petStorage.petId);
+
+            if (petId != null) {
+                UUID petUUID = UUID.fromString(petId);
+                return this.thisPlugin.getServer().getEntity(petUUID);
+            }
+
+        } catch (IllegalArgumentException ignored) {}
+
         return null;
     }
 

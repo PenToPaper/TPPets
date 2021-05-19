@@ -5,9 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.SkeletonHorse;
 import org.bukkit.entity.Tameable;
-import org.bukkit.entity.ZombieHorse;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -45,7 +43,7 @@ public class ListenerPlayerInteractPetRelease implements Listener {
                 return DB_FAIL;
             }
 
-            releasePetEntity(pet);
+            EntityActions.releasePetEntity(pet);
             event.setCancelled(true);
             this.thisPlugin.getLogWrapper().logSuccessfulAction(event.getPlayer().getName() + " - release tool - " + event.getRightClicked().getUniqueId());
             return SUCCESS;
@@ -81,14 +79,6 @@ public class ListenerPlayerInteractPetRelease implements Listener {
     private void logEventStatus(Player examiningPlayer, EventStatus eventStatus) {
         if (eventStatus != EventStatus.SUCCESS) {
             this.thisPlugin.getLogWrapper().logUnsuccessfulAction(examiningPlayer.getName() + " - release tool - " + eventStatus.toString());
-        }
-    }
-
-    private void releasePetEntity(Tameable pet) {
-        EntityActions.setStanding(pet);
-        pet.setOwner(null);
-        if (!(pet instanceof SkeletonHorse || pet instanceof ZombieHorse)) {
-            pet.setTamed(false);
         }
     }
 

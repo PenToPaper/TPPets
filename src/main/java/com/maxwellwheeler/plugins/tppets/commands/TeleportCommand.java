@@ -2,12 +2,8 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
-import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -36,29 +32,14 @@ public abstract class TeleportCommand extends BaseCommand {
      * @return True if the pet was found and teleported, false otherwise
      */
 
-    protected boolean teleportPetsFromStorage(Location sendTo, @NotNull PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) throws SQLException {
-        World world = Bukkit.getWorld(petStorage.petWorld);
-        if (world != null) {
-            Chunk petChunk = world.getChunkAt(petStorage.petX >> 4, petStorage.petZ >> 4);
-            petChunk.load();
-            Entity entity = getEntityFromWorld(world, petStorage);
-            if (entity != null && teleportPet(sendTo, entity, setSitting, kickPlayerOff)) {
-                this.thisPlugin.getDatabase().updatePetLocation(entity);
-                return true;
-            }
+    protected boolean teleportPetFromStorage(Location sendTo, @NotNull PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) throws SQLException {
+        loadChunkFromPetStorage(petStorage);
+        Entity entity = getEntity(petStorage);
+        if (entity != null && teleportPet(sendTo, entity, setSitting, kickPlayerOff)) {
+            this.thisPlugin.getDatabase().updatePetLocation(entity);
+            return true;
         }
         return false;
-    }
-
-    protected Entity getEntityFromWorld(World world, PetStorage petStorage) {
-        // Internally, using the getEntitiesByClasses goes through this same loop. So this isn't a performance loss. It's actually more efficient because it only loops through it all once.
-        String petId = UUIDUtils.unTrimUUID(petStorage.petId);
-        for (Entity entity : world.getEntities()) {
-            if (entity.getUniqueId().toString().equals(petId)) {
-                return entity;
-            }
-        }
-        return null;
     }
 
     /**

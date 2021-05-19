@@ -80,7 +80,7 @@ public class CommandTeleportAll extends TeleportCommand {
 
     private void teleportAllPets() throws SQLException {
         for (PetStorage petStorage : this.petList) {
-            if (!canTpToWorld(this.sender, petStorage.petWorld) || !teleportPetsFromStorage(this.sender.getLocation(), petStorage, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
+            if (!canTpToWorld(this.sender, petStorage.petWorld) || !teleportPetFromStorage(this.sender.getLocation(), petStorage, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
                 this.commandStatus = CommandStatus.CANT_TELEPORT;
                 this.errorPetList.add(petStorage);
             }

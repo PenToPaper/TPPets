@@ -1,7 +1,6 @@
 package com.maxwellwheeler.plugins.tppets.helpers;
 
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Sittable;
+import org.bukkit.entity.*;
 
 /**
  * Simple class for general entity actions
@@ -27,6 +26,14 @@ public class EntityActions {
         if (ent instanceof Sittable) {
             Sittable sittableTemp = (Sittable) ent;
             sittableTemp.setSitting(false);
+        }
+    }
+
+    public static void releasePetEntity(Tameable pet) {
+        EntityActions.setStanding(pet);
+        pet.setOwner(null);
+        if (!(pet instanceof SkeletonHorse || pet instanceof ZombieHorse)) {
+            pet.setTamed(false);
         }
     }
 }
