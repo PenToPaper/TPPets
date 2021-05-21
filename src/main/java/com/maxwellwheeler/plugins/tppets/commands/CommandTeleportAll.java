@@ -22,22 +22,22 @@ public class CommandTeleportAll extends TeleportCommand {
     }
 
     private boolean initializePetList() throws SQLException {
-        try {
-            this.petType = PetType.Pets.valueOf(this.args[0].toUpperCase());
+        this.petType = getPetType(this.args[0]);
 
-            List<PetStorage> petList = this.thisPlugin.getDatabase().getAllPetsFromOwner(this.commandFor.getUniqueId().toString());
-
-            if (petList.size() == 0) {
-                this.commandStatus = CommandStatus.NO_PET;
-                return false;
-            }
-
-            this.petList = petList;
-
-        } catch (IllegalArgumentException ignored) {
+        if (this.petType == null || this.petType == PetType.Pets.UNKNOWN) {
             this.commandStatus = CommandStatus.NO_PET_TYPE;
             return false;
         }
+
+        List<PetStorage> petList = this.thisPlugin.getDatabase().getAllPetsFromOwner(this.commandFor.getUniqueId().toString());
+
+        if (petList.size() == 0) {
+            this.commandStatus = CommandStatus.NO_PET;
+            return false;
+        }
+
+        this.petList = petList;
+
         return true;
     }
 
@@ -91,7 +91,7 @@ public class CommandTeleportAll extends TeleportCommand {
         // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, SYNTAX_ERROR, NO_PET, NO_PET_TYPE, DB_FAIL, CANT_TELEPORT
         switch (this.commandStatus) {
             case SUCCESS:
-                this.sender.sendMessage((this.isIntendedForSomeoneElse ? ChatColor.WHITE + this.commandFor.getName() + "'s " : ChatColor.BLUE + "Your ") + ChatColor.WHITE + this.args[0] + "s " + ChatColor.BLUE + "have been teleported to you");
+                this.sender.sendMessage((this.isIntendedForSomeoneElse ? ChatColor.WHITE + this.commandFor.getName() + "'s " : ChatColor.BLUE + "Your ") + ChatColor.WHITE + this.petType.toString().toLowerCase() + "s " + ChatColor.BLUE + "have been teleported to you");
                 break;
             case INSUFFICIENT_PERMISSIONS:
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");

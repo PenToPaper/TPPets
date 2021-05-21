@@ -106,6 +106,35 @@ public class TPPCommandTeleportListTest {
         assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
     }
 
+    @ParameterizedTest
+    @MethodSource("petTypeProvider")
+    void listsValidPetsOptionalPlural(PetType.Pets petType) throws SQLException {
+        // PetStorage
+        PetStorage pet0 = new PetStorage("MockPetId0", PetType.getIndexFromPet(petType), 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+        PetStorage pet1 = new PetStorage("MockPetId1", PetType.getIndexFromPet(petType), 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+        PetStorage pet2 = new PetStorage("MockPetId2", PetType.getIndexFromPet(petType), 200, 200, 200, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+        List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+
+        // Plugin database wrapper instance
+        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+
+        this.setAliases();
+
+        // Command object
+        String[] args = {"list", petType.toString().toLowerCase() + "s"};
+        this.commandTPP.onCommand(this.player, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+
+        verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
+        List<String> messages = this.messageCaptor.getAllValues();
+        assertEquals(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's " + petType.toString().toLowerCase() + ChatColor.BLUE + " names ]" + ChatColor.DARK_GRAY + "---------", messages.get(0));
+        assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
+        assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
+        assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
+        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+    }
+
     @Test
     @DisplayName("Displays which pets are in another world if cannot tp_pets_between_worlds false")
     void listsPetsInAnotherWorldDenyTpBetweenWorlds() throws SQLException {

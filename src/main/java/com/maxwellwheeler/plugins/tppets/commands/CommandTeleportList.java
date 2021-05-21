@@ -33,7 +33,10 @@ public class CommandTeleportList extends TeleportCommand {
     }
 
     private void processCommandGeneric() {
-        if (!initializePetType()) {
+        this.petType = getPetType(this.args[0]);
+
+        if (this.petType == null || this.petType == PetType.Pets.UNKNOWN) {
+            this.commandStatus = CommandStatus.NO_PET_TYPE;
             return;
         }
 
@@ -47,16 +50,6 @@ public class CommandTeleportList extends TeleportCommand {
         }
 
         announcePetsFromList();
-    }
-
-    private boolean initializePetType() {
-        try {
-            this.petType = PetType.Pets.valueOf(this.args[0].toUpperCase());
-            return true;
-        } catch (IllegalArgumentException ignored) {
-            this.commandStatus = CommandStatus.NO_PET_TYPE;
-            return false;
-        }
     }
 
     private boolean initializePetList() {

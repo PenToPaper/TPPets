@@ -168,6 +168,42 @@ public class TPPCommandTeleportAllTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("teleportsPetsProvider")
+    void teleportsValidPetsOptionalPluralSyntax(PetType.Pets petType, Class<? extends Entity> className) throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            //  Bukkit static mock
+            bukkit.when(() -> Bukkit.getWorld("MockWorld")).thenReturn(this.world);
+
+            // A list of both entities
+            Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, className);
+
+            // PetStorage
+            PetStorage pet0 = new PetStorage("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet0", "CorrectPet0");
+            PetStorage pet1 = new PetStorage("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet1", "CorrectPet1");
+            PetStorage pet2 = new PetStorage("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", 7, 100, 100, 100, "MockWorld", "MockPlayerId", "CorrectPet2", "CorrectPet2");
+            List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
+
+            // Plugin database wrapper instance
+            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+
+            this.setAliases();
+
+            // Command object
+            String[] args = {"all", petType.toString().toLowerCase() + "s"};
+            this.commandTPP.onCommand(this.player, this.command, "", args);
+
+            verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - all - teleported MockPlayerName's " + petType.toString().toLowerCase() + "s");
+
+            verify(this.chunk, times(3)).load();
+            checkPetIsTeleported(entities[0], this.playerLocation, this.teleportCaptor);
+            checkPetIsTeleported(entities[1], this.playerLocation, this.teleportCaptor);
+            checkPetIsTeleported(entities[2], this.playerLocation, this.teleportCaptor);
+            checkPetIsNotTeleported(entities[3]);
+            checkPlayerResponse(this.player, ChatColor.BLUE + "Your " + ChatColor.WHITE + petType.toString().toLowerCase() + "s " + ChatColor.BLUE + "have been teleported to you", this.messageCaptor);
+        }
+    }
+
     @Test
     @DisplayName("Can't teleport all in ProtectedRegions without tppets.tpanywhere")
     void cannotTeleportInProtectedRegionsWithoutPermission() throws SQLException {

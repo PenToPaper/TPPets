@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.EntityActions;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
+import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -69,13 +70,17 @@ public abstract class TeleportCommand extends BaseCommand {
         return this.thisPlugin.getAllowTpBetweenWorlds() || player.getWorld().getName().equals(petWorldName) || player.hasPermission("tppets.tpanywhere");
     }
 
-    /**
-     * Formats the location in a readable way
-     * @param lc Location to format
-     * @return The readable string of location data
-     */
-    static String formatLocation(Location lc) {
-        return "x: " + lc.getBlockX() + ", " + "y: " + lc.getBlockY() + ", " + "z: " + lc.getBlockZ();
+    protected PetType.Pets getPetType(String petType) {
+        // If there's a PetType.Pets added in the future that has an "s" at the end of it, this will need to be reworked
+        // Avoided using recursion for now to avoid potential exploits from malicious players
+        try {
+            if (petType.length() > 1 && petType.substring(petType.length() - 1).equalsIgnoreCase("s")) {
+                return PetType.Pets.valueOf(petType.substring(0, petType.length() - 1).toUpperCase());
+            } else {
+                return PetType.Pets.valueOf(petType.toUpperCase());
+            }
+        } catch (IllegalArgumentException ignored) {}
+        return null;
     }
 
 }
