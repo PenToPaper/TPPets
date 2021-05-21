@@ -9,8 +9,11 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 public class CommandProtectedAdd extends Command {
+    private String enterMessage;
+
     CommandProtectedAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
@@ -39,7 +42,9 @@ public class CommandProtectedAdd extends Command {
                 return;
             }
 
-            if(!ArgValidator.softValidateRegionEnterMessage(this.args[2])) {
+            this.enterMessage = String.join(" ", Arrays.copyOfRange(this.args, 2, this.args.length));
+
+            if (!ArgValidator.softValidateRegionEnterMessage(this.enterMessage)) {
                 this.commandStatus = CommandStatus.INVALID_MESSAGE;
                 return;
             }
@@ -58,7 +63,7 @@ public class CommandProtectedAdd extends Command {
                 return;
             }
 
-            ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.args[2], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
+            ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.enterMessage, selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
             if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
                 this.thisPlugin.getProtectedRegionManager().addProtectedRegion(protectedRegion);
             } else {
@@ -85,7 +90,7 @@ public class CommandProtectedAdd extends Command {
                 this.sender.sendMessage(ChatColor.RED + "Invalid lost and found region name: " + ChatColor.WHITE + this.args[1]);
                 break;
             case INVALID_MESSAGE:
-                this.sender.sendMessage(ChatColor.RED + "Invalid enter message: " + ChatColor.WHITE + this.args[2]);
+                this.sender.sendMessage(ChatColor.RED + "Invalid enter message: " + ChatColor.WHITE + this.enterMessage);
                 break;
             case NO_REGION:
                 this.sender.sendMessage(ChatColor.RED + "Can't add region without a region selection");

@@ -98,7 +98,7 @@ public class TPPCommandProtectedAddTest {
     @Test
     @DisplayName("Adds a protected region")
     void addsProtectedRegion() throws SQLException {
-        String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't teleport here"};
+        String[] args = {"protected", "add", "ProtectedRegionName", "LostRegionName", "Can't", "teleport", "here"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         ProtectedRegion expectedRegion = ObjectFactory.getProtectedRegion("ProtectedRegionName", "Can't teleport here", "MockWorldName", this.world,100, 200, 300, 400, 500, 600, "LostRegionName", this.tpPets);
