@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.listeners;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,9 +18,13 @@ public class ListenerPlayerInteractRegionSelection implements Listener {
         this.thisPlugin = thisPlugin;
     }
 
+    private boolean hasRegionPermission(Player player) {
+        return player.hasPermission("tppets.protected") || player.hasPermission("tppets.lost");
+    }
+
     @EventHandler(priority=EventPriority.LOW)
     public void onPlayerInteract(PlayerInteractEvent e) {
-        if (!this.thisPlugin.getToolsManager().isMaterialValidTool("select_region", e.getMaterial()) || e.getClickedBlock() == null) {
+        if (!this.thisPlugin.getToolsManager().isMaterialValidTool("select_region", e.getMaterial()) || e.getClickedBlock() == null || !hasRegionPermission(e.getPlayer())) {
             return;
         }
 
@@ -27,9 +32,11 @@ public class ListenerPlayerInteractRegionSelection implements Listener {
         if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
             this.thisPlugin.getRegionSelectionManager().setStartLocation(e.getPlayer(), getBlockLocation);
             e.getPlayer().sendMessage(ChatColor.BLUE + "First position set!" + (this.thisPlugin.getRegionSelectionManager().getSelectionSession(e.getPlayer()).isCompleteSelection() ? " Selection is complete." : ""));
+            e.setCancelled(true);
         } else if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
             this.thisPlugin.getRegionSelectionManager().setEndLocation(e.getPlayer(), getBlockLocation);
             e.getPlayer().sendMessage(ChatColor.BLUE + "Second position set!" + (this.thisPlugin.getRegionSelectionManager().getSelectionSession(e.getPlayer()).isCompleteSelection() ? " Selection is complete." : ""));
+            e.setCancelled(true);
         }
     }
 

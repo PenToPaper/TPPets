@@ -41,7 +41,7 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
         World world = mock(World.class);
         this.blockLocation = MockFactory.getMockLocation(world, 10, 20, 30);
         this.regionSelectionManager = new RegionSelectionManager();
-        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
+        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.protected"});
 
         when(toolsManager.isMaterialValidTool("select_region", Material.BLAZE_ROD)).thenReturn(true);
         when(this.playerInteractEvent.getMaterial()).thenReturn(Material.BLAZE_ROD);
@@ -63,6 +63,8 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "First position set!");
 
+        verify(this.playerInteractEvent, times(1)).setCancelled(true);
+
         assertNotNull(this.regionSelectionManager.getSelectionSession(this.player));
         assertFalse(this.regionSelectionManager.getSelectionSession(this.player).isCompleteSelection());
 
@@ -80,6 +82,8 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "First position set! Selection is complete.");
 
+        verify(this.playerInteractEvent, times(1)).setCancelled(true);
+
         assertNotNull(this.regionSelectionManager.getSelectionSession(this.player));
         assertTrue(this.regionSelectionManager.getSelectionSession(this.player).isCompleteSelection());
     }
@@ -92,6 +96,8 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
         this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Second position set!");
+
+        verify(this.playerInteractEvent, times(1)).setCancelled(true);
 
         assertNotNull(this.regionSelectionManager.getSelectionSession(this.player));
         assertFalse(this.regionSelectionManager.getSelectionSession(this.player).isCompleteSelection());
@@ -110,8 +116,40 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
 
         verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "Second position set! Selection is complete.");
 
+        verify(this.playerInteractEvent, times(1)).setCancelled(true);
+
         assertNotNull(this.regionSelectionManager.getSelectionSession(this.player));
         assertTrue(this.regionSelectionManager.getSelectionSession(this.player).isCompleteSelection());
+    }
+
+    @Test
+    @DisplayName("Sets position if player has only lost permission")
+    void setsFirstPositionWithLostPerms() {
+        when(this.player.hasPermission("tppets.lost")).thenReturn(true);
+        when(this.player.hasPermission("tppets.protected")).thenReturn(false);
+
+        when(this.playerInteractEvent.getAction()).thenReturn(Action.LEFT_CLICK_BLOCK);
+
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+
+        verify(this.player, times(1)).sendMessage(ChatColor.BLUE + "First position set!");
+        verify(this.playerInteractEvent, times(1)).setCancelled(true);
+        assertNotNull(this.regionSelectionManager.getSelectionSession(this.player));
+        assertFalse(this.regionSelectionManager.getSelectionSession(this.player).isCompleteSelection());
+        this.regionSelectionManager.setEndLocation(this.player, this.blockLocation);
+        assertTrue(this.regionSelectionManager.getSelectionSession(this.player).isCompleteSelection());
+    }
+
+    @Test
+    @DisplayName("Doesn't set position when player has neither protected nor lost permissions")
+    void cannotSetPositionInsufficientPermissions() {
+        when(this.player.hasPermission("tppets.protected")).thenReturn(false);
+
+        this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+
+        verify(this.playerInteractEvent, never()).setCancelled(true);
+        verify(this.player, never()).sendMessage(anyString());
+        assertNull(this.regionSelectionManager.getSelectionSession(this.player));
     }
 
     @Test
@@ -120,6 +158,8 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
         when(this.playerInteractEvent.getAction()).thenReturn(Action.LEFT_CLICK_AIR);
 
         this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
+
+        verify(this.playerInteractEvent, never()).setCancelled(true);
 
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));
@@ -132,6 +172,7 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
 
         this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
+        verify(this.playerInteractEvent, never()).setCancelled(true);
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));
     }
@@ -143,6 +184,7 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
 
         this.listenerPlayerInteractRegionSelection.onPlayerInteract(this.playerInteractEvent);
 
+        verify(this.playerInteractEvent, never()).setCancelled(true);
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));
     }
@@ -158,6 +200,7 @@ public class TPPListenerPlayerInteractRegionSelectionTest {
 
         this.listenerPlayerInteractRegionSelection.onPlayerQuit(playerQuitEvent);
 
+        verify(this.playerInteractEvent, never()).setCancelled(true);
         verify(this.player, never()).sendMessage(anyString());
         assertNull(this.regionSelectionManager.getSelectionSession(this.player));
     }
