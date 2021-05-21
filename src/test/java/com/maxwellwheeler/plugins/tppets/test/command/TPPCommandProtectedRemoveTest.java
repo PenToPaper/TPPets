@@ -91,7 +91,7 @@ public class TPPCommandProtectedRemoveTest {
 
         verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
         String capturedMessage = this.stringCaptor.getValue();
-        assertEquals("You have removed protected region " + ChatColor.WHITE + "ProtectedRegionName", capturedMessage);
+        assertEquals(ChatColor.BLUE + "You have removed protected region " + ChatColor.WHITE + "ProtectedRegionName", capturedMessage);
     }
 
     @Test

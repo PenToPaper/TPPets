@@ -55,7 +55,7 @@ public class CommandProtectedRemove extends Command {
     private void displayStatus() {
         switch(this.commandStatus) {
             case SUCCESS:
-                this.sender.sendMessage("You have removed protected region " + ChatColor.WHITE + this.args[0]);
+                this.sender.sendMessage(ChatColor.BLUE + "You have removed protected region " + ChatColor.WHITE + this.args[0]);
                 break;
             case DB_FAIL:
                 this.sender.sendMessage(ChatColor.RED + "Could not remove protected region");
