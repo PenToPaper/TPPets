@@ -97,7 +97,7 @@ public class CommandTeleportList extends TeleportCommand {
                 this.sender.sendMessage(ChatColor.RED + "Could not find any " + ChatColor.WHITE + this.petType.toString().toLowerCase() + "s");
                 break;
             case DB_FAIL:
-                this.sender.sendMessage(ChatColor.RED + "Could not allow user to pet");
+                this.sender.sendMessage(ChatColor.RED + "Could not find pets");
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");

@@ -272,7 +272,7 @@ public class TPPCommandTeleportListTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not allow user to pet", message);
+        assertEquals(ChatColor.RED + "Could not find pets", message);
     }
 
     @Test
