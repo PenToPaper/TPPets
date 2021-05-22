@@ -4,7 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.commands.CommandStatus;
 import com.maxwellwheeler.plugins.tppets.commands.CommandTPP;
 import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
-import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
+import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import org.bukkit.Bukkit;
@@ -25,26 +25,21 @@ import java.util.Hashtable;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-// Using /tpp storage list to test response to syntax errors
-public class TPPCommandStorageTest {
-    private Player player;
+public class TPPCommandServerStorageTest {
     private Player admin;
-    private ArgumentCaptor<String> messageCaptor;
+    private Player player;
     private SQLWrapper sqlWrapper;
+    private LogWrapper logWrapper;
     private Command command;
     private CommandTPP commandTPP;
-    private List<PlayerStorageLocation> storageLocations;
-    private LogWrapper logWrapper;
 
     @BeforeEach
     public void beforeEach(){
         // Players
-        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{"tppets.storage"});
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.storageother", "tppets.bypassstoragelimit"});
-        this.messageCaptor = ArgumentCaptor.forClass(String.class);
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.serverstorage", "tppets.storageother", "tppets.bypassstoragelimit"});
+        this.player = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
 
         // Plugin
         this.sqlWrapper = mock(SQLWrapper.class);
@@ -54,37 +49,37 @@ public class TPPCommandStorageTest {
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
-        altAlias.add("storage");
-        aliases.put("storage", altAlias);
+        altAlias.add("serverstorage");
+        aliases.put("serverstorage", altAlias);
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
 
         // Database
         World world = mock(World.class);
         when(world.getName()).thenReturn("MockWorld");
-        PlayerStorageLocation locationOne = MockFactory.getPlayerStorageLocation("StorageOne", "MockPlayerId", 100, 200, 300, world);
-        PlayerStorageLocation locationTwo = MockFactory.getPlayerStorageLocation("StorageTwo", "MockPlayerId", 400, 500, 600, world);
-        this.storageLocations = new ArrayList<>();
-        this.storageLocations.add(locationOne);
-        this.storageLocations.add(locationTwo);
+        ServerStorageLocation locationOne = MockFactory.getServerStorageLocation("StorageOne", 100, 200, 300, world);
+        ServerStorageLocation locationTwo = MockFactory.getServerStorageLocation("StorageTwo", 400, 500, 600, world);
+        List<ServerStorageLocation> storageLocations = new ArrayList<>();
+        storageLocations.add(locationOne);
+        storageLocations.add(locationTwo);
     }
 
     public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
-        assertEquals(expectedPlayerName + " - storage - " + commandStatus.toString(), logCaptor.getValue());
+        assertEquals(expectedPlayerName + " - serverstorage - " + commandStatus.toString(), logCaptor.getValue());
     }
 
     @Test
     @DisplayName("Non-player sending command denies action silently")
     void nonPlayerSendingCommand() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
-        when(sender.hasPermission("tppets.storage")).thenReturn(true);
+        when(sender.hasPermission("tppets.serverstorage")).thenReturn(true);
 
-        String[] args = {"storage", "list"};
+        String[] args = {"serverstorage", "list"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getStorageLocations(anyString());
+        verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
         verify(sender, never()).sendMessage(anyString());
     }
 
@@ -95,14 +90,14 @@ public class TPPCommandStorageTest {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
             CommandSender sender = mock(CommandSender.class);
-            when(sender.hasPermission("tppets.storage")).thenReturn(true);
+            when(sender.hasPermission("tppets.serverstorage")).thenReturn(true);
 
-            String[] args = {"storage", "f:MockPlayerName", "list"};
+            String[] args = {"serverstorage", "f:MockPlayerName", "list"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
             verifyLoggedUnsuccessfulAction("Unknown Sender", CommandStatus.INVALID_SENDER);
 
-            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getServerStorageLocation(anyString(), any(World.class));
             verify(sender, never()).sendMessage(anyString());
         }
     }
@@ -114,17 +109,15 @@ public class TPPCommandStorageTest {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
             when(this.admin.hasPermission("tppets.storageother")).thenReturn(false);
 
-            String[] args = {"storage", "f:MockPlayerName", "list"};
+            String[] args = {"serverstorage", "f:MockPlayerName", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.INSUFFICIENT_PERMISSIONS);
 
             verify(this.sqlWrapper, never()).getStorageLocations(anyString());
 
-            verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-
-            assertEquals(ChatColor.RED + "You don't have permission to do that", message);
+            verify(this.admin, times(1)).sendMessage(anyString());
+            verify(this.admin, times(1)).sendMessage(ChatColor.RED + "You don't have permission to do that");
         }
     }
 
@@ -135,91 +128,79 @@ public class TPPCommandStorageTest {
             when(this.player.hasPlayedBefore()).thenReturn(false);
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getStorageLocations("MockPlayerId")).thenReturn(this.storageLocations);
-
-            String[] args = {"storage", "f:MockPlayerName", "list"};
+            String[] args = {"serverstorage", "f:MockPlayerName", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
-            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getServerStorageLocations(any(World.class));
 
-            verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-
-            assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName", message);
+            verify(this.admin, times(1)).sendMessage(anyString());
+            verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName");
         }
     }
 
     @Test
-    @DisplayName("Admins invalid username with f:[username] syntax")
+    @DisplayName("Admin invalid username with f:[username] syntax")
     void adminInvalidName() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
-
-            String[] args = {"storage", "f:MockPlayerName;", "list"};
+            String[] args = {"serverstorage", "f:MockPlayerName;", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.NO_PLAYER);
 
-            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getServerStorageLocations(any(World.class));
 
-            verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-
-            assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName;", message);
+            verify(this.admin, times(1)).sendMessage(anyString());
+            verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName;");
         }
     }
 
     @Test
-    @DisplayName("Admins no action with command using f:[username] syntax")
+    @DisplayName("Admin no action with command using f:[username] syntax")
     void adminNoAction() throws SQLException {
         try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
             bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(this.player);
 
-            when(this.sqlWrapper.getStorageLocations("MockAdminId")).thenReturn(this.storageLocations);
-
-            String[] args = {"storage", "f:MockPlayerName"};
+            String[] args = {"serverstorage", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
-            verify(this.sqlWrapper, never()).getStorageLocations(anyString());
+            verify(this.sqlWrapper, never()).getServerStorageLocations(any(World.class));
 
-            verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
-            String message = this.messageCaptor.getValue();
-
-            assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list/server]", message);
+            verify(this.admin, times(1)).sendMessage(anyString());
+            verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp serverstorage [add/remove/list]");
         }
     }
 
     @Test
     @DisplayName("No action with command")
-    void playerNoAction() {
-        String[] args = {"storage"};
-        this.commandTPP.onCommand(this.player, this.command, "", args);
+    void playerNoAction() throws SQLException {
+        String[] args = {"serverstorage"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
-        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
-        String message = this.messageCaptor.getValue();
+        verify(this.sqlWrapper, never()).getServerStorageLocations(any(World.class));
 
-        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list/server]", message);
+        verify(this.admin, times(1)).sendMessage(anyString());
+        verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp serverstorage [add/remove/list]");
     }
 
     @Test
     @DisplayName("Invalid action with command")
-    void playerInvalidAction() {
-        String[] args = {"storage", "invalid"};
-        this.commandTPP.onCommand(this.player, this.command, "", args);
+    void playerInvalidAction() throws SQLException {
+        String[] args = {"serverstorage", "invalid"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.SYNTAX_ERROR);
+        verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.SYNTAX_ERROR);
 
-        verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
-        String message = this.messageCaptor.getValue();
+        verify(this.sqlWrapper, never()).getServerStorageLocations(any(World.class));
 
-        assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list/server]", message);
+        verify(this.admin, times(1)).sendMessage(anyString());
+        verify(this.admin, times(1)).sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp serverstorage [add/remove/list]");
     }
 }

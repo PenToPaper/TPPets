@@ -27,7 +27,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class TPPCommandStorageListDefaultTest {
+public class TPPCommandServerStorageListTest {
     private Player admin;
     private List<World> worldList;
     private ArgumentCaptor<String> messageCaptor;
@@ -39,7 +39,7 @@ public class TPPCommandStorageListDefaultTest {
     @BeforeEach
     public void beforeEach() {
         // Players
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.setdefaultstorage"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", null, null, new String[]{"tppets.storage", "tppets.serverstorage"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
 
         // Plugin
@@ -50,8 +50,8 @@ public class TPPCommandStorageListDefaultTest {
         // Command
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
-        altAlias.add("storage");
-        aliases.put("storage", altAlias);
+        altAlias.add("serverstorage");
+        aliases.put("serverstorage", altAlias);
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
 
@@ -81,7 +81,7 @@ public class TPPCommandStorageListDefaultTest {
             when(this.sqlWrapper.getServerStorageLocations(this.worldList.get(0))).thenReturn(Collections.singletonList(this.storageLocations.get(0)));
             when(this.sqlWrapper.getServerStorageLocations(this.worldList.get(1))).thenReturn(Collections.singletonList(this.storageLocations.get(1)));
 
-            String[] args = {"storage", "list", "default"};
+            String[] args = {"serverstorage", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.sqlWrapper, times(2)).getServerStorageLocations(any(World.class));
@@ -102,9 +102,9 @@ public class TPPCommandStorageListDefaultTest {
     void cannotListWhenSenderIsInvalidType() throws SQLException {
         CommandSender sender = mock(CommandSender.class);
         when(sender.hasPermission("tppets.storage")).thenReturn(true);
-        when(sender.hasPermission("tppets.setdefaultstorage")).thenReturn(true);
+        when(sender.hasPermission("tppets.serverstorage")).thenReturn(true);
 
-        String[] args = {"storage", "list", "default"};
+        String[] args = {"serverstorage", "list"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
         verify(this.sqlWrapper, never()).getServerStorageLocations(any(World.class));
@@ -120,7 +120,7 @@ public class TPPCommandStorageListDefaultTest {
 
             when(this.sqlWrapper.getServerStorageLocations(this.worldList.get(0))).thenThrow(new SQLException());
 
-            String[] args = {"storage", "list", "default"};
+            String[] args = {"serverstorage", "list"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
             verify(this.sqlWrapper, times(1)).getServerStorageLocations(any(World.class));

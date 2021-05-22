@@ -118,8 +118,8 @@ public class TPPArgValidatorTest {
         // False if over 64 in length
         assertFalse(ArgValidator.softValidateStorageName("12345678901234567890123456789012345678901234567890123456789012345"));
 
-        // False if equal to "default"
-        assertFalse(ArgValidator.softValidateStorageName("default"));
+        // True if equal to "default" - as of 5/22/21
+        assertTrue(ArgValidator.softValidateStorageName("default"));
     }
 
     @Test

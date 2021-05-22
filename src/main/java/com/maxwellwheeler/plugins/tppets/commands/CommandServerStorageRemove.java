@@ -8,19 +8,19 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
-public class CommandStorageRemoveDefault extends Command {
-    CommandStorageRemoveDefault(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
+public class CommandServerStorageRemove extends Command {
+    CommandServerStorageRemove(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
     @Override
     public void processCommand() {
-        removeDefaultStorage();
+        removeServerStorage();
         displayStatus();
         logStatus();
     }
 
-    private void removeDefaultStorage() {
+    private void removeServerStorage() {
         try {
             if (!ArgValidator.validateArgsLength(this.args, 1)) {
                 this.commandStatus = CommandStatus.SYNTAX_ERROR;
@@ -53,10 +53,10 @@ public class CommandStorageRemoveDefault extends Command {
                 this.sender.sendMessage(ChatColor.RED + "Could not remove sever storage location" + ChatColor.WHITE + this.args[0]);
                 break;
             case ALREADY_DONE:
-                this.sender.sendMessage(ChatColor.RED + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " in" + ChatColor.WHITE + this.sender.getWorld().getName() + ChatColor.RED + " already does not exist");
+                this.sender.sendMessage(ChatColor.RED + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " in " + ChatColor.WHITE + this.sender.getWorld().getName() + ChatColor.RED + " already does not exist");
                 break;
             case SYNTAX_ERROR:
-                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage remove default");
+                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp serverstorage remove [storage name]");
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
@@ -66,9 +66,9 @@ public class CommandStorageRemoveDefault extends Command {
 
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
-            logSuccessfulAction("storage remove default", "removed " + this.args[0] + " from " + this.sender.getWorld().getName());
+            logSuccessfulAction("serverstorage remove", "removed " + this.args[0] + " from " + this.sender.getWorld().getName());
         } else {
-            logUnsuccessfulAction("storage remove default", this.commandStatus.toString());
+            logUnsuccessfulAction("serverstorage remove", this.commandStatus.toString());
         }
     }
 }

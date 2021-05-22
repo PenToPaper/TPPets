@@ -19,7 +19,7 @@ public class CommandLost extends BaseCommand{
         }
 
         displayErrors();
-        logStatus();
+        logErrors();
     }
 
     public void processCommandGeneric() {
@@ -62,7 +62,7 @@ public class CommandLost extends BaseCommand{
         }
     }
 
-    private void logStatus() {
+    private void logErrors() {
         if (this.commandStatus != CommandStatus.SUCCESS) {
             logUnsuccessfulAction("lost", this.commandStatus.toString());
         }

@@ -7,14 +7,14 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
-import org.bukkit.ChatColor;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-public class TPPCommandStorageRemoveDefaultTest {
+public class TPPCommandServerStorageRemoveTest {
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
     private SQLWrapper sqlWrapper;
@@ -39,7 +39,7 @@ public class TPPCommandStorageRemoveDefaultTest {
     public void beforeEach() {
         this.world = mock(World.class);
         when(this.world.getName()).thenReturn("MockWorld");
-        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.storage", "tppets.setdefaultstorage"});
+        this.admin = MockFactory.getMockPlayer("MockAdminId", "MockAdminName", this.world, null, new String[]{"tppets.storage", "tppets.serverstorage", "tppets.storageother"});
         this.messageCaptor = ArgumentCaptor.forClass(String.class);
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
@@ -47,8 +47,8 @@ public class TPPCommandStorageRemoveDefaultTest {
         TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, true);
         Hashtable<String, List<String>> aliases = new Hashtable<>();
         List<String> altAlias = new ArrayList<>();
-        altAlias.add("storage");
-        aliases.put("storage", altAlias);
+        altAlias.add("serverstorage");
+        aliases.put("serverstorage", altAlias);
         this.command = mock(Command.class);
         this.commandTPP = new CommandTPP(aliases, tpPets);
     }
@@ -56,7 +56,7 @@ public class TPPCommandStorageRemoveDefaultTest {
     public void verifyLoggedUnsuccessfulAction(String expectedPlayerName, CommandStatus commandStatus) {
         ArgumentCaptor<String> logCaptor = ArgumentCaptor.forClass(String.class);
         verify(this.logWrapper, times(1)).logUnsuccessfulAction(logCaptor.capture());
-        assertEquals(expectedPlayerName + " - storage remove default - " + commandStatus.toString(), logCaptor.getValue());
+        assertEquals(expectedPlayerName + " - serverstorage remove - " + commandStatus.toString(), logCaptor.getValue());
     }
 
     @Test
@@ -66,18 +66,65 @@ public class TPPCommandStorageRemoveDefaultTest {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
         when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
 
-        String[] args = {"storage", "remove", "default"};
+        String[] args = {"serverstorage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
 
         verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
         String capturedLogOutput = this.logCaptor.getValue();
-        assertEquals("MockAdminName - storage remove default - removed default from MockWorld", capturedLogOutput);
+        assertEquals("MockAdminName - serverstorage remove - removed default from MockWorld", capturedLogOutput);
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
         assertEquals(ChatColor.BLUE + "Server storage " + ChatColor.WHITE + "default" + ChatColor.BLUE + " in " + ChatColor.WHITE + "MockWorld" + ChatColor.BLUE + " has been removed", capturedMessageOutput);
+    }
+
+    @Test
+    @DisplayName("Removes storage location based on sender, even if f:[username] syntax used")
+    void removeStorageLocationBasedOnSender() throws SQLException {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            OfflinePlayer player = MockFactory.getMockOfflinePlayer("MockPlayerId", "MockPlayerName");
+            bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(player);
+
+            ServerStorageLocation storageLocation = mock(ServerStorageLocation.class);
+            when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
+            when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
+
+            String[] args = {"serverstorage", "f:MockPlayerName", "remove", "default"};
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
+
+            verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
+            String capturedLogOutput = this.logCaptor.getValue();
+            assertEquals("MockAdminName - serverstorage remove - removed default from MockWorld", capturedLogOutput);
+
+            verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+            String capturedMessageOutput = this.messageCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "Server storage " + ChatColor.WHITE + "default" + ChatColor.BLUE + " in " + ChatColor.WHITE + "MockWorld" + ChatColor.BLUE + " has been removed", capturedMessageOutput);
+        }
+    }
+
+    @Test
+    @DisplayName("Removes non-default storage locations from the database")
+    void removeNotDefaultStorageLocation() throws SQLException {
+        ServerStorageLocation storageLocation = mock(ServerStorageLocation.class);
+        when(this.sqlWrapper.getServerStorageLocation("notdefault", this.world)).thenReturn(storageLocation);
+        when(this.sqlWrapper.removeServerStorageLocation("notdefault", this.world)).thenReturn(true);
+
+        String[] args = {"serverstorage", "remove", "notdefault"};
+        this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+        verify(this.sqlWrapper, times(1)).removeServerStorageLocation(anyString(), any(World.class));
+
+        verify(this.logWrapper, times(1)).logSuccessfulAction(this.logCaptor.capture());
+        String capturedLogOutput = this.logCaptor.getValue();
+        assertEquals("MockAdminName - serverstorage remove - removed notdefault from MockWorld", capturedLogOutput);
+
+        verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
+        String capturedMessageOutput = this.messageCaptor.getValue();
+        assertEquals(ChatColor.BLUE + "Server storage " + ChatColor.WHITE + "notdefault" + ChatColor.BLUE + " in " + ChatColor.WHITE + "MockWorld" + ChatColor.BLUE + " has been removed", capturedMessageOutput);
     }
 
     @Test
@@ -86,7 +133,7 @@ public class TPPCommandStorageRemoveDefaultTest {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenThrow(new SQLException());
         when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(true);
 
-        String[] args = {"storage", "remove", "default"};
+        String[] args = {"serverstorage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
@@ -106,7 +153,7 @@ public class TPPCommandStorageRemoveDefaultTest {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
         when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenReturn(false);
 
-        String[] args = {"storage", "remove", "default"};
+        String[] args = {"serverstorage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
@@ -126,7 +173,7 @@ public class TPPCommandStorageRemoveDefaultTest {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(storageLocation);
         when(this.sqlWrapper.removeServerStorageLocation("default", this.world)).thenThrow(new SQLException());
 
-        String[] args = {"storage", "remove", "default"};
+        String[] args = {"serverstorage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.DB_FAIL);
@@ -144,7 +191,7 @@ public class TPPCommandStorageRemoveDefaultTest {
     void cannotRemoveStorageLocationAlreadyDoesNotExist() throws SQLException {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
 
-        String[] args = {"storage", "remove", "default"};
+        String[] args = {"serverstorage", "remove", "default"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
         verifyLoggedUnsuccessfulAction("MockAdminName", CommandStatus.ALREADY_DONE);
@@ -154,6 +201,6 @@ public class TPPCommandStorageRemoveDefaultTest {
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Server storage " + ChatColor.WHITE + "default" + ChatColor.RED + " in" + ChatColor.WHITE + "MockWorld" + ChatColor.RED + " already does not exist", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Server storage " + ChatColor.WHITE + "default" + ChatColor.RED + " in " + ChatColor.WHITE + "MockWorld" + ChatColor.RED + " already does not exist", capturedMessageOutput);
     }
 }

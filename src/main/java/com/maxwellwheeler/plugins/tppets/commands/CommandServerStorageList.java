@@ -12,18 +12,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommandStorageListDefault extends StorageListCommand {
-    CommandStorageListDefault(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
+public class CommandServerStorageList extends StorageListCommand {
+    CommandServerStorageList(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
     @Override
     public void processCommand() {
-        listDefaultStorages();
+        listServerStorages();
         displayStatus();
     }
 
-    private void listDefaultStorages() {
+    private void listServerStorages() {
         try {
 
             // Checks all worlds and stores their storage locations. Doing this first checks for database failures\

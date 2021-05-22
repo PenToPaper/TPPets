@@ -40,6 +40,35 @@ class CommandStore extends TeleportCommand {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
+    private StorageLocation getStorageLocation() throws SQLException {
+        StorageLocation storageLocation;
+
+        if (ArgValidator.validateArgsLength(this.args, 2)) {
+            // Syntax: /tpp store [pet name] [storage location]
+
+            this.hasSpecificStorage = true;
+
+            if (!ArgValidator.softValidateStorageName(this.args[1])) {
+                this.commandStatus = CommandStatus.INVALID_NAME;
+                return null;
+            }
+
+            storageLocation = this.thisPlugin.getDatabase().getStorageLocation(this.commandFor.getUniqueId().toString(), this.args[1]);
+
+            if (storageLocation == null) {
+                storageLocation = this.thisPlugin.getDatabase().getServerStorageLocation(this.args[1], this.sender.getWorld());
+            }
+
+        } else {
+            // Syntax: /tpp store [pet name]
+
+            storageLocation = this.thisPlugin.getDatabase().getServerStorageLocation("default", this.sender.getWorld());
+            this.hasSpecificStorage = false;
+        }
+
+        return storageLocation;
+    }
+
     private void processCommandGeneric() {
         // The first argument is always the pet name. Check if it's a valid pet name.
         try {
@@ -55,25 +84,7 @@ class CommandStore extends TeleportCommand {
                 return;
             }
 
-            StorageLocation storageLocation;
-
-            if (ArgValidator.validateArgsLength(this.args, 2)) {
-                // Syntax: /tpp store [pet name] [storage location]
-
-                this.hasSpecificStorage = true;
-
-                if (!ArgValidator.softValidateStorageName(this.args[1])) {
-                    this.commandStatus = CommandStatus.INVALID_NAME;
-                    return;
-                }
-
-                storageLocation = this.thisPlugin.getDatabase().getStorageLocation(this.commandFor.getUniqueId().toString(), this.args[1]);
-            } else {
-                // Syntax: /tpp store [pet name]
-
-                storageLocation = this.thisPlugin.getDatabase().getServerStorageLocation("default", this.sender.getWorld());
-                this.hasSpecificStorage = false;
-            }
+            StorageLocation storageLocation = getStorageLocation();
 
             if (storageLocation == null) {
                 this.commandStatus = CommandStatus.INVALID_NAME;

@@ -131,6 +131,14 @@ public class CommandTPP implements CommandExecutor {
                         permissionMessage(sender);
                     }
                     break;
+                case "serverstorage":
+                    if (sender.hasPermission("tppets.serverstorage")) {
+                        CommandServerStorage storage = new CommandServerStorage(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        storage.processCommand();
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
                 case "position1":
                     if (sender.hasPermission("tppets.protected") || sender.hasPermission("tppets.lost")) {
                         CommandPosition1 position1 = new CommandPosition1(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
@@ -195,6 +203,9 @@ public class CommandTPP implements CommandExecutor {
         }
         if (sender.hasPermission("tppets.storage")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp storage [add, remove, list] [storage name]" + ChatColor.BLUE + "  ->  Adds a new storage location.");
+        }
+        if (sender.hasPermission("tppets.serverstorage")) {
+            sender.sendMessage(ChatColor.WHITE + "/tpp serverstorage [add, remove, list] [storage name]" + ChatColor.BLUE + "  ->  Adds a new server storage location.");
         }
         if (sender.hasPermission("tppets.store")) {
             sender.sendMessage(ChatColor.WHITE + "/tpp store [pet name] [storage name]" + ChatColor.BLUE + "  ->  Sends [pet name] to [storage name]");

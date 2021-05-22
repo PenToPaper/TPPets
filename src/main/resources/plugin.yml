@@ -10,7 +10,7 @@ commands:
   tpp:
     description: Base command for TPPets
     aliases: [teleportpets]
-    usage: "Usage: /tpp [birds/dogs/cats/horses/mules/llamas/donkeys/protected/lost]"
+    usage: "Usage: /tpp [tp, list, all, rename, allow...]"
 
 permissions:
   tppets.*:
@@ -25,7 +25,7 @@ permissions:
       tppets.bypassprotection: true
       tppets.bypasslimit: true
       tppets.tpanywhere: true
-      tppets.setdefaultstorage: true
+      tppets.serverstorage: true
       tppets.storageother: true
       tppets.bypassstoragelimit: true
       tppets.rename: true
@@ -79,7 +79,7 @@ permissions:
   tppets.tpanywhere:
     default: op
     description: Allows user to teleport pets into, and keep pets inside, protected regions.
-  tppets.setdefaultstorage:
+  tppets.serverstorage:
     default: op
     description: Allows user to set a storage location named "default", which every player on the server can use.
   tppets.storageother:

@@ -27,6 +27,7 @@ command_aliases:
   all: [findall, getall]
   store: [move, stable]
   storage: [setstable]
+  serverstorage: [defstorage, sstorage, serverstable]
   help: [pls]
   position1: [1, pos1, startpos, start]
   position2: [2, pos2, endpos, end]

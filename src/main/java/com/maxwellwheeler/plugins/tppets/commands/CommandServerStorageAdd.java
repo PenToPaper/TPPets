@@ -8,19 +8,19 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
-public class CommandStorageAddDefault extends Command {
-    CommandStorageAddDefault(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
+public class CommandServerStorageAdd extends Command {
+    CommandServerStorageAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
     @Override
     public void processCommand() {
-        addDefaultStorage();
+        addServerStorage();
         displayStatus();
         logStatus();
     }
 
-    private void addDefaultStorage() {
+    private void addServerStorage() {
         try {
             if (!ArgValidator.validateArgsLength(this.args, 1)) {
                 this.commandStatus = CommandStatus.SYNTAX_ERROR;
@@ -58,7 +58,7 @@ public class CommandStorageAddDefault extends Command {
                 this.sender.sendMessage(ChatColor.RED + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " already exists");
                 break;
             case SYNTAX_ERROR:
-                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage add default");
+                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp serverstorage add [storage name]");
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
@@ -68,9 +68,9 @@ public class CommandStorageAddDefault extends Command {
 
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
-            logSuccessfulAction("storage add default", "added " + this.args[0] + " in " + this.sender.getWorld().getName());
+            logSuccessfulAction("serverstorage add", "added " + this.args[0] + " in " + this.sender.getWorld().getName());
         } else {
-            logUnsuccessfulAction("storage add default", this.commandStatus.toString());
+            logUnsuccessfulAction("serverstorage add", this.commandStatus.toString());
         }
     }
 }

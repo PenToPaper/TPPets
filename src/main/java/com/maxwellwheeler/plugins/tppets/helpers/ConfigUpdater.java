@@ -147,6 +147,7 @@ public class ConfigUpdater {
         this.thisPlugin.getConfig().set("command_aliases.position2", new String[]{"2", "pos2", "endpos", "end"});
         this.thisPlugin.getConfig().set("command_aliases.clear", new String[]{"wipe"});
         this.thisPlugin.getConfig().set("command_aliases.release", new String[]{"untame"});
+        this.thisPlugin.getConfig().set("command_aliases.serverstorage", new String[]{"defstorage", "sstorage", "serverstable"});
 
         for (String pet : new String[]{"dogs", "cats", "birds", "horses", "mules", "llamas", "donkeys"}) {
             this.thisPlugin.getConfig().set("command_aliases." + pet, null);

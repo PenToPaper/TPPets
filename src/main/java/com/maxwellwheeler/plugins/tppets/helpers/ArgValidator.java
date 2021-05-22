@@ -54,7 +54,7 @@ public class ArgValidator {
      * @return If the storage name is valid
      */
     public static boolean softValidateStorageName(String storeName) {
-        return softValidateServerStorageName(storeName) && !storeName.equalsIgnoreCase("default");
+        return softValidateServerStorageName(storeName);
     }
 
     /**

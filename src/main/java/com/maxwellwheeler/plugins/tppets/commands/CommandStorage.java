@@ -13,15 +13,6 @@ import java.util.Arrays;
  */
 // TODO: JAVADOC
 public class CommandStorage extends BaseCommand {
-    /*
-        TODO: In future update:
-     1) Move default storage commands to separate base command
-     2) Allow default as a storage name
-     3) When storing, if a player storage location doesn't exist, then search for server storage.
-
-     */
-    private boolean isDefaultCommand;
-
     /**
      * Generic constructor, needs to point to plugin for logging.
      * @param thisPlugin The {@link TPPets} instance.
@@ -46,78 +37,37 @@ public class CommandStorage extends BaseCommand {
         }
 
         displayErrors();
-        logStatus();
+        logErrors();
     }
 
     private boolean isValidSyntax() {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.storageother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
-    private void determineIsDefaultCommand() {
-        // TODO: Can change this not to static "default" in the future
-        if (ArgValidator.validateArgsLength(this.args, 2) && this.args[1].equalsIgnoreCase("default")) {
-            if (this.hasDefaultStoragePermissions()) {
-                this.isDefaultCommand = true;
-                return;
-            } else {
-                this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
-            }
-        }
-        this.isDefaultCommand = false;
-    }
-
-    private boolean hasDefaultStoragePermissions() {
-        return this.sender.hasPermission("tppets.setdefaultstorage");
-    }
-
-    public Command getCommandAdd() {
-        if (this.isDefaultCommand) {
-            return new CommandStorageAddDefault(this.thisPlugin, this.sender, this.sender, Arrays.copyOfRange(this.args, 1, this.args.length));
-        } else {
-            return new CommandStorageAdd(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
-        }
-    }
-
-    public Command getCommandRemove() {
-        if (this.isDefaultCommand) {
-            return new CommandStorageRemoveDefault(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
-        } else {
-            return new CommandStorageRemove(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
-        }
-    }
-
-    public Command getCommandList() {
-        if (this.isDefaultCommand) {
-            return new CommandStorageListDefault(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
-        } else {
-            return new CommandStorageList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
-        }
-    }
-
     public void processCommandGeneric() {
         // Determine if the command is of type /tpp storage list default, add default, remove default
-        determineIsDefaultCommand();
-        if (this.commandStatus != CommandStatus.SUCCESS) {
-            return;
-        }
-
         Command commandToRun = null;
 
         switch(this.args[0].toLowerCase()) {
             case "add":
-                commandToRun = getCommandAdd();
+                commandToRun = new CommandStorageAdd(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
                 break;
             case "remove":
-                commandToRun = getCommandRemove();
+                commandToRun = new CommandStorageRemove(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
                 break;
             case "list":
-                commandToRun = getCommandList();
+                commandToRun = new CommandStorageList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
+                break;
+            case "server":
+            case "serverlist":
+            case "slist":
+                commandToRun = new CommandWorldServerStorageList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
                 break;
             default:
                 this.commandStatus = CommandStatus.SYNTAX_ERROR;
                 break;
         }
-        
+
         if (commandToRun != null) {
             commandToRun.processCommand();
         }
@@ -135,7 +85,7 @@ public class CommandStorage extends BaseCommand {
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
                 break;
             case SYNTAX_ERROR:
-                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list]");
+                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage [add/remove/list/server]");
                 break;
             default:
                 this.sender.sendMessage(ChatColor.RED + "An unknown error occurred");
@@ -143,7 +93,7 @@ public class CommandStorage extends BaseCommand {
         }
     }
 
-    private void logStatus() {
+    private void logErrors() {
         if (this.commandStatus != CommandStatus.SUCCESS) {
             logUnsuccessfulAction("storage", this.commandStatus.toString());
         }
