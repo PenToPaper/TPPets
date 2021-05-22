@@ -13,6 +13,13 @@ import java.util.Arrays;
  */
 // TODO: JAVADOC
 public class CommandStorage extends BaseCommand {
+    /*
+        TODO: In future update:
+     1) Move default storage commands to separate base command
+     2) Allow default as a storage name
+     3) When storing, if a player storage location doesn't exist, then search for server storage.
+
+     */
     private boolean isDefaultCommand;
 
     /**
