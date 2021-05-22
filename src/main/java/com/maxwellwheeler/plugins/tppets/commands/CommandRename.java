@@ -54,7 +54,6 @@ public class CommandRename extends BaseCommand {
 
             if (!this.thisPlugin.getDatabase().renamePet(this.commandFor.getUniqueId().toString(), this.args[0], this.args[1])) {
                 this.commandStatus = CommandStatus.DB_FAIL;
-                return;
             }
 
         } catch (SQLException exception) {
