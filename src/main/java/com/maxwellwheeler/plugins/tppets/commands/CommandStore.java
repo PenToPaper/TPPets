@@ -48,6 +48,13 @@ class CommandStore extends TeleportCommand {
                 return;
             }
 
+            this.pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
+
+            if (this.pet == null) {
+                this.commandStatus = CommandStatus.NO_PET;
+                return;
+            }
+
             StorageLocation storageLocation;
 
             if (ArgValidator.validateArgsLength(this.args, 2)) {
@@ -70,13 +77,6 @@ class CommandStore extends TeleportCommand {
 
             if (storageLocation == null) {
                 this.commandStatus = CommandStatus.INVALID_NAME;
-                return;
-            }
-
-            this.pet = this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[0]);
-
-            if (this.pet == null) {
-                this.commandStatus = CommandStatus.NO_PET;
                 return;
             }
 
@@ -114,7 +114,7 @@ class CommandStore extends TeleportCommand {
             case CANT_TELEPORT_IN_PR:
                 break;
             case SUCCESS:
-                this.sender.sendMessage((isForSelf() ? ChatColor.BLUE + "Your" : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE) + " pet has been stored successfully");
+                this.sender.sendMessage((isForSelf() ? ChatColor.BLUE + "Your" : ChatColor.WHITE + this.commandFor.getName() + "'s" + ChatColor.BLUE) + " pet " + ChatColor.WHITE + this.pet.petName + ChatColor.BLUE + " has been stored successfully");
                 break;
             case INSUFFICIENT_PERMISSIONS:
                 this.sender.sendMessage(ChatColor.RED + "You don't have permission to do that");
@@ -129,7 +129,7 @@ class CommandStore extends TeleportCommand {
                 this.sender.sendMessage(ChatColor.RED + "Could not find pet: " + ChatColor.WHITE +  this.args[0]);
                 break;
             case INVALID_NAME:
-                this.sender.sendMessage(ChatColor.RED + "Could not find " + (this.hasSpecificStorage ? ChatColor.WHITE + this.args[1] : "default storage"));
+                this.sender.sendMessage(ChatColor.RED + "Could not find location: " + ChatColor.WHITE + (this.hasSpecificStorage ? this.args[1] : "default storage"));
                 break;
             case CANT_TELEPORT:
                 this.sender.sendMessage(ChatColor.RED + "Could not store " + (isForSelf() ? "your " : ChatColor.WHITE + this.commandFor.getName() + "'s " + ChatColor.RED) + "pet");

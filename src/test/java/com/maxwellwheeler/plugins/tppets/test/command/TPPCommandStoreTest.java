@@ -122,7 +122,7 @@ public class TPPCommandStoreTest {
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.BLUE + "Your pet has been stored successfully", message);
+            assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "MockPetName" + ChatColor.BLUE + " has been stored successfully", message);
         }
     }
 
@@ -156,7 +156,7 @@ public class TPPCommandStoreTest {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.WHITE + "MockPlayerName's" + ChatColor.BLUE + " pet has been stored successfully", message);
+            assertEquals(ChatColor.WHITE + "MockPlayerName's" + ChatColor.BLUE + " pet " + ChatColor.WHITE + "MockPetName" + ChatColor.BLUE + " has been stored successfully", message);
         }
     }
 
@@ -189,7 +189,7 @@ public class TPPCommandStoreTest {
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.BLUE + "Your pet has been stored successfully", message);
+            assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "MockPetName" + ChatColor.BLUE + " has been stored successfully", message);
         }
     }
 
@@ -223,7 +223,7 @@ public class TPPCommandStoreTest {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.WHITE + "MockPlayerName's" + ChatColor.BLUE + " pet has been stored successfully", message);
+            assertEquals(ChatColor.WHITE + "MockPlayerName's" + ChatColor.BLUE + " pet " + ChatColor.WHITE + "MockPetName" + ChatColor.BLUE + " has been stored successfully", message);
         }
     }
 
@@ -402,7 +402,7 @@ public class TPPCommandStoreTest {
 
             verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.BLUE + "Your pet has been stored successfully", message);
+            assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "MockPetName" + ChatColor.BLUE + " has been stored successfully", message);
         }
     }
 
@@ -439,7 +439,7 @@ public class TPPCommandStoreTest {
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
-            assertEquals(ChatColor.BLUE + "Your pet has been stored successfully", message);
+            assertEquals(ChatColor.BLUE + "Your pet " + ChatColor.WHITE + "MockPetName" + ChatColor.BLUE + " has been stored successfully", message);
         }
     }
 
@@ -504,7 +504,8 @@ public class TPPCommandStoreTest {
     @Test
     @DisplayName("Cannot teleport user's pets with an invalid storage name")
     void cannotTeleportUsersPetsInvalidStorageName() throws SQLException {
-        String[] args = {"store", "MyPet", "MyStorage;"};
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
+        String[] args = {"store", "PetName", "MyStorage;"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.INVALID_NAME);
@@ -516,15 +517,16 @@ public class TPPCommandStoreTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not find " + ChatColor.WHITE + "MyStorage;", message);
+        assertEquals(ChatColor.RED + "Could not find location: " + ChatColor.WHITE + "MyStorage;", message);
     }
 
 
     @Test
     @DisplayName("Cannot teleport user's pets when database fails to find storage")
     void cannotTeleportUsersPetsDbFailFindStorage() throws SQLException {
-        String[] args = {"store", "MyPet", "MyStorage"};
+        String[] args = {"store", "PetName", "MyStorage"};
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "MyStorage")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
@@ -543,8 +545,9 @@ public class TPPCommandStoreTest {
     @Test
     @DisplayName("Cannot teleport user's pets when database fails to find server storage")
     void cannotTeleportUsersPetsDbFailFindDefaultStorage() throws SQLException {
-        String[] args = {"store", "MyPet"};
+        String[] args = {"store", "PetName"};
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenThrow(new SQLException());
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
         verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.DB_FAIL);
@@ -585,6 +588,7 @@ public class TPPCommandStoreTest {
     @DisplayName("Cannot teleport user's pets with non-existent storage")
     void cannotTeleportUsersPetsNonExistentStorage() throws SQLException {
         when(this.sqlWrapper.getStorageLocation("MockPlayerId", "StorageName")).thenReturn(null);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
         String[] args = {"store", "PetName", "StorageName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -597,7 +601,7 @@ public class TPPCommandStoreTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not find " + ChatColor.WHITE + "StorageName", message);
+        assertEquals(ChatColor.RED + "Could not find location: " + ChatColor.WHITE + "StorageName", message);
     }
 
 
@@ -605,6 +609,7 @@ public class TPPCommandStoreTest {
     @DisplayName("Cannot teleport user's pets with non-existent default storage")
     void cannotTeleportUsersPetsNonExistentDefaultStorage() throws SQLException {
         when(this.sqlWrapper.getServerStorageLocation("default", this.world)).thenReturn(null);
+        when(this.sqlWrapper.getSpecificPet("MockPlayerId", "PetName")).thenReturn(this.pet);
 
         String[] args = {"store", "PetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
@@ -617,7 +622,7 @@ public class TPPCommandStoreTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Could not find default storage", message);
+        assertEquals(ChatColor.RED + "Could not find location: " + ChatColor.WHITE + "default storage", message);
     }
 
     @Test
@@ -631,7 +636,7 @@ public class TPPCommandStoreTest {
 
         verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.NO_PET);
 
-        verify(this.sqlWrapper, times(1)).getStorageLocation(anyString(), anyString());
+        verify(this.sqlWrapper, never()).getStorageLocation(anyString(), anyString());
 
         verify(this.chunk, never()).load();
         verify(this.horse, never()).teleport(any(Location.class));
