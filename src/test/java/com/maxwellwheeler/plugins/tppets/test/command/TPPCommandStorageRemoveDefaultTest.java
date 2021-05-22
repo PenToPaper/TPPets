@@ -154,6 +154,6 @@ public class TPPCommandStorageRemoveDefaultTest {
 
         verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.RED + "Server storage " + ChatColor.WHITE + "default" + ChatColor.BLUE + " in" + ChatColor.WHITE + "MockWorld" + ChatColor.RED + " already does not exist", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Server storage " + ChatColor.WHITE + "default" + ChatColor.RED + " in" + ChatColor.WHITE + "MockWorld" + ChatColor.RED + " already does not exist", capturedMessageOutput);
     }
 }

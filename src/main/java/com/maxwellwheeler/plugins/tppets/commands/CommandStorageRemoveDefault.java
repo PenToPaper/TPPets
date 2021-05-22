@@ -53,7 +53,7 @@ public class CommandStorageRemoveDefault extends Command {
                 this.sender.sendMessage(ChatColor.RED + "Could not remove sever storage location" + ChatColor.WHITE + this.args[0]);
                 break;
             case ALREADY_DONE:
-                this.sender.sendMessage(ChatColor.RED + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.BLUE + " in" + ChatColor.WHITE + this.sender.getWorld().getName() + ChatColor.RED + " already does not exist");
+                this.sender.sendMessage(ChatColor.RED + "Server storage " + ChatColor.WHITE + this.args[0] + ChatColor.RED + " in" + ChatColor.WHITE + this.sender.getWorld().getName() + ChatColor.RED + " already does not exist");
                 break;
             case SYNTAX_ERROR:
                 this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp storage remove default");
