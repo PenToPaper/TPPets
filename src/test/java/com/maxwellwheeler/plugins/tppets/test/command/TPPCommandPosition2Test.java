@@ -117,4 +117,24 @@ public class TPPCommandPosition2Test {
             assertEquals(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + "MockPlayerName", capturedMessage);
         }
     }
+
+    @Test
+    @DisplayName("Position 2 operates on sender even when sent using f:[username] syntax")
+    void cannotSetPosition2ForOtherPlayers() {
+        try (MockedStatic<Bukkit> bukkit = mockStatic(Bukkit.class)) {
+            OfflinePlayer player = MockFactory.getMockOfflinePlayer("MockPlayerId", "MockPlayerName");
+            bukkit.when(() -> Bukkit.getOfflinePlayer("MockPlayerName")).thenReturn(player);
+
+            String[] args = {"position2", "f:MockPlayerName"};
+            this.commandTPP.onCommand(this.admin, this.command, "", args);
+
+            assertNotNull(this.regionSelectionManager.getSelectionSession(this.admin));
+            this.regionSelectionManager.setStartLocation(this.admin, new Location(this.world, 400, 500, 600));
+            assertTrue(this.regionSelectionManager.getSelectionSession(this.admin).isCompleteSelection());
+
+            verify(this.admin, times(1)).sendMessage(this.stringCaptor.capture());
+            String capturedMessage = this.stringCaptor.getValue();
+            assertEquals(ChatColor.BLUE + "Second position set!", capturedMessage);
+        }
+    }
 }

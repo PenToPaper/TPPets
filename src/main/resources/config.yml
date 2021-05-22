@@ -30,6 +30,7 @@ command_aliases:
   help: [pls]
   position1: [1, pos1, startpos, start]
   position2: [2, pos2, endpos, end]
+  clear: [wipe]
 mysql:
   enable: false
   host: localhost

@@ -5,8 +5,8 @@ import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
-public class CommandPosition1 extends BaseCommand {
-    public CommandPosition1(TPPets thisPlugin, CommandSender sender, String[] args) {
+public class CommandClear extends BaseCommand {
+    public CommandClear(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
@@ -19,11 +19,7 @@ public class CommandPosition1 extends BaseCommand {
     }
 
     private void processCommandGeneric() {
-        this.thisPlugin.getRegionSelectionManager().setStartLocation(this.sender, this.sender.getLocation());
-    }
-
-    private boolean isSelectionComplete() {
-        return this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender).isCompleteSelection();
+        this.thisPlugin.getRegionSelectionManager().clearPlayerSession(this.sender);
     }
 
     private void displayStatus() {
@@ -31,7 +27,7 @@ public class CommandPosition1 extends BaseCommand {
             case INVALID_SENDER:
                 break;
             case SUCCESS:
-                this.sender.sendMessage(ChatColor.BLUE + "First position set!" + (isSelectionComplete() ? " Selection is complete." : ""));
+                this.sender.sendMessage(ChatColor.BLUE + "Selection cleared.");
                 break;
             case NO_PLAYER:
                 this.sender.sendMessage(ChatColor.RED + "Can't find player: " + ChatColor.WHITE + ArgValidator.isForSomeoneElse(this.args[0]));

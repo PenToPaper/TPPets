@@ -147,6 +147,14 @@ public class CommandTPP implements CommandExecutor {
                         permissionMessage(sender);
                     }
                     break;
+                case "clear":
+                    if (sender.hasPermission("tppets.protected") || sender.hasPermission("tppets.lost")) {
+                        CommandClear clear = new CommandClear(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));
+                        clear.processCommand();
+                    } else {
+                        permissionMessage(sender);
+                    }
+                    break;
                 case "release":
                     if (sender.hasPermission("tppets.dogs") || sender.hasPermission("tppets.cats") || sender.hasPermission("tppets.parrots") || sender.hasPermission("tppets.horses") || sender.hasPermission("tppets.mules") || sender.hasPermission("tppets.llamas") || sender.hasPermission("tppets.donkeys")) {
                         CommandRelease commandRelease = new CommandRelease(this.thisPlugin, sender, Arrays.copyOfRange(args, 1, args.length));

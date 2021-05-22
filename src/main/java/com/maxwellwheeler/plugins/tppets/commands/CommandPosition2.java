@@ -15,7 +15,7 @@ public class CommandPosition2 extends BaseCommand {
             processCommandGeneric();
         }
 
-        displayErrors();
+        displayStatus();
     }
 
     private void processCommandGeneric() {
@@ -26,7 +26,7 @@ public class CommandPosition2 extends BaseCommand {
         return this.thisPlugin.getRegionSelectionManager().getSelectionSession(this.sender).isCompleteSelection();
     }
 
-    private void displayErrors() {
+    private void displayStatus() {
         switch(this.commandStatus) {
             case INVALID_SENDER:
                 break;
