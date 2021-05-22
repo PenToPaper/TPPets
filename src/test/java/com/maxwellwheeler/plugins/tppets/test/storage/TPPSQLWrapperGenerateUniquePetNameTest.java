@@ -21,8 +21,8 @@ import static org.mockito.Mockito.times;
 public class TPPSQLWrapperGenerateUniquePetNameTest {
     private TPPets tpPets;
     private Connection connection;
-    private PreparedStatement getAllPetsStatement;
-    private ResultSet getAllPetsResultSet;
+    private PreparedStatement getNumPetsStatement;
+    private ResultSet getNumPetsResultSet;
     private PreparedStatement getSpecificPetStatement;
     private ResultSet getSpecificPetResultSet;
 
@@ -32,9 +32,9 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
         LogWrapper logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(sqlWrapper, logWrapper, false, false);
         this.connection = mock(Connection.class);
-        this.getAllPetsStatement = mock(PreparedStatement.class);
+        this.getNumPetsStatement = mock(PreparedStatement.class);
         this.getSpecificPetStatement = mock(PreparedStatement.class);
-        this.getAllPetsResultSet = mock(ResultSet.class);
+        this.getNumPetsResultSet = mock(ResultSet.class);
         this.getSpecificPetResultSet = mock(ResultSet.class);
 
         // Get specific pet
@@ -43,18 +43,10 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
         when(this.getSpecificPetStatement.executeQuery()).thenReturn(this.getSpecificPetResultSet);
 
         // Getting all pets from pet owner
-        when(this.connection.prepareStatement("SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?")).thenReturn(this.getAllPetsStatement);
-        when(this.getAllPetsResultSet.next()).thenReturn(true).thenReturn(false);
-        when(this.getAllPetsResultSet.getString("pet_id")).thenReturn("MockPetId");
-        when(this.getAllPetsResultSet.getInt("pet_type")).thenReturn(7);
-        when(this.getAllPetsResultSet.getInt("pet_x")).thenReturn(10);
-        when(this.getAllPetsResultSet.getInt("pet_y")).thenReturn(20);
-        when(this.getAllPetsResultSet.getInt("pet_z")).thenReturn(30);
-        when(this.getAllPetsResultSet.getString("pet_world")).thenReturn("MockWorldName");
-        when(this.getAllPetsResultSet.getString("owner_id")).thenReturn("MockOwnerId");
-        when(this.getAllPetsResultSet.getString("pet_name")).thenReturn("MockPetName");
-        when(this.getAllPetsResultSet.getString("effective_pet_name")).thenReturn("mockpetname");
-        when(this.getAllPetsStatement.executeQuery()).thenReturn(this.getAllPetsResultSet);
+        when(this.connection.prepareStatement("SELECT COUNT(pet_id) as count FROM tpp_unloaded_pets WHERE owner_id = ?")).thenReturn(this.getNumPetsStatement);
+        when(this.getNumPetsResultSet.next()).thenReturn(true);
+        when(this.getNumPetsResultSet.getInt("count")).thenReturn(1);
+        when(this.getNumPetsStatement.executeQuery()).thenReturn(this.getNumPetsResultSet);
     }
 
     @Test
@@ -70,9 +62,9 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
         verify(this.getSpecificPetStatement, times(1)).close();
         verify(this.getSpecificPetResultSet, times(1)).close();
 
-        verify(this.getAllPetsStatement, times(1)).executeQuery();
-        verify(this.getAllPetsStatement, times(1)).close();
-        verify(this.getAllPetsResultSet, times(1)).close();
+        verify(this.getNumPetsStatement, times(1)).executeQuery();
+        verify(this.getNumPetsStatement, times(1)).close();
+        verify(this.getNumPetsResultSet, times(1)).close();
     }
 
     @Test
@@ -90,15 +82,15 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
         verify(this.getSpecificPetStatement, times(2)).close();
         verify(this.getSpecificPetResultSet, times(2)).close();
 
-        verify(this.getAllPetsStatement, times(1)).executeQuery();
-        verify(this.getAllPetsStatement, times(1)).close();
-        verify(this.getAllPetsResultSet, times(1)).close();
+        verify(this.getNumPetsStatement, times(1)).executeQuery();
+        verify(this.getNumPetsStatement, times(1)).close();
+        verify(this.getNumPetsResultSet, times(1)).close();
     }
 
     @Test
     @DisplayName("generateUniquePetName increments the pet name if the pet name already exists")
     void generateUniquePetNameWith2OwnedPets() throws SQLException {
-        when(this.getAllPetsResultSet.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        when(this.getNumPetsResultSet.getInt("count")).thenReturn(2);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
 
@@ -110,15 +102,15 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
         verify(this.getSpecificPetStatement, times(1)).close();
         verify(this.getSpecificPetResultSet, times(1)).close();
 
-        verify(this.getAllPetsStatement, times(1)).executeQuery();
-        verify(this.getAllPetsStatement, times(1)).close();
-        verify(this.getAllPetsResultSet, times(1)).close();
+        verify(this.getNumPetsStatement, times(1)).executeQuery();
+        verify(this.getNumPetsStatement, times(1)).close();
+        verify(this.getNumPetsResultSet, times(1)).close();
     }
 
     @Test
     @DisplayName("generateUniquePetName throws SQLExceptions from getAllPetsFromOwner")
     void generateUniquePetNameRethrowsGetException() throws SQLException {
-        when(this.getAllPetsResultSet.next()).thenThrow(new SQLException());
+        when(this.getNumPetsResultSet.next()).thenThrow(new SQLException());
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
 
@@ -130,9 +122,9 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
         verify(this.getSpecificPetStatement, never()).close();
         verify(this.getSpecificPetResultSet, never()).close();
 
-        verify(this.getAllPetsStatement, times(1)).executeQuery();
-        verify(this.getAllPetsStatement, times(1)).close();
-        verify(this.getAllPetsResultSet, times(1)).close();
+        verify(this.getNumPetsStatement, times(1)).executeQuery();
+        verify(this.getNumPetsStatement, times(1)).close();
+        verify(this.getNumPetsResultSet, times(1)).close();
     }
 
     @Test
@@ -150,8 +142,8 @@ public class TPPSQLWrapperGenerateUniquePetNameTest {
         verify(this.getSpecificPetStatement, times(1)).close();
         verify(this.getSpecificPetResultSet, times(1)).close();
 
-        verify(this.getAllPetsStatement, times(1)).executeQuery();
-        verify(this.getAllPetsStatement, times(1)).close();
-        verify(this.getAllPetsResultSet, times(1)).close();
+        verify(this.getNumPetsStatement, times(1)).executeQuery();
+        verify(this.getNumPetsStatement, times(1)).close();
+        verify(this.getNumPetsResultSet, times(1)).close();
     }
 }

@@ -54,7 +54,7 @@ public class CommandTeleportList extends TeleportCommand {
 
     private boolean initializePetList() {
         try {
-            List<PetStorage> petList = this.thisPlugin.getDatabase().getAllPetsFromOwner(this.commandFor.getUniqueId().toString());
+            List<PetStorage> petList = this.thisPlugin.getDatabase().getPetTypeFromOwner(this.commandFor.getUniqueId().toString(), this.petType);
 
             if (petList.size() == 0) {
                 this.commandStatus = CommandStatus.NO_PET;

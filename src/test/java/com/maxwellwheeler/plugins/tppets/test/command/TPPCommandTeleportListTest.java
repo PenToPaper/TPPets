@@ -87,7 +87,7 @@ public class TPPCommandTeleportListTest {
         List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
         // Plugin database wrapper instance
-        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+        when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", petType)).thenReturn(petList);
 
         this.setAliases();
 
@@ -95,7 +95,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", petType.toString().toLowerCase()};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
@@ -116,7 +116,7 @@ public class TPPCommandTeleportListTest {
         List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
         // Plugin database wrapper instance
-        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+        when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", petType)).thenReturn(petList);
 
         this.setAliases();
 
@@ -124,7 +124,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", petType.toString().toLowerCase() + "s"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
@@ -145,7 +145,7 @@ public class TPPCommandTeleportListTest {
         List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
         // Plugin database wrapper instance
-        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+        when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
         this.setAliases();
 
@@ -153,7 +153,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "horse"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
@@ -174,7 +174,7 @@ public class TPPCommandTeleportListTest {
         List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
         // Plugin database wrapper instance
-        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+        when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
         when(this.tpPets.getAllowTpBetweenWorlds()).thenReturn(true);
 
@@ -184,7 +184,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "horse"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(5)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
@@ -205,7 +205,7 @@ public class TPPCommandTeleportListTest {
         List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
         // Plugin database wrapper instance
-        when(this.sqlWrapper.getAllPetsFromOwner("MockAdminId")).thenReturn(petList);
+        when(this.sqlWrapper.getPetTypeFromOwner("MockAdminId", PetType.Pets.HORSE)).thenReturn(petList);
 
         this.setAliases();
 
@@ -213,7 +213,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "horse"};
         this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.admin, times(5)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
@@ -237,7 +237,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "horse"};
         this.commandTPP.onCommand(sender, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
         verify(sender, never()).sendMessage(this.messageCaptor.capture());
     }
 
@@ -250,7 +250,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
         assertEquals(ChatColor.RED + "Syntax Error! Usage: /tpp list [pet type]", message);
@@ -260,7 +260,7 @@ public class TPPCommandTeleportListTest {
     @DisplayName("Cannot list when database failure occurs")
     void cannotListDbFail() throws SQLException {
         // Plugin database wrapper instance
-        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenThrow(new SQLException());
+        when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenThrow(new SQLException());
 
         this.setAliases();
 
@@ -268,7 +268,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "horse"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
@@ -279,7 +279,7 @@ public class TPPCommandTeleportListTest {
     @DisplayName("Cannot list when database finds no pets")
     void cannotListNoPetsFound() throws SQLException {
         // Plugin database wrapper instance
-        when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(new ArrayList<>());
+        when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(new ArrayList<>());
 
         this.setAliases();
 
@@ -287,7 +287,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "horse"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
@@ -303,7 +303,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "invalidpettype"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
@@ -322,7 +322,7 @@ public class TPPCommandTeleportListTest {
         String[] args = {"list", "horse"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+        verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String message = this.messageCaptor.getValue();
@@ -340,7 +340,7 @@ public class TPPCommandTeleportListTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -351,7 +351,7 @@ public class TPPCommandTeleportListTest {
             String[] args = {"list", "f:MockPlayerName", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, times(1)).getAllPetsFromOwner(anyString());
+            verify(this.sqlWrapper, times(1)).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
             verify(this.admin, times(5)).sendMessage(this.messageCaptor.capture());
             List<String> messages = this.messageCaptor.getAllValues();
@@ -374,7 +374,7 @@ public class TPPCommandTeleportListTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -386,7 +386,7 @@ public class TPPCommandTeleportListTest {
             String[] args = {"list", "f:MockPlayerName", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+            verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -412,7 +412,7 @@ public class TPPCommandTeleportListTest {
             String[] args = {"list", "f:MockPlayerName", "horse"};
             this.commandTPP.onCommand(sender, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+            verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
             verify(sender, never()).sendMessage(this.messageCaptor.capture());
         }
     }
@@ -433,7 +433,7 @@ public class TPPCommandTeleportListTest {
             String[] args = {"list", "f:MockPlayerName", "horse"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+            verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();
@@ -454,7 +454,7 @@ public class TPPCommandTeleportListTest {
             String[] args = {"list", "f:MockPlayerName"};
             this.commandTPP.onCommand(this.admin, this.command, "", args);
 
-            verify(this.sqlWrapper, never()).getAllPetsFromOwner(anyString());
+            verify(this.sqlWrapper, never()).getPetTypeFromOwner(anyString(), any(PetType.Pets.class));
 
             verify(this.admin, times(1)).sendMessage(this.messageCaptor.capture());
             String message = this.messageCaptor.getValue();

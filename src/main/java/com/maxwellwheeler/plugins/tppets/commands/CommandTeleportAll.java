@@ -29,7 +29,7 @@ public class CommandTeleportAll extends TeleportCommand {
             return false;
         }
 
-        List<PetStorage> petList = this.thisPlugin.getDatabase().getAllPetsFromOwner(this.commandFor.getUniqueId().toString());
+        List<PetStorage> petList = this.thisPlugin.getDatabase().getPetTypeFromOwner(this.commandFor.getUniqueId().toString(), this.petType);
 
         if (petList.size() == 0) {
             this.commandStatus = CommandStatus.NO_PET;
@@ -101,7 +101,7 @@ public class CommandTeleportAll extends TeleportCommand {
                 break;
             case SYNTAX_ERROR:
             case NO_PET_TYPE:
-                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp [pet type] all");
+                this.sender.sendMessage(ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]");
                 break;
             case NO_PET:
                 this.sender.sendMessage(ChatColor.RED + "Could not find any " + ChatColor.WHITE + this.petType.toString().toLowerCase() + "s");

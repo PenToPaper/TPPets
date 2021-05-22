@@ -149,7 +149,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.getEnumByEntity(entities[0]))).thenReturn(petList);
 
             this.setAliases();
 
@@ -185,7 +185,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.getEnumByEntity(entities[0]))).thenReturn(petList);
 
             this.setAliases();
 
@@ -221,7 +221,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -260,7 +260,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -299,7 +299,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -314,7 +314,7 @@ public class TPPCommandTeleportAllTest {
             checkPetIsNotTeleported(entities[1]);
             checkPetIsNotTeleported(entities[2]);
             checkPetIsNotTeleported(entities[3]);
-            checkPlayerResponse(this.player, ChatColor.RED + "Syntax Error! Usage: /tpp [pet type] all", this.messageCaptor);
+            checkPlayerResponse(this.player, ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", this.messageCaptor);
         }
     }
 
@@ -335,7 +335,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -350,7 +350,7 @@ public class TPPCommandTeleportAllTest {
             checkPetIsNotTeleported(entities[1]);
             checkPetIsNotTeleported(entities[2]);
             checkPetIsNotTeleported(entities[3]);
-            checkPlayerResponse(this.player, ChatColor.RED + "Syntax Error! Usage: /tpp [pet type] all", this.messageCaptor);
+            checkPlayerResponse(this.player, ChatColor.RED + "Syntax Error! Usage: /tpp all [pet type]", this.messageCaptor);
         }
     }
 
@@ -365,7 +365,7 @@ public class TPPCommandTeleportAllTest {
             Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(new ArrayList<>());
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(new ArrayList<>());
 
             this.setAliases();
 
@@ -395,7 +395,7 @@ public class TPPCommandTeleportAllTest {
             Entity[] entities = getEntityList(new String[]{"AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA", "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB", "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC", "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"}, org.bukkit.entity.Horse.class);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenThrow(new SQLException());
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenThrow(new SQLException());
 
             this.setAliases();
 
@@ -432,7 +432,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -466,7 +466,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -504,7 +504,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -543,7 +543,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockAdminId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockAdminId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -581,7 +581,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -620,7 +620,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -660,7 +660,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 
@@ -696,7 +696,7 @@ public class TPPCommandTeleportAllTest {
             List<PetStorage> petList = Arrays.asList(pet0, pet1, pet2);
 
             // Plugin database wrapper instance
-            when(this.sqlWrapper.getAllPetsFromOwner("MockPlayerId")).thenReturn(petList);
+            when(this.sqlWrapper.getPetTypeFromOwner("MockPlayerId", PetType.Pets.HORSE)).thenReturn(petList);
 
             this.setAliases();
 

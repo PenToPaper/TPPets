@@ -148,8 +148,7 @@ public abstract class SQLWrapper {
     // Pet actions
 
     public String generateUniquePetName(@NotNull String ownerId, @NotNull PetType.Pets petType) throws SQLException {
-        List<PetStorage> currentPetsList = this.getAllPetsFromOwner(ownerId);
-        int lastIndexChecked = currentPetsList.size();
+        int lastIndexChecked = this.getNumPets(ownerId);
         String ret;
 
         do {
@@ -244,11 +243,11 @@ public abstract class SQLWrapper {
         }
     }
 
-    public List<PetStorage> getAllPetsFromOwner(@NotNull String ownerId) throws SQLException {
+    public List<PetStorage> getPetTypeFromOwner(@NotNull String ownerId, @NotNull PetType.Pets petType) throws SQLException {
         String trimmedOwnerId = UUIDUtils.trimUUID(ownerId);
-        String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ?";
+        String selectPetsFromOwner = "SELECT * FROM tpp_unloaded_pets WHERE owner_id = ? AND pet_type = ?";
         try (Connection dbConn = this.getConnection();
-             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsFromOwner), trimmedOwnerId);
+             PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectPetsFromOwner), trimmedOwnerId, PetType.getIndexFromPet(petType));
              ResultSet resultSet = selectStatement.executeQuery()) {
             List<PetStorage> ret = new ArrayList<>();
             while (resultSet.next()) {
