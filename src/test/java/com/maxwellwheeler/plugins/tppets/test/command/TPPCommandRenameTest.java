@@ -167,7 +167,7 @@ public class TPPCommandRenameTest {
 
         verify(this.player, times(1)).sendMessage(this.messageCaptor.capture());
         String capturedMessageOutput = this.messageCaptor.getValue();
-        assertEquals(ChatColor.WHITE + "NewPetName;" + ChatColor.RED + " is an invalid name", capturedMessageOutput);
+        assertEquals(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + "NewPetName;", capturedMessageOutput);
     }
 
     @Test
@@ -216,7 +216,7 @@ public class TPPCommandRenameTest {
         String[] args = {"rename", "OldPetName", "NewPetName"};
         this.commandTPP.onCommand(this.player, this.command, "", args);
 
-        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.PET_NAME_ALREADY_IN_USE);
+        verifyLoggedUnsuccessfulAction("MockPlayerName", CommandStatus.ALREADY_DONE);
 
         verify(this.sqlWrapper, times(2)).getSpecificPet(anyString(), anyString());
         verify(this.sqlWrapper, times(1)).getSpecificPet("MockPlayerId", "OldPetName");

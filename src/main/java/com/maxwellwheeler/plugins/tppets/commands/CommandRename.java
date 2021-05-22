@@ -48,7 +48,7 @@ public class CommandRename extends BaseCommand {
             }
 
             if (this.thisPlugin.getDatabase().getSpecificPet(this.commandFor.getUniqueId().toString(), this.args[1]) != null) {
-                this.commandStatus = CommandStatus.PET_NAME_ALREADY_IN_USE;
+                this.commandStatus = CommandStatus.ALREADY_DONE;
                 return;
             }
 
@@ -62,7 +62,6 @@ public class CommandRename extends BaseCommand {
     }
 
     private void displayStatus() {
-        // NO_TARGET_PET, INVALID_NAME, PET_NAME_ALREADY_IN_USE
         switch(this.commandStatus) {
             case INVALID_SENDER:
                 break;
@@ -82,9 +81,9 @@ public class CommandRename extends BaseCommand {
                 this.sender.sendMessage(ChatColor.RED + "Could not find pet named " + ChatColor.WHITE + this.args[0]);
                 break;
             case INVALID_NAME:
-                this.sender.sendMessage(ChatColor.WHITE + this.args[1] + ChatColor.RED + " is an invalid name");
+                this.sender.sendMessage(ChatColor.RED + "Invalid pet name: " + ChatColor.WHITE + this.args[1]);
                 break;
-            case PET_NAME_ALREADY_IN_USE:
+            case ALREADY_DONE:
                 this.sender.sendMessage(ChatColor.RED + "Pet name " + ChatColor.WHITE + this.args[1] + ChatColor.RED + " is already in use");
                 break;
             case SYNTAX_ERROR:
