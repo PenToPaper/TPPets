@@ -24,6 +24,8 @@ import static org.mockito.Mockito.*;
 public class TPPListenerEntityTamedEntityBreedTest {
     private Player owner;
     private Horse horse;
+    private Horse fatherHorse;
+    private Horse motherHorse;
     private TPPets tpPets;
     private SQLWrapper sqlWrapper;
     private ListenerEntityTamed listenerEntityTamed;
@@ -33,6 +35,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
     public void beforeEach() throws SQLException {
         this.owner = MockFactory.getMockPlayer("MockPlayerId", "MockPlayerName", null, null, new String[]{});
         this.horse = MockFactory.getTamedMockEntity("MockHorseId", Horse.class, this.owner);
+        this.fatherHorse = MockFactory.getTamedMockEntity("MockFatherHorseId", Horse.class, this.owner);
+        this.motherHorse = MockFactory.getTamedMockEntity("MockMotherHorseId", Horse.class, this.owner);
         this.sqlWrapper = mock(SQLWrapper.class);
         this.logWrapper = mock(LogWrapper.class);
         this.tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
@@ -51,6 +55,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         EntityBreedEvent entityBreedEvent = mock(EntityBreedEvent.class);
         when(entityBreedEvent.isCancelled()).thenReturn(false);
         when(entityBreedEvent.getEntity()).thenReturn(this.horse);
+        when(entityBreedEvent.getMother()).thenReturn(this.motherHorse);
+        when(entityBreedEvent.getFather()).thenReturn(this.fatherHorse);
         return entityBreedEvent;
     }
 
@@ -67,6 +73,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).insertPet(this.horse, "MockPlayerId", "MockPetName");
         verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(this.horse, never()).setTamed(anyBoolean());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
@@ -87,6 +95,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
 
@@ -116,6 +126,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
 
@@ -146,6 +158,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
 
@@ -165,6 +179,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logSuccessfulAction("MockPlayerName - tame - MockPetName");
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
 
@@ -183,6 +199,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
 
@@ -202,6 +220,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
 
@@ -221,6 +241,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, never()).logSuccessfulAction(anyString());
         verify(this.horse, never()).setOwner(any(AnimalTamer.class));
         verify(this.horse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, never()).setLoveModeTicks(anyInt());
+        verify(this.fatherHorse, never()).setLoveModeTicks(anyInt());
         verify(entityBreedEvent, never()).setCancelled(anyBoolean());
     }
 
@@ -239,6 +261,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - TOTAL_LIMIT");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -257,6 +281,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - TYPE_LIMIT");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -275,6 +301,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -293,6 +321,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -311,6 +341,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -329,6 +361,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.logWrapper, times(1)).logUnsuccessfulAction("MockPlayerName - tame - DB_FAIL");
         verify(this.horse, times(1)).setOwner(null);
         verify(this.horse, times(1)).setTamed(false);
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -352,6 +386,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(wolf, times(1)).setOwner(null);
         verify(wolf, times(1)).setTamed(false);
         verify(wolf, times(1)).setSitting(false);
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -373,6 +409,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), anyString());
         verify(skeletonHorse, times(1)).setOwner(null);
         verify(skeletonHorse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 
@@ -394,6 +432,8 @@ public class TPPListenerEntityTamedEntityBreedTest {
         verify(this.sqlWrapper, times(1)).insertPet(any(Entity.class), anyString(), anyString());
         verify(zombieHorse, times(1)).setOwner(null);
         verify(zombieHorse, never()).setTamed(anyBoolean());
+        verify(this.motherHorse, times(1)).setLoveModeTicks(0);
+        verify(this.fatherHorse, times(1)).setLoveModeTicks(0);
         verify(entityBreedEvent, times(1)).setCancelled(true);
     }
 }

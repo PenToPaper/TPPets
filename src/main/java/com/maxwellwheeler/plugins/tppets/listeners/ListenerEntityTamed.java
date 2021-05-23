@@ -135,6 +135,8 @@ public class ListenerEntityTamed implements Listener {
             if (eventStatus != EventStatus.SUCCESS) {
                 cancelTame(pet);
                 event.setCancelled(true);
+                ((Tameable) event.getFather()).setLoveModeTicks(0);
+                ((Tameable) event.getMother()).setLoveModeTicks(0);
                 displayStatus(owner, pet, eventStatus);
                 logStatus(owner, eventStatus);
             }
