@@ -6,6 +6,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.LogWrapper;
 import com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -78,12 +79,12 @@ public class TPPCommandStorageListTest {
 
         verify(this.player, times(6)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
-        assertEquals(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------", messages.get(0));
+        assertEquals(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "---------", messages.get(0));
         assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageOne", messages.get(1));
         assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "100, 200, 300, MockWorld", messages.get(2));
         assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageTwo", messages.get(3));
         assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "400, 500, 600, MockWorld", messages.get(4));
-        assertEquals(ChatColor.GRAY + "----------------------------------------", messages.get(5));
+        assertEquals(ChatColor.GRAY + StringUtils.repeat("-", 42), messages.get(5));
     }
 
     @Test
@@ -101,12 +102,12 @@ public class TPPCommandStorageListTest {
 
             verify(this.admin, times(6)).sendMessage(this.messageCaptor.capture());
             List<String> messages = this.messageCaptor.getAllValues();
-            assertEquals(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------", messages.get(0));
+            assertEquals(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "---------", messages.get(0));
             assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageOne", messages.get(1));
             assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "100, 200, 300, MockWorld", messages.get(2));
             assertEquals(ChatColor.BLUE + "Name: " + ChatColor.WHITE + "StorageTwo", messages.get(3));
             assertEquals(ChatColor.BLUE + "    Location: " + ChatColor.WHITE + "400, 500, 600, MockWorld", messages.get(4));
-            assertEquals(ChatColor.GRAY + "----------------------------------------", messages.get(5));
+            assertEquals(ChatColor.GRAY + StringUtils.repeat("-", 42), messages.get(5));
         }
     }
 
@@ -122,8 +123,8 @@ public class TPPCommandStorageListTest {
 
         verify(this.player, times(2)).sendMessage(this.messageCaptor.capture());
         List<String> messages = this.messageCaptor.getAllValues();
-        assertEquals(ChatColor.GRAY + "----------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "----------", messages.get(0));
-        assertEquals(ChatColor.GRAY + "----------------------------------------", messages.get(1));
+        assertEquals(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ " + ChatColor.WHITE + "MockPlayerName's Storage" + ChatColor.BLUE + "]" + ChatColor.GRAY + "---------", messages.get(0));
+        assertEquals(ChatColor.GRAY + StringUtils.repeat("-", 42), messages.get(1));
     }
 
     @Test

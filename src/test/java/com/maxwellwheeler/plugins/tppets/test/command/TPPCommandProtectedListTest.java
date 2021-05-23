@@ -10,6 +10,7 @@ import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -87,7 +88,7 @@ public class TPPCommandProtectedListTest {
         assertEquals(ChatColor.BLUE + "    Endpoint 1: " + ChatColor.WHITE + "10, 20, 30", capturedMessages.get(10));
         assertEquals(ChatColor.BLUE + "    Endpoint 2: " + ChatColor.WHITE + "40, 50, 60", capturedMessages.get(11));
         assertEquals(ChatColor.BLUE + "    Lost Region: " + ChatColor.WHITE + "LostRegion" + ChatColor.BLUE + " (Unset)", capturedMessages.get(12));
-        assertEquals(ChatColor.DARK_GRAY + "-----------------------------------------", capturedMessages.get(13));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 37), capturedMessages.get(13));
     }
 
     @Test
@@ -105,7 +106,7 @@ public class TPPCommandProtectedListTest {
         assertEquals(ChatColor.BLUE + "    Endpoint 1: " + ChatColor.WHITE + "100, 200, 300", capturedMessages.get(4));
         assertEquals(ChatColor.BLUE + "    Endpoint 2: " + ChatColor.WHITE + "400, 500, 600", capturedMessages.get(5));
         assertEquals(ChatColor.BLUE + "    Lost Region: " + ChatColor.WHITE + "LostAndFoundRegion", capturedMessages.get(6));
-        assertEquals(ChatColor.DARK_GRAY + "-----------------------------------------", capturedMessages.get(7));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 37), capturedMessages.get(7));
     }
 
     @Test

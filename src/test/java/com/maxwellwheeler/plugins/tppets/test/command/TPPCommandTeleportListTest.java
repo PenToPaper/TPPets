@@ -7,6 +7,7 @@ import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
@@ -103,7 +104,7 @@ public class TPPCommandTeleportListTest {
         assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
         assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
         assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
-        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 42 + petType.toString().length()), messages.get(4));
     }
 
     @ParameterizedTest
@@ -132,7 +133,7 @@ public class TPPCommandTeleportListTest {
         assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
         assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
         assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
-        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 42 + petType.toString().length()), messages.get(4));
     }
 
     @Test
@@ -161,7 +162,7 @@ public class TPPCommandTeleportListTest {
         assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
         assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
         assertEquals(ChatColor.WHITE + "  3) CorrectPet2" + ChatColor.RED + " (In: NotMockWorld)", messages.get(3));
-        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 47), messages.get(4));
     }
 
     @Test
@@ -192,7 +193,7 @@ public class TPPCommandTeleportListTest {
         assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
         assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
         assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
-        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 47), messages.get(4));
     }
 
     @Test
@@ -221,7 +222,7 @@ public class TPPCommandTeleportListTest {
         assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
         assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
         assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
-        assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 46), messages.get(4));
     }
 
     @Test
@@ -359,7 +360,7 @@ public class TPPCommandTeleportListTest {
             assertEquals(ChatColor.WHITE + "  1) CorrectPet0", messages.get(1));
             assertEquals(ChatColor.WHITE + "  2) CorrectPet1", messages.get(2));
             assertEquals(ChatColor.WHITE + "  3) CorrectPet2", messages.get(3));
-            assertEquals(ChatColor.DARK_GRAY + "----------------------------------", messages.get(4));
+            assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 47), messages.get(4));
         }
     }
 

@@ -6,6 +6,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.GuestManager;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -80,7 +81,7 @@ public class TPPCommandAllowListTest {
             List<String> capturedMessageOutput = this.messageCaptor.getAllValues();
             assertEquals(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  "MockPlayerName's MockPetName" + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------", capturedMessageOutput.get(0));
             assertEquals(ChatColor.WHITE + "MockGuestName", capturedMessageOutput.get(1));
-            assertEquals(ChatColor.GRAY + "-------------------------------------------", capturedMessageOutput.get(2));
+            assertEquals(ChatColor.GRAY + StringUtils.repeat("-", 67), capturedMessageOutput.get(2));
         }
     }
 
@@ -102,7 +103,7 @@ public class TPPCommandAllowListTest {
             List<String> capturedMessageOutput = this.messageCaptor.getAllValues();
             assertEquals(ChatColor.GRAY + "---------" + ChatColor.BLUE + "[ Allowed Players for " + ChatColor.WHITE +  "MockPlayerName's MockPetName" + ChatColor.BLUE + " ]" + ChatColor.GRAY + "---------", capturedMessageOutput.get(0));
             assertEquals(ChatColor.WHITE + "MockGuestName", capturedMessageOutput.get(1));
-            assertEquals(ChatColor.GRAY + "-------------------------------------------", capturedMessageOutput.get(2));
+            assertEquals(ChatColor.GRAY + StringUtils.repeat("-", 67), capturedMessageOutput.get(2));
         }
     }
 

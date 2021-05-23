@@ -4,6 +4,7 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.UUIDUtils;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -67,7 +68,8 @@ public class CommandAllowList extends BaseCommand{
             }
         }
 
-        this.sender.sendMessage(ChatColor.GRAY + "-------------------------------------------");
+        // 45 chars in header - 3 characters (buffer, since [] are small characters and footer shouldn't be larger than header
+        this.sender.sendMessage(ChatColor.GRAY + StringUtils.repeat("-", 42 + (this.commandFor.getName() == null ? 4 : this.commandFor.getName().length()) + this.args[0].length()));
     }
 
     private void displayStatus() {

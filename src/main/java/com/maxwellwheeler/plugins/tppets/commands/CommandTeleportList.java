@@ -5,6 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.helpers.PermissionChecker;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import com.maxwellwheeler.plugins.tppets.storage.PetType;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -74,7 +75,8 @@ public class CommandTeleportList extends TeleportCommand {
         for (int i = 0; i < this.petList.size(); i++) {
             this.sender.sendMessage(ChatColor.WHITE + "  " + (i + 1) + ") " + this.petList.get(i).petName + (canTpToWorld(this.sender, this.petList.get(i).petWorld) ? "" : ChatColor.RED + " (In: " + this.petList.get(i).petWorld + ")"));
         }
-        this.sender.sendMessage(ChatColor.DARK_GRAY + "----------------------------------");
+        // 31 chars in header - 3 characters (buffer, since [] are small characters and footer shouldn't be larger than header
+        this.sender.sendMessage(ChatColor.DARK_GRAY + StringUtils.repeat("-", 28 + (this.commandFor.getName() == null ? 4 : this.commandFor.getName().length()) + this.petType.toString().length()));
     }
 
     private void displayStatus() {

@@ -3,6 +3,7 @@ package com.maxwellwheeler.plugins.tppets.commands;
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.regions.ProtectedRegion;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -53,7 +54,8 @@ public class CommandProtectedList extends Command {
         for (ProtectedRegion pr : prs) {
             listProtectedRegion(pr);
         }
-        this.sender.sendMessage(ChatColor.DARK_GRAY + "-----------------------------------------");
+        // 39 chars in header - 2 characters (buffer, since header has small characters and footer shouldn't be larger than header
+        this.sender.sendMessage(ChatColor.DARK_GRAY + StringUtils.repeat("-", 37));
     }
 
     private String getLocationString(Location lc) {

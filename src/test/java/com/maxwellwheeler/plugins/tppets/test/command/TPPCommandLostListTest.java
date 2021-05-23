@@ -8,6 +8,7 @@ import com.maxwellwheeler.plugins.tppets.regions.LostRegionManager;
 import com.maxwellwheeler.plugins.tppets.storage.SQLWrapper;
 import com.maxwellwheeler.plugins.tppets.test.MockFactory;
 import com.maxwellwheeler.plugins.tppets.test.ObjectFactory;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -79,7 +80,7 @@ public class TPPCommandLostListTest {
         assertEquals(ChatColor.BLUE + "    World: " + ChatColor.WHITE + "MockWorldName", capturedMessages.get(10));
         assertEquals(ChatColor.BLUE + "    Endpoint 1: " + ChatColor.WHITE + "1, 2, 3", capturedMessages.get(11));
         assertEquals(ChatColor.BLUE + "    Endpoint 2: " + ChatColor.WHITE + "4, 5, 6", capturedMessages.get(12));
-        assertEquals(ChatColor.DARK_GRAY + "-----------------------------------------", capturedMessages.get(13));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 42), capturedMessages.get(13));
     }
 
     @Test
@@ -95,7 +96,7 @@ public class TPPCommandLostListTest {
         assertEquals(ChatColor.BLUE + "    World: " + ChatColor.WHITE + "MockWorldName", capturedMessages.get(2));
         assertEquals(ChatColor.BLUE + "    Endpoint 1: " + ChatColor.WHITE + "100, 200, 300", capturedMessages.get(3));
         assertEquals(ChatColor.BLUE + "    Endpoint 2: " + ChatColor.WHITE + "400, 500, 600", capturedMessages.get(4));
-        assertEquals(ChatColor.DARK_GRAY + "-----------------------------------------", capturedMessages.get(5));
+        assertEquals(ChatColor.DARK_GRAY + StringUtils.repeat("-", 42), capturedMessages.get(5));
     }
 
     @Test

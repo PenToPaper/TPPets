@@ -2,6 +2,7 @@ package com.maxwellwheeler.plugins.tppets.commands;
 
 import com.maxwellwheeler.plugins.tppets.TPPets;
 import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -220,7 +221,8 @@ public class CommandTPP implements CommandExecutor {
             sender.sendMessage(ChatColor.WHITE + "/tpp position1" + ChatColor.BLUE + "  ->  Assigns your current location as the first position for region creation");
             sender.sendMessage(ChatColor.WHITE + "/tpp position2" + ChatColor.BLUE + "  ->  Assigns your current location as the second position for region creation");
         }
-        sender.sendMessage(ChatColor.DARK_GRAY + "-------------------------------------");
+        // 40 chars in header - 2 characters (buffer, since [] are small characters and footer shouldn't be larger than header
+        sender.sendMessage(ChatColor.DARK_GRAY + StringUtils.repeat("-", 38));
     }
     
     /**
