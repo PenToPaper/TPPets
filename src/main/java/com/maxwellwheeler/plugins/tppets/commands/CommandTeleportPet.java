@@ -108,7 +108,11 @@ public class CommandTeleportPet extends TeleportCommand {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp tp [Pet Name]</li>
+     * </ul>
      */
     public void processCommand() {
         try {

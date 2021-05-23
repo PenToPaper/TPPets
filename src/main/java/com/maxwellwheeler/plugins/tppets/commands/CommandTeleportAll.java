@@ -35,7 +35,11 @@ public class CommandTeleportAll extends TeleportCommand {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp all [Pet Type]</li>
+     * </ul>
      */
     public void processCommand() {
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {

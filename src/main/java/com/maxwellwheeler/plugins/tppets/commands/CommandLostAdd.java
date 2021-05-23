@@ -26,7 +26,11 @@ public class CommandLostAdd extends Command {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp lost add [Lost and Found Region Name]</li>
+     * </ul>
      */
     @Override
     public void processCommand() {

@@ -30,7 +30,11 @@ public class CommandAllowList extends BaseCommand {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp allowed [Pet Name]</li>
+     * </ul>
      */
     public void processCommand() {
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true

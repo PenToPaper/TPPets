@@ -30,7 +30,11 @@ public class CommandProtectedAdd extends Command {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp protected add [Protected Region Name] [Lost and Found Region Name] [Enter Message]</li>
+     * </ul>
      */
     @Override
     public void processCommand() {

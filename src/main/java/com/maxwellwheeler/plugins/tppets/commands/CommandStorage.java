@@ -23,17 +23,12 @@ public class CommandStorage extends BaseCommand {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp storage [action]</li>
+     * </ul>
      */
-    // Desired Syntax: /tpp storage add [storage name]
-    // Desired Syntax: /tpp storage remove [storage name]
-    // Desired Syntax: /tpp storage list
-    // Desired Syntax: /tpp storage f:[username] add [storage name]
-    // Desired Syntax: /tpp storage f:[username] remove [storage name]
-    // Desired Syntax: /tpp storage f:[username] list
-    // Admin Syntax: /tpp storage list server
-    // Storage Name: \w{1,64}
-    // Storage Name: default
     public void processCommand() {
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {

@@ -28,7 +28,12 @@ public class CommandProtectedList extends Command {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp protected list</li>
+     *      <li>/tpp protected list [Protected Region Name]</li>
+     * </ul>
      */
     @Override
     public void processCommand() {

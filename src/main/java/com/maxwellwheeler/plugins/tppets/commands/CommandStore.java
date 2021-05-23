@@ -30,7 +30,13 @@ class CommandStore extends TeleportCommand {
     }
 
     /**
-     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     * <p>Calling this method indicates that all necessary data is in the instance and the command can be processed.</p>
+     * <p>Expected Syntax:</p>
+     * <ul>
+     *      <li>/tpp store [Pet Name], which teleports to the server default, if available</li>
+     *      <li>/tpp store [Pet Name] [Storage Name], which teleports to your storage with given name, or server storage
+     *      with given name if none exists</li>
+     * </ul>
      */
     public void processCommand() {
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
