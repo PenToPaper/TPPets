@@ -11,13 +11,27 @@ import org.bukkit.entity.Player;
 import java.sql.SQLException;
 import java.util.Arrays;
 
+/**
+ * Class representing a /tpp protected add subcommand.
+ * @author GatheringExp
+ */
 public class CommandProtectedAdd extends Command {
+    /** The added protected region's enter message. Can be null. */
     private String enterMessage;
 
+    /**
+     * Relays data to {@link Command} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp protected add.
+     */
     CommandProtectedAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         processCommandGeneric();
@@ -25,6 +39,9 @@ public class CommandProtectedAdd extends Command {
         logStatus();
     }
 
+    /**
+     * Adds a new {@link ProtectedRegion} to the server.
+     */
     private void processCommandGeneric() {
         try {
             if (!ArgValidator.validateArgsLength(this.args, 3)) {
@@ -75,6 +92,9 @@ public class CommandProtectedAdd extends Command {
         }
     }
 
+    /**
+     * Messages the command status to the {@link CommandProtectedAdd#sender}.
+     */
     private void displayStatus() {
         switch(this.commandStatus) {
             case SUCCESS:
@@ -107,6 +127,9 @@ public class CommandProtectedAdd extends Command {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("protected add", "added " + this.args[0]);

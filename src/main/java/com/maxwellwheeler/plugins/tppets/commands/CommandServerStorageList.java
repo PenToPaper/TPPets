@@ -12,17 +12,33 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class representing a /tpp serverstorage list subcommand.
+ * @author GatheringExp
+ */
 public class CommandServerStorageList extends StorageListCommand {
+    /**
+     * Relays data to {@link StorageListCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp serverstorage list.
+     */
     CommandServerStorageList(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         listServerStorages();
-        displayStatus();
+        displayErrors();
     }
 
+    /**
+     * Lists all {@link ServerStorageLocation}s to {@link CommandServerStorageList#sender}
+     */
     private void listServerStorages() {
         try {
 
@@ -42,7 +58,10 @@ public class CommandServerStorageList extends StorageListCommand {
         }
     }
 
-    private void displayStatus() {
+    /**
+     * Messages any command status errors to the {@link CommandServerStorageList#sender}.
+     */
+    private void displayErrors() {
         switch (this.commandStatus) {
             case SUCCESS:
             case INVALID_SENDER:

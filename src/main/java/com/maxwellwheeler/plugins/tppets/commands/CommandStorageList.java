@@ -9,17 +9,33 @@ import org.bukkit.entity.Player;
 import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Class representing a /tpp storage list subcommand.
+ * @author GatheringExp
+ */
 public class CommandStorageList extends StorageListCommand {
+    /**
+     * Relays data to {@link StorageListCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp storage list.
+     */
     CommandStorageList(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         listStorage();
-        displayStatus();
+        displayErrors();
     }
 
+    /**
+     * Lists all {@link Command#commandFor}'s {@link PlayerStorageLocation}s to {@link CommandStorageList#sender}
+     */
     private void listStorage() {
         try {
 
@@ -31,7 +47,10 @@ public class CommandStorageList extends StorageListCommand {
         }
     }
 
-    public void displayStatus() {
+    /**
+     * Messages any command status errors to the {@link CommandStorageList#sender}.
+     */
+    public void displayErrors() {
         switch (this.commandStatus) {
             case SUCCESS:
             case INVALID_SENDER:

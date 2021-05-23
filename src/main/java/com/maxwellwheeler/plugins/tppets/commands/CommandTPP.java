@@ -14,18 +14,19 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
- * Core command handler to the plugin.
+ * Class representing a /tpp command.
  * @author GatheringExp
- *
  */
 public class CommandTPP implements CommandExecutor {
+    /** Hashtable mapping base commands in strings to a list of aliases in strings*/
     private final Hashtable<String, List<String>> commandAliases;
+    /** A reference to the active TPPets instance */
     private final TPPets thisPlugin;
 
     /**
-     * Initializes the core command handler with the commandAliases provided.
-     * @param commandAliases Hashtable linking &#60;Real command name, List&#60;Aliases of real command name&#62;&#62;
-     * @param thisPlugin Reference to the TPPets plugin instance
+     * Initializes instance variables.
+     * @param commandAliases Hashtable with &#60;Real command name, List&#60; Aliases of real command name&#62;&#62;.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
      */
     public CommandTPP(Hashtable<String, List<String>> commandAliases, TPPets thisPlugin) {
         this.commandAliases = commandAliases;
@@ -33,12 +34,12 @@ public class CommandTPP implements CommandExecutor {
     }
 
     /**
-     * The core command handler for all /tpp [args] commands
+     * The command handler for all /tpp commands.
      * @param sender The sender of the command
-     * @param command The full commant string
+     * @param command The full command string
      * @param label First word of the command
      * @param args Array of arguments for the command
-     * @return True if command was valid, false if not
+     * @return if a valid command, otherwise false
      */
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -183,8 +184,8 @@ public class CommandTPP implements CommandExecutor {
     }
     
     /**
-     * Sends help message to player
-     * @param sender The player that the help message should be sent to
+     * Send a help message to a {@link CommandSender} based on their level of permission.
+     * @param sender The sender that the help message will be sent to.
      */
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(ChatColor.DARK_GRAY + "--------------" + ChatColor.BLUE + "[ Commands ]" + ChatColor.DARK_GRAY + "--------------");
@@ -226,8 +227,8 @@ public class CommandTPP implements CommandExecutor {
     }
     
     /**
-     * Sends a permission denied message
-     * @param sender Represents where to send the message.
+     * Sends a permission denied message to a {@link CommandSender}
+     * @param sender The sender that the permission message will be sent to.
      */
     private void permissionMessage(CommandSender sender) {
         sender.sendMessage(ChatColor.RED + "You do not have permission to use that command.");

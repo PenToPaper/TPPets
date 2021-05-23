@@ -8,19 +8,23 @@ import org.bukkit.command.CommandSender;
 import java.util.Arrays;
 
 /**
- * Object used for storage commands
+ * Class representing a /tpp storage command.
  * @author GatheringExp
  */
-// TODO: JAVADOC
 public class CommandStorage extends BaseCommand {
     /**
-     * Generic constructor, needs to point to plugin for logging.
-     * @param thisPlugin The {@link TPPets} instance.
+     * Relays data to {@link BaseCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp storage.
      */
     public CommandStorage(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     // Desired Syntax: /tpp storage add [storage name]
     // Desired Syntax: /tpp storage remove [storage name]
     // Desired Syntax: /tpp storage list
@@ -40,10 +44,22 @@ public class CommandStorage extends BaseCommand {
         logErrors();
     }
 
+    /**
+     * Performs basic checks to the command's syntax:
+     * <ul>
+     *     <li>Checks that the sender is a player</li>
+     *     <li>Checks that the command has the minimum number of arguments (1)</li>
+     *     <li>If the command is using f:[username] syntax, checks for tppets.storageother.</li>
+     * </ul>
+     * @return True if command has a target player with proper permissions and a proper number of arguments, false if not.
+     */
     private boolean isValidSyntax() {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.storageother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
+    /**
+     * Runs the given /tpp storage subcommand.
+     */
     public void processCommandGeneric() {
         // Determine if the command is of type /tpp storage list default, add default, remove default
         Command commandToRun = null;
@@ -61,7 +77,7 @@ public class CommandStorage extends BaseCommand {
             case "server":
             case "serverlist":
             case "slist":
-                commandToRun = new CommandWorldServerStorageList(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
+                commandToRun = new CommandStorageServer(this.thisPlugin, this.sender, this.commandFor, Arrays.copyOfRange(this.args, 1, this.args.length));
                 break;
             default:
                 this.commandStatus = CommandStatus.SYNTAX_ERROR;
@@ -73,6 +89,9 @@ public class CommandStorage extends BaseCommand {
         }
     }
 
+    /**
+     * Messages any command status errors to the {@link CommandStorage#sender}.
+     */
     private void displayErrors() {
         switch(this.commandStatus) {
             case SUCCESS:
@@ -93,6 +112,9 @@ public class CommandStorage extends BaseCommand {
         }
     }
 
+    /**
+     * Logs any command status errors.
+     */
     private void logErrors() {
         if (this.commandStatus != CommandStatus.SUCCESS) {
             logUnsuccessfulAction("storage", this.commandStatus.toString());

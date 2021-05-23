@@ -9,11 +9,24 @@ import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
 
+/**
+ * Class representing a /tpp remove command.
+ * @author GatheringExp
+ */
 public class CommandAllowRemove extends BaseCommand {
+    /**
+     * Relays data to {@link BaseCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp remove.
+     */
     public CommandAllowRemove(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     public void processCommand() {
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
@@ -24,10 +37,22 @@ public class CommandAllowRemove extends BaseCommand {
         logStatus();
     }
 
+    /**
+     * Performs basic checks to the command's syntax:
+     * <ul>
+     *     <li>Checks that the sender is a player</li>
+     *     <li>Checks that the command has the minimum number of arguments (2)</li>
+     *     <li>If the command is using f:[username] syntax, checks for tppets.allowother.</li>
+     * </ul>
+     * @return True if command has a target player with proper permissions and a proper number of arguments, false if not.
+     */
     private boolean isValidSyntax() {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.allowother", 2)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(2));
     }
 
+    /**
+     * Removes the player from {@link CommandAllowRemove#commandFor}'s pet.
+     */
     private void processCommandGeneric() {
         try {
             OfflinePlayer playerToAllow = this.getOfflinePlayer(this.args[0]);
@@ -65,6 +90,9 @@ public class CommandAllowRemove extends BaseCommand {
         }
     }
 
+    /**
+     * Messages the command status to the {@link CommandAllowRemove#sender}.
+     */
     private void displayStatus() {
         // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, NO_TARGET_PLAYER, SYNTAX_ERROR, NO_PET, DB_FAIL
         switch (this.commandStatus) {
@@ -100,6 +128,9 @@ public class CommandAllowRemove extends BaseCommand {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("remove", this.args[0] + " from " + this.commandFor.getName() + "'s " + this.args[1]);

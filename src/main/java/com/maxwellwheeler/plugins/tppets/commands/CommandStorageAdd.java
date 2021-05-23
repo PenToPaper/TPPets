@@ -8,11 +8,24 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
+/**
+ * Class representing a /tpp storage add subcommand.
+ * @author GatheringExp
+ */
 public class CommandStorageAdd extends Command {
+    /**
+     * Relays data to {@link Command} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp storage add.
+     */
     CommandStorageAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         addStorage();
@@ -20,6 +33,9 @@ public class CommandStorageAdd extends Command {
         logStatus();
     }
 
+    /**
+     * Adds a new {@link com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation} to {@link CommandStorageAdd#commandFor}.
+     */
     private void addStorage() {
         if (!this.thisPlugin.getProtectedRegionManager().canTpThere(this.sender, this.sender.getLocation())) {
             this.commandStatus = CommandStatus.CANT_TELEPORT_IN_PR;
@@ -45,6 +61,10 @@ public class CommandStorageAdd extends Command {
         }
     }
 
+    /**
+     * Adds a new {@link com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation} to {@link TPPets}'s
+     * {@link com.maxwellwheeler.plugins.tppets.storage.SQLWrapper}.
+     */
     private void addStorageToDb() throws SQLException {
         if (this.thisPlugin.getDatabase().getStorageLocation(this.commandFor.getUniqueId().toString(), this.args[0]) != null) {
             this.commandStatus = CommandStatus.ALREADY_DONE;
@@ -63,10 +83,20 @@ public class CommandStorageAdd extends Command {
         }
     }
 
+    /**
+     * Returns whether or not a new {@link com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation} would be
+     * within the server config's storage_limit, but overrides this limit if the player has tppets.bypassstoragelimit.
+     * @return true if the new storage is within the limit or if the player can bypass the limit, false if not.
+     * @throws SQLException If getting all storage locations from the database fails.
+     * {@link com.maxwellwheeler.plugins.tppets.storage.SQLWrapper}
+     */
     public boolean isNewStorageWithinLimit() throws SQLException {
         return this.sender.hasPermission("tppets.bypassstoragelimit") || this.thisPlugin.getStorageLimit() < 0 || this.thisPlugin.getDatabase().getStorageLocations(this.commandFor.getUniqueId().toString()).size() < this.thisPlugin.getStorageLimit();
     }
 
+    /**
+     * Messages the command status to the {@link CommandStorageAdd#sender}.
+     */
     private void displayStatus() {
         // SUCCESS, DB_FAIL, LIMIT_REACHED, INVALID_NAME, ALREADY_DONE, SYNTAX_ERROR, CANT_TP_THERE
         switch(this.commandStatus) {
@@ -97,6 +127,9 @@ public class CommandStorageAdd extends Command {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("storage add", "added " + this.args[0] + " for " + this.commandFor.getName());

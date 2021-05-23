@@ -7,16 +7,37 @@ import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
 
+/**
+ * Class representing a /tpp serverstorage command.
+ * @author GatheringExp
+ */
 public class CommandServerStorage extends BaseCommand {
-
+    /**
+     * Relays data to {@link BaseCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp serverstorage.
+     */
     public CommandServerStorage(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
+    /**
+     * Performs basic checks to the command's syntax:
+     * <ul>
+     *     <li>Checks that the sender is a player</li>
+     *     <li>Checks that the command has the minimum number of arguments (1)</li>
+     *     <li>If the command is using f:[username] syntax, checks for tppets.storageother.</li>
+     * </ul>
+     * @return True if command has a target player with proper permissions and a proper number of arguments, false if not.
+     */
     private boolean isValidSyntax() {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.storageother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
@@ -27,6 +48,9 @@ public class CommandServerStorage extends BaseCommand {
         logErrors();
     }
 
+    /**
+     * Runs the given /tpp serverstorage subcommand.
+     */
     private void processCommandGeneric() {
         Command commandToRun = null;
 
@@ -50,6 +74,9 @@ public class CommandServerStorage extends BaseCommand {
         }
     }
 
+    /**
+     * Messages any command status errors to the {@link CommandServerStorage#sender}.
+     */
     private void displayErrors() {
         switch(this.commandStatus) {
             case SUCCESS:
@@ -70,6 +97,9 @@ public class CommandServerStorage extends BaseCommand {
         }
     }
 
+    /**
+     * Logs any command status errors.
+     */
     private void logErrors() {
         if (this.commandStatus != CommandStatus.SUCCESS) {
             logUnsuccessfulAction("serverstorage", this.commandStatus.toString());

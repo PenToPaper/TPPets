@@ -12,17 +12,33 @@ import org.bukkit.entity.Player;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Class representing a /tpp lost list command.
+ * @author GatheringExp
+ */
 public class CommandLostList extends Command {
+    /**
+     * Relays data to {@link Command} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp lost list.
+     */
     CommandLostList(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         processCommandGeneric();
-        displayStatus();
+        displayErrors();
     }
 
+    /**
+     * Lists all active {@link LostAndFoundRegion}s on the server.
+     */
     private void processCommandGeneric() {
         Collection<LostAndFoundRegion> lfrs;
         if (ArgValidator.validateArgsLength(this.args, 1)) {
@@ -49,6 +65,10 @@ public class CommandLostList extends Command {
         this.listAllRegions(lfrs);
     }
 
+    /**
+     * Lists all supplied {@link LostAndFoundRegion}s to the {@link CommandLostList#sender}.
+     * @param lfrs A collection of {@link LostAndFoundRegion}s to list.
+     */
     private void listAllRegions(Collection<LostAndFoundRegion> lfrs) {
         this.sender.sendMessage(ChatColor.DARK_GRAY + "---------" + ChatColor.BLUE + "[ Lost and Found Regions ]" + ChatColor.DARK_GRAY + "---------");
         for (LostAndFoundRegion lfr : lfrs) {
@@ -58,10 +78,19 @@ public class CommandLostList extends Command {
         this.sender.sendMessage(ChatColor.DARK_GRAY + StringUtils.repeat("-", 42));
     }
 
+    /**
+     * Gets a formatted string from a location.
+     * @param lc The location to parse.
+     * @return A formatted string with rounded block coordinates.
+     */
     private String getLocationString(Location lc) {
         return lc.getBlockX() + ", " + lc.getBlockY() + ", " + lc.getBlockZ();
     }
 
+    /**
+     * Displays an individual {@link LostAndFoundRegion}'s data to the {@link CommandLostList#sender}.
+     * @param lfr A single {@link LostAndFoundRegion} to display.
+     */
     private void listLostAndFoundRegion(LostAndFoundRegion lfr) {
         this.sender.sendMessage(ChatColor.BLUE + "Name: " + ChatColor.WHITE + lfr.getRegionName());
         this.sender.sendMessage(ChatColor.BLUE + "    World: " + ChatColor.WHITE + lfr.getWorldName());
@@ -69,7 +98,10 @@ public class CommandLostList extends Command {
         this.sender.sendMessage(ChatColor.BLUE + "    Endpoint 2: " + ChatColor.WHITE + getLocationString(lfr.getMaxLoc()));
     }
 
-    private void displayStatus() {
+    /**
+     * Messages any command status errors to the {@link CommandLostList#sender}.
+     */
+    private void displayErrors() {
         switch(this.commandStatus) {
             case SUCCESS:
                 break;

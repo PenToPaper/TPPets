@@ -7,12 +7,24 @@ import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;
 
-public class CommandProtected extends BaseCommand{
-
+/**
+ * Class representing a /tpp protected command.
+ * @author GatheringExp
+ */
+public class CommandProtected extends BaseCommand {
+    /**
+     * Relays data to {@link BaseCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp protected.
+     */
     public CommandProtected(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     public void processCommand() {
         if (this.commandStatus == CommandStatus.SUCCESS && hasValidForSelfFormat(1)) {
             processCommandGeneric();
@@ -22,6 +34,9 @@ public class CommandProtected extends BaseCommand{
         logErrors();
     }
 
+    /**
+     * Runs the given /tpp protected subcommand.
+     */
     public void processCommandGeneric() {
         Command commandToRun = null;
 
@@ -48,6 +63,9 @@ public class CommandProtected extends BaseCommand{
         }
     }
 
+    /**
+     * Messages any command status errors to the {@link CommandProtected#sender}.
+     */
     private void displayErrors() {
         switch(this.commandStatus) {
             case SUCCESS:
@@ -65,6 +83,9 @@ public class CommandProtected extends BaseCommand{
         }
     }
 
+    /**
+     * Logs any command status errors.
+     */
     private void logErrors() {
         if (this.commandStatus != CommandStatus.SUCCESS) {
             logUnsuccessfulAction("protected", this.commandStatus.toString());

@@ -10,22 +10,28 @@ import org.bukkit.command.CommandSender;
 import java.sql.SQLException;
 
 /**
- * Object used for store commands
+ * Class representing a /tpp store command.
  * @author GatheringExp
  */
-
 class CommandStore extends TeleportCommand {
+    /** Represents whether or not the pet is to be sent to a specific storage or a server default. */
     private boolean hasSpecificStorage;
+    /** The pet to store. Can be null. */
     private PetStorage pet;
 
     /**
-     * Generic constructor, needs to point to plugin for logging.
-     * @param thisPlugin The {@link TPPets} instance.
+     * Relays data to {@link TeleportCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp store.
      */
     public CommandStore(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     public void processCommand() {
         // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
@@ -36,10 +42,28 @@ class CommandStore extends TeleportCommand {
         logStatus();
     }
 
+    /**
+     * Performs basic checks to the command's syntax:
+     * <ul>
+     *     <li>Checks that the sender is a player</li>
+     *     <li>Checks that the command has the minimum number of arguments (1)</li>
+     *     <li>If the command is using f:[username] syntax, checks for tppets.teleportother.</li>
+     * </ul>
+     * @return True if command has a target player with proper permissions and a proper number of arguments, false if not.
+     */
     private boolean isValidSyntax() {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
+    /**
+     * <p>Gets a target storage location based on the command arguments.</p>
+     * <p>If a specific storage location name is supplied, it first looks for a {@link com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation}
+     * with that name. If it can't find any, it looks for a {@link com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation} with that name.
+     * It will return null if it fails to find both, even if a server default exists.</p>
+     * <p>If no specific storage location name is supplied, it looks for a default server storage location in that world.</p>
+     * @return A {@link StorageLocation} to send the pet, or null if none can be found.
+     * @throws SQLException If getting any storage location from the database fails.
+     */
     private StorageLocation getStorageLocation() throws SQLException {
         StorageLocation storageLocation;
 

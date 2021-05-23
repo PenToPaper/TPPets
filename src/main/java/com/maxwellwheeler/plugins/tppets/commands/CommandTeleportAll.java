@@ -12,40 +12,31 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class representing a /tpp all command.
+ * @author GatheringExp
+ */
 public class CommandTeleportAll extends TeleportCommand {
+    /** The {@link PetType.Pets} type to be teleported. */
     private PetType.Pets petType;
+    /** A list of {@link PetStorage}s to be teleported. */
     private List<PetStorage> petList;
+    /** A list of {@link PetStorage}s that were unable to be teleported. */
     private final List<PetStorage> errorPetList = new ArrayList<>();
 
+    /**
+     * Relays data to {@link TeleportCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp all.
+     */
     public CommandTeleportAll(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
-    private boolean initializePetList() throws SQLException {
-        this.petType = getPetType(this.args[0]);
-
-        if (this.petType == null || this.petType == PetType.Pets.UNKNOWN) {
-            this.commandStatus = CommandStatus.NO_PET_TYPE;
-            return false;
-        }
-
-        List<PetStorage> petList = this.thisPlugin.getDatabase().getPetTypeFromOwner(this.commandFor.getUniqueId().toString(), this.petType);
-
-        if (petList.size() == 0) {
-            this.commandStatus = CommandStatus.NO_PET;
-            return false;
-        }
-
-        this.petList = petList;
-
-        return true;
-    }
-
-    private boolean isValidSyntax() {
-        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
-        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
-    }
-
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     public void processCommand() {
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
             processCommandGeneric();
@@ -55,6 +46,23 @@ public class CommandTeleportAll extends TeleportCommand {
         logStatus();
     }
 
+    /**
+     * Performs basic checks to the command's syntax:
+     * <ul>
+     *     <li>Checks that the sender is a player</li>
+     *     <li>Checks that the command has the minimum number of arguments (1)</li>
+     *     <li>If the command is using f:[username] syntax, checks for tppets.teleportother.</li>
+     * </ul>
+     * @return True if command has a target player with proper permissions and a proper number of arguments, false if not.
+     */
+    private boolean isValidSyntax() {
+        // Remember that correctForSelfSyntax() will not run if correctForOtherPlayerSyntax() is true
+        return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.teleportother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
+    }
+
+    /**
+     * Teleports all of {@link CommandTeleportAll#commandFor}'s pets of a particular type to {@link CommandTeleportAll#sender}.
+     */
     private void processCommandGeneric() {
         try {
             if (!initializePetList()) {
@@ -78,6 +86,35 @@ public class CommandTeleportAll extends TeleportCommand {
         }
     }
 
+    /**
+     * Initializes and populates {@link CommandTeleportAll#petList} from {@link CommandTeleportAll#thisPlugin}'s {@link com.maxwellwheeler.plugins.tppets.storage.SQLWrapper}.
+     * @return true if populated, false if not.
+     * @throws SQLException If getting all pets of {@link CommandTeleportAll#petType} from the database fails.
+     */
+    private boolean initializePetList() throws SQLException {
+        this.petType = getPetType(this.args[0]);
+
+        if (this.petType == null || this.petType == PetType.Pets.UNKNOWN) {
+            this.commandStatus = CommandStatus.NO_PET_TYPE;
+            return false;
+        }
+
+        List<PetStorage> petList = this.thisPlugin.getDatabase().getPetTypeFromOwner(this.commandFor.getUniqueId().toString(), this.petType);
+
+        if (petList.size() == 0) {
+            this.commandStatus = CommandStatus.NO_PET;
+            return false;
+        }
+
+        this.petList = petList;
+
+        return true;
+    }
+
+    /**
+     * Teleports all pets from {@link CommandTeleportAll#petList} to {@link CommandTeleportAll#sender}
+     * @throws SQLException If updating pet location after teleport fails.
+     */
     private void teleportAllPets() throws SQLException {
         for (PetStorage petStorage : this.petList) {
             if (!canTpToWorld(this.sender, petStorage.petWorld) || !teleportPetFromStorage(this.sender.getLocation(), petStorage, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
@@ -87,6 +124,9 @@ public class CommandTeleportAll extends TeleportCommand {
         }
     }
 
+    /**
+     * Messages the command status to the {@link CommandTeleportAll#sender}.
+     */
     private void displayStatus() {
         // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, SYNTAX_ERROR, NO_PET, NO_PET_TYPE, DB_FAIL, CANT_TELEPORT
         switch (this.commandStatus) {
@@ -120,6 +160,10 @@ public class CommandTeleportAll extends TeleportCommand {
         }
     }
 
+    /**
+     * Generates a string representing {@link CommandTeleportAll#errorPetList}
+     * @return A comma-separated list of the pet names in {@link CommandTeleportAll#errorPetList}
+     */
     private String getErrorPetNames() {
         StringBuilder errorPetNames = new StringBuilder();
         for (PetStorage errorPet : this.errorPetList) {
@@ -129,6 +173,9 @@ public class CommandTeleportAll extends TeleportCommand {
         return errorPetNames.toString();
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("all", "teleported " + this.commandFor.getName() + "'s " + this.petType.toString().toLowerCase() + "s");

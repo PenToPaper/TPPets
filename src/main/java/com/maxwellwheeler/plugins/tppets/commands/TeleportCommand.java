@@ -13,26 +13,27 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 
 /**
- * Object used for store commands
+ * Class representing any TPP teleport command.
  * @author GatheringExp
  */
 public abstract class TeleportCommand extends BaseCommand {
     /**
-     * Generic constructor, takes TPPets plugin instance.
-     * @param thisPlugin The TPPets plugin instance.
+     * Relays data to {@link BaseCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments, depending on the expected command.
      */
     public TeleportCommand(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
     /**
-     * Teleports a specific pet to a location
-     * @param sendTo The location to send the pet
-     * @param setSitting Whether or not the pet should be set sitting after the teleportation
-     * @param kickPlayerOff Whether or not any players riding the pet should be kicked off before teleportation
-     * @return True if the pet was found and teleported, false otherwise
+     * Teleports a specific pet from {@link PetStorage} to a location.
+     * @param sendTo The location to send the pet.
+     * @param setSitting Whether or not the pet should be set sitting after the teleportation.
+     * @param kickPlayerOff Whether or not any players riding the pet should be kicked off before teleportation.
+     * @return true if the pet was found and teleported, false if not.
      */
-
     protected boolean teleportPetFromStorage(Location sendTo, @NotNull PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) throws SQLException {
         loadChunkFromPetStorage(petStorage);
         Entity entity = getEntity(petStorage);
@@ -44,14 +45,14 @@ public abstract class TeleportCommand extends BaseCommand {
     }
 
     /**
-     * Teleports an individual pet to a location
-     * @param loc The location to teleport the pet
-     * @param entity The entity to teleport
-     * @param setSitting Whether or not the pet should be set to sit after the teleporting
-     * @param kickPlayerOff Whether or not any players riding the entity should be kicked off before teleportation
-     * @return True if successful, false if not
+     * Performs the teleport operation on a given entity.
+     * @param sendTo The location to send the pet.
+     * @param entity The entity to teleport.
+     * @param setSitting Whether or not the pet should be set sitting after the teleportation.
+     * @param kickPlayerOff Whether or not any players riding the pet should be kicked off before teleportation.
+     * @return true if the pet was found and teleported, false if not.
      */
-    protected boolean teleportPet(Location loc, Entity entity, boolean setSitting, boolean kickPlayerOff) {
+    protected boolean teleportPet(Location sendTo, Entity entity, boolean setSitting, boolean kickPlayerOff) {
         if (!kickPlayerOff && entity.getPassengers().size() != 0) {
             return false;
         }
@@ -59,17 +60,28 @@ public abstract class TeleportCommand extends BaseCommand {
         if (kickPlayerOff) {
             entity.eject();
         }
-        entity.teleport(loc);
+        entity.teleport(sendTo);
         if (setSitting) {
             EntityActions.setSitting(entity);
         }
         return true;
     }
 
+    /**
+     * Gets whether or not a player can teleport to a given world name, based on where the player is currently.
+     * @param player The player attempting to teleport to a world.
+     * @param petWorldName The destination world name.
+     * @return true if can teleport to that world, false if not.
+     */
     protected boolean canTpToWorld(Player player, String petWorldName) {
         return this.thisPlugin.getAllowTpBetweenWorlds() || player.getWorld().getName().equals(petWorldName) || player.hasPermission("tppets.tpanywhere");
     }
 
+    /**
+     * Gets a pet type from a string in format: [Pet Type]s or [PetType]. Case insensitive.
+     * @param petType A string representing the pet type. Can be plural. Case insensitive.
+     * @return A {@link PetType.Pets} value if valid input string, null if not.
+     */
     protected PetType.Pets getPetType(String petType) {
         // If there's a PetType.Pets added in the future that has an "s" at the end of it, this will need to be reworked
         // Avoided using recursion for now to avoid potential exploits from malicious players
@@ -82,5 +94,4 @@ public abstract class TeleportCommand extends BaseCommand {
         } catch (IllegalArgumentException ignored) {}
         return null;
     }
-
 }

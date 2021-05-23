@@ -8,11 +8,24 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
+/**
+ * Class representing a /tpp storage remove subcommand.
+ * @author GatheringExp
+ */
 public class CommandStorageRemove extends Command {
+    /**
+     * Relays data to {@link Command} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp storage remove.
+     */
     CommandStorageRemove(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         removeStorage();
@@ -20,6 +33,9 @@ public class CommandStorageRemove extends Command {
         logStatus();
     }
 
+    /**
+     * Removes an existing {@link com.maxwellwheeler.plugins.tppets.regions.PlayerStorageLocation} from {@link CommandStorageRemove#commandFor}.
+     */
     private void removeStorage() {
         try {
 
@@ -42,6 +58,9 @@ public class CommandStorageRemove extends Command {
         }
     }
 
+    /**
+     * Messages the command status to the {@link CommandStorageRemove#sender}.
+     */
     private void displayStatus() {
         // SUCCESS, SYNTAX_ERROR, DB_FAIL, ALREADY_DONE
         switch(this.commandStatus) {
@@ -65,6 +84,9 @@ public class CommandStorageRemove extends Command {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("storage remove", "removed " + this.args[0] + " from " + this.commandFor.getName());

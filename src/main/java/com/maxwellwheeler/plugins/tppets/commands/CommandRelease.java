@@ -11,11 +11,24 @@ import org.bukkit.entity.Tameable;
 
 import java.sql.SQLException;
 
+/**
+ * Class representing a /tpp release command.
+ * @author GatheringExp
+ */
 public class CommandRelease extends BaseCommand {
+    /**
+     * Relays data to {@link BaseCommand} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp release.
+     */
     public CommandRelease(TPPets thisPlugin, CommandSender sender, String[] args) {
         super(thisPlugin, sender, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         if (this.commandStatus == CommandStatus.SUCCESS && isValidSyntax()) {
@@ -26,10 +39,22 @@ public class CommandRelease extends BaseCommand {
         logStatus();
     }
 
+    /**
+     * Performs basic checks to the command's syntax:
+     * <ul>
+     *     <li>Checks that the sender is a player</li>
+     *     <li>Checks that the command has the minimum number of arguments (1)</li>
+     *     <li>If the command is using f:[username] syntax, checks for tppets.releaseother.</li>
+     * </ul>
+     * @return True if command has a target player with proper permissions and a proper number of arguments, false if not.
+     */
     private boolean isValidSyntax() {
         return (this.isIntendedForSomeoneElse && hasValidForOtherPlayerFormat("tppets.releaseother", 1)) || (!this.isIntendedForSomeoneElse && hasValidForSelfFormat(1));
     }
 
+    /**
+     * Releases {@link CommandRelease#commandFor}'s pet.
+     */
     private void processCommandGeneric() {
         try {
             if (!this.thisPlugin.getAllowUntamingPets() && !this.sender.hasPermission("tppets.releaseother")) {
@@ -68,11 +93,19 @@ public class CommandRelease extends BaseCommand {
         }
     }
 
+    /**
+     * Loads the chunk the pet was last seen in, and gets the entity object in the world.
+     * @param petStorage The {@link PetStorage} to look for.
+     * @return Entity if the entity was found, null if not.
+     */
     private Entity getPet(PetStorage petStorage) {
         loadChunkFromPetStorage(petStorage);
         return getEntity(petStorage);
     }
 
+    /**
+     * Messages the command status to the {@link CommandRelease#sender}.
+     */
     private void displayStatus() {
         switch(this.commandStatus) {
             case INVALID_SENDER:
@@ -107,6 +140,9 @@ public class CommandRelease extends BaseCommand {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("release", "released " + this.commandFor.getName() + "'s " + this.args[0]);

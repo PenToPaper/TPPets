@@ -8,11 +8,24 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
+/**
+ * Class representing a /tpp serverstorage add subcommand.
+ * @author GatheringExp
+ */
 public class CommandServerStorageAdd extends Command {
+    /**
+     * Relays data to {@link Command} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp serverstorage add.
+     */
     CommandServerStorageAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         addServerStorage();
@@ -20,6 +33,9 @@ public class CommandServerStorageAdd extends Command {
         logStatus();
     }
 
+    /**
+     * Adds a new {@link com.maxwellwheeler.plugins.tppets.regions.ServerStorageLocation} to the server.
+     */
     private void addServerStorage() {
         try {
             if (!ArgValidator.validateArgsLength(this.args, 1)) {
@@ -43,6 +59,9 @@ public class CommandServerStorageAdd extends Command {
         }
     }
 
+    /**
+     * Messages the command status to the {@link CommandServerStorageAdd#sender}.
+     */
     private void displayStatus() {
         // SUCCESS, DB_FAIL, ALREADY_DONE, SYNTAX_ERROR
         switch (this.commandStatus) {
@@ -66,6 +85,9 @@ public class CommandServerStorageAdd extends Command {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("serverstorage add", "added " + this.args[0] + " in " + this.sender.getWorld().getName());

@@ -10,11 +10,24 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
+/**
+ * Class representing a /tpp lost add subcommand.
+ * @author GatheringExp
+ */
 public class CommandLostAdd extends Command {
+    /**
+     * Relays data to {@link Command} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp lost add.
+     */
     CommandLostAdd(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
 
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         processCommandGeneric();
@@ -22,6 +35,9 @@ public class CommandLostAdd extends Command {
         logStatus();
     }
 
+    /**
+     * Adds a new {@link LostAndFoundRegion} to the server.
+     */
     private void processCommandGeneric() {
         try {
             if (!ArgValidator.validateArgsLength(this.args, 1)) {
@@ -60,6 +76,9 @@ public class CommandLostAdd extends Command {
         }
     }
 
+    /**
+     * Messages the command status to the {@link CommandLostAdd#sender}.
+     */
     private void displayStatus() {
         switch(this.commandStatus) {
             case SUCCESS:
@@ -86,6 +105,9 @@ public class CommandLostAdd extends Command {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("lost add", "added " + this.args[0]);

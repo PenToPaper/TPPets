@@ -9,10 +9,24 @@ import org.bukkit.entity.Player;
 
 import java.sql.SQLException;
 
+/**
+ * Class representing a /tpp protected relink subcommand.
+ * @author GatheringExp
+ */
 public class CommandProtectedRelink extends Command {
+    /**
+     * Relays data to {@link Command} for processing.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param sender The sender of the command.
+     * @param args A truncated list of arguments. Includes all arguments after the /tpp protected relink.
+     */
     CommandProtectedRelink(TPPets thisPlugin, Player sender, OfflinePlayer commandFor, String[] args) {
         super(thisPlugin, sender, commandFor, args);
     }
+
+    /**
+     * Calling this method indicates that all necessary data is in the instance and the command can be processed.
+     */
     @Override
     public void processCommand() {
         processCommandGeneric();
@@ -20,6 +34,9 @@ public class CommandProtectedRelink extends Command {
         logStatus();
     }
 
+    /**
+     * Relinks an existing {@link ProtectedRegion} to a {@link com.maxwellwheeler.plugins.tppets.regions.LostAndFoundRegion}.
+     */
     private void processCommandGeneric() {
         try {
             if (!ArgValidator.validateArgsLength(this.args, 2)) {
@@ -56,6 +73,9 @@ public class CommandProtectedRelink extends Command {
         }
     }
 
+    /**
+     * Messages the command status to the {@link CommandProtectedRelink#sender}.
+     */
     private void displayStatus() {
         switch(this.commandStatus) {
             case SUCCESS:
@@ -82,6 +102,9 @@ public class CommandProtectedRelink extends Command {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("protected relink", "relinked " + this.args[0] + " to " + this.args[1]);

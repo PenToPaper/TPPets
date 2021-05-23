@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class TPPCommandWorldServerStorageListTest {
+public class TPPCommandStorageServerTest {
     private Player player;
     private Player admin;
     private ArgumentCaptor<String> messageCaptor;
