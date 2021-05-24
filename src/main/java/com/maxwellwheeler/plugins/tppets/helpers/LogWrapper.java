@@ -5,25 +5,32 @@ import com.maxwellwheeler.plugins.tppets.TPPets;
 import java.util.logging.Level;
 
 /**
- * A wrapper around all logging actions. Takes into account configurations regarding log spam
+ * A wrapper between all TPPets logging actions. Prefixes logs, and disables them when certain configuration options are
+ * active.
  * @author GatheringExp
  */
 public class LogWrapper {
+    /** A reference to the active TPPets instance */
     private final TPPets thisPlugin;
+    /** The setting for whether or not updated pets should be logged. */
     private final boolean updatedPets;
+    /** The setting for whether or not successful actions should be logged. */
     private final boolean successfulActions;
+    /** The setting for whether or not unsuccessful actions should be logged. */
     private final boolean unsuccessfulActions;
+    /** The setting for whether or not prevented damage should be logged. */
     private final boolean preventedDamage;
+    /** The setting for whether or not errors should be logged. */
     private final boolean errors;
 
     /**
-     * General constructor with configuration options
-     * @param thisPlugin The TPPets plugin instance
-     * @param updatedPets The logging updated pets option
-     * @param successfulActions The logging successful actions option
-     * @param unsuccessfulActions The logging unsuccessful actions option
-     * @param preventedDamage The logging prevented damage option
-     * @param errors The logging errors option
+     * Initializes instance variables.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param updatedPets The setting for whether or not updated pets should be logged.
+     * @param successfulActions The setting for whether or not successful actions should be logged.
+     * @param unsuccessfulActions The setting for whether or not unsuccessful actions should be logged.
+     * @param preventedDamage The setting for whether or not prevented damage should be logged.
+     * @param errors The setting for whether or not errors should be logged.
      */
     public LogWrapper(TPPets thisPlugin, boolean updatedPets, boolean successfulActions, boolean unsuccessfulActions, boolean preventedDamage, boolean errors) {
         this.thisPlugin = thisPlugin;
@@ -35,8 +42,8 @@ public class LogWrapper {
     }
 
     /**
-     * Logs a pet update
-     * @param message The message to log
+     * Logs a pet update as info, if the setting is enabled. This can include pet positions and pet deaths.
+     * @param message The updated pet message to log.
      */
     public void logUpdatedPet(String message) {
         if (this.updatedPets) {
@@ -45,8 +52,8 @@ public class LogWrapper {
     }
 
     /**
-     * Logs a successful action
-     * @param message The message to log
+     * Logs a successful action as info, if the setting is enabled. This can include intentional actions from players.
+     * @param message The successful action message to log.
      */
     public void logSuccessfulAction(String message) {
         if (this.successfulActions) {
@@ -55,8 +62,9 @@ public class LogWrapper {
     }
 
     /**
-     * Logs an unsuccessful action
-     * @param message The message to log
+     * Logs an unsuccessful action as info, if the setting is enabled. This can include unsuccessful intentional actions
+     * from players.
+     * @param message The unsuccessful action message to log.
      */
     public void logUnsuccessfulAction(String message) {
         if (this.unsuccessfulActions) {
@@ -65,8 +73,9 @@ public class LogWrapper {
     }
 
     /**
-     * Logs an error
-     * @param message The message to log
+     * Logs an error as severe, if the setting is enabled. This can include all critical errors that impact the plugin's
+     * function.
+     * @param message The error message to log.
      */
     public void logErrors(String message) {
         if (this.errors) {
@@ -75,8 +84,8 @@ public class LogWrapper {
     }
 
     /**
-     * Logs prevented damage
-     * @param message The message to log
+     * Logs prevented damage as info, if the setting is enabled. This can include environmental or player damage.
+     * @param message The prevented damage message to log.
      */
     public void logPreventedDamage(String message) {
         if (this.preventedDamage) {
@@ -84,6 +93,10 @@ public class LogWrapper {
         }
     }
 
+    /**
+     * Logs essential plugin info as info.
+     * @param message The essential plugin message to log.
+     */
     public void logPluginInfo(String message) {
         this.thisPlugin.getLogger().info("TPPets Plugin: " + message);
     }

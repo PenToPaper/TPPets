@@ -6,17 +6,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Updates the spigot/bukkit config file, so that expected values should always(tm) be there
+ * Updates the spigot/bukkit config file.
  * @author GatheringExp
- *
  */
 public class ConfigUpdater {
+    /** A reference to the active TPPets instance. */
     private final TPPets thisPlugin;
+    /** The current schema version represented in the config. */
     private int schemaVersion;
 
     /**
-     * General constructor. Gets current schema version from config
-     * @param thisPlugin TPPets plugin instance
+     * Initializes instance variables. Gets schema version by reading from the config file.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
      */
     public ConfigUpdater(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
@@ -24,16 +25,16 @@ public class ConfigUpdater {
     }
 
     /**
-     * Gets the current schema version from the active config
-     * @return the schema version
+     * Gets the current schema version from the config file.
+     * @return schema_version from the config file, or 0 if schema_version isn't in the config.
      */
     private int getSchemaVersionFromConfig() {
         return this.thisPlugin.getConfig().getInt("schema_version", 1);
     }
 
     /**
-     * Sets the schema version in memory and in the config file
-     * @param version The version to set the config to
+     * Sets the schema version at {@link ConfigUpdater#schemaVersion} and in the config file.
+     * @param version The version to set.
      */
     private void setSchemaVersion(int version) {
         this.thisPlugin.getConfig().set("schema_version", version);
@@ -41,7 +42,7 @@ public class ConfigUpdater {
     }
 
     /**
-     * Core method for updating the config. Compares the schema version found with the most up-to-date one, and updates as needed
+     * Starts the updating process. Cascades updates as needed until fully up to date.
      */
     public void update() {
         int updatedVersion = 4;
@@ -66,7 +67,7 @@ public class ConfigUpdater {
     }
 
     /**
-     * Updates the schema version from one to two
+     * Updates the schema version from one to two.
      */
     private void oneToTwo() {
         this.thisPlugin.getConfig().set("horse_limit", -1);
@@ -86,7 +87,7 @@ public class ConfigUpdater {
     }
 
     /**
-     * Updates the schema from two to three
+     * Updates the schema version from two to three.
      */
     private void twoToThree() {
         this.thisPlugin.getConfig().set("storage_limit", 5);
@@ -99,6 +100,9 @@ public class ConfigUpdater {
         this.thisPlugin.getConfig().set("logging.errors", true);
     }
 
+    /**
+     * Updates config's protect_pets_from based on its version three values to its version four values.
+     */
     private void threeToFourIntelligentlyUpdateProtectPetsFrom() {
         List<String> oldProtectPetsFrom = this.thisPlugin.getConfig().getStringList("protect_pets_from");
         List<String> newProtectPetsFrom = new ArrayList<>();
@@ -123,6 +127,9 @@ public class ConfigUpdater {
         this.thisPlugin.getConfig().set("protect_pets_from", newProtectPetsFrom);
     }
 
+    /**
+     * Renames config's tools.untame_pets to tools.release_pets.
+     */
     private void threeToFourIntelligentlyUpdateReleaseTool() {
         List<String> oldReleaseTools = this.thisPlugin.getConfig().getStringList("tools.untame_pets");
         if (oldReleaseTools.size() == 0) {
@@ -133,7 +140,7 @@ public class ConfigUpdater {
     }
 
     /**
-     * Updates the schema from three to four
+     * Updates the schema version from three to four.
      */
     private void threeToFour() {
         threeToFourIntelligentlyUpdateProtectPetsFrom();

@@ -3,15 +3,14 @@ package com.maxwellwheeler.plugins.tppets.helpers;
 import java.util.UUID;
 
 /**
- * Utilities to work with UUIDs
+ * Used to manipulate UUIDs for storage.
  * @author GatheringExp
- *
  */
 public class UUIDUtils {
     /**
-     * Gets a trimmed version of the UUID's .toString()
-     * @param id The UUID to evaluate
-     * @return A trimmed version of the UUID's .toString()
+     * Gets a trimmed, string representation of a given UUID.
+     * @param id The UUID to evaluate.
+     * @return A trimmed, string version of the UUID.
      */
     public static String trimUUID(UUID id) {
         if (id != null) {
@@ -19,20 +18,21 @@ public class UUIDUtils {
         }
         return null;
     }
-    
+
     /**
-     * Gets a trimmed version of the string
-     * @param idString The UUID string to evaluate
-     * @return A trimmed version of the string
+     * Trims a string representation of a given UUID.
+     * @param idString The UUID string to trim.
+     * @return A trimmed, string version of the UUID.
      */
     public static String trimUUID(String idString) {
         return idString.replace("-", "");
     }
 
     /**
-     * Untrims a UUID, effectively reversing the opration done in trimUUID
-     * @param idString The UUID string to untrim
-     * @return The untrimmed uuid, or null if the UUID is not of length 32
+     * Untrims a UUID string. It effectively reverses the operation done in {@see trimUUID}. It adds back the - character,
+     * as specified by the UUID spec.
+     * @param idString The UUID string to untrim.
+     * @return An trimmed, string version of the UUID, or null if the idString cannot properly represent a UUID.
      */
     public static String unTrimUUID(String idString) {
         if (idString.length() == 32) {
