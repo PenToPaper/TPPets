@@ -16,13 +16,29 @@ import java.sql.SQLException;
 
 import static com.maxwellwheeler.plugins.tppets.listeners.EventStatus.*;
 
+/**
+ * An event listener that listens for players attempting to examine the owner and name of a pet.
+ * @author GatheringExp
+ */
 public class ListenerPlayerInteractPetExamine implements Listener {
+    /** A reference to the active TPPets instance */
     private final TPPets thisPlugin;
 
+    /**
+     * Initializes instance variables.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     */
     public ListenerPlayerInteractPetExamine(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 
+    /**
+     * Generic handler of the actual examine pet action. Determines the owner and name of the entity, and reports any
+     * success to the user. Event status is returned for the calling function to handle.
+     * @param event The supplied {@link PlayerInteractEntityEvent}.
+     * @return A {@link EventStatus} representing the result of the operation. Possible return values: {@link EventStatus#NO_OWNER},
+     * {@link EventStatus#DB_FAIL}, {@link EventStatus#SUCCESS}.
+     */
     private EventStatus onPlayerExaminePet(PlayerInteractEntityEvent event) {
         try {
             if (!PetType.isPetTracked(event.getRightClicked())) {
@@ -46,6 +62,12 @@ public class ListenerPlayerInteractPetExamine implements Listener {
         }
     }
 
+    /**
+     * Displays the status of a {@link ListenerPlayerInteractPetExamine#onPlayerExaminePet(PlayerInteractEntityEvent)}
+     * to the player.
+     * @param examiningPlayer The player examining the pet.
+     * @param eventStatus The event status to display.
+     */
     private void displayCommandStatus(Player examiningPlayer, EventStatus eventStatus) {
         switch(eventStatus) {
             case SUCCESS:
@@ -62,10 +84,21 @@ public class ListenerPlayerInteractPetExamine implements Listener {
         }
     }
 
+    /**
+     * Determines if the generic {@link PlayerInteractEntityEvent} is a player crouching, right-clicking with the main
+     * hand, and with a valid get_type tool.
+     * @param event The {@link PlayerInteractEntityEvent} to evaluate.
+     * @return true if it is a pet examine event, false if not.
+     */
     private boolean isPetExamineEvent(PlayerInteractEntityEvent event) {
         return event.getHand().equals(EquipmentSlot.HAND) && event.getPlayer().isSneaking() && this.thisPlugin.getToolsManager().isMaterialValidTool("get_owner", event.getPlayer().getInventory().getItemInMainHand().getType());
     }
 
+    /**
+     * An event listener for the PlayerInteractEntityEvent. It determines if the event is a pet examine event, examines
+     * the pet, and reports the results to the user.
+     * @param event The supplied {@link PlayerInteractEntityEvent}.
+     */
     @EventHandler(priority= EventPriority.LOW)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (isPetExamineEvent(event)) {

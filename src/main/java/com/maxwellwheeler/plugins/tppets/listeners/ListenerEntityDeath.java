@@ -9,13 +9,27 @@ import org.bukkit.event.entity.EntityDeathEvent;
 
 import java.sql.SQLException;
 
+/**
+ * An event listener that handles pet deaths.
+ * @author GatheringExp
+ */
 public class ListenerEntityDeath implements Listener {
+    /** A reference to the active TPPets instance */
     private final TPPets thisPlugin;
 
+    /**
+     * Initializes instance variables.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     */
     public ListenerEntityDeath(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 
+    /**
+     * An event listener for the {@link EntityDeathEvent}. If the entity that died is a logged pet, it removes the pet
+     * from the plugin, and logs its death, if enabled.
+     * @param event The supplied {@link EntityDeathEvent}.
+     */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onEntityDeathEvent(EntityDeathEvent event) {
         try {

@@ -9,13 +9,28 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+/**
+ * An event listener that prevents damage to protected pets.
+ * @author GatheringExp
+ */
 public class ListenerEntityDamage implements Listener {
+    /** A reference to the active TPPets instance */
     private final TPPets thisPlugin;
 
+    /**
+     * Initializes instance variables.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     */
     public ListenerEntityDamage(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 
+    /**
+     * An event listener for the EntityDamageByEntityEvent. This uses {@link com.maxwellwheeler.plugins.tppets.helpers.MobDamageManager}
+     * to determine if the damage is stranger damage, guest damage, owner damage, mob damage, or environmental damage
+     * being done to a protected pet, prevents it, and logs it if enabled.
+     * @param event The supplied {@link EntityDamageByEntityEvent}.
+     */
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
         if (PetType.isPetTracked(event.getEntity())) {
@@ -27,6 +42,12 @@ public class ListenerEntityDamage implements Listener {
         }
     }
 
+    /**
+     * An event listener for the generic EntityDamageEvent. This uses {@link com.maxwellwheeler.plugins.tppets.helpers.MobDamageManager}
+     * to determine if the damage is environmental damage being done to a protected pet, prevents it, and logs it if
+     * enabled.
+     * @param event The supplied {@link EntityDamageEvent}.
+     */
     @EventHandler (priority = EventPriority.LOW)
     public void onEntityDamageEvent(EntityDamageEvent event) {
         if (PetType.isPetTracked(event.getEntity()) && this.thisPlugin.getMobDamageManager().isPreventedEnvironmentalDamage(event.getCause())) {

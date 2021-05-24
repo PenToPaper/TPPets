@@ -16,13 +16,31 @@ import java.sql.SQLException;
 
 import static com.maxwellwheeler.plugins.tppets.listeners.EventStatus.*;
 
+/**
+ * An event listener that listens for players attempting to release a pet.
+ * @author GatheringExp
+ */
 public class ListenerPlayerInteractPetRelease implements Listener {
+    /** A reference to the active TPPets instance */
     private final TPPets thisPlugin;
 
+    /**
+     * Initializes instance variables.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     */
     public ListenerPlayerInteractPetRelease(TPPets thisPlugin) {
         this.thisPlugin = thisPlugin;
     }
 
+    /**
+     * Generic handler of the actual release pet action. Determines if the player has permission to release the pet, if
+     * the server has releasing pets enabled, if the pet is tamed to begin with, and then removes the pet entry from the
+     * database. It logs successful actions to {@link ListenerPlayerInteractPetRelease#thisPlugin}'s {@link com.maxwellwheeler.plugins.tppets.helpers.LogWrapper}
+     * @param event The supplied {@link PlayerInteractEntityEvent}.
+     * @return A {@link EventStatus} representing the result of the operation. Possible return values: {@link EventStatus#NOT_ENABLED},
+     * {@link EventStatus#NO_OWNER}, {@link EventStatus#INSUFFICIENT_PERMISSIONS}, {@link EventStatus#DB_FAIL},
+     * {@link EventStatus#SUCCESS}.
+     */
     private EventStatus onPlayerReleasePet(PlayerInteractEntityEvent event) {
         try {
             if (!this.thisPlugin.getAllowUntamingPets() && !event.getPlayer().hasPermission("tppets.releaseother")) {
@@ -53,43 +71,73 @@ public class ListenerPlayerInteractPetRelease implements Listener {
         }
     }
 
-    private void displayEventStatus(Player examiningPlayer, EventStatus eventStatus) {
+    /**
+     * Displays the status of a {@link ListenerPlayerInteractPetRelease#onPlayerReleasePet(PlayerInteractEntityEvent)}
+     * to the player.
+     * @param releasingPlayer The player releasing the pet.
+     * @param eventStatus The event status to display.
+     */
+    private void displayEventStatus(Player releasingPlayer, EventStatus eventStatus) {
         switch(eventStatus) {
             case SUCCESS:
-                examiningPlayer.sendMessage(ChatColor.BLUE + "Pet released!");
+                releasingPlayer.sendMessage(ChatColor.BLUE + "Pet released!");
                 break;
             case NO_OWNER:
-                examiningPlayer.sendMessage(ChatColor.RED + "This pet doesn't have an owner");
+                releasingPlayer.sendMessage(ChatColor.RED + "This pet doesn't have an owner");
                 break;
             case DB_FAIL:
-                examiningPlayer.sendMessage(ChatColor.RED + "Could not release pet");
+                releasingPlayer.sendMessage(ChatColor.RED + "Could not release pet");
                 break;
             case INSUFFICIENT_PERMISSIONS:
-                examiningPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that");
+                releasingPlayer.sendMessage(ChatColor.RED + "You don't have permission to do that");
                 break;
             case NOT_ENABLED:
-                examiningPlayer.sendMessage(ChatColor.RED + "You can't release pets");
+                releasingPlayer.sendMessage(ChatColor.RED + "You can't release pets");
                 break;
             default:
-                examiningPlayer.sendMessage(ChatColor.RED + "An unknown error occurred");
+                releasingPlayer.sendMessage(ChatColor.RED + "An unknown error occurred");
                 break;
         }
     }
 
-    private void logEventStatus(Player examiningPlayer, EventStatus eventStatus) {
+    /**
+     * Logs the status of a {@link ListenerPlayerInteractPetRelease#onPlayerReleasePet(PlayerInteractEntityEvent)}
+     * to {@link ListenerPlayerInteractPetRelease#thisPlugin}'s {@link com.maxwellwheeler.plugins.tppets.helpers.LogWrapper}.
+     * @param releasingPlayer The player releasing the pet.
+     * @param eventStatus The event status to display.
+     */
+    private void logEventStatus(Player releasingPlayer, EventStatus eventStatus) {
         if (eventStatus != EventStatus.SUCCESS) {
-            this.thisPlugin.getLogWrapper().logUnsuccessfulAction(examiningPlayer.getName() + " - release tool - " + eventStatus.toString());
+            this.thisPlugin.getLogWrapper().logUnsuccessfulAction(releasingPlayer.getName() + " - release tool - " + eventStatus.toString());
         }
     }
 
+    /**
+     * Determines if the generic {@link PlayerInteractEntityEvent} is a player crouching, right-clicking with the main
+     * hand, and with a valid release_pets tool.
+     * @param event The {@link PlayerInteractEntityEvent} to evaluate.
+     * @return true if it is a pet release event, false if not.
+     */
     private boolean isPetReleaseEvent(PlayerInteractEntityEvent event) {
         return event.getHand().equals(EquipmentSlot.HAND) && event.getPlayer().isSneaking() && this.thisPlugin.getToolsManager().isMaterialValidTool("release_pets", event.getPlayer().getInventory().getItemInMainHand().getType());
     }
 
+    /**
+     * Determines if a player has permission to release a pet. Returns true if the player is the owner, or if the player
+     * has tppets.releaseother.
+     * @param releasingPlayer The player releasing the pet.
+     * @param pet The pet being released.
+     * @return true if the player is the owner or has tppets.releaseother, false if not.
+     */
     private boolean doesPlayerHavePermissionToRelease(Player releasingPlayer, Tameable pet) {
         return releasingPlayer.equals(pet.getOwner()) || releasingPlayer.hasPermission("tppets.releaseother");
     }
 
+    /**
+     * An event listener for the PlayerInteractEntityEvent. It determines if the event is a pet release event, releases
+     * the pet, and reports the results to the user.
+     * @param event The supplied {@link PlayerInteractEntityEvent}.
+     */
     @EventHandler(priority= EventPriority.LOW)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         if (isPetReleaseEvent(event)) {
