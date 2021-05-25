@@ -29,7 +29,7 @@ public class UUIDUtils {
     }
 
     /**
-     * Untrims a UUID string. It effectively reverses the operation done in {@see trimUUID}. It adds back the - character,
+     * Untrims a UUID string. It effectively reverses the operation done in {@link UUIDUtils#trimUUID(String)}. It adds back the - character,
      * as specified by the UUID spec.
      * @param idString The UUID string to untrim.
      * @return An trimmed, string version of the UUID, or null if the idString cannot properly represent a UUID.

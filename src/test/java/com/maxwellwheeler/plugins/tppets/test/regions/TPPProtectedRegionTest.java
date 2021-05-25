@@ -23,7 +23,6 @@ public class TPPProtectedRegionTest {
     private ProtectedRegion protectedRegion;
     private TPPets tpPets;
     private LostRegionManager lostRegionManager;
-    private LostAndFoundRegion lostAndFoundRegion;
 
     @BeforeEach
     public void beforeEach() {
@@ -34,10 +33,10 @@ public class TPPProtectedRegionTest {
         this.tpPets = mock(TPPets.class);
 
         this.lostRegionManager = mock(LostRegionManager.class);
-        this.lostAndFoundRegion = new LostAndFoundRegion("LFRName", "WorldName", this.world, min, max);
+        LostAndFoundRegion lostAndFoundRegion = new LostAndFoundRegion("LFRName", "WorldName", this.world, min, max);
 
         when(this.tpPets.getLostRegionManager()).thenReturn(this.lostRegionManager);
-        when(this.lostRegionManager.getLostRegion("LFRName")).thenReturn(this.lostAndFoundRegion);
+        when(this.lostRegionManager.getLostRegion("LFRName")).thenReturn(lostAndFoundRegion);
 
         this.protectedRegion = new ProtectedRegion("PRName", "EnterMessage", "WorldName", this.world, min, max, "LFRName", this.tpPets);
     }
@@ -93,12 +92,6 @@ public class TPPProtectedRegionTest {
         verify(wolf, times(1)).setSitting(true);
         verify(wolf, times(1)).eject();
         verify(wolf, never()).teleport(any(Location.class));
-    }
-
-    @Test
-    @DisplayName("toString displays properly")
-    void toStringTest() {
-        assertEquals("zoneName = PRName; enterMessage = EnterMessage; worldName = WorldName; x1: 10; y1: 20; z1: 30; x2: 20; y2: 30; z2: 40", this.protectedRegion.toString());
     }
 
     @Test

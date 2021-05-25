@@ -67,11 +67,6 @@ public abstract class Region {
         return this.world != null && this.world.equals(lc.getWorld()) && isBetween(this.minLoc.getBlockX(), lc.getBlockX(), this.maxLoc.getBlockX()) && isBetween(this.minLoc.getBlockY(), lc.getBlockY(), this.maxLoc.getBlockY()) && isBetween(this.minLoc.getBlockZ(), lc.getBlockZ(), this.maxLoc.getBlockZ());
     }
     
-    /**
-     * Implementing regions need a way to communicate with the log file.
-     */
-    public abstract String toString();
-
     public String getRegionName() {
         return regionName;
     }

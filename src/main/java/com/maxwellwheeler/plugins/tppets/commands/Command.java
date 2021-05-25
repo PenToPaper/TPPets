@@ -49,7 +49,7 @@ public abstract class Command {
 
     /**
      * Initializes instance variables more directly.
-     * @param thisPlugin A reference to the active TPPets instance.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
      * @param sender The sender of the command.
      * @param commandFor The player the command is intended to target.
      * @param args A list of arguments relevant to the passed command.

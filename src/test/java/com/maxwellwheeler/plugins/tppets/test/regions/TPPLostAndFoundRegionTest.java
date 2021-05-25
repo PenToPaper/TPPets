@@ -36,12 +36,6 @@ public class TPPLostAndFoundRegionTest {
     }
 
     @Test
-    @DisplayName("toString displays properly")
-    void toStringTest() {
-        assertEquals("zoneName = LFRName; worldName = WorldName; x1: 10; y1: 20; z1: 30; x2: 20; y2: 30; z2: 40", this.lostAndFoundRegion.toString());
-    }
-
-    @Test
     @DisplayName("isInRegion functions properly")
     void isInRegionTest() {
         // True
