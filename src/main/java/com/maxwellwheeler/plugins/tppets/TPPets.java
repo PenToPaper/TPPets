@@ -129,7 +129,7 @@ public class TPPets extends JavaPlugin {
      */
     private void createTables() {
         try {
-            if (!this.database.initializeTables()) {
+            if (!this.database.createTables()) {
                 getLogWrapper().logErrors("Database is unable to be initialized. Plugin cannot run.");
                 getServer().getPluginManager().disablePlugin(this);
             }

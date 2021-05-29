@@ -8,19 +8,20 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * A class that interfaces with the SQLite File
+ * Used to interface with a SQLite Server
  * @author GatheringExp
- *
  */
 public class SQLiteWrapper extends SQLWrapper {
+    /** The path to the SQLite database on disk. */
     private final String dbPath;
+    /** The SQLite database name. */
     private final String dbName;
 
     /**
-     * The initializer storing all the data needed for the SQLite connection.
-     * @param dbPath The path to the SQLite database.
-     * @param dbName The name of the database file itself, without the file extension.
-     * @param thisPlugin A reference to the TPPets plugin instance.
+     * Initializes instance variables.
+     * @param dbPath The path to the SQLite database on disk.
+     * @param dbName The SQLite database name.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
      */
     public SQLiteWrapper(String dbPath, String dbName, TPPets thisPlugin) {
         super(thisPlugin);
@@ -28,6 +29,10 @@ public class SQLiteWrapper extends SQLWrapper {
         this.dbName = dbName;
     }
 
+    /**
+     * Creates a new directory at {@link SQLiteWrapper#dbPath}.
+     * @throws SQLException If unable to create the database directory.
+     */
     public void makeDatabaseDirectory() throws SQLException {
         File dbDir = new File(this.dbPath);
         SQLException exception = new SQLException("Could not access database directory");
@@ -40,7 +45,12 @@ public class SQLiteWrapper extends SQLWrapper {
         }
 
     }
-    
+
+    /**
+     * Gets a database Connection object from this object's SQLite credentials.
+     * @return A new {@link Connection} object. Does not return null.
+     * @throws SQLException If generating a new connection to the database fails.
+     */
     @Override
     public Connection getConnection() throws SQLException {
         try {
@@ -58,6 +68,10 @@ public class SQLiteWrapper extends SQLWrapper {
         }
     }
 
+    /**
+     * Determines the JDBC SQLite url based on {@link SQLiteWrapper#dbPath} and {@link SQLiteWrapper#dbName}.
+     * @return A JDBC SQLite url string.
+     */
     private String getJDBCPath() {
         return "jdbc:sqlite:" + this.dbPath + File.separator + this.dbName + ".db";
     }

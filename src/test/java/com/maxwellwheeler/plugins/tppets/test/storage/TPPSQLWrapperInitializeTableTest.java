@@ -42,7 +42,7 @@ public class TPPSQLWrapperInitializeTableTest {
     void initializeTables() throws SQLException {
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
 
-        assertTrue(mockSQLWrapper.initializeTables());
+        assertTrue(mockSQLWrapper.createTables());
         verify(this.connection, times(6)).createStatement();
     }
 
@@ -63,7 +63,7 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.statement.executeUpdate(makeTableUnloadedPets)).thenReturn(1);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertFalse(mockSQLWrapper.initializeTables());
+        assertFalse(mockSQLWrapper.createTables());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.statement.executeUpdate(makeTableLostRegions)).thenReturn(1);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertFalse(mockSQLWrapper.initializeTables());
+        assertFalse(mockSQLWrapper.createTables());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.statement.executeUpdate(makeTableProtectedRegions)).thenReturn(1);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertFalse(mockSQLWrapper.initializeTables());
+        assertFalse(mockSQLWrapper.createTables());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.statement.executeUpdate(makeTableAllowedPlayers)).thenReturn(1);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertFalse(mockSQLWrapper.initializeTables());
+        assertFalse(mockSQLWrapper.createTables());
     }
 
     @Test
@@ -133,7 +133,7 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.statement.executeUpdate(makeTableUserStorageLocations)).thenReturn(1);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertFalse(mockSQLWrapper.initializeTables());
+        assertFalse(mockSQLWrapper.createTables());
     }
 
     @Test
@@ -150,7 +150,7 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.statement.executeUpdate(makeTableServerStorageLocations)).thenReturn(1);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertFalse(mockSQLWrapper.initializeTables());
+        assertFalse(mockSQLWrapper.createTables());
     }
 
     @Test
@@ -159,7 +159,7 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.dbUpdater.updateSchemaVersion(any(SQLWrapper.class))).thenReturn(false);
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertFalse(mockSQLWrapper.initializeTables());
+        assertFalse(mockSQLWrapper.createTables());
     }
 
     @Test
@@ -168,6 +168,6 @@ public class TPPSQLWrapperInitializeTableTest {
         when(this.dbUpdater.updateSchemaVersion(any(SQLWrapper.class))).thenThrow(new SQLException());
 
         MockSQLWrapper mockSQLWrapper = new MockSQLWrapper(this.tpPets, this.connection);
-        assertThrows(SQLException.class, mockSQLWrapper::initializeTables);
+        assertThrows(SQLException.class, mockSQLWrapper::createTables);
     }
 }

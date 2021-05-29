@@ -6,33 +6,40 @@ import org.bukkit.OfflinePlayer;
 import java.sql.SQLException;
 
 /**
- * An index of how many pets each player owns. Used for the limiting of tamed pets.
+ * Used to determine if a player can tame a new pet, based on config settings.
  * @author GatheringExp
- *
  */
 public class PetLimitChecker {
+    /** A reference to the active TPPets instance. */
     private final TPPets thisPlugin;
+    /** The configured limit to the total number of pets a player can own. */
     private final int totalLimit;
+    /** The configured limit to the number of dogs a player can own. */
     private final int dogLimit;
+    /** The configured limit to the number of cats a player can own. */
     private final int catLimit;
+    /** The configured limit to the number of birds a player can own. */
     private final int birdLimit;
+    /** The configured limit to the number of horses a player can own. */
     private final int horseLimit;
+    /** The configured limit to the number of mules a player can own. */
     private final int muleLimit;
+    /** The configured limit to the number of llamas a player can own. */
     private final int llamaLimit;
+    /** The configured limit to the number of donkeys a player can own. */
     private final int donkeyLimit;
 
-    
     /**
-     * General constructor, referencing the plugin instance, and pet limits from the config file.
-     * @param thisPlugin The TPPets instance.
-     * @param totalLimit The limit of all pets owned.
-     * @param dogLimit The limit of all dogs owned.
-     * @param catLimit The limit of all cats owned.
-     * @param birdLimit The limit of all birds owned.
-     * @param horseLimit The limit of all horses owned.
-     * @param muleLimit The limit of all mules owned.
-     * @param llamaLimit The limit of all llamas owned.
-     * @param donkeyLimit The limit of all donkeys owned.
+     * Initializes instance variables.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param totalLimit The configured limit to the total number of pets owned.
+     * @param dogLimit The configured limit to the number of dogs owned.
+     * @param catLimit The configured limit to the number of cats owned.
+     * @param birdLimit The configured limit to the number of birds owned.
+     * @param horseLimit The configured limit to the number of horses owned.
+     * @param muleLimit The configured limit to the number of mules owned.
+     * @param llamaLimit The configured limit to the number of llamas owned.
+     * @param donkeyLimit The configured limit to the number of donkeys owned.
      */
     public PetLimitChecker(TPPets thisPlugin, int totalLimit, int dogLimit, int catLimit, int birdLimit, int horseLimit, int muleLimit, int llamaLimit, int donkeyLimit) {
         this.thisPlugin = thisPlugin;
@@ -47,12 +54,12 @@ public class PetLimitChecker {
     }
     
     /**
-     * Gets the limit specific to a pet of type pt.
-     * @param pt The pet type limit to get
-     * @return An integer represneting the specific taming limit of pet type pt
+     * Gets the specific limit for a pet type.
+     * @param petType The pet type to get the limit of.
+     * @return The configured limit to the number of that pet type a player can own.
      */
-    public int getSpecificLimit(PetType.Pets pt) {
-        switch (pt) {
+    public int getSpecificLimit(PetType.Pets petType) {
+        switch (petType) {
             case DOG:
                 return dogLimit;
             case CAT:
@@ -72,25 +79,42 @@ public class PetLimitChecker {
         }
     }
 
+    /**
+     * Gets the total pet limit.
+     * @return The configured limit to the total number of pets a player can own.
+     */
     public int getTotalLimit() {
         return totalLimit;
     }
 
+    /**
+     * Determines if the player has room in their total pet limit to tame a new pet.
+     * @param owner The owner of the pet.
+     * @return true if the player can tame an additional pet and be within the total limit, false if not.
+     * @throws SQLException If getting the total number of owned pets from the database fails.
+     */
     public boolean isWithinTotalLimit(OfflinePlayer owner) throws SQLException {
         int numTotalPets = this.thisPlugin.getDatabase().getNumPets(owner.getUniqueId().toString());
         return isWithinLimit(this.totalLimit, numTotalPets);
     }
 
+    /**
+     * Determines if the player has room in their specific pet type limit to tame a new pet.
+     * @param owner The owner of the pet.
+     * @param petType The specific pet type to get the limit of.
+     * @return true if the player can tame an additional pet and be within the pet type's specific limit, false if not.
+     * @throws SQLException If getting the total number of owned pets of the pet type from the database fails.
+     */
     public boolean isWithinSpecificLimit(OfflinePlayer owner, PetType.Pets petType) throws SQLException {
         int numSpecificPets = this.thisPlugin.getDatabase().getNumPetsByPetType(owner.getUniqueId().toString(), petType);
         return isWithinLimit(this.getSpecificLimit(petType), numSpecificPets);
     }
 
     /**
-     * Helper function that determines if the integer within is under (not inclusive) the limit
-     * @param limit The upper bound of the test, non inclusive.
+     * Determines if the integer within is under (not inclusive) the limit, or if the limit is negative.
+     * @param limit The upper limit, non inclusive.
      * @param within The integer being tested that should be under the limit.
-     * @return True if within is below limit, false if otherwise
+     * @return true if within is below limit or if limit is negative, false if otherwise.
      */
     private boolean isWithinLimit(int limit, int within) {
         return limit < 0 || within < limit;

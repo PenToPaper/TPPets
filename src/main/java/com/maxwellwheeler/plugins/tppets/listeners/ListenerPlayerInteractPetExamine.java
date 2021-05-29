@@ -21,7 +21,7 @@ import static com.maxwellwheeler.plugins.tppets.listeners.EventStatus.*;
  * @author GatheringExp
  */
 public class ListenerPlayerInteractPetExamine implements Listener {
-    /** A reference to the active TPPets instance */
+    /** A reference to the active TPPets instance. */
     private final TPPets thisPlugin;
 
     /**

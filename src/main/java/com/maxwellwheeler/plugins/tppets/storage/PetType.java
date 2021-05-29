@@ -5,26 +5,22 @@ import org.bukkit.entity.*;
 import java.util.Arrays;
 
 /**
- * Class that classifies entities by the types we care about, CAT, DOG, and PARROT
+ * Used to represent a {@link com.maxwellwheeler.plugins.tppets.TPPets} pet type.
  * @author GatheringExp
- *
  */
 public class PetType {
-    /*
-     * Enum representing a pet type.
-     * CAT = cat
-     * DOG = wolf
-     * PARROT = parrot
-     * UNKNOWN = a pet not of the above three types
+    /**
+     * Representing all pets that {@link com.maxwellwheeler.plugins.tppets.TPPets} tracks, and an {@link #UNKNOWN}
+     * value representing a pet that is not tracked on by the plugin.
      */
     public enum Pets {
         CAT, DOG, PARROT, HORSE, MULE, LLAMA, DONKEY, UNKNOWN
     }
 
     /**
-     * Gets the enum {@link Pets} based on the entity's type.
-     * @param ent The entity to be checked
-     * @return The enum value representing the entity's type
+     * Gets the corresponding {@link Pets} value based on an entity's type.
+     * @param ent The entity to be checked.
+     * @return The {@link Pets} value representing the entity's type, or {@link Pets#UNKNOWN} if not tracked by {@link com.maxwellwheeler.plugins.tppets.TPPets}.
      */
     public static Pets getEnumByEntity(Entity ent) {
         if (ent instanceof Wolf) {
@@ -46,10 +42,21 @@ public class PetType {
         }
     }
 
+    /**
+     * Determines if an entity is of a type that is tracked by {@link com.maxwellwheeler.plugins.tppets.TPPets}.
+     * @param entity The entity.
+     * @return true if the pet type is tracked by {@link com.maxwellwheeler.plugins.tppets.TPPets}, false if not.
+     */
     public static boolean isPetTypeTracked(Entity entity) {
         return !PetType.getEnumByEntity(entity).equals(PetType.Pets.UNKNOWN);
     }
 
+    /**
+     * Determines if an entity is of a type that is tracked by {@link com.maxwellwheeler.plugins.tppets.TPPets}, and is
+     * currently tamed by a real owner.
+     * @param entity The entity.
+     * @return true if the pet is tracked by {@link com.maxwellwheeler.plugins.tppets.TPPets}, false if not.
+     */
     public static boolean isPetTracked(Entity entity) {
         if (isPetTypeTracked(entity)) {
             Tameable tameableTemp = (Tameable) entity;
@@ -59,25 +66,26 @@ public class PetType {
     }
 
     /**
-     * Translates the enum to an integer for the database
+     * Translates {@link Pets} to an integer for the database.
      */
     private static final Pets[] indexTranslation = new Pets[] {Pets.UNKNOWN, Pets.CAT, Pets.DOG, Pets.PARROT, Pets.MULE, Pets.LLAMA, Pets.DONKEY, Pets.HORSE};
 
     /**
-     * Gets a numeric index based on the pet type, used in the database storage of the pet. While MySQL supports enums directly, SQLite does not, so this plugin uses integers to store this data.
-     * @param pt The type of the pet
-     * @return An integer representing the enum passed as pt
+     * Translates {@link Pets} to an integer for the database.
+     * @param petType The pet's type.
+     * @return The integer representing the pet type in the database.
      */
-    public static int getIndexFromPet(Pets pt) {
-        return Arrays.asList(indexTranslation).indexOf(pt);
+    public static int getIndexFromPet(Pets petType) {
+        return Arrays.asList(indexTranslation).indexOf(petType);
     }
 
     /**
-     * Gets the {@link Pets} enum value from the integer, used when pulling pets from database storage.
-     * @param i The index of the pet, consistent with the getIndexFromPet(Pets pt) method.
-     * @return The pet's type
+     * Translates a integer to a {@link Pets} type.
+     * @param index The integer.
+     * @return The pet's type.
+     * @see #getIndexFromPet(Pets)
      */
-    public static Pets getPetFromIndex(int i) {
-        return indexTranslation[i];
+    public static Pets getPetFromIndex(int index) {
+        return indexTranslation[index];
     }
 }
