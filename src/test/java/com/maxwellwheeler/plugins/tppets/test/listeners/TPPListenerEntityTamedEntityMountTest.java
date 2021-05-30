@@ -34,7 +34,7 @@ public class TPPListenerEntityTamedEntityMountTest {
         TPPets tpPets = MockFactory.getMockPlugin(this.sqlWrapper, this.logWrapper, false, false);
 
         PetLimitChecker petIndex = new PetLimitChecker(tpPets, 1, 1, 1, 1, 1, 1, 1, 1);
-        when(tpPets.getPetIndex()).thenReturn(petIndex);
+        when(tpPets.getPetLimitChecker()).thenReturn(petIndex);
         when(tpPets.getVaultEnabled()).thenReturn(false);
         when(this.sqlWrapper.getNumPets("MockPlayerId")).thenReturn(0);
         when(this.sqlWrapper.getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE)).thenReturn(0);

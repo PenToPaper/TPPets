@@ -41,7 +41,7 @@ public class TPPListenerEntityTamedEntityTamedEventTest {
 
         this.listenerEntityTamed = new ListenerEntityTamed(this.tpPets);
 
-        when(this.tpPets.getPetIndex()).thenReturn(petIndex);
+        when(this.tpPets.getPetLimitChecker()).thenReturn(petIndex);
         when(this.sqlWrapper.getNumPets("MockPlayerId")).thenReturn(0);
         when(this.sqlWrapper.getNumPetsByPetType("MockPlayerId", PetType.Pets.HORSE)).thenReturn(0);
         when(this.sqlWrapper.generateUniquePetName("MockPlayerId", PetType.Pets.HORSE)).thenReturn("MockHorseName");

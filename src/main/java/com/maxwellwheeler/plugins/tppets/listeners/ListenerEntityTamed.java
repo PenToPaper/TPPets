@@ -48,11 +48,11 @@ public class ListenerEntityTamed implements Listener {
 
             boolean canBypassPetLimit = canBypassPetLimit(owner, entity.getWorld());
 
-            if (!canBypassPetLimit && !this.thisPlugin.getPetIndex().isWithinTotalLimit(owner)) {
+            if (!canBypassPetLimit && !this.thisPlugin.getPetLimitChecker().isWithinTotalLimit(owner)) {
                 return EventStatus.TOTAL_LIMIT;
             }
 
-            if (!canBypassPetLimit && !this.thisPlugin.getPetIndex().isWithinSpecificLimit(owner, petType)) {
+            if (!canBypassPetLimit && !this.thisPlugin.getPetLimitChecker().isWithinSpecificLimit(owner, petType)) {
                 return EventStatus.TYPE_LIMIT;
             }
 
@@ -114,12 +114,12 @@ public class ListenerEntityTamed implements Listener {
 
             switch(eventStatus) {
                 case TOTAL_LIMIT:
-                    player.sendMessage(ChatColor.RED + "You've exceeded the limit for total pets! Limit: " + this.thisPlugin.getPetIndex().getTotalLimit());
+                    player.sendMessage(ChatColor.RED + "You've exceeded the limit for total pets! Limit: " + this.thisPlugin.getPetLimitChecker().getTotalLimit());
                     break;
                 case TYPE_LIMIT:
                     PetType.Pets petType = PetType.getEnumByEntity(pet);
                     String petTypeString = petType.toString();
-                    player.sendMessage(ChatColor.RED + "You've exceeded the limit for this pet type! " + petTypeString.charAt(0) + petTypeString.substring(1).toLowerCase() + " Limit: " + this.thisPlugin.getPetIndex().getSpecificLimit(petType));
+                    player.sendMessage(ChatColor.RED + "You've exceeded the limit for this pet type! " + petTypeString.charAt(0) + petTypeString.substring(1).toLowerCase() + " Limit: " + this.thisPlugin.getPetLimitChecker().getSpecificLimit(petType));
                     break;
                 case DB_FAIL:
                     player.sendMessage(ChatColor.RED + "Could not tame this pet");
