@@ -34,11 +34,13 @@ public abstract class TeleportCommand extends BaseCommand {
      * @param kickPlayerOff Whether or not any players riding the pet should be kicked off before teleportation.
      * @return true if the pet was found and teleported, false if not.
      */
-    protected boolean teleportPetFromStorage(Location sendTo, @NotNull PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) throws SQLException {
+    protected boolean teleportPetFromStorage(Location sendTo, @NotNull PetStorage petStorage, boolean setSitting, boolean kickPlayerOff) {
         loadChunkFromPetStorage(petStorage);
         Entity entity = getEntity(petStorage);
         if (entity != null && teleportPet(sendTo, entity, setSitting, kickPlayerOff)) {
-            this.thisPlugin.getDatabase().updatePetLocation(entity);
+            try {
+                this.thisPlugin.getDatabase().updatePetLocation(entity);
+            } catch (SQLException ignored) {}
             return true;
         }
         return false;

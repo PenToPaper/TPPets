@@ -117,9 +117,8 @@ public class CommandTeleportAll extends TeleportCommand {
 
     /**
      * Teleports all pets from {@link CommandTeleportAll#petList} to {@link CommandTeleportAll#sender}
-     * @throws SQLException If updating pet location after teleport fails.
      */
-    private void teleportAllPets() throws SQLException {
+    private void teleportAllPets() {
         for (PetStorage petStorage : this.petList) {
             if (!canTpToWorld(this.sender, petStorage.petWorld) || !teleportPetFromStorage(this.sender.getLocation(), petStorage, this.isIntendedForSomeoneElse, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"))) {
                 this.commandStatus = CommandStatus.CANT_TELEPORT;

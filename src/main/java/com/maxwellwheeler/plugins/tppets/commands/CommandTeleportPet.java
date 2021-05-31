@@ -130,7 +130,7 @@ public class CommandTeleportPet extends TeleportCommand {
     /**
      * Teleports {@link CommandTeleportPet#commandFor}'s pet {@link CommandTeleportPet#pet} to {@link CommandTeleportPet#sender}.
      */
-    private void processCommandGeneric() throws SQLException {
+    private void processCommandGeneric() {
         if (!PermissionChecker.hasPermissionToTeleportType(this.pet.petType, this.sender)) {
             this.commandStatus = CommandStatus.INSUFFICIENT_PERMISSIONS;
             return;
