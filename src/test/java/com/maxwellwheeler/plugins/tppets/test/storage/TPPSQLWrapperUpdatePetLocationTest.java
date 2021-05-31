@@ -52,7 +52,7 @@ public class TPPSQLWrapperUpdatePetLocationTest {
         when(this.horse.getWorld()).thenReturn(world);
         when(this.horse.getLocation()).thenReturn(horseLocation);
 
-        when(this.connection.prepareStatement("UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ? AND owner_id = ?")).thenReturn(this.preparedStatement);
+        when(this.connection.prepareStatement("UPDATE tpp_unloaded_pets SET pet_x = ?, pet_y = ?, pet_z = ?, pet_world = ? WHERE pet_id = ?")).thenReturn(this.preparedStatement);
         when(this.preparedStatement.executeUpdate()).thenReturn(1);
     }
 
@@ -63,7 +63,7 @@ public class TPPSQLWrapperUpdatePetLocationTest {
 
         assertTrue(mockSQLWrapper.updatePetLocation(this.horse));
 
-        verify(this.preparedStatement, times(3)).setString(this.stringIndexCaptor.capture(), this.stringCaptor.capture());
+        verify(this.preparedStatement, times(2)).setString(this.stringIndexCaptor.capture(), this.stringCaptor.capture());
         List<Integer> stringIndexes = this.stringIndexCaptor.getAllValues();
         List<String> preparedStrings = this.stringCaptor.getAllValues();
 
@@ -85,9 +85,6 @@ public class TPPSQLWrapperUpdatePetLocationTest {
 
         assertEquals(5, stringIndexes.get(1));
         assertEquals("MockPetId", preparedStrings.get(1));
-
-        assertEquals(6, stringIndexes.get(2));
-        assertEquals("MockOwnerId", preparedStrings.get(2));
 
         verify(this.preparedStatement, times(1)).executeUpdate();
         verify(this.connection, times(1)).close();
@@ -135,7 +132,7 @@ public class TPPSQLWrapperUpdatePetLocationTest {
 
         assertFalse(mockSQLWrapper.updatePetLocation(this.horse));
 
-        verify(this.preparedStatement, times(3)).setString(anyInt(), anyString());
+        verify(this.preparedStatement, times(2)).setString(anyInt(), anyString());
         verify(this.preparedStatement, times(3)).setInt(anyInt(), anyInt());
 
         verify(this.preparedStatement, times(1)).executeUpdate();
@@ -152,7 +149,7 @@ public class TPPSQLWrapperUpdatePetLocationTest {
 
         assertThrows(SQLException.class, () -> mockSQLWrapper.updatePetLocation(this.horse));
 
-        verify(this.preparedStatement, times(3)).setString(anyInt(), anyString());
+        verify(this.preparedStatement, times(2)).setString(anyInt(), anyString());
         verify(this.preparedStatement, times(3)).setInt(anyInt(), anyInt());
 
         verify(this.preparedStatement, times(1)).executeUpdate();
