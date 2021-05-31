@@ -34,6 +34,9 @@ public abstract class BaseCommand extends Command {
      * @param numArgs The expected number of arguments.
      * @return True if the command's format passes all checks, false if not.
      */
+    // Was considering simplifying this by internally calling hasValidForSelfFormat, but decided I liked the order that
+    // this method currently does checks. Players running this command without permission will always get a permission
+    // message first, rather than syntax message first.
     protected boolean hasValidForOtherPlayerFormat(String permission, int numArgs) {
         // 1) Check that the command sender exists and is a player
         if (this.sender == null) {
