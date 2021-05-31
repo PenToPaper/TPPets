@@ -5,6 +5,7 @@ import com.maxwellwheeler.plugins.tppets.helpers.ArgValidator;
 import com.maxwellwheeler.plugins.tppets.regions.StorageLocation;
 import com.maxwellwheeler.plugins.tppets.storage.PetStorage;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 
 import java.sql.SQLException;
@@ -99,6 +100,9 @@ class CommandStore extends TeleportCommand {
         return storageLocation;
     }
 
+    /**
+     * Teleports {@link CommandStore#commandFor}'s pet {@link CommandStore#pet} to {@link CommandStore#sender}.
+     */
     private void processCommandGeneric() {
         // The first argument is always the pet name. Check if it's a valid pet name.
         try {
@@ -140,10 +144,19 @@ class CommandStore extends TeleportCommand {
         }
     }
 
+    /**
+     * Teleports a given pet to a given storage location. Internally uses {@link TeleportCommand#teleportPetFromStorage(Location, PetStorage, boolean, boolean)}.
+     * @param storageLocation The storage location to teleport the pet to. Can't be null.
+     * @param pet The pet to teleport. Can't be null.
+     * @return true if the pet was successfully teleported to the storage location, false if not.
+     */
     private boolean storePet(StorageLocation storageLocation, PetStorage pet) {
         return teleportPetFromStorage(storageLocation.getLoc(), pet, true, !this.isIntendedForSomeoneElse || this.sender.hasPermission("tppets.teleportother"));
     }
 
+    /**
+     * Messages the command status to the {@link CommandStore#sender}.
+     */
     public void displayStatus() {
         // SUCCESS, INVALID_SENDER, INSUFFICIENT_PERMISSIONS, NO_PLAYER, SYNTAX_ERROR, NO_PET, NO_STORAGE, CANNOT_TP
         switch (this.commandStatus) {
@@ -183,6 +196,9 @@ class CommandStore extends TeleportCommand {
         }
     }
 
+    /**
+     * Logs any command status messages.
+     */
     private void logStatus() {
         if (this.commandStatus == CommandStatus.SUCCESS) {
             logSuccessfulAction("store", "stored " + this.commandFor.getName() + "'s " + this.args[0] + " at " + (this.hasSpecificStorage ? this.args[1] : "default"));
