@@ -610,7 +610,7 @@ public abstract class SQLWrapper {
              PreparedStatement selectStatement = this.setPreparedStatementArgs(dbConn.prepareStatement(selectProtectedRegion), regionName);
              ResultSet resultSet = selectStatement.executeQuery()) {
             if (resultSet.next()) {
-                return new ProtectedRegion(resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getString("lf_zone_name"), this.thisPlugin);
+                return new ProtectedRegion(this.thisPlugin, resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("lf_zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getInt("min_x"), resultSet.getInt("min_y"));
             }
             return null;
         } catch (SQLException exception) {
@@ -634,7 +634,7 @@ public abstract class SQLWrapper {
              ResultSet resultSet = selectStatement.executeQuery()) {
             Hashtable<String, ProtectedRegion> ret = new Hashtable<>();
             while (resultSet.next()) {
-                ret.put(resultSet.getString("zone_name"), new ProtectedRegion(resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("world_name"), resultSet.getInt("min_x"), resultSet.getInt("min_y"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getString("lf_zone_name"), this.thisPlugin));
+                ret.put(resultSet.getString("zone_name"), new ProtectedRegion(this.thisPlugin, resultSet.getString("zone_name"), resultSet.getString("enter_message"), resultSet.getString("lf_zone_name"), resultSet.getString("world_name"), resultSet.getInt("min_z"), resultSet.getInt("max_x"), resultSet.getInt("max_y"), resultSet.getInt("max_z"), resultSet.getInt("min_x"), resultSet.getInt("min_y")));
             }
             return ret;
         } catch (SQLException exception) {

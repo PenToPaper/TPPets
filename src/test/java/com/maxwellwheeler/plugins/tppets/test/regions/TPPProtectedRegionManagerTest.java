@@ -42,7 +42,7 @@ public class TPPProtectedRegionManagerTest {
         when(this.lostRegionManager.getLostRegion("LostRegionName")).thenReturn(lostRegion);
 
         Hashtable<String, ProtectedRegion> protectedRegions = new Hashtable<>();
-        this.protectedRegion1 = new ProtectedRegion("ProtectedRegion1", "Enter Message", "MockWorldName", this.world, new Location(this.world, 100, 200, 300), new Location(this.world, 200, 300, 400), "LostRegionName", this.tpPets);
+        this.protectedRegion1 = new ProtectedRegion(this.tpPets, "ProtectedRegion1", "Enter Message", "LostRegionName", "MockWorldName", this.world, new Location(this.world, 200, 300, 400), new Location(this.world, 100, 200, 300));
         protectedRegions.put("ProtectedRegion1", this.protectedRegion1);
         when(sqlWrapper.getProtectedRegions()).thenReturn(protectedRegions);
 
@@ -65,7 +65,7 @@ public class TPPProtectedRegionManagerTest {
     @Test
     @DisplayName("ProtectedRegionManager adds new regions")
     void protectedRegionManagerAddsRegions() {
-        ProtectedRegion protectedRegion2 = new ProtectedRegion("ProtectedRegion2", "Enter Message", "MockWorldName", this.world, new Location(this.world, 100, 200, 300), new Location(this.world, 400, 500, 600), "LostRegionName", this.tpPets);
+        ProtectedRegion protectedRegion2 = new ProtectedRegion(this.tpPets, "ProtectedRegion2", "Enter Message", "LostRegionName", "MockWorldName", this.world, new Location(this.world, 400, 500, 600), new Location(this.world, 100, 200, 300));
 
         this.protectedRegionManager.addProtectedRegion(protectedRegion2);
 

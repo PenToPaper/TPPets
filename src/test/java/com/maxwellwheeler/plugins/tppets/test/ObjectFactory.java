@@ -16,6 +16,6 @@ public class ObjectFactory {
     public static ProtectedRegion getProtectedRegion(String regionName, String enterMessage, String worldName, World world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, String lfString, TPPets tpPets) {
         Location minLoc = new Location(world, minX, minY, minZ);
         Location maxLoc = new Location(world, maxX, maxY, maxZ);
-        return new ProtectedRegion(regionName, enterMessage, worldName, world, minLoc, maxLoc, lfString, tpPets);
+        return new ProtectedRegion(tpPets, regionName, enterMessage, lfString, worldName, world, maxLoc, minLoc);
     }
 }

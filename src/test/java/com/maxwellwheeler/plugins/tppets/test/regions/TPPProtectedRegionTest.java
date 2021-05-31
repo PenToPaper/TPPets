@@ -38,7 +38,7 @@ public class TPPProtectedRegionTest {
         when(this.tpPets.getLostRegionManager()).thenReturn(this.lostRegionManager);
         when(this.lostRegionManager.getLostRegion("LFRName")).thenReturn(lostAndFoundRegion);
 
-        this.protectedRegion = new ProtectedRegion("PRName", "EnterMessage", "WorldName", this.world, min, max, "LFRName", this.tpPets);
+        this.protectedRegion = new ProtectedRegion(this.tpPets, "PRName", "EnterMessage", "LFRName", "WorldName", this.world, max, min);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class TPPProtectedRegionTest {
             World world = mock(World.class);
             bukkit.when(() -> Bukkit.getWorld("WorldName")).thenReturn(world);
 
-            this.protectedRegion = new ProtectedRegion("PRName", "EnterMessage", "WorldName", 10, 20, 30, 40, 50, 60, "LFRName", this.tpPets);
+            this.protectedRegion = new ProtectedRegion(this.tpPets, "PRName", "EnterMessage", "LFRName", "WorldName", 30, 40, 50, 60, 10, 20);
 
             assertEquals(world, this.protectedRegion.getWorld());
         }

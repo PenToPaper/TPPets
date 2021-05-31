@@ -26,38 +26,38 @@ public class ProtectedRegion extends Region {
     
     /**
      * Constructor for when the world is only known by its name. Primarily used when reconstructing regions from the db.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
      * @param regionName The ProtectedRegion's name.
      * @param enterMessage The message sent to players who attempt to teleport a pet in a protected region without
-     *                     permission. Supports &#38;[#] color codes.
+*                     permission. Supports &#38;[#] color codes.
+     * @param lfString A string representing the name of the {@link LostAndFoundRegion} linked to this ProtectedRegion.
+*                 This can be an empty string, or point to a {@link LostAndFoundRegion} that doesn't exist.
      * @param worldName The ProtectedRegion's world's name.
-     * @param minX The cube region's minimum x coordinate.
-     * @param minY The cube region's minimum y coordinate.
      * @param minZ The cube region's minimum z coordinate.
      * @param maxX The cube region's maximum x coordinate.
      * @param maxY The cube region's maximum y coordinate.
      * @param maxZ The cube region's maximum z coordinate.
-     * @param lfString A string representing the name of the {@link LostAndFoundRegion} linked to this ProtectedRegion.
-     *                 This can be an empty string, or point to a {@link LostAndFoundRegion} that doesn't exist.
-     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param minX The cube region's minimum x coordinate.
+     * @param minY The cube region's minimum y coordinate.
      */
-    public ProtectedRegion(String regionName, String enterMessage, String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, String lfString, TPPets thisPlugin) {
-        this(regionName, enterMessage, worldName, Bukkit.getWorld(worldName), new Location(Bukkit.getWorld(worldName), minX, minY, minZ), new Location(Bukkit.getWorld(worldName), maxX, maxY, maxZ), lfString, thisPlugin);
+    public ProtectedRegion(TPPets thisPlugin, String regionName, String enterMessage, String lfString, String worldName, int minZ, int maxX, int maxY, int maxZ, int minX, int minY) {
+        this(thisPlugin, regionName, enterMessage, lfString, worldName, Bukkit.getWorld(worldName), new Location(Bukkit.getWorld(worldName), maxX, maxY, maxZ), new Location(Bukkit.getWorld(worldName), minX, minY, minZ));
     }
     
     /**
      * Constructor for when the world object is known.
+     * @param thisPlugin A reference to the active {@link TPPets} instance.
      * @param regionName The ProtectedRegion's name.
      * @param enterMessage The message sent to players who attempt to teleport a pet in a protected region without
-     *                     permission. Supports &#38;[#] color codes.
+*                     permission. Supports &#38;[#] color codes.
+     * @param lfString A string representing the name of the {@link LostAndFoundRegion} linked to this ProtectedRegion.
+*                 This can be an empty string, or point to a {@link LostAndFoundRegion} that doesn't exist.
      * @param worldName The ProtectedRegion's world's name.
      * @param world The ProtectedRegion's world
-     * @param minLoc The cube region's minimum point.
      * @param maxLoc The cube region's maximum point.
-     * @param lfString A string representing the name of the {@link LostAndFoundRegion} linked to this ProtectedRegion.
-     *                 This can be an empty string, or point to a {@link LostAndFoundRegion} that doesn't exist.
-     * @param thisPlugin A reference to the active {@link TPPets} instance.
+     * @param minLoc The cube region's minimum point.
      */
-    public ProtectedRegion(String regionName, String enterMessage, String worldName, World world, Location minLoc, Location maxLoc, String lfString, TPPets thisPlugin) {
+    public ProtectedRegion(TPPets thisPlugin, String regionName, String enterMessage, String lfString, String worldName, World world, Location maxLoc, Location minLoc) {
         super(regionName, worldName, world, minLoc, maxLoc);
         this.lfName = lfString;
         this.lfReference = thisPlugin.getLostRegionManager().getLostRegion(lfString);

@@ -49,7 +49,7 @@ public class TPPSQLWrapperInsertProtectedRegionTest {
         when(tpPets.getLostRegionManager()).thenReturn(lostRegionManager);
 
         World world = mock(World.class);
-        this.protectedRegion = new ProtectedRegion("ProtectedRegion", "EnterMessage", "WorldName", world, new Location(world, 1, 2, 3), new Location(world, 4, 5, 6), "ProtectedRegion", tpPets);
+        this.protectedRegion = new ProtectedRegion(tpPets, "ProtectedRegion", "EnterMessage", "ProtectedRegion", "WorldName", world, new Location(world, 4, 5, 6), new Location(world, 1, 2, 3));
         this.mockSQLWrapper = new MockSQLWrapper(tpPets, this.connection);
 
         ProtectedRegionManager protectedRegionManager = mock(ProtectedRegionManager.class);

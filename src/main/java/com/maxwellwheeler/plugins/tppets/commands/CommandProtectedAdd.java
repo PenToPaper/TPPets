@@ -84,7 +84,7 @@ public class CommandProtectedAdd extends Command {
                 return;
             }
 
-            ProtectedRegion protectedRegion = new ProtectedRegion(this.args[0], this.enterMessage, selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMinimumLocation(), selectionSession.getMaximumLocation(), this.args[1], this.thisPlugin);
+            ProtectedRegion protectedRegion = new ProtectedRegion(this.thisPlugin, this.args[0], this.enterMessage, this.args[1], selectionSession.getWorld().getName(), selectionSession.getWorld(), selectionSession.getMaximumLocation(), selectionSession.getMinimumLocation());
             if (this.thisPlugin.getDatabase().insertProtectedRegion(protectedRegion)) {
                 this.thisPlugin.getProtectedRegionManager().addProtectedRegion(protectedRegion);
             } else {

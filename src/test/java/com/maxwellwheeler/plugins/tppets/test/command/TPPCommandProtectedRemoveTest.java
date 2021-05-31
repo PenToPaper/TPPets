@@ -58,7 +58,7 @@ public class TPPCommandProtectedRemoveTest {
         when(tpPets.getLostRegionManager()).thenReturn(lostRegionManager);
 
         World world = mock(World.class);
-        ProtectedRegion protectedRegion = new ProtectedRegion("ProtectedRegionName", "Enter Message", "MockWorldName", world, new Location(world, 100, 200, 300), new Location(world, 400, 500, 600), "LostAndFoundRegion", tpPets);
+        ProtectedRegion protectedRegion = new ProtectedRegion(tpPets, "ProtectedRegionName", "Enter Message", "LostAndFoundRegion", "MockWorldName", world, new Location(world, 400, 500, 600), new Location(world, 100, 200, 300));
 
         when(this.sqlWrapper.getProtectedRegion("ProtectedRegionName")).thenReturn(protectedRegion);
         when(this.sqlWrapper.removeProtectedRegion("ProtectedRegionName")).thenReturn(true);
